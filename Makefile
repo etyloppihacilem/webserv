@@ -17,7 +17,7 @@
 SHELL			:= sh
 MAKEFLAGS		+= --no-builtin-rules
 MAKEFLAGS		+= --no-print-directory
-MAKEFLAGS		+= -j4
+MAKEFLAGS		+= -j
 .RECIPEPREFIX	=
 
 ###################
@@ -140,3 +140,4 @@ help:
 	@egrep -h '\s#\s' ${MAKEFILE_LIST} | sort | awk 'BEGIN {FS = ":.*?# "}; {printf "${MAGENTA}%-15s${GRAY} %s${RESET}\n", $$1, $$2}'
 
 .PHONY: all clean fclean re debug sanitize tags file help mac_clean test
+.NOTPARALLEL	: re debug sanitize
