@@ -106,6 +106,11 @@ re: fclean all
 
 debug: all
 
+init_google_tests:
+	git submodule init
+	git submodule sync
+	git submodule update
+
 sanitize:
 	@printf "\033[1;34m%-44s\033[0m \033[1;32m%s\033[0m\n" "Output is sanitized" "done"
 
