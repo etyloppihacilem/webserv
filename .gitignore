@@ -5,7 +5,8 @@
 obj
 obj/**
 NOT*
-cpp_09.tgz
-btc
-RPN
-PmergeMe
+webserv
+header/libgmock.a
+header/libgtest.a
+header/libgmock_main.a
+header/libgtest_main.a
