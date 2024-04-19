@@ -110,7 +110,6 @@ debug: all
 	mkdir header
 
 ./googletest/build:
-	git submodule init
 	git submodule sync
 	git submodule update
 	cd googletest && mkdir build && cd build && cmake .. && make
@@ -119,7 +118,7 @@ debug: all
 	ln ./googletest/build/lib/* header/
 
 test: ./header/libgtest.a
-	echo "Tests not implemented yet..."
+	@echo "Tests not implemented yet..."
 
 sanitize:
 	@printf "\033[1;34m%-44s\033[0m \033[1;32m%s\033[0m\n" "Output is sanitized" "done"
@@ -127,5 +126,3 @@ sanitize:
 # supprime les fichiers dupliqués sur mac
 mac_clean:
 	@find . -type f -name "* [2-9]*" -print -delete
-
-test:
