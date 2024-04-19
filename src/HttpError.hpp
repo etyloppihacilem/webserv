@@ -9,12 +9,10 @@
 ############################################################################# */
 
 #pragma once
-#include "HttpStatusCodes.hpp"
 #ifndef INCLUDE_SRC_HTTPERROR_HPP_
 #define INCLUDE_SRC_HTTPERROR_HPP_
 
 #include <exception>
-#include <map>
 #include <string>
 
 class HttpError: public std::exception {

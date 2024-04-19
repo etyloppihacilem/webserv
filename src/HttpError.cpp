@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "HttpError.hpp"
+#include "HttpStatusCodes.hpp"
 
 HttpError::HttpError(const int code) throw ():
     _code   (code),
