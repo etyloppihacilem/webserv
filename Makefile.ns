@@ -1,0 +1,108 @@
+###################
+##  MAKE CONFIG  ##
+###################
+
+.ONESHELL:
+.DELETE_ON_ERROR:
+SHELL			:= sh
+MAKEFLAGS		+= --no-builtin-rules
+MAKEFLAGS		+= --no-print-directory
+.RECIPEPREFIX	= 	
+
+####################
+##  PRINT COLORS  ##
+####################
+
+RESET		= \033[0m
+BLACK		= \033[0;30m
+RED			= \033[0;31m
+GREEN		= \033[0;32m
+YELLOW		= \033[0;33m
+BLUE		= \033[0;34m
+MAGENTA		= \033[0;35m
+CYAN		= \033[0;36m
+GRAY		= \033[0;37m
+DELETE		= \033[2K\r
+
+###################
+##  PROJECT VAR  ##
+###################
+
+NAME			= PmergeMe
+
+C++				= c++
+CFLAGS			= -Wall -Werror -Wextra -std=c++98 -fdiagnostics-color=always
+DEBUG_FLAG		= -g3
+SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
+CFLAGS			:= ${CFLAGS} ${if ${filter ${MAKECMDGOALS}, debug }, ${DEBUG_FLAG}, }
+CFLAGS			:= ${CFLAGS} ${if ${filter ${MAKECMDGOALS}, sanitize }, ${SANITIZE_FLAG}, }
+
+HEADER_DIR		= header
+SOURCE_DIR		= source
+OBJECT_DIR		= object
+
+SOURCES			= ${shell find ${SOURCE_DIR} -type f -name *.cpp}
+# SOURCES = source/FordJohnsonMain.cpp
+OBJECTS			= ${patsubst ${SOURCE_DIR}/%.cpp,${OBJECT_DIR}/%.o,${SOURCES}}
+
+####################
+##  MAKE PROMPTS  ##
+####################
+
+DEBUG_PROMPT		= ${MAGENTA}debug mode${RESET}
+SANITIZE_PROMPT		= ${YELLOW} sanitize mode${RESET}
+OK_PROMPT			= ${GREEN}done ${RESET}
+OK_PROMPT			+= ${if ${filter ${MAKECMDGOALS}, debug}, ${DEBUG_PROMPT}, }
+OK_PROMPT			+= ${if ${filter ${MAKECMDGOALS}, sanitize}, ${SANITIZE_PROMPT}, }
+
+##################
+##  MAKE RULES  ##
+##################
+
+all: ${NAME} # Default rule
+	@printf "${GREEN}Success${RESET}\n"
+
+${NAME}: ${OBJECT_DIR} ${OBJECTS} # Compile ${NAME} program
+	@printf "${DELETE}${YELLOW}...Building${RESET} %-33s" "./${NAME}"
+	@${C++} ${CFLAGS} -o $@ ${OBJECTS}
+	@printf "${OK_PROMPT}\n"
+
+${OBJECT_DIR}:
+	@printf "${BLUE}...Creating${RESET} %-33s" "${OBJECT_DIR} directory"
+	@mkdir -p ${OBJECT_DIR}
+	@printf "${GREEN}done${RESET}"
+
+${OBJECT_DIR}/%.o: ${SOURCE_DIR}/%.cpp
+	@printf "${DELETE}${BLUE}Compiling${RESET} %-35s" $<
+	@${C++} ${CFLAGS} -I ${HEADER_DIR} -c $< -o $@
+	@printf "${OK_PROMPT}"
+
+clean: # Clean object files
+	@rm -f ${OBJECTS}
+	@rm -df ${OBJECT_DIR}
+	@printf "${BLUE}%-44s${RESET} ${GREEN}%s${RESET}\n" "${OBJECT_DIR} file cleaning" "done"
+
+fclean: clean # Clean executable file
+	@rm -f ${NAME}
+	# @rm tags
+	@printf "${BLUE}%-44s${RESET} ${GREEN}%s${RESET}\n" "${NAME} file cleaning" "done"
+
+re: fclean all # Execute fclean & all rules
+
+debug: fclean all
+
+sanitize: fclean all
+
+tags: force
+	@printf "${YELLOW}.Generating${RESET} %-33s" "tags"
+	@ctags --options=.ctags
+	@printf "${GREEN}done${RESET}"
+
+file: # Print list of source and object files
+	@printf "${MAGENTA}.cpp:		${GRAY}${SOURCES}${RESET}\n"
+	@printf "${MAGENTA}.o:		${GRAY}${OBJECTS}${RESET}\n"
+
+help:
+	@egrep -h '\s#\s' ${MAKEFILE_LIST} | sort | awk 'BEGIN {FS = ":.*?# "}; {printf "${MAGENTA}%-15s${GRAY} %s${RESET}\n", $$1, $$2}'
+
+.PHONY: all clean fclean re debug sanitize tags file help
