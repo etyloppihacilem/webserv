@@ -115,7 +115,7 @@ debug: all
 	cd googletest && mkdir build && cd build && cmake .. && make
 
 ./header/libgtest.a: ./googletest/build ./header
-	ln ./googletest/build/lib/* header/
+	ln -f ./googletest/build/lib/* header/
 
 test: ./header/libgtest.a
 	@echo "Tests not implemented yet..."
