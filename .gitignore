@@ -1,0 +1,11 @@
+*.swp
+*.swa
+*.o
+.DS_Store
+obj
+obj/**
+NOT*
+cpp_09.tgz
+btc
+RPN
+PmergeMe
