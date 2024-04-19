@@ -7,104 +7,112 @@
 #         \___/)))/         hmelica@student.42.fr
 #
 # ##############################################################################
-#    ____                _
-#   |  _ \ ___  __ _  __| |_ __ ___   ___
-#   | |_) / _ \/ _` |/ _` | '_ ` _ \ / _ \                   :)
-#   |  _ <  __/ (_| | (_| | | | | | |  __/
-#   |_| \_\___|\__,_|\__,_|_| |_| |_|\___|
-#
-# How to use :
-# ----------
-#   * all
-#   * re
-#   * clean
-#   * fclean
-#   * norm : like norminette but really fast to check all files
-#   * debug : like all but with -g flag, can be used with bonus too
-#   * sanitize : use this as a parameter to compile executable with fsanitize
-#
-# Stuff to edit :
-# -------------
-NAME		= webserv
 
-CFLAGS	= -MMD -Wall -Werror -Wextra -std=c++98
-# Other useful flags : -O3 -Wno-unused-result
-#                           ^- flag de compilation sur mac (Apple Clang)
-#                        ^- flag d'optimisation maximum (peut entrainer des
-#                           comportements indéfinis)
+###################
+##  MAKE CONFIG  ##
+###################
+
+.ONESHELL:
+.DELETE_ON_ERROR:
+SHELL			:= sh
+MAKEFLAGS		+= --no-builtin-rules
+MAKEFLAGS		+= --no-print-directory
+MAKEFLAGS		+= -j4
+.RECIPEPREFIX	=
+
+###################
+##  PRINT COLOR  ##
+###################
+
+RESET		= \033[0m
+BLACK		= \033[0;30m
+RED			= \033[0;31m
+GREEN		= \033[0;32m
+YELLOW		= \033[0;33m
+BLUE		= \033[0;34m
+MAGENTA		= \033[0;35m
+CYAN		= \033[0;36m
+GRAY		= \033[0;37m
+DELETE		= \033[2K\r
+GO_UP		= \033[1A\r
+
+###################
+##  PROJECT VAR  ##
+###################
+
+NAME			= webserv
+
+LIBRARIES		= -lreadline
+
+CC				= c++
+CFLAGS			= -MMD -Wall -Werror -Wextra -std=c++98
 DEBUG_FLAG		= -g3
-SANITIZE_FLAG	= -fsanitize=address
+SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
-# **************************************************************************** #
-#
-# Le reste :
-# --------
-
-# N'affiche pas le changement de directory lors du ${MAKE} -C
-MAKEFLAGS += --no-print-directory
-
-CC = c++
-
-TEST_MODE = -D TEST_MODE
-# comment to disable test and compile with static
-
-HEADERS_DIR			= headers src/libft src
-HEADERS_DIR_FLAG	= ${addprefix -I ,${HEADERS_DIR}}
-
-SRCS_DIR			= src
-SRCS				= ${shell find src/ -type f -name "*.cpp"}
-
+HEADER_DIR		= header src
+SRCS_DIR		= src
 OBJS_DIR		= obj
-OBJS			= ${patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.o,$(SRCS)}
-DEPS			= ${patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.d,$(SRCS)}
 
-ECHO	= echo
+########################
+##  AUTO-EDIT ON VAR  ##
+########################
+
+HEADER_DIR	= ${addprefix -I ,${HEADERS_DIR}}
+SRCS		= ${shell find src/ -type f -name "*.cpp"}
+OBJS		= ${patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.o,${SRCS}}
+DEPS		= ${patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.d,${SRCS}}
+
+CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, sanitize),${SANITIZE_FLAG},)
+CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, debug test),${DEBUG_FLAG},) ${TEST_MODE}
+DEBUG_PROMPT		= ${MAGENTA}debug mode${RESET}
+SANITIZE_PROMPT		= ${YELLOW} sanitize mode${RESET}
+OK_PROMPT			= ${GREEN}done ${RESET}
+OK_PROMPT			+= ${if ${filter ${MAKECMDGOALS}, debug}, ${DEBUG_PROMPT}, }
+OK_PROMPT			+= ${if ${filter ${MAKECMDGOALS}, sanitize}, ${SANITIZE_PROMPT}, }
+
+#######################
+##  USUAL FUNCTIONS  ##
+#######################
+
 RM		= rm -f
 RMDIR	= rm -df
 MKDIR	= mkdir
 
-CFLAGS_NAME		= $(if $(filter $(MAKECMDGOALS), sanitize),$(SANITIZE_FLAG),)
-CFLAGS			:= ${CFLAGS} $(if $(filter $(MAKECMDGOALS), debug test),$(DEBUG_FLAG),) ${TEST_MODE}
-DEBUG_PROMPT	= \033[1;35mdebug mode\033[0m
-OK_PROMPT		= \033[1;32mdone \033[0m$(if $(filter $(MAKECMDGOALS), debug test),$(DEBUG_PROMPT),)
-OK_PROMPT		+= $(ifdef TEST_MODE, "\033[1;35munit test mode\033[0m")
 
-DELETE = \033[2K\r
-GO_UP = \033[1A\r
+all: ${NAME} # Default rule
+	@printf "${GREEN}Success${RESET}  :)\n"
 
-all: ${NAME}
-	@echo "\033[1;32mSuccess\033[0m" ":)"
+-include ${DEPS}
 
--include $(DEPS)
-
-${NAME}: ${LIBFT} ${OBJS_DIR} ${OBJS}
-	@printf "$(DELETE)\033[1;33m...Building\033[0m %-33s" "${NAME}"
-	@${CC} ${CFLAGS} ${CFLAGS_NAME} ${HEADERS_DIR_FLAG} -o ${NAME} ${OBJS} ${LIBFT_FLAG} -lreadline
-	@echo "${OK_PROMPT}"
-	@#${MAKE} tags
+${NAME}: ${OBJS_DIR} ${OBJS} # Compile ${NAME} program
+	@printf "${DELETE}${YELLOW}...Building${RESET} %-33s" "${NAME}"
+	@${CC} ${CFLAGS} ${HEADERS} -o ${NAME} ${OBJS} ${LIBRARIES}
+	@printf "${OK_PROMPT}\n"
 
 ${OBJS_DIR}:
-	@printf "\033[1;34m...Creating\033[0m %-33s" "${OBJS_DIR} directory"
+	@printf "${BLUE}...Creating${RESET} %-33s" "${OBJS_DIR} directory"
 	@${MKDIR} ${OBJS_DIR}
-	@printf "\033[1;32mdone\033[0m\n"
+	@printf "${GREEN}done${RESET}\n"
 
 ${OBJS_DIR}/%.o: ${SRCS_DIR}/%.cpp
-	@printf "$(DELETE)\033[1;34mCompiling\033[0m %-35s" $<
+	@printf "${DELETE}${BLUE}Compiling${RESET} %-35s" $<
 	@${CC} ${CFLAGS} ${HEADERS_DIR_FLAG} -c $< -o $@
 	@printf "${OK_PROMPT}\n${GO_UP}"
 
-clean:
-	@${RM} ${OBJS} $(DEPS)
+clean: # Clean object files
+	@${RM} ${OBJS} ${DEPS}
 	@${RMDIR} ${OBJS_DIR}
-	@printf "\033[1;34m%-44s\033[0m \033[1;32m%s\033[0m\n" "Cleaning" "done"
+	@printf "${BLUE}%-44s${RESET} ${GREEN}%s${RESET}\n" "Cleaning" "done"
 
-fclean: clean
+fclean: clean # Clean executable file
 	@${RM} ${NAME}
-	@printf "\033[1;34m%-44s\033[0m \033[1;32m%s\033[0m\n" "File cleaning" "done"
+	@printf "${BLUE}%-44s${RESET} ${GREEN}%s${RESET}\n" "File cleaning" "done"
 
-re: fclean all
+re: fclean all # Execute fclean & all rules
 
-debug: all
+debug: fclean all
+
+sanitize: fclean all
 
 ./header:
 	mkdir header
@@ -120,9 +128,15 @@ debug: all
 test: ./header/libgtest.a
 	@echo "Tests not implemented yet..."
 
-sanitize:
-	@printf "\033[1;34m%-44s\033[0m \033[1;32m%s\033[0m\n" "Output is sanitized" "done"
-
 # supprime les fichiers dupliqués sur mac
 mac_clean:
 	@find . -type f -name "* [2-9]*" -print -delete
+
+file: # Print list of source and object files
+	@printf "${MAGENTA}.cpp:		${GRAY}${SOURCES}${RESET}\n"
+	@printf "${MAGENTA}.o:		${GRAY}${OBJECTS}${RESET}\n"
+
+help:
+	@egrep -h '\s#\s' ${MAKEFILE_LIST} | sort | awk 'BEGIN {FS = ":.*?# "}; {printf "${MAGENTA}%-15s${GRAY} %s${RESET}\n", $$1, $$2}'
+
+.PHONY: all clean fclean re debug sanitize tags file help mac_clean test
