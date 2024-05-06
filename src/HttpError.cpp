@@ -13,4 +13,6 @@
 
 HttpError::HttpError(const int code) throw ():
     _code   (code),
-    _message(status_string(code)) {}
+    _message(status_string(code)) {
+    (void) _code;
+    (void) _message;}

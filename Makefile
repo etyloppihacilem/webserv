@@ -46,29 +46,36 @@ LIBRARIES		= -lreadline
 
 CC				= c++
 CFLAGS			= -MMD -Wall -Werror -Wextra -std=c++98
+CTESTFLAGS		= -MMD -Wall -Werror -Wextra -std=c++20
 DEBUG_FLAG		= -g3
 SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
-HEADER_DIR		= header src
+HEADER_DIR		= header src ${shell realpath googletest/googletest/include} ${shell realpath googletest/googlemock/include}
 SRCS_DIR		= src
 OBJS_DIR		= obj
+TEST_DIR		= ${OBJS_DIR}/test
 
 ########################
 ##  AUTO-EDIT ON VAR  ##
 ########################
 
-HEADER_DIR	= ${addprefix -I ,${HEADERS_DIR}}
-SRCS		= ${shell find src/ -type f -name "*.cpp"}
+HEADERS		= ${addprefix -I,${HEADER_DIR}}
+SRCS		= ${shell find src/ -type f -name "*.cpp" | grep -v "*_test.cpp"}
+TEST		= ${shell find src/ -type f -name "*_test.cpp"}
+TEST		= ${shell find test/ -type f -name "*.cpp"}
 OBJS		= ${patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.o,${SRCS}}
+TEST_OBJ	= ${patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.o,${TEST}}
+TEST_OBJ	+= $(filter-out ${OBJS_DIR}/main.o, ${OBJS})
 DEPS		= ${patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.d,${SRCS}}
+DEPS		+= ${patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.d,${TESTS}}
 
 CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, sanitize),${SANITIZE_FLAG},)
 CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, debug test),${DEBUG_FLAG},) ${TEST_MODE}
 DEBUG_PROMPT		= ${MAGENTA}debug mode${RESET}
 SANITIZE_PROMPT		= ${YELLOW} sanitize mode${RESET}
 OK_PROMPT			= ${GREEN}done ${RESET}
-OK_PROMPT			+= ${if ${filter ${MAKECMDGOALS}, debug}, ${DEBUG_PROMPT}, }
-OK_PROMPT			+= ${if ${filter ${MAKECMDGOALS}, sanitize}, ${SANITIZE_PROMPT}, }
+OK_PROMPT			+= $(if $(filter $(MAKECMDGOALS) none, debug), $(DEBUG_PROMPT), )
+OK_PROMPT			+= $(if $(filter $(MAKECMDGOALS) none, sanitize), $(SANITIZE_PROMPT), )
 
 #######################
 ##  USUAL FUNCTIONS  ##
@@ -78,13 +85,12 @@ RM		= rm -f
 RMDIR	= rm -df
 MKDIR	= mkdir
 
-
 all: ${NAME} # Default rule
 	@printf "${GREEN}Success${RESET}  :)\n"
 
 -include ${DEPS}
 
-${NAME}: ${OBJS_DIR} ${OBJS} # Compile ${NAME} program
+${NAME}: ${OBJS} # Compile ${NAME} program
 	@printf "${DELETE}${YELLOW}...Building${RESET} %-33s" "${NAME}"
 	@${CC} ${CFLAGS} ${HEADERS} -o ${NAME} ${OBJS} ${LIBRARIES}
 	@printf "${OK_PROMPT}\n"
@@ -94,9 +100,19 @@ ${OBJS_DIR}:
 	@${MKDIR} ${OBJS_DIR}
 	@printf "${GREEN}done${RESET}\n"
 
-${OBJS_DIR}/%.o: ${SRCS_DIR}/%.cpp
+${OBJS_DIR}/%.o: ${SRCS_DIR}/%.cpp ${OBJS_DIR}
 	@printf "${DELETE}${BLUE}Compiling${RESET} %-35s" $<
-	@${CC} ${CFLAGS} ${HEADERS_DIR_FLAG} -c $< -o $@
+	@${CC} ${CFLAGS} ${HEADERS} -c $< -o $@
+	@printf "${OK_PROMPT}\n${GO_UP}"
+
+${TEST_DIR}:
+	@printf "${BLUE}...Creating${RESET} %-33s" "${TEST_DIR} directory"
+	@${MKDIR} -p ${TEST_DIR}
+	@printf "${GREEN}done${RESET}\n"
+
+${TEST_DIR}/%.o: ${SRCS_DIR}/%.cpp ${TEST_DIR}
+	@printf "${DELETE}${BLUE}Compiling${RESET} %-35s" $<
+	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
 	@printf "${OK_PROMPT}\n${GO_UP}"
 
 clean: # Clean object files
@@ -112,7 +128,7 @@ re: fclean all # Execute fclean & all rules
 
 debug: fclean all
 
-sanitize: fclean all
+sanitize: fclean al
 
 ./header:
 	mkdir header
@@ -123,10 +139,16 @@ sanitize: fclean all
 	cd googletest && mkdir build && cd build && cmake .. && make
 
 ./header/libgtest.a: ./googletest/build ./header
-	ln -f ./googletest/build/lib/* header/
+	@ln -f ./googletest/build/lib/* header/
 
-test: ./header/libgtest.a
-	@echo "Tests not implemented yet..."
+test: ./header/libgtest.a ${TEST_OBJ}# to run tests
+	@printf "${DELETE}${YELLOW}...Building tests${RESET} %-27s" "${NAME}"
+	@${CC} ${CTESTFLAGS} ${HEADERS} -o ${NAME}_test ${TEST_OBJ} ${LIBRARIES} ./header/libgtest.a ./header/libgmock.a
+	@printf "${GREEN}done${RESET}\n"
+	./${NAME}_test
+
+clangd: # configure clangd for tests
+	bash ./script/clangd_generator.sh
 
 # supprime les fichiers dupliqués sur mac
 mac_clean:
