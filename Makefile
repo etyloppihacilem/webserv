@@ -41,6 +41,7 @@ GO_UP		= \033[1A\r
 ###################
 
 NAME			= webserv
+NAME_TEST		= ${NAME}_test
 
 LIBRARIES		= -lreadline
 
@@ -59,15 +60,20 @@ TEST_DIR		= ${OBJS_DIR}/test
 ##  AUTO-EDIT ON VAR  ##
 ########################
 
-HEADERS		= ${addprefix -I,${HEADER_DIR}}
-SRCS		= ${shell find src/ -type f -name "*.cpp" | grep -v "*_test.cpp"}
-TEST		= ${shell find src/ -type f -name "*_test.cpp"}
-TEST		= ${shell find test/ -type f -name "*.cpp"}
-OBJS		= ${patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.o,${SRCS}}
-TEST_OBJ	= ${patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.o,${TEST}}
+HEADERS		= $(addprefix -I,$(HEADER_DIR))
+SRCS		= $(shell find src/ -type f -name "*.cpp" | grep -v "*_test.cpp")
+
+TESTS		= $(shell find src/ -type f -name "*_test.cpp")
+DEPS		= $(if ${TESTS}, $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.d,${TESTS}), )
+
+TESTS_FILES	= $(shell find test/ -type f -name "*.cpp")
+DEPS		+= $(patsubst test%.cpp,${TEST_DIR}%.d,${TESTS_FILES})
+
+OBJS		= $(patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.o,${SRCS})
+TEST_OBJ	= $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.o,${TESTS})
 TEST_OBJ	+= $(filter-out ${OBJS_DIR}/main.o, ${OBJS})
-DEPS		= ${patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.d,${SRCS}}
-DEPS		+= ${patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.d,${TESTS}}
+TEST_OBJ	+= $(patsubst test%.cpp,${TEST_DIR}%.o,${TESTS_FILES})
+DEPS		+= $(patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.d,${SRCS})
 
 CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, sanitize),${SANITIZE_FLAG},)
 CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, debug test),${DEBUG_FLAG},) ${TEST_MODE}
@@ -115,13 +121,18 @@ ${TEST_DIR}/%.o: ${SRCS_DIR}/%.cpp ${TEST_DIR}
 	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
 	@printf "${OK_PROMPT}\n${GO_UP}"
 
+${TEST_DIR}/%.o: test/%.cpp ${TEST_DIR}
+	@printf "${DELETE}${BLUE}Compiling${RESET} %-35s" $<
+	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
+	@printf "${OK_PROMPT}\n${GO_UP}"
+
 clean: # Clean object files
-	@${RM} ${OBJS} ${DEPS}
-	@${RMDIR} ${OBJS_DIR}
+	@${RM} ${TEST_OBJ} ${OBJS} ${DEPS}
+	@${RMDIR} ${TEST_DIR} ${OBJS_DIR}
 	@printf "${BLUE}%-44s${RESET} ${GREEN}%s${RESET}\n" "Cleaning" "done"
 
 fclean: clean # Clean executable file
-	@${RM} ${NAME}
+	@${RM} ${NAME} ${NAME_TEST}
 	@printf "${BLUE}%-44s${RESET} ${GREEN}%s${RESET}\n" "File cleaning" "done"
 
 re: fclean all # Execute fclean & all rules
@@ -142,10 +153,10 @@ sanitize: fclean al
 	@ln -f ./googletest/build/lib/* header/
 
 test: ./header/libgtest.a ${TEST_OBJ}# to run tests
-	@printf "${DELETE}${YELLOW}...Building tests${RESET} %-27s" "${NAME}"
-	@${CC} ${CTESTFLAGS} ${HEADERS} -o ${NAME}_test ${TEST_OBJ} ${LIBRARIES} ./header/libgtest.a ./header/libgmock.a
+	@printf "${DELETE}${YELLOW}...Building${RESET} %-33s" "${NAME_TEST}"
+	@${CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} ./header/libgtest.a ./header/libgmock.a
 	@printf "${GREEN}done${RESET}\n"
-	./${NAME}_test
+	./${NAME_TEST}
 
 clangd: # configure clangd for tests
 	bash ./script/clangd_generator.sh

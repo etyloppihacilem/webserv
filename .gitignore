@@ -11,3 +11,4 @@ header/libgtest.a
 header/libgmock_main.a
 header/libgtest_main.a
 .clangd
+webserv_test
