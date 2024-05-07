@@ -37,6 +37,26 @@ TEST(MessageTest, ParseMethodTest) {
     }, HttpError);
     EXPECT_THROW({
         try {
+            test.parse_method("DELETED");
+        } catch (HttpError &e) {
+            EXPECT_EQ(e.get_code(), NotImplemented);
+            throw;
+        } catch (std::exception) {
+            throw;
+        }
+    }, HttpError);
+    EXPECT_THROW({
+        try {
+            test.parse_method("G");
+        } catch (HttpError &e) {
+            EXPECT_EQ(e.get_code(), NotImplemented);
+            throw;
+        } catch (std::exception) {
+            throw;
+        }
+    }, HttpError);
+    EXPECT_THROW({
+        try {
             test.parse_method("");
         } catch (HttpError &e) {
             EXPECT_EQ(e.get_code(), NotImplemented);
