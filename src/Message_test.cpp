@@ -15,6 +15,10 @@
 #include "HttpStatusCodes.hpp"
 #include "Message.hpp"
 
+/*
+ * Can access private elements of Message.
+ * LSP is wrong
+ * */
 TEST(MessageTest, ParseMethodTest) {
     Message test;
 
