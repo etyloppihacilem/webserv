@@ -5,6 +5,7 @@
 #include <map>
 
 #include "Socket.hpp"
+#include "Location.hpp"
 class Request;
 
 class Server {
@@ -14,12 +15,17 @@ private:
 	std::string _ipAddress;
 	unsigned int _port;
 	unsigned int _maxConnection;
+	unsigned int _maxBodySize;
 	std::string _rootDir;
-	std::map<std::string, std::string> _routes;
+	std::map<std::string, Location> _routes;
+	std::map<std::string, std::string> _errorPages;
 	Socket _socket;
 
 	Request parseRequest(int clientSocket);
 	void requestHandler(int clientSocket);
+	void addLocation();
+	void returnHTML(std::string url, std::string html);
+	void returnHTML(std::string url, std::string html, unsigned int statusCode);
 
 public:
 
@@ -32,12 +38,12 @@ public:
 
 // config file fields 
 // SERVER
-// - listen (port)
-// - root (foler ortigin)
-// - index (default page ?)
-// - serverName (host/ IP)
+// - listen (port) - mand -> def=8080
+// - root (foler ortigin) - mand/opt? -> def=www
+// - index (default page ?) - mand/opt? -> def=index.html
+// - serverName (host/ IP) mand -> localhost 127.0.0.1
 // - client_max_body_size 
-// - methods 
+// - methods - mand -> def=GET
 // SERVER/LOCATION
 // - methods
 // - index
