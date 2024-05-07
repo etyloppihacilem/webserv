@@ -1,6 +1,6 @@
 /* #############################################################################
 
-               """          Messages.hpp
+               """          Message.hpp
         -\-    _|__
          |\___/  . \        Created on 19 Apr. 2024 at 17:51
          \     /(((/        by hmelica
@@ -8,20 +8,20 @@
 
 ############################################################################# */
 
-#ifndef INCLUDE_SRC_MESSAGES_HPP_
-#define INCLUDE_SRC_MESSAGES_HPP_
+#ifndef INCLUDE_SRC_MESSAGE_HPP_
+#define INCLUDE_SRC_MESSAGE_HPP_
 
 #include <string>
 
-class Messages {
+class Message {
 public:
-    Messages();
-    Messages(const Messages&);
-    ~Messages();
+    Message();
+    Message(const Message&);
+    ~Message();
 
-    Messages &operator=(const Messages&);
+    Message &operator=(const Message&);
 private:
     std::string _body;
 };
 
-#endif  // INCLUDE_SRC_MESSAGES_HPP_
+#endif  // INCLUDE_SRC_MESSAGE_HPP_

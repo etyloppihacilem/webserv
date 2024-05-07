@@ -1,6 +1,6 @@
 /* #############################################################################
 
-               """          Messages.cpp
+               """          Message.cpp
         -\-    _|__
          |\___/  . \        Created on 19 Apr. 2024 at 17:51
          \     /(((/        by hmelica
@@ -8,17 +8,17 @@
 
 ############################################################################# */
 
-#include "Messages.hpp"
+#include "Message.hpp"
 
-Messages::Messages() {}
+Message::Message() {}
 
-Messages::~Messages() {}
+Message::~Message() {}
 
-Messages::Messages(const Messages &other) {
+Message::Message(const Message &other) {
     (void) other;
 }
 
-Messages &Messages::operator=(const Messages &other) {
+Message &Message::operator=(const Message &other) {
     if (&other == this)
         return (*this);
     return (*this);
