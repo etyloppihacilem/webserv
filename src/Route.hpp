@@ -4,11 +4,13 @@
 #include <string>
 #include <vector>
 
+#include "HttpMethods.hpp"
+
 class Route {
 
 private:
 	bool _autoindex;
-	std::vector<int> _methods;
+	std::vector<HttpMethod > _methods;
 	std::string _rootDir;
 	std::vector<std::string> _indexPage;
 	std::string _uploadPath;

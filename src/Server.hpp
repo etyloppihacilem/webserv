@@ -4,9 +4,11 @@
 #include <string>
 #include <map>
 
-#include "Socket.hpp"
-#include "Route.hpp"
 #include "HttpMethods.hpp"
+#include "Route.hpp"
+
+	// unsigned int _maxBodySize;
+	// unsigned int _maxConnection;
 
 class Server {
 
@@ -14,20 +16,19 @@ private:
 	std::vector<std::string> _serverName;
 	unsigned int _port;
 	bool _autoindex;
-	std::vector<int> _methods;
+	std::vector<HttpMethod > _methods;
 	std::string _rootDir;
 	std::vector<std::string> _indexPage;
 	std::map<std::string, Route> _routes;
 	std::map<std::string, std::string> _errorPages;
 
-	// std::string _ipAddress;
-	// unsigned int _maxBodySize;
-	// unsigned int _maxConnection;
-
 public:
 	Server();
 	//Basic Server constructor
-	Server(std::string ipAddress, unsigned int port, std::string rootDir, std::string indexPage);
+	Server(std::string ipAddress = "127.0.0.1", 
+			unsigned int port = 80, 
+			std::string rootDir = "/www/html",
+			std::string indexPage = "index.html");
 	//conf file Server constructor
 	Server(std::string);
 	~Server();
@@ -35,12 +36,13 @@ public:
 	std::vector<std::string> getServerName() const;
 	unsigned int getPort() const;
 	bool getAutoindex() const;
-	std::vector<int> getMethods() const;
+	std::vector<HttpMethod> getMethods() const;
 	std::string getRootDir() const;
-	std::string getIndexPage() const;
+	std::vector<std::string> getIndexPage() const;
 	std::map<std::string, std::string> getErrorPages() const;
 	bool hasRoute(const std::string &path) const;
-	Route &getRoute(const std::string &path) const;
+	Route &findRoute(const std::string &path);
+	Route *getRoute(const std::string &path);
 	bool hasServeName(const std::string &serverName) const;
 
 };
