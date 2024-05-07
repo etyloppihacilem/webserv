@@ -57,7 +57,3 @@ void Message::parse(const std::string &in) {
         _status = e.get_code();
     }
 }
-
-int main(){
-
-}

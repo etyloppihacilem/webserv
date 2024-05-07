@@ -11,7 +11,6 @@
 #ifndef INCLUDE_SRC_MESSAGE_HPP_
 #define INCLUDE_SRC_MESSAGE_HPP_
 
-#include "gtest/gtest_prod.h"
 #include <map>
 #include <sstream>
 #include <string>
