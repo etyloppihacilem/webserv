@@ -51,8 +51,9 @@ void Message::parse(const std::string &in) {
     size_t sp = in.find_first_of(" \t");
 
     try {
-        parse_method(in.substr(0, sp));
-    } catch (HttpError &e){
+        _method = parse_method(in.substr(0, sp));
+    } catch (HttpError &e) {
+        _method = none;
         _status = e.get_code();
     }
 }
