@@ -5,56 +5,44 @@
 #include <map>
 
 #include "Socket.hpp"
-#include "Location.hpp"
-class Request;
+#include "Route.hpp"
+#include "HttpMethods.hpp"
 
 class Server {
 
 private:
-
-	std::string _ipAddress;
+	std::vector<std::string> _serverName;
 	unsigned int _port;
-	unsigned int _maxConnection;
-	unsigned int _maxBodySize;
+	bool _autoindex;
+	std::vector<int> _methods;
 	std::string _rootDir;
-	std::map<std::string, Location> _routes;
+	std::vector<std::string> _indexPage;
+	std::map<std::string, Route> _routes;
 	std::map<std::string, std::string> _errorPages;
-	Socket _socket;
 
-	Request parseRequest(int clientSocket);
-	void requestHandler(int clientSocket);
-	void addLocation();
-	void returnHTML(std::string url, std::string html);
-	void returnHTML(std::string url, std::string html, unsigned int statusCode);
+	// std::string _ipAddress;
+	// unsigned int _maxBodySize;
+	// unsigned int _maxConnection;
 
 public:
-
 	Server();
-	Server(std::string ipAddress, unsigned int port, unsigned int maxConnections, std::string rootDir);
-	void run();
+	//Basic Server constructor
+	Server(std::string ipAddress, unsigned int port, std::string rootDir, std::string indexPage);
+	//conf file Server constructor
+	Server(std::string);
 	~Server();
 
-};
+	std::vector<std::string> getServerName() const;
+	unsigned int getPort() const;
+	bool getAutoindex() const;
+	std::vector<int> getMethods() const;
+	std::string getRootDir() const;
+	std::string getIndexPage() const;
+	std::map<std::string, std::string> getErrorPages() const;
+	bool hasRoute(const std::string &path) const;
+	Route &getRoute(const std::string &path) const;
+	bool hasServeName(const std::string &serverName) const;
 
-// config file fields 
-// SERVER
-// - listen (port) - mand -> def=8080
-// - root (foler ortigin) - mand/opt? -> def=www
-// - index (default page ?) - mand/opt? -> def=index.html
-// - serverName (host/ IP) mand -> localhost 127.0.0.1
-// - client_max_body_size 
-// - methods - mand -> def=GET
-// SERVER/LOCATION
-// - methods
-// - index
-// - autoindex
-// - upload_path
-// - rewrite
-// - cgi path
-// - file_ext
-// SERVER/ERROR_PAGE -> file location
-//
-// CONTEXT:
-// Core -> Server -> Location
+};
 
 #endif // !__INCLUDE_SRC_SERVER__
