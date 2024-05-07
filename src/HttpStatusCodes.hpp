@@ -13,6 +13,7 @@
 #include <string>
 
 enum HttpCode {
+    unset                         = 0,
     Continue                      = 100,
     SwitchingProtocols            = 101,
     Processing                    = 102,
@@ -79,27 +80,27 @@ enum HttpCode {
     NetworkAuthenticationRequired = 511,
 };
 
-inline bool        isInformational(int code) {
+inline bool isInformational(int code) {
     return (code >= 100 && code < 200);
 }
 
-inline bool        isSuccessful(int code) {
+inline bool isSuccessful(int code) {
     return (code >= 200 && code < 300);
 }
 
-inline bool        isRedirection(int code) {
+inline bool isRedirection(int code) {
     return (code >= 300 && code < 400);
 }
 
-inline bool        isClientError(int code) {
+inline bool isClientError(int code) {
     return (code >= 400 && code < 500);
 }
 
-inline bool        isServerError(int code) {
+inline bool isServerError(int code) {
     return (code >= 500 && code < 600);
 }
 
-inline bool        isError(int code) {
+inline bool isError(int code) {
     return (code >= 400);
 }
 

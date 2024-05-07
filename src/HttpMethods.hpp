@@ -12,7 +12,7 @@
 #define INCLUDE_SRC_HTTPMETHODS_HPP_
 
 #include <string>
-enum HttpMethods {
+enum HttpMethod {
     none   = -1,
     GET    = 0,
     POST   = 1,

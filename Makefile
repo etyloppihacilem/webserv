@@ -12,13 +12,15 @@
 ##  MAKE CONFIG  ##
 ###################
 
-.ONESHELL:
+# .ONESHELL:
+# oneshell does not permit error checking using current reciepes syntax
 .DELETE_ON_ERROR:
 SHELL			:= sh
 MAKEFLAGS		+= --no-builtin-rules
 MAKEFLAGS		+= --no-print-directory
 MAKEFLAGS		+= -j
-.RECIPEPREFIX	=
+# .RECIPEPREFIX	=
+# same as default RECIPEPREFIX prefix used here
 
 ###################
 ##  PRINT COLOR  ##
@@ -49,6 +51,7 @@ CC				= c++
 CFLAGS			= -MMD -Wall -Werror -Wextra -std=c++98
 CTESTFLAGS		= -MMD -Wall -Werror -Wextra -std=c++20
 DEBUG_FLAG		= -g3
+TEST_FLAG		= -DTESTING
 SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
 HEADER_DIR		= header src ${shell realpath googletest/googletest/include} ${shell realpath googletest/googlemock/include}
@@ -61,22 +64,25 @@ TEST_DIR		= ${OBJS_DIR}/test
 ########################
 
 HEADERS		= $(addprefix -I,$(HEADER_DIR))
-SRCS		= $(shell find src/ -type f -name "*.cpp" | grep -v "*_test.cpp")
+SRCS		= $(shell find src -type f -name "*.cpp" | grep -v ".*_test.cpp")
 
-TESTS		= $(shell find src/ -type f -name "*_test.cpp")
+TESTS		= $(shell find src -type f -name "*_test.cpp")
 DEPS		= $(if ${TESTS}, $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.d,${TESTS}), )
 
-TESTS_FILES	= $(shell find test/ -type f -name "*.cpp")
+TESTS_FILES	= $(shell find test -type f -name "*.cpp")
 DEPS		+= $(patsubst test%.cpp,${TEST_DIR}%.d,${TESTS_FILES})
 
 OBJS		= $(patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.o,${SRCS})
 TEST_OBJ	= $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.o,${TESTS})
-TEST_OBJ	+= $(filter-out ${OBJS_DIR}/main.o, ${OBJS})
+TEST_OBJ	+= $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.o,$(filter-out ${SRCS_DIR}/main.cpp, ${SRCS}))
+# TEST_OBJ	:= $(filter-out ${OBJS_DIR}/main.o, ${OBJS})
 TEST_OBJ	+= $(patsubst test%.cpp,${TEST_DIR}%.o,${TESTS_FILES})
 DEPS		+= $(patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.d,${SRCS})
 
 CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, sanitize),${SANITIZE_FLAG},)
-CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, debug test),${DEBUG_FLAG},) ${TEST_MODE}
+CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, debug test),${DEBUG_FLAG},)
+CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, test),${TEST_FLAG},)
+CTESTFLAGS		+= ${TEST_FLAG}
 DEBUG_PROMPT		= ${MAGENTA}debug mode${RESET}
 SANITIZE_PROMPT		= ${YELLOW} sanitize mode${RESET}
 OK_PROMPT			= ${GREEN}done ${RESET}

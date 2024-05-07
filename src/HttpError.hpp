@@ -17,7 +17,7 @@
 
 class HttpError: public std::exception {
     public:
-        HttpError(const int code = 500, std::string message = "") throw ():
+        HttpError(const HttpCode code = InternalServerError, std::string message = "") throw ():
             _code   (code),
             _message(message != "" ? message : status_string(code)) {}
 
@@ -27,8 +27,12 @@ class HttpError: public std::exception {
             return (_message.c_str());
         }
 
+        HttpCode    get_code() const {
+            return (_code);
+        }
+
     private:
-        int         _code;
+        HttpCode    _code;
         std::string _message;
 };
 
