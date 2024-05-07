@@ -64,6 +64,7 @@ HEADERS		= $(addprefix -I,$(HEADER_DIR))
 SRCS		= $(shell find src/ -type f -name "*.cpp" | grep -v "*_test.cpp")
 
 TESTS		= $(shell find src/ -type f -name "*_test.cpp")
+TESTS		+= $(shell find src/ -type f -name "*Test.cpp")
 DEPS		= $(if ${TESTS}, $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.d,${TESTS}), )
 
 TESTS_FILES	= $(shell find test/ -type f -name "*.cpp")
