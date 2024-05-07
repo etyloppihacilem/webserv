@@ -12,6 +12,7 @@
 #include "HttpMethods.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
+#include "HttpUtils.hpp"
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -49,11 +50,22 @@ HttpMethod Message::parse_method(const std::string &method) {
 
 void Message::parse(const std::string &in) {
     size_t sp = in.find_first_of(" \t");
+    size_t protocol;
 
     try {
-        _method = parse_method(in.substr(0, sp));
+        if (sp <= MAX_METHOD)
+            _method = parse_method(in.substr(0, sp));
+        else {
+            _method = none;
+            _status = NotImplemented;
+        }
     } catch (HttpError &e) {
         _method = none;
         _status = e.get_code();
+    }
+    sp = in.find_first_of(" \t", sp);
+    protocol = in.find("HTTP", sp);
+    if (sp != protocol - 1) {
+        
     }
 }
