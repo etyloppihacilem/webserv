@@ -1,6 +1,8 @@
 #include "Server.hpp"
 #include "HttpMethods.hpp"
 
+#include <algorithm>
+
 Server::Server() 
 {
 }
@@ -76,5 +78,14 @@ Route *Server::getRoute(const std::string &path)
 
 bool Server::hasServeName(const std::string &serverName) const
 {
-	if _serverName.find(serverName) 
+	std::vector<std::string>::const_iterator name = _serverName.end();
+	name = std::find(_serverName.begin(), _serverName.end(), serverName);
+	if (name ==  _serverName.end())
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }

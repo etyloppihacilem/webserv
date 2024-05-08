@@ -23,9 +23,9 @@ private:
 	bool _indexPageSet;
 	bool _rootDirSet;
 	bool _methodsSet;
-	bool _cgiSet;
 	bool _uploadSet;
 	bool _redirectionSet;
+	bool _cgiSet;
 
 public:
 	Route();
@@ -33,9 +33,9 @@ public:
 	~Route();
 
 	bool getAutoindex() const;
-	std::vector<int> getMethods() const;
+	std::vector<HttpMethod> getMethods() const;
 	std::string getRootDir() const;
-	std::string getIndexPage() const;
+	std::vector<std::string> getIndexPage() const;
 	std::string getUploadPath() const;
 	std::string getRedirCode() const;
 	std::string getRedirPage() const;
@@ -46,8 +46,8 @@ public:
 	bool hasMethods() const;
 	bool hasRoot() const;
 	bool hasIndexPage() const;
-	bool hasRedir() const;
 	bool hasUpload() const;
+	bool hasRedir() const;
 	bool hasCgi() const;
 
 };

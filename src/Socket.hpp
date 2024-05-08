@@ -1,7 +1,7 @@
-#include <sys/types.h>
 #ifndef __INCLUDE_SRC_SOCKET_
 #define __INCLUDE_SRC_SOCKET_
 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string>
