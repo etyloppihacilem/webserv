@@ -30,9 +30,12 @@ class Message {
         void                               parse(const std::string &in);
     private:
         HttpMethod                         parse_method(const std::string &method, const size_t &end);
+        void                               parse_target(const std::string &in, const size_t &pos);
         std::string                        _method;
         std::string                        _target;
         std::map<std::string, std::string> _header;
+        std::map<std::string, std::string> _response_header;
+        std::map<std::string, std::string> _parameters;
         std::string                        _body;
         HttpCode                           _status;
 
