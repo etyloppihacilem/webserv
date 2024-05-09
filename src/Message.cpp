@@ -52,7 +52,7 @@ HttpMethod Message::parse_method(const std::string &method, const size_t &end) {
 static void replace_all(std::string &str, const std::string &to_find, const std::string &to_replace) {
     size_t elem = str.find(to_find, 0);
 
-    while (elem) {
+    while (elem != std::string::npos) {
         str.replace(elem, to_find.length(), to_replace);
         elem = str.find(to_find, 0);
     }
@@ -68,7 +68,8 @@ void Message::parse_target(const std::string &in, const size_t &pos) {
         throw (HttpError(BadRequest));
     if ((protocol - 1) - (pos + 1) > MAX_URI)
         throw (HttpError(URITooLong));
-    if (sp_protocol != protocol - 1) { // there are SP remaining in URI, that is wrong, going for 301 MovedPermanently
+    if (sp_protocol != protocol - 1) { // there are SP remaining in URI, that is wrong, going for 301 MovedPermanently. IF NOT IN ORIGIN
+                                       // FORM, ADD HOST TO LOCATION !!!
         std::string redirect = in.substr(pos + 1, (protocol - 1) - (pos + 1));
         replace_all(redirect, " ",  "%20");
         replace_all(redirect, "\t", "%09");
@@ -77,13 +78,13 @@ void Message::parse_target(const std::string &in, const size_t &pos) {
     _target = in.substr(pos + 1, (protocol - 1) - (pos + 1));
     size_t host = _target.find("http://");
     if (host == 0) {                   // absolute form
-        size_t host_end = _target.find("/", sizeof("http://"));
+        size_t host_end = _target.find("/", 7);
         if (host_end == std::string::npos)
-            throw (BadRequest);
-        _header["Host"] = _target.substr(sizeof("http://"), host_end - sizeof("http://"));
+            throw (HttpError(BadRequest));
+        _header["Host"] = _target.substr(7, host_end - 7);
         _target         = _target.substr(host_end, _target.length() - host_end);
     } else if (_target[0] != '/')      // not origin form
-        throw (BadRequest);
+        throw (HttpError(BadRequest));
 }
 
 void Message::parse(const std::string &in) {
