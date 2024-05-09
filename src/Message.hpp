@@ -29,7 +29,7 @@ class Message {
         Message                            &operator=(const Message&);
         void                               parse(const std::string &in);
     private:
-        HttpMethod                         parse_method(const std::string &method);
+        HttpMethod                         parse_method(const std::string &method, const size_t &end);
         std::string                        _method;
         std::string                        _target;
         std::map<std::string, std::string> _header;
@@ -37,7 +37,8 @@ class Message {
         HttpCode                           _status;
 
 #ifdef TESTING
-        FRIEND_TEST(MessageTest, ParseMethodTest);
+        FRIEND_TEST(MessageTest, ParseMethodTestExpectedOK);
+        FRIEND_TEST(MessageTest, ParseMethodTestExpectedFail);
 #endif
 };
 

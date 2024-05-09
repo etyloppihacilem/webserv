@@ -36,14 +36,14 @@ Message &Message::operator=(const Message &other) {
     return (*this);
 }
 
-HttpMethod Message::parse_method(const std::string &method) {
-    if (method.length() < 2)
+HttpMethod Message::parse_method(const std::string &method, const size_t &end) {
+    if (method.length() < 2 || end > MAX_METHOD)
         throw HttpError(NotImplemented);
-    if (method[0] == 'G' && method == method_string(GET))
+    if (method[0] == 'G' && method.find(method_string(GET)) == 0 && end == 3)
         return (GET);
-    if (method[0] == 'P' && method == method_string(POST))
+    if (method[0] == 'P' && method.find(method_string(POST)) == 0 && end == 4)
         return (POST);
-    if (method[0] == 'D' && method == method_string(DELETE))
+    if (method[0] == 'D' && method.find(method_string(DELETE)) == 0 && end == 6)
         return (DELETE);
     throw HttpError(NotImplemented);
 }
@@ -53,19 +53,15 @@ void Message::parse(const std::string &in) {
     size_t protocol;
 
     try {
-        if (sp <= MAX_METHOD)
-            _method = parse_method(in.substr(0, sp));
-        else {
-            _method = none;
-            _status = NotImplemented;
-        }
+        _method = parse_method(in, sp);
     } catch (HttpError &e) {
         _method = none;
         _status = e.get_code();
+        return; // double check if anything needs to be done in case of error except returning
     }
-    sp = in.find_first_of(" \t", sp);
+    sp       = in.find_first_of(" \t", sp);
     protocol = in.find("HTTP", sp);
     if (sp != protocol - 1) {
-        
+        ;
     }
 }
