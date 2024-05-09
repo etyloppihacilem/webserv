@@ -81,7 +81,7 @@ void Message::parse_target(const std::string &in, const size_t &pos) {
         if (host_end == std::string::npos)
             throw (BadRequest);
         _header["Host"] = _target.substr(sizeof("http://"), host_end - sizeof("http://"));
-        _target         = _target.substr(sizeof("http://"), _target.length() - sizeof("http://"));
+        _target         = _target.substr(host_end, _target.length() - host_end);
     } else if (_target[0] != '/')      // not origin form
         throw (BadRequest);
 }
@@ -95,5 +95,10 @@ void Message::parse(const std::string &in) {
         _method = none;
         _status = e.get_code();
         return;                        // double check if anything needs to be done in case of error except returning
+    }
+    try {
+        parse_target(in, sp);
+    } catch (HttpError &e) {
+        _status = e.get_code();
     }
 }

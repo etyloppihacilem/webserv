@@ -40,8 +40,9 @@ class Message {
         HttpCode                           _status;
 
 #ifdef TESTING
-        FRIEND_TEST(MessageTest, ParseMethodTestExpectedOK);
-        FRIEND_TEST(MessageTest, ParseMethodTestExpectedFail);
+        FRIEND_TEST(MessageTestSuite, ParseMethodTestExpectedOK);
+        FRIEND_TEST(MessageTestSuite, ParseMethodTestExpectedFail);
+        FRIEND_TEST(MessageTest, ParseTargetTestExpectedOK);
 #endif
 };
 
