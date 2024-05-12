@@ -29,4 +29,10 @@ class MessageTest: public testing::TestWithParam<t_test_target> {
         Message test;
 };
 
+class MessageTestParseHeader: public testing::TestWithParam<t_test_target> {
+    public:
+    protected:
+        Message test;
+};
+
 #endif  // INCLUDE_SRC_MESSAGETEST_HPP_

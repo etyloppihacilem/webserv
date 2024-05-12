@@ -26,12 +26,12 @@
 TEST(MessageTestSuite, ParseMethodTestExpectedOK) {
     Message test;
 
-    EXPECT_EQ(test.parse_method("GET", 3),  GET);
-    EXPECT_EQ(test.parse_method("POST", 4), POST);
-    EXPECT_EQ(test.parse_method("DELETE", 6), DELETE);
-    EXPECT_EQ(test.parse_method("GET /var/srcs HTTP/1.1", 3),  GET);
-    EXPECT_EQ(test.parse_method("POST /var/srcs HTTP/1.1", 4), POST);
-    EXPECT_EQ(test.parse_method("DELETE /var/srcs HTTP/1.1", 6), DELETE);
+    EXPECT_EQ(  test.parse_method("GET", 3),    GET);
+    EXPECT_EQ(  test.parse_method("POST", 4),   POST);
+    EXPECT_EQ(  test.parse_method("DELETE", 6), DELETE);
+    EXPECT_EQ(  test.parse_method("GET /var/srcs HTTP/1.1", 3),     GET);
+    EXPECT_EQ(  test.parse_method("POST /var/srcs HTTP/1.1", 4),    POST);
+    EXPECT_EQ(  test.parse_method("DELETE /var/srcs HTTP/1.1", 6), DELETE);
 }
 
 TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
@@ -109,17 +109,17 @@ TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
     }, HttpError);
 }
 
-TEST_P(MessageTest, ParseTargetTestExpectedOK) {
-    std::string line = "METHOD ";
-    size_t      pos  = 6;
+TEST_P(MessageTest, ParseTargetTest) {
+    std::string line    = "METHOD ";
+    size_t      pos     = 6;
     std::string params[3];
 
     t_test_target tmp = GetParam();
 
-    params[0] = tmp.c1;
-    params[1] = tmp.c2;
-    params[2] = tmp.c3;
-    line     += params[0];
+    params[0]   = tmp.c1;
+    params[1]   = tmp.c2;
+    params[2]   = tmp.c3;
+    line        += params[0];
     if (params[1] == "BadRequest") {
         EXPECT_THROW({
             try {
@@ -147,8 +147,8 @@ TEST_P(MessageTest, ParseTargetTestExpectedOK) {
             try {
                 test.parse_target(line, pos);
             } catch (HttpError &e) {
-                EXPECT_EQ(e.get_code(), MovedPermanently);
-                EXPECT_EQ(e.what(), params[2]);
+                EXPECT_EQ(  e.get_code(), MovedPermanently);
+                EXPECT_EQ(  e.what(), params[2]);
                 throw;
             } catch (std::exception) {
                 throw;
@@ -301,8 +301,7 @@ static const t_test_target MessageTargetSuiteValues[] {
         "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
         "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
         "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool HTTP/1.1",
+        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo" "l/cool/cool HTTP/1.1",
         "URITooLong", ""
     }, {
         "no_protocol", "/dev?using AHAH/1.0", "BadRequest", ""
@@ -315,10 +314,58 @@ static const t_test_target MessageTargetSuiteValues[] {
     }, {
         "spaces_absolute_form", "http://host.com/dev?wrong using HTTP/1.1", "MovedPermanently",
         "http://host.com/dev?wrong%20using"
+    }, {
+        "root", "/ HTTP/1.1", "/", ""
     },
 };
-INSTANTIATE_TEST_SUITE_P(MessageTargetSuite, MessageTest, ::testing::ValuesIn(MessageTargetSuiteValues),
-        [](const testing::TestParamInfo<t_test_target> &info) {
+INSTANTIATE_TEST_SUITE_P(MessageTargetSuite,
+        MessageTest,
+        ::testing::ValuesIn(MessageTargetSuiteValues),
+        [](const testing::TestParamInfo<t_test_target> &info)
+{
+    // Can use info.param here to generate the test suffix
+    std::string name = info.param.name;
+    return (name);
+});
+
+TEST(MessageTestSuite, ParseHeaderLineTestHost) {
+    ;
+}
+
+TEST_P(MessageTestParseHeader, ParseHeaderLineTest) {
+    t_test_target   tmp     = GetParam();
+    size_t          begin   = 0;
+    size_t          end     = tmp.c1.length();
+
+    if (tmp.c3 == "BadRequest") {
+        EXPECT_THROW({
+            try {
+                test.parse_header_line(tmp.c1, begin, end);
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), BadRequest);
+                throw;
+            } catch (std::exception) {
+                throw;
+            }
+        }, HttpError);
+    } else {
+        ASSERT_NO_THROW(test.parse_header_line(tmp.c1, begin, end));
+        EXPECT_NE(test._header.find(tmp.c2), test._header.end());
+        EXPECT_EQ(test._header[tmp.c2], tmp.c3);
+    }
+}
+static const t_test_target MessageParseHeaderLineSuiteValues[] {
+    {
+        "basic", "Host: test", "Host", "test"
+        // }, {
+        //     "no_slash", "dev HTTP/1.1", "BadRequest", ""
+    },
+};
+INSTANTIATE_TEST_SUITE_P(MessageParseHeaderLineSuite,
+        MessageTestParseHeader,
+        ::testing::ValuesIn(MessageParseHeaderLineSuiteValues),
+        [](const testing::TestParamInfo<t_test_target> &info)
+{
     // Can use info.param here to generate the test suffix
     std::string name = info.param.name;
     return (name);
