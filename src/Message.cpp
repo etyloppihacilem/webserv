@@ -14,6 +14,7 @@
 #include "HttpStatusCodes.hpp"
 #include "HttpUtils.hpp"
 #include <algorithm>
+#include <iostream>
 #include <sstream>
 #include <string>
 
@@ -91,9 +92,9 @@ void Message::parse_target(const std::string &in, const size_t &pos) {
 
 void Message::parse_header_line(const std::string &in, size_t begin, size_t end) {
     size_t  sep = in.find_first_of(":", begin);
-    size_t  ows;
+    size_t  ows = in.find_first_of(" \t", begin);
 
-    if (sep > end || sep == std::string::npos)
+    if (ows < sep || sep > end || sep <= begin || sep == std::string::npos)
         throw (HttpError(BadRequest));
     std::string key = in.substr(begin, sep - begin);
     do {
@@ -101,7 +102,7 @@ void Message::parse_header_line(const std::string &in, size_t begin, size_t end)
         sep++;
     } while (ows == sep);   // sep is at begining of value after this
     do {
-        ows = in.find_last_of(" \t", end);
+        ows = in.find_last_of(" \t", end - 1);
         end--;
     } while (ows == end);   // end is last optional whistspace after this
     if (key == "Host") {
@@ -110,7 +111,9 @@ void Message::parse_header_line(const std::string &in, size_t begin, size_t end)
         else if (_absolute_form)
             return;
     }
-    if (_header.find(key) != _header.end())
+    if (end + 1 <= sep)
+        throw (HttpError(BadRequest));
+    else if (_header.find(key) != _header.end())
         _header[key] += in.substr(sep, (end + 1) - sep);
     else
         _header[key] = in.substr(sep, (end + 1) - sep);

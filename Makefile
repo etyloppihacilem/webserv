@@ -49,7 +49,7 @@ LIBRARIES		= -lreadline
 
 CC				= c++
 CFLAGS			= -MMD -Wall -Werror -Wextra -std=c++98
-CTESTFLAGS		= -MMD -Wall -Werror -Wextra -std=c++20
+CTESTFLAGS		= -MMD -Wall -Werror -Wextra -std=c++20 -g3
 DEBUG_FLAG		= -g3
 TEST_FLAG		= -DTESTING
 SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer

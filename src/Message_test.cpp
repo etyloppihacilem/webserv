@@ -329,7 +329,22 @@ INSTANTIATE_TEST_SUITE_P(MessageTargetSuite,
 });
 
 TEST(MessageTestSuite, ParseHeaderLineTestHost) {
-    ;
+    std::string header ="Host: www.example.com";
+    std::string header_2 ="Host: www.coucou.com";
+    Message test;
+    EXPECT_NO_THROW(test.parse_header_line(header, 0, header.length()));
+    EXPECT_EQ(test._header["Host"], "www.example.com");
+    EXPECT_THROW({
+        try {
+            test.parse_header_line(header_2, 0, header_2.length());
+        } catch (HttpError &e) {
+            EXPECT_EQ(e.get_code(), BadRequest);
+            throw;
+        } catch (std::exception) {
+            throw;
+        }
+    }, HttpError);
+    EXPECT_EQ(test._header["Host"], "www.example.com");
 }
 
 TEST_P(MessageTestParseHeader, ParseHeaderLineTest) {
@@ -348,6 +363,7 @@ TEST_P(MessageTestParseHeader, ParseHeaderLineTest) {
                 throw;
             }
         }, HttpError);
+        EXPECT_EQ(test._header.find(tmp.c2), test._header.end());
     } else {
         ASSERT_NO_THROW(test.parse_header_line(tmp.c1, begin, end));
         EXPECT_NE(test._header.find(tmp.c2), test._header.end());
@@ -357,10 +373,29 @@ TEST_P(MessageTestParseHeader, ParseHeaderLineTest) {
 static const t_test_target MessageParseHeaderLineSuiteValues[] {
     {
         "basic", "Host: test", "Host", "test"
-        // }, {
-        //     "no_slash", "dev HTTP/1.1", "BadRequest", ""
+    }, {
+        "nospaces", "Host:test", "Host", "test"
+    }, {
+        "spaces", "Host: \t test\t\t      ", "Host", "test"
+    }, {
+        "sep_in_name", "Host :", "Host", "BadRequest"
+    }, {
+        "no_value", "Host:", "Host", "BadRequest"
+    }, {
+        "no_value2", "Host: ", "Host", "BadRequest"
+    }, {
+        "no_value3", "Host:             ", "Host", "BadRequest"
+    }, {
+        "sp_in_val", "coucou: je suis heureux  ", "coucou", "je suis heureux"
+    }, {
+        "no_name", ":eheheh", "", "BadRequest"
+    }, {
+        "no_colon", "eheheh", "eheheh", "BadRequest"
+    }, {
+        "nothing", "", "", "BadRequest"
     },
 };
+
 INSTANTIATE_TEST_SUITE_P(MessageParseHeaderLineSuite,
         MessageTestParseHeader,
         ::testing::ValuesIn(MessageParseHeaderLineSuiteValues),
