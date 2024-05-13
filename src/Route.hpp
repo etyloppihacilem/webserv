@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_SRC_ROUTE__
-#define __INCLUDE_SRC_ROUTE__
+#ifndef __INCLUDE_SRC_ROUTE_HPP_
+#define __INCLUDE_SRC_ROUTE_HPP_
 
 #include <string>
 #include <vector>

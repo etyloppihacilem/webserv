@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_SRC_SERVER__
-#define __INCLUDE_SRC_SERVER__
+#ifndef __INCLUDE_SRC_SERVER_HPP_
+#define __INCLUDE_SRC_SERVER_HPP_
 
 #include <string>
 #include <map>

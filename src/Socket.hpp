@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_SRC_SOCKET_
-#define __INCLUDE_SRC_SOCKET_
+#ifndef __INCLUDE_SRC_SOCKET_HPP_
+#define __INCLUDE_SRC_SOCKET_HPP_
 
 #include <sys/types.h>
 #include <sys/socket.h>

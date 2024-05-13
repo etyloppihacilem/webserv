@@ -1,5 +1,5 @@
-#ifdef __INCLUDE_SRC_SERVERCONF_
-#define __INCLUDE_SRC_SERVERCONF_
+#ifdef INCLUDE_SRC_SERVERCONF_HPP_
+#define INCLUDE_SRC_SERVERCONF_HPP_
 
 namespace ServerConf {
 

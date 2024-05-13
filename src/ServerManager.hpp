@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_SRC_SERVERMANAGER_
-#define __INCLUDE_SRC_SERVERMANAGER_
+#ifndef __INCLUDE_SRC_SERVERMANAGER_HPP_
+#define __INCLUDE_SRC_SERVERMANAGER_HPP_
 
 #include <string>
 #include <vector>
