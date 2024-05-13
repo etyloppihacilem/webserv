@@ -70,8 +70,8 @@ void Message::parse_target(const std::string &in, const size_t &pos) {
         throw (HttpError(BadRequest));
     if ((protocol - 1) - (pos + 1) > MAX_URI)
         throw (HttpError(URITooLong));
-    if (sp_protocol != protocol - 1) {  // there are SP remaining in URI, that is wrong, going for 301 MovedPermanently. IF NOT IN ORIGIN
-                                        // FORM, ADD HOST TO LOCATION !!!
+    if (sp_protocol != protocol - 1) {  // there are SP remaining in URI, that is wrong, going for 301 MovedPermanently.
+        // IF NOT IN ORIGIN FORM, ADD HOST TO LOCATION !!!
         std::string redirect = in.substr(pos + 1, (protocol - 1) - (pos + 1));
         replace_all(redirect,   " ",    "%20");
         replace_all(redirect,   "\t",   "%09");
@@ -81,7 +81,7 @@ void Message::parse_target(const std::string &in, const size_t &pos) {
     size_t host = _target.find("http://");
     if (host == 0) {                // absolute form
         size_t host_end = _target.find("/", 7);
-        if (host_end == std::string::npos)
+        if (host_end == std::string::npos || host_end == 7)
             throw (HttpError(BadRequest));
         _header["Host"] = _target.substr(7, host_end - 7);
         _target         = _target.substr(host_end, _target.length() - host_end);
@@ -127,11 +127,13 @@ void Message::init_header(const std::string &in) {
         throw (HttpError(BadRequest));
     while (begin + 2 != end) {
         parse_header_line(in, begin + 2, end);
-        begin = end;
-        end = in.find("\r\n", begin + 2);
+        begin   = end;
+        end     = in.find("\r\n", begin + 2);
         if (begin == std::string::npos || end == std::string::npos)
             throw (HttpError(BadRequest));
     }
+    if (_header.find("Host") == _header.end())
+        throw (HttpError(BadRequest));
 }
 
 void Message::parse(const std::string &in) {
@@ -150,7 +152,9 @@ void Message::parse(const std::string &in) {
         _status = e.get_code();
         return;
     }
-    try {} catch (HttpError &e) {
+    try {
+        init_header(in);
+    } catch (HttpError &e) {
         _status = e.get_code();
         return;
     }

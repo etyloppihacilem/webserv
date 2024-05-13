@@ -18,6 +18,7 @@
 #include "HttpStatusCodes.hpp"
 #include "MessageTest.hpp"
 #include "Message.hpp"
+#include "Message_test.hpp"
 
 /*
  * Can access private elements of Message.
@@ -109,7 +110,7 @@ TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
     }, HttpError);
 }
 
-TEST_P(MessageTest, ParseTargetTest) {
+TEST_P(MessageTestTarget, ParseTargetTest) {
     std::string line    = "METHOD ";
     size_t      pos     = 6;
     std::string params[3];
@@ -163,163 +164,9 @@ TEST_P(MessageTest, ParseTargetTest) {
             EXPECT_EQ(test._header.find("Host"), test._header.end());
     }
 }
-static const t_test_target MessageTargetSuiteValues[] {
-    {
-        "normal", "/dev HTTP/1.1", "/dev", ""
-    }, {
-        "no_slash", "dev HTTP/1.1", "BadRequest", ""
-    }, {
-        "empty", " HTTP/1.1", "BadRequest", ""
-    }, {
-        "empty_2", "", "BadRequest", ""
-    }, {
-        "spaces", "/dev?using spaces is really\twrong HTTP/1.1", "MovedPermanently",
-        "/dev?using%20spaces%20is%20really%09wrong"
-    }, {
-        "URI_too_long",
-        "/super/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo"
-        "l/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/coo" "l/cool/cool HTTP/1.1",
-        "URITooLong", ""
-    }, {
-        "no_protocol", "/dev?using AHAH/1.0", "BadRequest", ""
-    }, {
-        "no_more_spaces", "/dev?usingAHAH/1.0", "BadRequest", ""
-    }, {
-        "absolute_form", "http://host.com/dev?using HTTP/1.1", "/dev?using", "host.com"
-    }, {
-        "https_absolute_form", "https://host.com/dev?using HTTP/1.1", "BadRequest", ""
-    }, {
-        "spaces_absolute_form", "http://host.com/dev?wrong using HTTP/1.1", "MovedPermanently",
-        "http://host.com/dev?wrong%20using"
-    }, {
-        "root", "/ HTTP/1.1", "/", ""
-    },
-};
+
 INSTANTIATE_TEST_SUITE_P(MessageTargetSuite,
-        MessageTest,
+        MessageTestTarget,
         ::testing::ValuesIn(MessageTargetSuiteValues),
         [](const testing::TestParamInfo<t_test_target> &info)
 {
@@ -329,9 +176,10 @@ INSTANTIATE_TEST_SUITE_P(MessageTargetSuite,
 });
 
 TEST(MessageTestSuite, ParseHeaderLineTestHost) {
-    std::string header ="Host: www.example.com";
-    std::string header_2 ="Host: www.coucou.com";
-    Message test;
+    std::string header      = "Host: www.example.com";
+    std::string header_2    = "Host: www.coucou.com";
+    Message     test;
+
     EXPECT_NO_THROW(test.parse_header_line(header, 0, header.length()));
     EXPECT_EQ(test._header["Host"], "www.example.com");
     EXPECT_THROW({
@@ -353,7 +201,7 @@ TEST_P(MessageTestParseHeader, ParseHeaderLineTest) {
     size_t          end     = tmp.c1.length();
 
     if (tmp.c3 == "BadRequest") {
-        EXPECT_THROW({
+        ASSERT_THROW({
             try {
                 test.parse_header_line(tmp.c1, begin, end);
             } catch (HttpError &e) {
@@ -370,36 +218,47 @@ TEST_P(MessageTestParseHeader, ParseHeaderLineTest) {
         EXPECT_EQ(test._header[tmp.c2], tmp.c3);
     }
 }
-static const t_test_target MessageParseHeaderLineSuiteValues[] {
-    {
-        "basic", "Host: test", "Host", "test"
-    }, {
-        "nospaces", "Host:test", "Host", "test"
-    }, {
-        "spaces", "Host: \t test\t\t      ", "Host", "test"
-    }, {
-        "sep_in_name", "Host :", "Host", "BadRequest"
-    }, {
-        "no_value", "Host:", "Host", "BadRequest"
-    }, {
-        "no_value2", "Host: ", "Host", "BadRequest"
-    }, {
-        "no_value3", "Host:             ", "Host", "BadRequest"
-    }, {
-        "sp_in_val", "coucou: je suis heureux  ", "coucou", "je suis heureux"
-    }, {
-        "no_name", ":eheheh", "", "BadRequest"
-    }, {
-        "no_colon", "eheheh", "eheheh", "BadRequest"
-    }, {
-        "nothing", "", "", "BadRequest"
-    },
-};
 
 INSTANTIATE_TEST_SUITE_P(MessageParseHeaderLineSuite,
         MessageTestParseHeader,
         ::testing::ValuesIn(MessageParseHeaderLineSuiteValues),
         [](const testing::TestParamInfo<t_test_target> &info)
+{
+    // Can use info.param here to generate the test suffix
+    std::string name = info.param.name;
+    return (name);
+});
+
+TEST_P(MessageTestInitHeader, InitHeaderTest) {
+    t_test_messages tmp = GetParam();
+    if (tmp.name == "no_headers_absolute")
+        return ; // test is skipped
+
+    if (tmp.error == BadRequest) {
+        ASSERT_THROW({
+            try {
+                test.init_header(tmp.request);
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), BadRequest);
+                throw;
+            } catch (std::exception) {
+                throw;
+            }
+        }, HttpError);
+    } else {
+        ASSERT_NO_THROW(test.init_header(tmp.request));
+        for (auto it = tmp.headers.begin(); it != tmp.headers.end(); it++) {
+            ASSERT_NE(test._header.find(it->first), test._header.end());
+            EXPECT_EQ(test._header[it->first], it->second);
+        }
+        EXPECT_EQ(tmp.headers.size(), test._header.size());
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(MessageTestInitHeaderSuite,
+        MessageTestInitHeader,
+        ::testing::ValuesIn(MessageTestData),
+        [](const testing::TestParamInfo<t_test_messages> &info)
 {
     // Can use info.param here to generate the test suffix
     std::string name = info.param.name;

@@ -47,9 +47,10 @@ class Message {
 #ifdef TESTING
         FRIEND_TEST(MessageTestSuite,   ParseMethodTestExpectedOK);
         FRIEND_TEST(MessageTestSuite,   ParseMethodTestExpectedFail);
-        FRIEND_TEST(MessageTest, ParseTargetTest);
+        FRIEND_TEST(MessageTestTarget, ParseTargetTest);
         FRIEND_TEST(MessageTestSuite,   ParseHeaderLineTestHost);
         FRIEND_TEST(MessageTestParseHeader, ParseHeaderLineTest);
+        FRIEND_TEST(MessageTestInitHeader, InitHeaderTest);
 #endif
 };
 

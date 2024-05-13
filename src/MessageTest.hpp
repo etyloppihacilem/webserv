@@ -15,21 +15,21 @@
 #include "gtest/gtest.h"
 #include <string>
 #include <vector>
+#include "Message_test.hpp"
 
-typedef struct s_test_target {
-    std::string name;
-    std::string c1;
-    std::string c2;
-    std::string c3;
-} t_test_target;
-
-class MessageTest: public testing::TestWithParam<t_test_target> {
+class MessageTestTarget: public testing::TestWithParam<t_test_target> {
     public:
     protected:
         Message test;
 };
 
 class MessageTestParseHeader: public testing::TestWithParam<t_test_target> {
+    public:
+    protected:
+        Message test;
+};
+
+class MessageTestInitHeader: public testing::TestWithParam<s_test_messages> {
     public:
     protected:
         Message test;
