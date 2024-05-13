@@ -202,6 +202,10 @@ static const t_test_target MessageParseHeaderLineSuiteValues[] {
     }, {
         "sep_in_name", "Host :", "Host", "BadRequest"
     }, {
+        "sep_in_name2", "   Host:", "Host", "BadRequest"
+    }, {
+        "sep_in_name3", "  Host :", "Host", "BadRequest"
+    }, {
         "no_value", "Host:", "Host", "BadRequest"
     }, {
         "no_value2", "Host: ", "Host", "BadRequest"
@@ -238,6 +242,23 @@ static const t_test_messages MessageTestData[] {
         "coucou: jesuisheureux\r\n"
         "\r\n"
         "Eheheheheh voici des donnees\r\n",
+        {
+            {
+                "Host", "www.example.com"
+            }, {
+                "Infos", "il_n'y_a_rien_ici"
+            }, {
+                "coucou", "jesuisheureux"
+            },
+        }, "/", GET, false, unset
+    },
+    {
+        "no_body",
+        "GET / HTTP/1.1\r\n"
+        "Host: www.example.com\r\n"
+        "Infos: il_n'y_a_rien_ici\r\n"
+        "coucou: jesuisheureux\r\n"
+        "\r\n", // no data
         {
             {
                 "Host", "www.example.com"
