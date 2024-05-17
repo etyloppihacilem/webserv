@@ -16,5 +16,19 @@ If:
 
 Diagnostics:
   Suppress: access
+
+---
+If:
+  PathMatch: .*Test\.cpp
+
+Diagnostics:
+  Suppress: access
+
+---
+If:
+  PathMatch: .*test/.*\.cpp
+
+Diagnostics:
+  Suppress: access
 EOF
 echo Clangd correctly configured
