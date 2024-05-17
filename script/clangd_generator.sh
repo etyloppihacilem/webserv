@@ -3,8 +3,8 @@ CompileFlags:
   Add:
     - "-Wall"
     - "-Wextra"
-    - "-l$(realpath googletest/googletest/lib/libgtest.a)"
-    - "-l$(realpath googletest/googletest/lib/libgmock.a)"
+    - "-l$(realpath googletest/build/lib/libgtest.a)"
+    - "-l$(realpath googletest/build/lib/libgmock.a)"
     - "-I$(realpath googletest/googletest/include)"
     - "-I$(realpath googletest/googlemock/include)"
     - "-I$(realpath header)"
