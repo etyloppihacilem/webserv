@@ -153,13 +153,13 @@ sanitize: fclean al
 	git submodule update
 	cd googletest && mkdir build
 
-./googletest/build/lib/libgtest.a: ./header ./googletest/build
+./googletest/build/lib/libgtest.a:
 	cd googletest/build && cmake .. && make
 
 test: ${NAME_TEST}
 	./${NAME_TEST}
 
-${NAME_TEST}: ./header/libgtest.a ${TEST_DIR} ${TEST_OBJ}# to run tests
+${NAME_TEST}: ./googletest/build ./googletest/build/lib/libgtest.a ${TEST_DIR} ${TEST_OBJ}# to run tests
 	@printf "${DELETE}${YELLOW}...Building${RESET} %-33s" "${NAME_TEST}"
 	@${CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} ./googletest/build/lib/libgtest.a ./googletest/build/lib/libgmock.a
 	@printf "${GREEN}done${RESET}\n"
