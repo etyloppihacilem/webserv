@@ -3,10 +3,13 @@
 
 #include <string>
 #include <vector>
+#include <limits>
 
-namespace ServerConf {
+namespace ServerConf
+{
 
 	static const int MAX_PORT = 65535;
+	static const int MAX_BODY_SIZE = INT_MAX;
 	typedef std::pair<std::string, std::string> Field;
 
 	struct Fields {
@@ -27,6 +30,7 @@ namespace ServerConf {
 		std::vector<Module> serverDetails;
 	};
 
+	std::string trimIsspace(const std::string &);
 	std::vector<Field> tokenizeServer(const std::string &);
 	std::vector<Field> tokenizeLocation(const std::string &);
 
