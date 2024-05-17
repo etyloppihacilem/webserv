@@ -80,7 +80,6 @@ DEPS		+= $(patsubst %.o,%.d,${TEST_OBJ})
 
 CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, sanitize),${SANITIZE_FLAG},)
 CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, debug test),${DEBUG_FLAG},)
-CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, test),${TEST_FLAG},)
 CTESTFLAGS		+= ${TEST_FLAG}
 DEBUG_PROMPT		= ${MAGENTA}debug mode${RESET}
 SANITIZE_PROMPT		= ${YELLOW} sanitize mode${RESET}
@@ -101,7 +100,7 @@ all: ${NAME} # Default rule
 
 -include ${DEPS}
 
-${NAME}: ${OBJS} # Compile ${NAME} program
+${NAME}: ${OBJS_DIR} ${OBJS} # Compile ${NAME} program
 	@printf "${DELETE}${YELLOW}...Building${RESET} %-33s" "${NAME}"
 	@${CC} ${CFLAGS} ${HEADERS} -o ${NAME} ${OBJS} ${LIBRARIES}
 	@printf "${OK_PROMPT}\n"
@@ -111,7 +110,7 @@ ${OBJS_DIR}:
 	@${MKDIR} ${OBJS_DIR}
 	@printf "${GREEN}done${RESET}\n"
 
-${OBJS_DIR}/%.o: ${SRCS_DIR}/%.cpp ${OBJS_DIR}
+${OBJS_DIR}/%.o: ${SRCS_DIR}/%.cpp
 	@printf "${DELETE}${BLUE}Compiling${RESET} %-35s" $<
 	@${CC} ${CFLAGS} ${HEADERS} -c $< -o $@
 	@printf "${OK_PROMPT}\n${GO_UP}"
@@ -121,12 +120,12 @@ ${TEST_DIR}:
 	@${MKDIR} -p ${TEST_DIR}
 	@printf "${GREEN}done${RESET}\n"
 
-${TEST_DIR}/%.o: ${SRCS_DIR}/%.cpp ${TEST_DIR}
+${TEST_DIR}/%.o: ${SRCS_DIR}/%.cpp
 	@printf "${DELETE}${BLUE}Compiling${RESET} %-35s" $<
 	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
 	@printf "${OK_PROMPT}\n${GO_UP}"
 
-${TEST_DIR}/%.o: test/%.cpp ${TEST_DIR}
+${TEST_DIR}/%.o: test/%.cpp
 	@printf "${DELETE}${BLUE}Compiling${RESET} %-35s" $<
 	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
 	@printf "${OK_PROMPT}\n${GO_UP}"
@@ -152,16 +151,18 @@ sanitize: fclean al
 ./googletest/build:
 	git submodule sync
 	git submodule update
-	cd googletest && mkdir build && cd build && cmake .. && make
+	cd googletest && mkdir build
 
-./header/libgtest.a: ./googletest/build ./header
-	@ln -f ./googletest/build/lib/* header/
+./googletest/build/lib/libgtest.a: ./header ./googletest/build
+	cd googletest/build && cmake .. && make
 
-test: ./header/libgtest.a ${TEST_OBJ}# to run tests
-	@printf "${DELETE}${YELLOW}...Building${RESET} %-33s" "${NAME_TEST}"
-	@${CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} ./header/libgtest.a ./header/libgmock.a
-	@printf "${GREEN}done${RESET}\n"
+test: ${NAME_TEST}
 	./${NAME_TEST}
+
+${NAME_TEST}: ./header/libgtest.a ${TEST_DIR} ${TEST_OBJ}# to run tests
+	@printf "${DELETE}${YELLOW}...Building${RESET} %-33s" "${NAME_TEST}"
+	@${CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} ./googletest/build/lib/libgtest.a ./googletest/build/lib/libgmock.a
+	@printf "${GREEN}done${RESET}\n"
 
 clangd: # configure clangd for tests
 	bash ./script/clangd_generator.sh
