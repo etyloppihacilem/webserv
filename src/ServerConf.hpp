@@ -10,6 +10,13 @@ namespace ServerConf
 
 	static const int MAX_PORT = 65535;
 	static const int MAX_BODY_SIZE = INT_MAX;
+	static const int MAX_CLIENT_CONNECTION = 5;
+	static const int CONNECTION_TIMEOUT = 180; //second
+	static const int REQUEST_TIMEOUT = 60; //second
+	static const int INPUT_TIMEOUT = 15; //second
+	static const int OUTPUT_TIMEOUT = 180; //second
+	static const int CGI_TIMEOUT = 180; //second
+
 	typedef std::pair<std::string, std::string> Field;
 
 	struct Fields {
