@@ -16,6 +16,7 @@ namespace ServerConf
 	static const int INPUT_TIMEOUT = 15; //second
 	static const int OUTPUT_TIMEOUT = 180; //second
 	static const int CGI_TIMEOUT = 180; //second
+	static const std::string ISSPACE = " 	";
 
 	typedef std::pair<std::string, std::string> Field;
 
@@ -27,35 +28,15 @@ namespace ServerConf
 	};
 
 	struct Module {
-		std::vector<Field> serverFields;
-		std::vector<Field> locationsFields;
+		static std::vector<Field> serverFields;
+		static std::map<std::string, std::vector<Field> > locations;
 	};
 
 	struct Config {
-		std::string root;
-		std::vector<std::string> serverList;
-		std::vector<Module> serverDetails;
+		static std::string root;
+		static std::vector<std::string> serverList;
+		static std::vector<Module> serverDetails;
 	};
-
-	std::string trimIsspace(const std::string &);
-	std::vector<Field> tokenizeServer(const std::string &);
-	std::vector<Field> tokenizeLocation(const std::string &);
-
-	bool isValidHttp(const std::string &);
-	bool isValidServer(const std::string &);
-	bool isValidListen(const std::string &);
-	bool isValidServerName(const std::string &);
-	bool isValidRoot(const std::string &);
-	bool isValidMethods(const std::string &);
-	bool isValidClientMaxBodySize(const std::string &);
-	bool isValidAutoindex(const std::string &);
-	bool isValidIndex(const std::string &);
-	bool isValidCgiPath(const std::string &);
-	bool isValidUploadPath(const std::string &);
-	bool isValidRewrite(const std::string &);
-	bool isValidErrorPage(const std::string &);
-	bool isValidFileExt(const std::string &);
-
 }
 
 ServerConf::Fields::root[0] = "http";
@@ -77,4 +58,4 @@ ServerConf::Fields::location[5] = "upload_path";
 ServerConf::Fields::location[6] = "cgi_path";
 ServerConf::Fields::location[7] = "file_ext";
 
-#endif // __INCLUDE_SRC_SERVERCONF_
+#endif // __INCLUDE_SRC_SERVERCONF_HPP
