@@ -1,5 +1,6 @@
 #include "ServerConf.hpp"
 #include "ServerConfValidateField.hpp"
+#include "ServerConfTokenize.hpp"
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -27,7 +28,7 @@ namespace ServerConf
 			&& value.find("listen") != std::string::npos
 			&& value.find("root") != std::string::npos
 			&& value.find("index") != std::string::npos
-			&& value.find("mmespace ethods") != std::string::npos)
+			&& value.find("methods") != std::string::npos)
 		{
 			return true;
 		}
@@ -106,16 +107,17 @@ namespace ServerConf
 	// 	}
 	// 	return false;
 	// }
-	//
-	// bool isValidCgiPath(const std::string &value)
-	// {
-	// 	if ()
-	// 	{
-	// 		return true;
-	// 	}
-	// 	return false;
-	// }
-	//
+
+	bool isValidPath(const std::string &value)
+	{
+		std::vector<std::string> fieldToken = tokenize(value, " ");
+		if ()
+		{
+			return true;
+		}
+		return false;
+	}
+
 	// bool isValidUploadPath(const std::string &value)
 	// {
 	// 	if ()

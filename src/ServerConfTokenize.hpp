@@ -7,7 +7,8 @@ namespace ServerConf
 {
 	typedef std::pair<std::string, std::string> Field;
 
-	std::vector <std::string> split (std::string& text, const std::string& delimiter);
+	std::vector<std::string> tokenize(std::string& , const std::string& );
+	std::vector<std::string> tokenizeField(const std::string &);
 	std::vector<Field> tokenizeServer(const std::string &);
 	std::vector<Field> tokenizeLocation(const std::string &);
 

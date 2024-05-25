@@ -42,24 +42,24 @@ namespace ServerConf
 		return field;
 	}
 
-	std::vector<std::string> tokenizeConfFile(std::ifstream &input)
-	{
-		std::string isspace = " 	";
-		std::vector<std::string> tokens;
-
-		return tokens;
-	}
-
-	std::vector<Field> tokenizeServer(const std::string &)
-	{
-		std::vector<Field> fieldList;
-		return fieldList;
-	}
-
-	std::vector<Field> tokenizeLocation(const std::string &)
-	{
-		std::vector<Field> fieldList;
-		return fieldList;
-	}
+	// std::vector<std::string> tokenizeConfFile(std::ifstream &input)
+	// {
+	// 	std::string isspace = " 	";
+	// 	std::vector<std::string> tokens;
+	//
+	// 	return tokens;
+	// }
+	//
+	// std::vector<Field> tokenizeServer(const std::string &)
+	// {
+	// 	std::vector<Field> fieldList;
+	// 	return fieldList;
+	// }
+	//
+	// std::vector<Field> tokenizeLocation(const std::string &)
+	// {
+	// 	std::vector<Field> fieldList;
+	// 	return fieldList;
+	// }
 
 }
