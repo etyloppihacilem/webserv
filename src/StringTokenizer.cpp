@@ -6,7 +6,7 @@
  ***********************************************************************
 */
 
-#include "StringTokenizer.h"
+#include "StringTokenizer.hpp"
 
 StringTokenizer::StringTokenizer(const std::string& _str, const std::string& _delim)
 {
