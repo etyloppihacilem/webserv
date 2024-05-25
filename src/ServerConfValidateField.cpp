@@ -1,6 +1,7 @@
 #include "ServerConf.hpp"
 #include "ServerConfValidateField.hpp"
 #include "ServerConfTokenize.hpp"
+#include "StringTokenizer.hpp"
 #include <string>
 #include <vector>
 #include <algorithm>
