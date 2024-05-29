@@ -149,7 +149,7 @@ sanitize: fclean al
 	mkdir header
 
 ./googletest/build:
-	git submodule sync
+	git submodule init
 	git submodule update
 	cd googletest && mkdir build
 

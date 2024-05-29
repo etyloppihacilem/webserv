@@ -44,7 +44,7 @@ TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
         } catch (HttpError &e) {
             EXPECT_EQ(e.get_code(), NotImplemented);
             throw;
-        } catch (std::exception) {
+        } catch (std::exception &e) {
             throw;
         }
     }, HttpError);
@@ -54,7 +54,7 @@ TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
         } catch (HttpError &e) {
             EXPECT_EQ(e.get_code(), NotImplemented);
             throw;
-        } catch (std::exception) {
+        } catch (std::exception &e) {
             throw;
         }
     }, HttpError);
@@ -64,7 +64,7 @@ TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
         } catch (HttpError &e) {
             EXPECT_EQ(e.get_code(), NotImplemented);
             throw;
-        } catch (std::exception) {
+        } catch (std::exception &e) {
             throw;
         }
     }, HttpError);
@@ -74,7 +74,7 @@ TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
         } catch (HttpError &e) {
             EXPECT_EQ(e.get_code(), NotImplemented);
             throw;
-        } catch (std::exception) {
+        } catch (std::exception &e) {
             throw;
         }
     }, HttpError);
@@ -84,7 +84,7 @@ TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
         } catch (HttpError &e) {
             EXPECT_EQ(e.get_code(), NotImplemented);
             throw;
-        } catch (std::exception) {
+        } catch (std::exception &e) {
             throw;
         }
     }, HttpError);
@@ -94,7 +94,7 @@ TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
         } catch (HttpError &e) {
             EXPECT_EQ(e.get_code(), NotImplemented);
             throw;
-        } catch (std::exception) {
+        } catch (std::exception &e) {
             throw;
         }
     }, HttpError);
@@ -104,7 +104,7 @@ TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
         } catch (HttpError &e) {
             EXPECT_EQ(e.get_code(), NotImplemented);
             throw;
-        } catch (std::exception) {
+        } catch (std::exception &e) {
             throw;
         }
     }, HttpError);
@@ -128,7 +128,7 @@ TEST_P(MessageTestTarget, ParseTargetTest) {
             } catch (HttpError &e) {
                 EXPECT_EQ(e.get_code(), BadRequest);
                 throw;
-            } catch (std::exception) {
+            } catch (std::exception &e) {
                 throw;
             }
         }, HttpError);
@@ -139,7 +139,7 @@ TEST_P(MessageTestTarget, ParseTargetTest) {
             } catch (HttpError &e) {
                 EXPECT_EQ(e.get_code(), URITooLong);
                 throw;
-            } catch (std::exception) {
+            } catch (std::exception &e) {
                 throw;
             }
         }, HttpError);
@@ -151,7 +151,7 @@ TEST_P(MessageTestTarget, ParseTargetTest) {
                 EXPECT_EQ(  e.get_code(), MovedPermanently);
                 EXPECT_EQ(  e.what(), params[2]);
                 throw;
-            } catch (std::exception) {
+            } catch (std::exception &e) {
                 throw;
             }
         }, HttpError);
@@ -188,7 +188,7 @@ TEST(MessageTestSuite, ParseHeaderLineTestHost) {
         } catch (HttpError &e) {
             EXPECT_EQ(e.get_code(), BadRequest);
             throw;
-        } catch (std::exception) {
+        } catch (std::exception &e) {
             throw;
         }
     }, HttpError);
@@ -207,7 +207,7 @@ TEST_P(MessageTestParseHeader, ParseHeaderLineTest) {
             } catch (HttpError &e) {
                 EXPECT_EQ(e.get_code(), BadRequest);
                 throw;
-            } catch (std::exception) {
+            } catch (std::exception &e) {
                 throw;
             }
         }, HttpError);
@@ -241,7 +241,7 @@ TEST_P(MessageTestInitHeader, InitHeaderTest) {
             } catch (HttpError &e) {
                 EXPECT_EQ(e.get_code(), BadRequest);
                 throw;
-            } catch (std::exception) {
+            } catch (std::exception &e) {
                 throw;
             }
         }, HttpError);
