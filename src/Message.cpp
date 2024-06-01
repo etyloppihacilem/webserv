@@ -137,7 +137,7 @@ void Message::init_header(const std::string &in) {
         throw (HttpError(BadRequest));
 }
 
-void Message::parse(const std::string &in) {
+bool Message::parse_header(const std::string &in) {
     size_t sp = in.find_first_of(" \t");
 
     try {
@@ -145,18 +145,19 @@ void Message::parse(const std::string &in) {
     } catch (HttpError &e) {
         _method = none;
         _status = e.get_code();
-        return; // double check if anything needs to be done in case of error except returning
+        return (false); // double check if anything needs to be done in case of error except returning
     }
     try {
         parse_target(in, sp);
     } catch (HttpError &e) {
         _status = e.get_code();
-        return;
+        return (false);
     }
     try {
         init_header(in);
     } catch (HttpError &e) {
         _status = e.get_code();
-        return;
+        return (false);
     }
+    return (true);
 }

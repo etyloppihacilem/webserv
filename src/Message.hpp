@@ -27,7 +27,7 @@ class Message {
         ~Message();
 
         Message                             &operator=(const Message&);
-        void                                parse(const std::string &in);
+        bool                                parse_header(const std::string &in);
     private:
         HttpMethod                          parse_method(const std::string &method, const size_t &end);
         void                                parse_target(const std::string &in, const size_t &pos);

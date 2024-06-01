@@ -9,6 +9,8 @@
 ############################################################################# */
 
 #include "ReadState.hpp"
+#include "HttpMethods.hpp"
+#include "Message.hpp"
 #include <cstddef>
 
 ReadState::ReadState():
@@ -47,11 +49,28 @@ t_state ReadState::process_buffer(char *buffer) {
         // getting stuff that needs to be detected as header.
         // if _buffer does not start with a request line, everything will be discarded
         // until request line is found.
+        if (_in_progress) {
+            delete _in_progress;
+            _in_progress = 0;
+        }
         size_t begin = find_method();
         if (begin == _buffer.npos)
-            return (_state);
+            _buffer = "";
+        return (_state);
         if (begin != 0)
             _buffer = _buffer.substr(begin, _buffer.length() - begin);
+        // verifier la longueur du buffer
+        size_t end = _buffer.find("\r\n\r\n", 0);
+        if (end == _buffer.npos)
+            return (_state);
+        // if (end - begin > MAX_HEADER)
+        // _buffer = "" et il faut repondre par une erreur
+        _in_progress = new Message;
+        if (!_in_progress->parse_header(_buffer))
+            return (_state = error);
+        _buffer = _buffer.substr(0, end);
+        // decide here if body stuff
+        // TODO : coder le detecteur de body
     }
     return (_state);
 }
