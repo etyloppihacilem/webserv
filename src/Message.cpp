@@ -13,6 +13,7 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "HttpUtils.hpp"
+#include "Logger.hpp"
 #include <algorithm>
 #include <iostream>
 #include <sstream>

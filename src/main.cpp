@@ -8,8 +8,14 @@
 
 ############################################################################# */
 
+#include "Logger.hpp"
+#include <iostream>
+
 int main(int ac, char **av) {
     (void) ac;
     (void) av;
+    info.log("info message");
+    warn.log("warn message");
+    error.log("error message");
     return (0);
 }
