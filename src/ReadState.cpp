@@ -63,7 +63,7 @@ t_state ReadState::process_buffer(char *buffer) {
         size_t end = _buffer.find("\r\n\r\n", 0);
         if (end == _buffer.npos)
             return (_state);
-        // if (end - begin > MAX_HEADER)
+        // if (end - begin > MAX_HEADER) // est-ce que le max header existe ??
         // _buffer = "" et il faut repondre par une erreur
         _in_progress = new Message;
         if (!_in_progress->parse_header(_buffer))

@@ -28,6 +28,7 @@ class Message {
 
         Message                             &operator=(const Message&);
         bool                                parse_header(const std::string &in);
+        bool                                init_body(std::string &buffer);
     private:
         HttpMethod                          parse_method(const std::string &method, const size_t &end);
         void                                parse_target(const std::string &in, const size_t &pos);
@@ -38,9 +39,9 @@ class Message {
         std::string                         _method;
         std::string                         _target;
         std::map<std::string, std::string>  _header;
-        std::map<std::string, std::string>  _response_header;
         std::map<std::string, std::string>  _parameters;
-        std::string                         _body;
+        bool                                _body_exists;
+        std::string                         _body; // won't be a string
         HttpCode                            _status;
         bool                                _absolute_form;
 

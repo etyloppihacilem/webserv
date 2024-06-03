@@ -28,6 +28,7 @@ class ReadState {
         ~ReadState();
 
         t_state     process_buffer(char *buffer);
+        // TODO is a function to check header requirements needed ??
         Message     &get_message(); // when message is ready to process
         void        done_message(); // when message is done process, to free
     private:

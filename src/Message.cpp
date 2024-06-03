@@ -23,7 +23,7 @@ Message::Message():
     _method         (),
     _target         (),
     _header         (),
-    _response_header(),
+    _body_exists    (),
     _body           (),
     _status         (unset),
     _absolute_form  (false) {}
@@ -160,4 +160,15 @@ bool Message::parse_header(const std::string &in) {
         return (false);
     }
     return (true);
+}
+
+bool Message::init_body(std::string &buffer) {
+    if (_header.find("Transfer-Encoding") != _header.end()) {
+        // init chunked body
+    } else if (_header.find("Content-Length") != _header.end()) {
+        // init content length body
+    } else { // no body
+        _body_exists = false;
+    }
+    return (_body_exists);
 }
