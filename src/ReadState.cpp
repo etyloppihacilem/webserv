@@ -12,8 +12,11 @@
 #include "HttpMethods.hpp"
 #include "Message.hpp"
 #include <cstddef>
+#include <strings.h>
+#include <unistd.h>
 
-ReadState::ReadState():
+ReadState::ReadState(int fd):
+    _fd         (fd),
     _state      (waiting),
     _buffer     (),
     _ready      (0),
@@ -36,6 +39,15 @@ size_t ReadState::find_method() {
     if (found < ret)
         return (found);
     return (ret);
+}
+
+void ReadState::process() {
+    size_t bytes_read;
+    char buffer[1025]; // TODO changer pour le reglage
+
+    bzero(buffer, sizeof(buffer));
+    bytes_read = read(_fd, buffer, 1024);
+    process_buffer(buffer);
 }
 
 t_state ReadState::process_buffer(char *buffer) {

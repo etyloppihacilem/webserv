@@ -11,14 +11,15 @@
 #ifndef INCLUDE_SRC_MESSAGE_HPP_
 #define INCLUDE_SRC_MESSAGE_HPP_
 
+#ifdef TESTING
+#include "gtest/gtest.h"
+#endif
+
 #include <map>
 #include <sstream>
 #include <string>
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
-#ifdef TESTING
-#include "gtest/gtest.h"
-#endif
 
 class Message {
     public:
@@ -28,7 +29,7 @@ class Message {
 
         Message                             &operator=(const Message&);
         bool                                parse_header(const std::string &in);
-        bool                                init_body(std::string &buffer);
+        bool                                init_body(std::string &buffer, int fd);
     private:
         HttpMethod                          parse_method(const std::string &method, const size_t &end);
         void                                parse_target(const std::string &in, const size_t &pos);

@@ -13,7 +13,7 @@
 #include <cstddef>
 
 TEST(ReadStateSuite, FindMethod) {
-    ReadState test;
+    ReadState test(0);
 
     test._buffer = "GET coucou je suis heureux";
     EXPECT_EQ(test.find_method(), (size_t) 0);

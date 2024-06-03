@@ -145,7 +145,7 @@ bool Message::parse_header(const std::string &in) {
     } catch (HttpError &e) {
         _method = none;
         _status = e.get_code();
-        return (false); // double check if anything needs to be done in case of error except returning
+        return (false); // TODO double check if anything needs to be done in case of error except returning
     }
     try {
         parse_target(in, sp);
@@ -162,7 +162,9 @@ bool Message::parse_header(const std::string &in) {
     return (true);
 }
 
-bool Message::init_body(std::string &buffer) {
+bool Message::init_body(std::string &buffer, int fd) {
+    (void) buffer;
+    (void) fd;
     if (_header.find("Transfer-Encoding") != _header.end()) {
         // init chunked body
     } else if (_header.find("Content-Length") != _header.end()) {
