@@ -14,8 +14,8 @@
 int main(int ac, char **av) {
     (void) ac;
     (void) av;
-    info.log("info message");
-    warn.log("warn message");
-    error.log("error message");
+    info.log("info message -> %d", 1024);
+    warn.log("warn message -> %s", "hihi");
+    error.log("error message -> %p", "mais");
     return (0);
 }

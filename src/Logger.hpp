@@ -15,12 +15,14 @@
 #include <fstream>
 #include <string>
 
+#define LOG_MAX_SIZE 1024
+
 class Logger {
     public:
         Logger(std::ostream &os, std::string level = "INFO", std::string color = "", size_t width = 0);
         ~Logger();
 
-        void            log(std::string message);
+        void            log(const char *format, ...);
     private:
         std::string     _level;
         std::ofstream   _os;

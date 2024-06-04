@@ -9,7 +9,9 @@
 ############################################################################# */
 
 #include "Logger.hpp"
+#include <cstdarg>
 #include <cstddef>
+#include <cstdio>
 #include <iomanip>
 #include <ios>
 #include <iostream>
@@ -31,15 +33,20 @@ Logger::Logger(std::ostream &os, std::string level, std::string color, size_t wi
 
 Logger::~Logger() {}
 
-void Logger::log(std::string message) {
+void Logger::log(const char *format, ...) {
     time_t  now     = time(0);
     tm      *ltm    = localtime(&now);
+    char buffer[LOG_MAX_SIZE];
+    va_list args;
 
+    va_start(args, format);
+    vsnprintf(buffer, LOG_MAX_SIZE, format, args);
+    va_end(args);
     _os << std::setw(_width) << std::setfill(' ') << std::left << _level << std::right << std::setw(2)
         << std::setfill('0') << ltm->tm_hour << ":" << std::setw(2)
         << std::setfill('0') << ltm->tm_min << ":" << std::setw(2) << std::setfill('0') << ltm->tm_sec << " "
         << std::setw(2) << std::setfill('0') << ltm->tm_mday << "/" << std::setw(2) << std::setfill('0')
-        << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year << ": " << message << std::endl;
+        << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year << ": " << buffer << std::endl;
 }
 
 Logger  info(std::cerr, "INFO", _GREY, 5);
