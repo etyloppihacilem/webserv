@@ -33,6 +33,7 @@ class BodyLength : public Body {
 #ifdef TESTING
         FRIEND_TEST(BodyLengthTestSuite,    Constructor);
         FRIEND_TEST(BodyLengthTestSuite,    BadConstructor);
+        FRIEND_TEST(BodyLengthTestSuite,    read_body);
 #endif
 };
 

@@ -17,10 +17,11 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
+#include "Logger.hpp"
 
 BodyLength::BodyLength(int fd, std::string &buffer, std::string length):
     Body        (fd, buffer),
-    _length     (0),
+    _length(0),
     _read_length(_buffer.length()) {
     for (std::string::iterator i = length.begin(); i != length.end(); i++) {
         if (!isdigit(*i))
@@ -29,15 +30,14 @@ BodyLength::BodyLength(int fd, std::string &buffer, std::string length):
 
     std::stringstream tmp(length);
 
-    if (!tmp >> _length)
+    if (!(tmp >> _length))
         throw (HttpError(BadRequest));      // other invalid length
 }
 
 BodyLength::~BodyLength() {}
 
 size_t BodyLength::read_body() {
-    if (_length <= _read_length) {
-        _done = true;
+    if (_done) {
         return (0);
     }
 
@@ -49,6 +49,8 @@ size_t BodyLength::read_body() {
     size_read       = read(_fd, buf, (_length - _read_length > BUFFER_SIZE) ? BUFFER_SIZE : _length - _read_length);
     _buffer         += std::string(buf);
     _read_length    += size_read;
+    if (_length <= _read_length)
+        _done = true;
     return (size_read);
 }
 
