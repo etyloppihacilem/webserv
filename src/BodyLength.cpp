@@ -17,7 +17,6 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
-#include "Logger.hpp"
 
 BodyLength::BodyLength(int fd, std::string &buffer, std::string length):
     Body        (fd, buffer),
@@ -37,9 +36,8 @@ BodyLength::BodyLength(int fd, std::string &buffer, std::string length):
 BodyLength::~BodyLength() {}
 
 size_t BodyLength::read_body() {
-    if (_done) {
+    if (_done)
         return (0);
-    }
 
     char    buf[BUFFER_SIZE + 1] = {
         0

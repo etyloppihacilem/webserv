@@ -19,8 +19,10 @@ class Body {
         Body(int fd, std::string &buffer);
         virtual ~Body() = 0;
 
-        virtual std::string &get() = 0;
+        virtual std::string &get()  = 0;
+        virtual std::string pop()   = 0;
         bool                is_done() const; // return true if body was read
+
     protected:
         int                 _fd;
         std::string         &_buffer;
