@@ -11,6 +11,8 @@
 #ifndef INCLUDE_SRC_BODYLENGTH_HPP_
 #define INCLUDE_SRC_BODYLENGTH_HPP_
 
+#include <cstddef>
+#include <string>
 #ifdef TESTING
 #include "gtest/gtest.h"
 #endif
@@ -22,14 +24,15 @@ class BodyLength : public Body {
         BodyLength(int fd, std::string &buffer, std::string length);
         ~BodyLength();
 
-
-        std::string get();              // get whole body
-        std::string get(size_t size);   // only size of body
+        std::string &get();
+        std::string pop();
+        size_t      read_body();
     private:
-        size_t _length;
+        size_t      _length;
+        size_t      _read_length;
 #ifdef TESTING
-        FRIEND_TEST(BodyLengthTestSuite, Constructor);
-        FRIEND_TEST(BodyLengthTestSuite, BadConstructor);
+        FRIEND_TEST(BodyLengthTestSuite,    Constructor);
+        FRIEND_TEST(BodyLengthTestSuite,    BadConstructor);
 #endif
 };
 

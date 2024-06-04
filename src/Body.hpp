@@ -19,11 +19,13 @@ class Body {
         Body(int fd, std::string &buffer);
         virtual ~Body() = 0;
 
-        virtual std::string get() = 0;              // get whole body
-        virtual std::string get(size_t size) = 0;   // only size of body
+        virtual std::string &get() = 0;
+        bool                is_done() const; // return true if body was read
     protected:
-        int         _fd;
-        std::string _buffer;
+        int                 _fd;
+        std::string         &_buffer;
+        bool                _done;
+        std::string         _body;
 };
 
 #endif  // INCLUDE_SRC_BODY_HPP_

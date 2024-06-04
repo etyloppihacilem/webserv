@@ -9,9 +9,17 @@
 ############################################################################# */
 
 #include "Body.hpp"
+#include "todo.hpp"
+#include <unistd.h>
 
 Body::Body(int fd, std::string &buffer):
     _fd     (fd),
-    _buffer (buffer) {}
+    _buffer (buffer),
+    _done   (false),
+    _body   () {}
 
 Body::~Body() {}
+
+bool Body::is_done() const {
+    return (_done);
+}

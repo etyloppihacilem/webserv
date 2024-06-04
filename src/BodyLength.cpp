@@ -12,30 +12,59 @@
 #include "Body.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
+#include "todo.hpp"
 #include <cctype>
 #include <sstream>
 #include <string>
+#include <unistd.h>
 
 BodyLength::BodyLength(int fd, std::string &buffer, std::string length):
-    Body(fd, buffer) {
-    for (std::string::iterator i = length.begin(); i != length.end(); i++)
-    {
+    Body        (fd, buffer),
+    _length     (0),
+    _read_length(_buffer.length()) {
+    for (std::string::iterator i = length.begin(); i != length.end(); i++) {
         if (!isdigit(*i))
-            throw (HttpError(BadRequest)); // inbalid length
+            throw (HttpError(BadRequest));  // inbalid length
     }
+
     std::stringstream tmp(length);
+
     if (!tmp >> _length)
-        throw (HttpError(BadRequest)); // other invalid length
+        throw (HttpError(BadRequest));      // other invalid length
 }
 
 BodyLength::~BodyLength() {}
 
-std::string BodyLength::get() {
-    // trouver quelle buffer size utiliser
-    return ("");
+size_t BodyLength::read_body() {
+    if (_length <= _read_length) {
+        _done = true;
+        return (0);
+    }
+
+    char    buf[BUFFER_SIZE + 1] = {
+        0
+    };                               // the whole buffer is set to 0
+    size_t  size_read;
+
+    size_read       = read(_fd, buf, (_length - _read_length > BUFFER_SIZE) ? BUFFER_SIZE : _length - _read_length);
+    _buffer         += std::string(buf);
+    _read_length    += size_read;
+    return (size_read);
 }
 
-std::string BodyLength::get(size_t size) {
-    (void) size;
-    return ("");
+std::string &BodyLength::get() {
+    read_body();
+    _body   += _buffer;
+    _buffer = "";
+    return (_body);
+}
+
+std::string BodyLength::pop() {
+    std::string tmp = _body;
+
+    _body = "";
+    read_body();
+    tmp     += _buffer;
+    _buffer = "";
+    return (tmp);
 }
