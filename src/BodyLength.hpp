@@ -27,6 +27,7 @@ class BodyLength : public Body {
         std::string &get();
         std::string pop();
         size_t      read_body();
+
     private:
         size_t      _length;
         size_t      _read_length;
@@ -34,6 +35,8 @@ class BodyLength : public Body {
         FRIEND_TEST(BodyLengthTestSuite,    Constructor);
         FRIEND_TEST(BodyLengthTestSuite,    BadConstructor);
         FRIEND_TEST(BodyLengthTestSuite,    read_body);
+        FRIEND_TEST(BodyLengthTestSuite,    get);
+        FRIEND_TEST(BodyLengthTestSuite,    pop);
 #endif
 };
 

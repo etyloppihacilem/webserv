@@ -93,3 +93,54 @@ TEST(BodyLengthTestSuite, read_body) {
     }
     EXPECT_TRUE(test.is_done());
 }
+
+TEST(BodyLengthTestSuite, get) {
+    static const char buf[]
+        = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de compren"
+          "dre comment pouvoir lire de facon certaine.";
+    std::string tmp1(buf);
+    std::string tmp2;
+    std::string res;
+    int         fd[2];
+
+    if (pipe(fd) < 0)
+        GTEST_FATAL_FAILURE_("Pipe creation failed");
+
+    std::string buffer = "";
+    BodyLength  test(fd[0], buffer, "130");
+
+    write(fd[1], buf, 130);
+    for (size_t i = 1; i - 1 <= 130 / BUFFER_SIZE; i++) {
+        tmp2    = tmp1.substr(0, i * BUFFER_SIZE);
+        res     = test.get();
+        EXPECT_EQ(  tmp2, res);
+        EXPECT_EQ(  (size_t) i * BUFFER_SIZE > 130 ? 130 : (size_t) i * BUFFER_SIZE, test._read_length);
+    }
+    EXPECT_TRUE(test.is_done());
+}
+
+TEST(BodyLengthTestSuite, pop) {
+    static const char buf[]
+        = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de compren"
+          "dre comment pouvoir lire de facon certaine.";
+    std::string tmp1(buf);
+    std::string tmp2;
+    std::string res;
+    int         fd[2];
+
+    if (pipe(fd) < 0)
+        GTEST_FATAL_FAILURE_("Pipe creation failed");
+
+    std::string buffer = "";
+    BodyLength  test(fd[0], buffer, "130");
+
+    write(fd[1], buf, 130);
+    for (size_t i = 1; i - 1 <= 130 / BUFFER_SIZE; i++) {
+        tmp2    = tmp1.substr((i - 1) * BUFFER_SIZE, BUFFER_SIZE);
+        res     = test.pop();
+        EXPECT_EQ(  tmp2, res);
+        EXPECT_EQ(  (size_t) i * BUFFER_SIZE > 130 ? 130 : (size_t) i * BUFFER_SIZE, test._read_length);
+    }
+    EXPECT_TRUE(test.is_done());
+    EXPECT_EQ(test._buffer, "");
+}

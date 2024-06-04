@@ -21,7 +21,7 @@
 
 BodyLength::BodyLength(int fd, std::string &buffer, std::string length):
     Body        (fd, buffer),
-    _length(0),
+    _length     (0),
     _read_length(_buffer.length()) {
     for (std::string::iterator i = length.begin(); i != length.end(); i++) {
         if (!isdigit(*i))
