@@ -28,10 +28,13 @@ class BodyChunk: public Body {
     private:
         size_t      _bytes_remaining;
 
-        size_t      chunk_size();
+        bool        init_chunk();
         bool        is_hex(int c);
 #ifdef TESTING
-        FRIEND_TEST(BodyLengthTestSuite, Constructor);
+        FRIEND_TEST(BodyChunkTestSuite, is_hex);
+        FRIEND_TEST(BodyChunkTestSuite, init_chunk);
+        FRIEND_TEST(BodyChunkTestSuite, init_chunk_bad);
+        FRIEND_TEST(BodyChunkTestSuite, init_chunk_none);
 #endif
 };
 

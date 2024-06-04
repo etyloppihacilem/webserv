@@ -28,6 +28,7 @@ class Body {
         std::string         &_buffer;
         bool                _done;
         std::string         _body;
+        size_t              _total; // TODO implement total on BodyLength
 };
 
 #endif  // INCLUDE_SRC_BODY_HPP_
