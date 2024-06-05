@@ -231,9 +231,9 @@ INSTANTIATE_TEST_SUITE_P(MessageParseHeaderLineSuite,
 
 TEST_P(MessageTestInitHeader, InitHeaderTest) {
     t_test_messages tmp = GetParam();
-    if (tmp.name == "no_headers_absolute")
-        return ; // test is skipped
 
+    if (tmp.name == "no_headers_absolute")
+        return;  // test is skipped
     if (tmp.error == BadRequest) {
         ASSERT_THROW({
             try {

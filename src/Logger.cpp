@@ -36,7 +36,7 @@ Logger::~Logger() {}
 void Logger::log(const char *format, ...) {
     time_t  now     = time(0);
     tm      *ltm    = localtime(&now);
-    char buffer[LOG_MAX_SIZE];
+    char    buffer[LOG_MAX_SIZE];
     va_list args;
 
     va_start(args, format);

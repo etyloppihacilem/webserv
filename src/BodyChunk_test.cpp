@@ -81,12 +81,12 @@ TEST(BodyChunkTestSuite, init_chunk_end) {
     test._bytes_remaining = 0;
     EXPECT_TRUE(test.init_chunk());
     EXPECT_EQ(test._bytes_remaining, (size_t) 0x16);
-    EXPECT_FALSE(test.init_chunk());
+    EXPECT_FALSE(   test.init_chunk());
     test._bytes_remaining = 0;
 
     buffer = "0\r\n""trailer section\r\n""\r\n";
 
-    EXPECT_FALSE(test.init_chunk());
+    EXPECT_FALSE(   test.init_chunk());
     EXPECT_EQ(test._bytes_remaining, (size_t) 0x0);
     EXPECT_TRUE(test.is_done());
 }
@@ -133,7 +133,8 @@ TEST(BodyChunkTestSuite, read_body) {
 
 TEST(BodyChunkTestSuite, get) {
     static const char buf[]
-        = "16\r\nCoucou je suis heureux\r\n41\r\n de pouvoir tester le comportement d'un body_length et de compren\r\n2b\r\ndre comment pouvoir lire de facon certaine.\r\n0\r\ntrailing\r\n\r\n";
+        =
+            "16\r\nCoucou je suis heureux\r\n41\r\n de pouvoir tester le comportement d'un body_length et de compren\r\n2b\r\ndre comment pouvoir lire de facon certaine.\r\n0\r\ntrailing\r\n\r\n";
     int fd[2];
 
     if (pipe(fd) < 0)
@@ -141,7 +142,9 @@ TEST(BodyChunkTestSuite, get) {
 
     std::string buffer = "";
     BodyChunk   test(fd[0], buffer);
-    std::string tmp1 = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir lire de facon certaine.";
+    std::string tmp1
+        =
+            "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir lire de facon certaine.";
     std::string ret = "not good";
     size_t      i   = 1000;
 
@@ -159,7 +162,8 @@ TEST(BodyChunkTestSuite, get) {
 
 TEST(BodyChunkTestSuite, pop) {
     static const char buf[]
-        = "16\r\nCoucou je suis heureux\r\n41\r\n de pouvoir tester le comportement d'un body_length et de compren\r\n2b\r\ndre comment pouvoir lire de facon certaine.\r\n0\r\ntrailing\r\n\r\n";
+        =
+            "16\r\nCoucou je suis heureux\r\n41\r\n de pouvoir tester le comportement d'un body_length et de compren\r\n2b\r\ndre comment pouvoir lire de facon certaine.\r\n0\r\ntrailing\r\n\r\n";
     int fd[2];
 
     if (pipe(fd) < 0)
@@ -167,17 +171,19 @@ TEST(BodyChunkTestSuite, pop) {
 
     std::string buffer = "";
     BodyChunk   test(fd[0], buffer);
-    std::string tmp1 = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir lire de facon certaine.";
+    std::string tmp1
+        =
+            "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir lire de facon certaine.";
     std::string ret = "not good";
     size_t      i   = 1000;
-    size_t check;
+    size_t      check;
 
     write(fd[1], buf, sizeof(buf) - 1);
     while (!test.is_done() && --i) {
-        ret = test.pop();
-        check = tmp1.find(ret);
-        EXPECT_EQ(check, (size_t) 0);
-        EXPECT_EQ(ret, tmp1.substr(0, ret.length()));
+        ret     = test.pop();
+        check   = tmp1.find(ret);
+        EXPECT_EQ(  check, (size_t) 0);
+        EXPECT_EQ(  ret, tmp1.substr(0, ret.length()));
         tmp1 = tmp1.substr(ret.length(), tmp1.length() - ret.length());
     }
     if (!i)

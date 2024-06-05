@@ -23,10 +23,11 @@ class Logger {
         ~Logger();
 
         void            log(const char *format, ...);
+
     private:
         std::string     _level;
         std::ofstream   _os;
-        int _width;
+        int             _width;
 };
 
 extern Logger   info;

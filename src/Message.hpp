@@ -37,6 +37,7 @@ class Message {
         void                                parse_header_line(const std::string &in,
             size_t                                                              begin,
             size_t                                                              end);
+
         std::string                         _method;
         std::string                         _target;
         std::map<std::string, std::string>  _header;
@@ -49,10 +50,10 @@ class Message {
 #ifdef TESTING
         FRIEND_TEST(MessageTestSuite,   ParseMethodTestExpectedOK);
         FRIEND_TEST(MessageTestSuite,   ParseMethodTestExpectedFail);
-        FRIEND_TEST(MessageTestTarget, ParseTargetTest);
+        FRIEND_TEST(MessageTestTarget,  ParseTargetTest);
         FRIEND_TEST(MessageTestSuite,   ParseHeaderLineTestHost);
         FRIEND_TEST(MessageTestParseHeader, ParseHeaderLineTest);
-        FRIEND_TEST(MessageTestInitHeader, InitHeaderTest);
+        FRIEND_TEST(MessageTestInitHeader,  InitHeaderTest);
 #endif
 };
 

@@ -42,8 +42,8 @@ size_t ReadState::find_method() {
 }
 
 void ReadState::process() {
-    size_t bytes_read;
-    char buffer[1025]; // TODO changer pour le reglage
+    size_t  bytes_read;
+    char    buffer[1025]; // TODO changer pour le reglage
 
     bzero(buffer, sizeof(buffer));
     bytes_read = read(_fd, buffer, 1024);
@@ -65,14 +65,18 @@ t_state ReadState::process_buffer(char *buffer) {
             delete _in_progress;
             _in_progress = 0;
         }
+
         size_t begin = find_method();
+
         if (begin == _buffer.npos)
             _buffer = "";
         return (_state);
         if (begin != 0)
             _buffer = _buffer.substr(begin, _buffer.length() - begin);
+
         // verifier la longueur du buffer
         size_t end = _buffer.find("\r\n\r\n", 0);
+
         if (end == _buffer.npos)
             return (_state);
         // if (end - begin > MAX_HEADER) // est-ce que le max header existe ??

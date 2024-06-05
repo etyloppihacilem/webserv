@@ -32,6 +32,7 @@ class ReadState {
         // TODO is a function to check header requirements needed ??
         Message     &get_message();                         // when message is ready to process
         void        done_message();                         // when message is done process, to free
+
     private:
         int         _fd;
         t_state     _state;

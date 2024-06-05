@@ -13,10 +13,10 @@
 
 #include <string>
 enum HttpMethod {
-    none   = -1,
-    GET    = 0,
-    POST   = 1,
-    DELETE = 2,
+    none    = -1,
+    GET     = 0,
+    POST    = 1,
+    DELETE  = 2,
 };
 
 inline std::string method_string(const int &code) {
