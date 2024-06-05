@@ -20,6 +20,7 @@
 #include <string>
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
+#include "Body.hpp"
 
 class Message {
     public:
@@ -43,7 +44,7 @@ class Message {
         std::map<std::string, std::string>  _header;
         std::map<std::string, std::string>  _parameters;
         bool                                _body_exists;
-        std::string                         _body; // won't be a string
+        Body                                *_body;
         HttpCode                            _status;
         bool                                _absolute_form;
 

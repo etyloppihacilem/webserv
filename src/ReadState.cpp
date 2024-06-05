@@ -11,6 +11,7 @@
 #include "ReadState.hpp"
 #include "HttpMethods.hpp"
 #include "Message.hpp"
+#include "todo.hpp"
 #include <cstddef>
 #include <strings.h>
 #include <unistd.h>
@@ -43,10 +44,12 @@ size_t ReadState::find_method() {
 
 void ReadState::process() {
     size_t  bytes_read;
-    char    buffer[1025]; // TODO changer pour le reglage
+    char    buffer[BUFFER_SIZE + 1];
 
-    bzero(buffer, sizeof(buffer));
-    bytes_read = read(_fd, buffer, 1024);
+    if (_state == waiting) {
+        bzero(buffer, sizeof(buffer));
+        bytes_read = read(_fd, buffer, BUFFER_SIZE);
+    }
     process_buffer(buffer);
 }
 
@@ -85,8 +88,15 @@ t_state ReadState::process_buffer(char *buffer) {
         if (!_in_progress->parse_header(_buffer))
             return (_state = error);
         _buffer = _buffer.substr(0, end);
-        // decide here if body stuff
-        // TODO : coder le detecteur de body
+        if (_in_progress->init_body(_buffer, _fd)) {
+            _state          = waiting_body;
+            _ready          = _in_progress;
+            _in_progress    = 0;
+        } else {
+            _state          = ready;
+            _ready          = _in_progress;
+            _in_progress    = 0;
+        }
     }
     return (_state);
 }

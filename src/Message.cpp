@@ -9,6 +9,8 @@
 ############################################################################# */
 
 #include "Message.hpp"
+#include "BodyChunk.hpp"
+#include "BodyLength.hpp"
 #include "HttpMethods.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
@@ -24,11 +26,14 @@ Message::Message():
     _target         (),
     _header         (),
     _body_exists    (),
-    _body           (),
+    _body           (0),
     _status         (unset),
     _absolute_form  (false) {}
 
-Message::~Message() {}
+Message::~Message() {
+    if (_body)
+        delete _body;
+}
 
 Message::Message(const Message &other) {
     (void) other;
@@ -72,7 +77,7 @@ void Message::parse_target(const std::string &in, const size_t &pos) {
     if ((protocol - 1) - (pos + 1) > MAX_URI)
         throw (HttpError(URITooLong));
     if (sp_protocol != protocol - 1) {  // there are SP remaining in URI, that is wrong, going for 301 MovedPermanently.
-        // IF NOT IN ORIGIN FORM, ADD HOST TO LOCATION !!!
+        // TODO IF NOT IN ORIGIN FORM, ADD HOST TO LOCATION !!!
         std::string redirect = in.substr(pos + 1, (protocol - 1) - (pos + 1));
 
         replace_all(redirect,   " ",    "%20");
@@ -151,7 +156,7 @@ bool Message::parse_header(const std::string &in) {
     } catch (HttpError &e) {
         _method = none;
         _status = e.get_code();
-        return (false); // TODO double check if anything needs to be done in case of error except returning
+        return (false);
     }
     try {
         parse_target(in, sp);
@@ -172,9 +177,11 @@ bool Message::init_body(std::string &buffer, int fd) {
     (void) buffer;
     (void) fd;
     if (_header.find("Transfer-Encoding") != _header.end()) {
-        // init chunked body
+        _body_exists = true;
+        _body = new BodyChunk(fd, buffer);
     } else if (_header.find("Content-Length") != _header.end()) {
-        // init content length body
+        _body_exists = true;
+        _body = new BodyLength(fd, buffer, _header["Content-Length"]);
     } else { // no body
         _body_exists = false;
     }
