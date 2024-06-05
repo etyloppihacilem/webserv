@@ -27,14 +27,18 @@ class BodyChunk: public Body {
 
     private:
         size_t      _bytes_remaining;
+        bool        _trailing;
 
         bool        init_chunk();
         bool        is_hex(int c);
 #ifdef TESTING
         FRIEND_TEST(BodyChunkTestSuite, is_hex);
         FRIEND_TEST(BodyChunkTestSuite, init_chunk);
+        FRIEND_TEST(BodyChunkTestSuite, init_chunk_end);
         FRIEND_TEST(BodyChunkTestSuite, init_chunk_bad);
         FRIEND_TEST(BodyChunkTestSuite, init_chunk_none);
+        FRIEND_TEST(BodyChunkTestSuite, read_body);
+        FRIEND_TEST(BodyChunkTestSuite, get);
 #endif
 };
 

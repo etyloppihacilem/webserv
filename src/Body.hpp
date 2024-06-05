@@ -22,13 +22,14 @@ class Body {
         virtual std::string &get()  = 0;
         virtual std::string pop()   = 0;
         bool                is_done() const; // return true if body was read
+        size_t              length() const;
 
     protected:
         int                 _fd;
         std::string         &_buffer;
         bool                _done;
         std::string         _body;
-        size_t              _total; // TODO implement total on BodyLength
+        size_t              _total;
 };
 
 #endif  // INCLUDE_SRC_BODY_HPP_

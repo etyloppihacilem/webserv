@@ -12,6 +12,8 @@
 #include "gtest/gtest.h"
 #include <cstddef>
 #include <string>
+#include "Logger.hpp"
+#include "todo.hpp"
 
 TEST(BodyChunkTestSuite, is_hex) {
     std::string buffer = "ca32\r\n";
@@ -69,6 +71,26 @@ TEST(BodyChunkTestSuite, init_chunk) {
     EXPECT_EQ(  test._buffer, "COUCOU");
 }
 
+TEST(BodyChunkTestSuite, init_chunk_end) {
+    std::string buffer
+        = "16\r\nCoucou je suis heureux\r\n41\r\n"
+          " de pouvoir tester le comportement d'un body_length et de compren\r\n2b\r\n"
+          "dre comment pouvoir lire de facon certaine.\r\n\r\n";
+    BodyChunk test(0, buffer);
+
+    test._bytes_remaining = 0;
+    EXPECT_TRUE(test.init_chunk());
+    EXPECT_EQ(test._bytes_remaining, (size_t) 0x16);
+    EXPECT_FALSE(test.init_chunk());
+    test._bytes_remaining = 0;
+
+    buffer = "0\r\n""trailer section\r\n""\r\n";
+
+    EXPECT_FALSE(test.init_chunk());
+    EXPECT_EQ(test._bytes_remaining, (size_t) 0x0);
+    EXPECT_TRUE(test.is_done());
+}
+
 TEST(BodyChunkTestSuite, init_chunk_bad) {
     std::string buffer = "zxswABC\r\n" "2a\r\n";
     BodyChunk   test(0, buffer);
@@ -84,4 +106,81 @@ TEST(BodyChunkTestSuite, init_chunk_none) {
     EXPECT_FALSE(test.init_chunk());
     EXPECT_EQ(  test._bytes_remaining, (size_t) 0);
     EXPECT_EQ(  test._buffer, "");
+}
+
+TEST(BodyChunkTestSuite, read_body) {
+    static const char buf[]
+        = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de compren"
+          "dre comment pouvoir lire de facon certaine.";
+    std::string tmp1(buf);
+    std::string tmp2;
+    int         fd[2];
+
+    if (pipe(fd) < 0)
+        GTEST_FATAL_FAILURE_("Pipe creation failed");
+
+    std::string buffer = "";
+    BodyChunk   test(fd[0], buffer);
+
+    write(fd[1], buf, 130);
+    for (size_t i = 1; i <= 130 / BUFFER_SIZE; i++) {
+        tmp2 = tmp1.substr(0, i * BUFFER_SIZE);
+        test.read_body();
+        EXPECT_EQ(  tmp2,   test._buffer);
+        EXPECT_EQ(  tmp2,   buffer);
+    }
+}
+
+TEST(BodyChunkTestSuite, get) {
+    static const char buf[]
+        = "16\r\nCoucou je suis heureux\r\n41\r\n de pouvoir tester le comportement d'un body_length et de compren\r\n2b\r\ndre comment pouvoir lire de facon certaine.\r\n0\r\ntrailing\r\n\r\n";
+    int fd[2];
+
+    if (pipe(fd) < 0)
+        GTEST_FATAL_FAILURE_("Pipe creation failed");
+
+    std::string buffer = "";
+    BodyChunk   test(fd[0], buffer);
+    std::string tmp1 = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir lire de facon certaine.";
+    std::string ret = "not good";
+    size_t      i   = 1000;
+
+    write(fd[1], buf, sizeof(buf) - 1);
+    while (!test.is_done() && --i) {
+        ret = test.get();
+    }
+    if (!i)
+        GTEST_FATAL_FAILURE_("Infinite loop detected.");
+    EXPECT_EQ(  tmp1,   ret);
+    EXPECT_EQ(  &test._body, &test.get());
+    EXPECT_EQ(  tmp1,   test._body);
+    EXPECT_TRUE(test.is_done());
+}
+
+TEST(BodyChunkTestSuite, pop) {
+    static const char buf[]
+        = "16\r\nCoucou je suis heureux\r\n41\r\n de pouvoir tester le comportement d'un body_length et de compren\r\n2b\r\ndre comment pouvoir lire de facon certaine.\r\n0\r\ntrailing\r\n\r\n";
+    int fd[2];
+
+    if (pipe(fd) < 0)
+        GTEST_FATAL_FAILURE_("Pipe creation failed");
+
+    std::string buffer = "";
+    BodyChunk   test(fd[0], buffer);
+    std::string tmp1 = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir lire de facon certaine.";
+    std::string ret = "not good";
+    size_t      i   = 1000;
+    size_t check;
+
+    write(fd[1], buf, sizeof(buf) - 1);
+    while (!test.is_done() && --i) {
+        ret = test.pop();
+        check = tmp1.find(ret);
+        EXPECT_EQ(check, (size_t) 0);
+        EXPECT_EQ(ret, tmp1.substr(0, ret.length()));
+        tmp1 = tmp1.substr(ret.length(), tmp1.length() - ret.length());
+    }
+    if (!i)
+        GTEST_FATAL_FAILURE_("Infinite loop detected.");
+    EXPECT_TRUE(test.is_done());
 }
