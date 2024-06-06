@@ -1,6 +1,6 @@
 /* #############################################################################
 
-               """          Message.hpp
+               """          ClientRequest.hpp
         -\-    _|__
          |\___/  . \        Created on 19 Apr. 2024 at 17:51
          \     /(((/        by hmelica
@@ -22,13 +22,13 @@
 #include "HttpStatusCodes.hpp"
 #include "Body.hpp"
 
-class Message {
+class ClientRequest {
     public:
-        Message();
-        Message(const Message&);
-        ~Message();
+        ClientRequest();
+        ClientRequest(const ClientRequest&);
+        ~ClientRequest();
 
-        Message                             &operator=(const Message&);
+        ClientRequest                             &operator=(const ClientRequest&);
         bool                                parse_header(const std::string &in);
         bool                                init_body(std::string &buffer, int fd);
     private:
@@ -49,12 +49,12 @@ class Message {
         bool                                _absolute_form;
 
 #ifdef TESTING
-        FRIEND_TEST(MessageTestSuite,   ParseMethodTestExpectedOK);
-        FRIEND_TEST(MessageTestSuite,   ParseMethodTestExpectedFail);
-        FRIEND_TEST(MessageTestTarget,  ParseTargetTest);
-        FRIEND_TEST(MessageTestSuite,   ParseHeaderLineTestHost);
-        FRIEND_TEST(MessageTestParseHeader, ParseHeaderLineTest);
-        FRIEND_TEST(MessageTestInitHeader,  InitHeaderTest);
+        FRIEND_TEST(ClientRequestTestSuite,   ParseMethodTestExpectedOK);
+        FRIEND_TEST(ClientRequestTestSuite,   ParseMethodTestExpectedFail);
+        FRIEND_TEST(ClientRequestTestTarget,  ParseTargetTest);
+        FRIEND_TEST(ClientRequestTestSuite,   ParseHeaderLineTestHost);
+        FRIEND_TEST(ClientRequestTestParseHeader, ParseHeaderLineTest);
+        FRIEND_TEST(ClientRequestTestInitHeader,  InitHeaderTest);
 #endif
 };
 

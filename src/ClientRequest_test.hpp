@@ -1,6 +1,6 @@
 /* #############################################################################
 
-               """          Message_test.hpp
+               """          ClientRequest_test.hpp
         -\-    _|__
          |\___/  . \        Created on 13 May. 2024 at 13:54
          \     /(((/        by hmelica
@@ -34,7 +34,7 @@ typedef struct s_test_messages {
     HttpCode                            error;
 } t_test_messages;
 
-static const t_test_target MessageTargetSuiteValues[] {
+static const t_test_target ClientRequestTargetSuiteValues[] {
     {
         "normal", "/dev HTTP/1.1", "/dev", ""
     }, {
@@ -192,7 +192,7 @@ static const t_test_target MessageTargetSuiteValues[] {
     },
 };
 
-static const t_test_target MessageParseHeaderLineSuiteValues[] {
+static const t_test_target ClientRequestParseHeaderLineSuiteValues[] {
     {
         "basic", "Host: test", "Host", "test"
     }, {
@@ -222,7 +222,7 @@ static const t_test_target MessageParseHeaderLineSuiteValues[] {
     },
 };
 
-static const t_test_messages MessageTestData[] {
+static const t_test_messages ClientRequestTestData[] {
     // {
     //     "name",
     //     "request",

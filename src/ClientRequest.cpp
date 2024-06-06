@@ -1,6 +1,6 @@
 /* #############################################################################
 
-               """          Message.cpp
+               """          ClientRequest.cpp
         -\-    _|__
          |\___/  . \        Created on 19 Apr. 2024 at 17:51
          \     /(((/        by hmelica
@@ -8,7 +8,7 @@
 
 ############################################################################# */
 
-#include "Message.hpp"
+#include "ClientRequest.hpp"
 #include "BodyChunk.hpp"
 #include "BodyLength.hpp"
 #include "HttpMethods.hpp"
@@ -21,7 +21,7 @@
 #include <sstream>
 #include <string>
 
-Message::Message():
+ClientRequest::ClientRequest():
     _method         (),
     _target         (),
     _header         (),
@@ -30,22 +30,22 @@ Message::Message():
     _status         (unset),
     _absolute_form  (false) {}
 
-Message::~Message() {
+ClientRequest::~ClientRequest() {
     if (_body)
         delete _body;
 }
 
-Message::Message(const Message &other) {
+ClientRequest::ClientRequest(const ClientRequest &other) {
     (void) other;
 }
 
-Message &Message::operator=(const Message &other) {
+ClientRequest &ClientRequest::operator=(const ClientRequest &other) {
     if (&other == this)
         return (*this);
     return (*this);
 }
 
-HttpMethod Message::parse_method(const std::string &method, const size_t &end) {
+HttpMethod ClientRequest::parse_method(const std::string &method, const size_t &end) {
     if (method.length() < 2 || end > MAX_METHOD)
         throw (HttpError(NotImplemented));
     if (method[0] == 'G' && method.find(method_string(GET)) == 0 && end == 3)
@@ -66,7 +66,7 @@ static void replace_all(std::string &str, const std::string &to_find, const std:
     }
 }
 
-void Message::parse_target(const std::string &in, const size_t &pos) {
+void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
     size_t  sp_protocol;
     size_t  protocol;
 
@@ -100,7 +100,7 @@ void Message::parse_target(const std::string &in, const size_t &pos) {
         throw (HttpError(BadRequest));
 }
 
-void Message::parse_header_line(const std::string &in, size_t begin, size_t end) {
+void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_t end) {
     size_t  sep = in.find_first_of(":", begin);
     size_t  ows = in.find_first_of(" \t", begin);
 
@@ -131,7 +131,7 @@ void Message::parse_header_line(const std::string &in, size_t begin, size_t end)
         _header[key] = in.substr(sep, (end + 1) - sep);
 }
 
-void Message::init_header(const std::string &in) {
+void ClientRequest::init_header(const std::string &in) {
     size_t  begin   = in.find("\r\n");
     size_t  end     = in.find("\r\n", begin + 2);
 
@@ -148,7 +148,7 @@ void Message::init_header(const std::string &in) {
         throw (HttpError(BadRequest));
 }
 
-bool Message::parse_header(const std::string &in) {
+bool ClientRequest::parse_header(const std::string &in) {
     size_t sp = in.find_first_of(" \t");
 
     try {
@@ -173,7 +173,7 @@ bool Message::parse_header(const std::string &in) {
     return (true);
 }
 
-bool Message::init_body(std::string &buffer, int fd) {
+bool ClientRequest::init_body(std::string &buffer, int fd) {
     (void) buffer;
     (void) fd;
     if (_header.find("Transfer-Encoding") != _header.end()) {

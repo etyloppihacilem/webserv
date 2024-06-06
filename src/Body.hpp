@@ -29,7 +29,7 @@ class Body {
         std::string         &_buffer;
         bool                _done;
         std::string         _body;
-        size_t              _total;
+        size_t              _total; // TODO implementer max_body_length
 };
 
 #endif  // INCLUDE_SRC_BODY_HPP_

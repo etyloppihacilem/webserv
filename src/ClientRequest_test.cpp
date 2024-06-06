@@ -1,6 +1,6 @@
 /* #############################################################################
 
-               """          Message_test.cpp
+               """          ClientRequest_test.cpp
         -\-    _|__
          |\___/  . \        Created on 07 May. 2024 at 11:13
          \     /(((/        by hmelica
@@ -16,16 +16,16 @@
 #include "HttpError.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
-#include "MessageTest.hpp"
-#include "Message.hpp"
-#include "Message_test.hpp"
+#include "ClientRequestTest.hpp"
+#include "ClientRequest.hpp"
+#include "ClientRequest_test.hpp"
 
 /*
- * Can access private elements of Message.
+ * Can access private elements of ClientRequest.
  * LSP is wrong
  * */
-TEST(MessageTestSuite, ParseMethodTestExpectedOK) {
-    Message test;
+TEST(ClientRequestTestSuite, ParseMethodTestExpectedOK) {
+    ClientRequest test;
 
     EXPECT_EQ(  test.parse_method("GET", 3),    GET);
     EXPECT_EQ(  test.parse_method("POST", 4),   POST);
@@ -35,8 +35,8 @@ TEST(MessageTestSuite, ParseMethodTestExpectedOK) {
     EXPECT_EQ(  test.parse_method("DELETE /var/srcs HTTP/1.1", 6), DELETE);
 }
 
-TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
-    Message test;
+TEST(ClientRequestTestSuite, ParseMethodTestExpectedFail) {
+    ClientRequest test;
 
     EXPECT_THROW({
         try {
@@ -110,7 +110,7 @@ TEST(MessageTestSuite, ParseMethodTestExpectedFail) {
     }, HttpError);
 }
 
-TEST_P(MessageTestTarget, ParseTargetTest) {
+TEST_P(ClientRequestTestTarget, ParseTargetTest) {
     std::string line    = "METHOD ";
     size_t      pos     = 6;
     std::string params[3];
@@ -165,9 +165,9 @@ TEST_P(MessageTestTarget, ParseTargetTest) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(MessageTargetSuite,
-        MessageTestTarget,
-        ::testing::ValuesIn(MessageTargetSuiteValues),
+INSTANTIATE_TEST_SUITE_P(ClientRequestTargetSuite,
+        ClientRequestTestTarget,
+        ::testing::ValuesIn(ClientRequestTargetSuiteValues),
         [](const testing::TestParamInfo<t_test_target> &info)
 {
     // Can use info.param here to generate the test suffix
@@ -175,10 +175,10 @@ INSTANTIATE_TEST_SUITE_P(MessageTargetSuite,
     return (name);
 });
 
-TEST(MessageTestSuite, ParseHeaderLineTestHost) {
+TEST(ClientRequestTestSuite, ParseHeaderLineTestHost) {
     std::string header      = "Host: www.example.com";
     std::string header_2    = "Host: www.coucou.com";
-    Message     test;
+    ClientRequest     test;
 
     EXPECT_NO_THROW(test.parse_header_line(header, 0, header.length()));
     EXPECT_EQ(test._header["Host"], "www.example.com");
@@ -195,7 +195,7 @@ TEST(MessageTestSuite, ParseHeaderLineTestHost) {
     EXPECT_EQ(test._header["Host"], "www.example.com");
 }
 
-TEST_P(MessageTestParseHeader, ParseHeaderLineTest) {
+TEST_P(ClientRequestTestParseHeader, ParseHeaderLineTest) {
     t_test_target   tmp     = GetParam();
     size_t          begin   = 0;
     size_t          end     = tmp.c1.length();
@@ -219,9 +219,9 @@ TEST_P(MessageTestParseHeader, ParseHeaderLineTest) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(MessageParseHeaderLineSuite,
-        MessageTestParseHeader,
-        ::testing::ValuesIn(MessageParseHeaderLineSuiteValues),
+INSTANTIATE_TEST_SUITE_P(ClientRequestParseHeaderLineSuite,
+        ClientRequestTestParseHeader,
+        ::testing::ValuesIn(ClientRequestParseHeaderLineSuiteValues),
         [](const testing::TestParamInfo<t_test_target> &info)
 {
     // Can use info.param here to generate the test suffix
@@ -229,7 +229,7 @@ INSTANTIATE_TEST_SUITE_P(MessageParseHeaderLineSuite,
     return (name);
 });
 
-TEST_P(MessageTestInitHeader, InitHeaderTest) {
+TEST_P(ClientRequestTestInitHeader, InitHeaderTest) {
     t_test_messages tmp = GetParam();
 
     if (tmp.name == "no_headers_absolute")
@@ -255,9 +255,9 @@ TEST_P(MessageTestInitHeader, InitHeaderTest) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(MessageTestInitHeaderSuite,
-        MessageTestInitHeader,
-        ::testing::ValuesIn(MessageTestData),
+INSTANTIATE_TEST_SUITE_P(ClientRequestTestInitHeaderSuite,
+        ClientRequestTestInitHeader,
+        ::testing::ValuesIn(ClientRequestTestData),
         [](const testing::TestParamInfo<t_test_messages> &info)
 {
     // Can use info.param here to generate the test suffix

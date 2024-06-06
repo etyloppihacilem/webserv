@@ -1,6 +1,6 @@
 /* #############################################################################
 
-               """          MessageTest.hpp
+               """          ClientRequestTest.hpp
         -\-    _|__
          |\___/  . \        Created on 09 May. 2024 at 15:17
          \     /(((/        by hmelica
@@ -11,28 +11,28 @@
 #ifndef INCLUDE_SRC_MESSAGETEST_HPP_
 #define INCLUDE_SRC_MESSAGETEST_HPP_
 
-#include "Message.hpp"
+#include "ClientRequest.hpp"
 #include "gtest/gtest.h"
 #include <string>
 #include <vector>
-#include "Message_test.hpp"
+#include "ClientRequest_test.hpp"
 
-class MessageTestTarget: public testing::TestWithParam<t_test_target> {
+class ClientRequestTestTarget: public testing::TestWithParam<t_test_target> {
     public:
     protected:
-        Message test;
+        ClientRequest test;
 };
 
-class MessageTestParseHeader: public testing::TestWithParam<t_test_target> {
+class ClientRequestTestParseHeader: public testing::TestWithParam<t_test_target> {
     public:
     protected:
-        Message test;
+        ClientRequest test;
 };
 
-class MessageTestInitHeader: public testing::TestWithParam<s_test_messages> {
+class ClientRequestTestInitHeader: public testing::TestWithParam<s_test_messages> {
     public:
     protected:
-        Message test;
+        ClientRequest test;
 };
 
 #endif  // INCLUDE_SRC_MESSAGETEST_HPP_

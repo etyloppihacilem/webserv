@@ -11,7 +11,7 @@
 #ifndef INCLUDE_SRC_READSTATE_HPP_
 #define INCLUDE_SRC_READSTATE_HPP_
 
-#include "Message.hpp"
+#include "ClientRequest.hpp"
 #include <cstddef>
 #include <string>
 
@@ -30,15 +30,15 @@ class ReadState {
         void        process();
         t_state     process_buffer(char *buffer);
         // TODO is a function to check header requirements needed ??
-        Message     &get_message(); // when message is ready to process
+        ClientRequest     &get_message(); // when message is ready to process
         void        done_message(); // when message is done process, to free
 
     private:
         int         _fd;
         t_state     _state;
         std::string _buffer;        // buffer is supposed clean at the end of a successful parsing on it.
-        Message     *_ready;
-        Message     *_in_progress;
+        ClientRequest     *_ready;
+        ClientRequest     *_in_progress;
 
         size_t      find_method();
 #ifdef TESTING

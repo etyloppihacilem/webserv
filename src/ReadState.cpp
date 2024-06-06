@@ -10,7 +10,7 @@
 
 #include "ReadState.hpp"
 #include "HttpMethods.hpp"
-#include "Message.hpp"
+#include "ClientRequest.hpp"
 #include "todo.hpp"
 #include <cstddef>
 #include <strings.h>
@@ -84,7 +84,7 @@ t_state ReadState::process_buffer(char *buffer) {
             return (_state);
         // if (end - begin > MAX_HEADER) // est-ce que le max header existe ??
         // _buffer = "" et il faut repondre par une erreur
-        _in_progress = new Message;
+        _in_progress = new ClientRequest;
         if (!_in_progress->parse_header(_buffer))
             return (_state = error);
         _buffer = _buffer.substr(0, end);
