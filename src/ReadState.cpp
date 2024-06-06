@@ -11,13 +11,14 @@
 #include "ReadState.hpp"
 #include "HttpMethods.hpp"
 #include "ClientRequest.hpp"
+#include "ProcessState.hpp"
 #include "todo.hpp"
 #include <cstddef>
 #include <strings.h>
 #include <unistd.h>
 
 ReadState::ReadState(int fd):
-    _fd         (fd),
+    ProcessState(fd),
     _state      (waiting),
     _buffer     (),
     _ready      (0),
@@ -42,24 +43,23 @@ size_t ReadState::find_method() {
     return (ret);
 }
 
-void ReadState::process() {
+bool ReadState::process() {
+    if (_state == ready || _state == ready_body)
+        return (true);
     size_t  bytes_read;
-    char    buffer[BUFFER_SIZE + 1];
+    char    buffer[BUFFER_SIZE + 1] = {
+        0
+    };
 
     if (_state == waiting) {
-        bzero(buffer, sizeof(buffer));
         bytes_read = read(_fd, buffer, BUFFER_SIZE);
     }
     process_buffer(buffer);
+    return (_state == ready || _state == ready_body);
 }
 
 t_state ReadState::process_buffer(char *buffer) {
     _buffer += buffer;
-    if (_state == waiting_body) {
-        // body input on message in progress
-        if (!_in_progress)
-            return (_state = waiting); // this should not happen
-    }
     if (_state == waiting) {
         // getting stuff that needs to be detected as header.
         // if _buffer does not start with a request line, everything will be discarded
@@ -89,7 +89,7 @@ t_state ReadState::process_buffer(char *buffer) {
             return (_state = error);
         _buffer = _buffer.substr(0, end);
         if (_in_progress->init_body(_buffer, _fd)) {
-            _state          = waiting_body;
+            _state          = ready_body;
             _ready          = _in_progress;
             _in_progress    = 0;
         } else {

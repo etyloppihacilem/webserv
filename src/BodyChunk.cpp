@@ -42,7 +42,7 @@ size_t BodyChunk::read_body() {
 }
 
 std::string &BodyChunk::get() {
-    if (_done)
+    if (_done || !_uniform)
         return (_body);
     read_body();
     init_chunk();
@@ -60,6 +60,8 @@ std::string &BodyChunk::get() {
 std::string BodyChunk::pop() {
     std::string ret = "";
 
+    _uniform = false;
+    _body = "";
     read_body();
     init_chunk();
     if (_bytes_remaining) {
@@ -71,6 +73,10 @@ std::string BodyChunk::pop() {
         _total              += to_save;
     }
     return (ret);
+}
+
+void BodyChunk::clean(){
+    pop();
 }
 
 // returns true if a new chunk is found and updates _bytes remaining

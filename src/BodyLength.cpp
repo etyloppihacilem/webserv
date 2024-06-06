@@ -62,9 +62,14 @@ std::string &BodyLength::get() {
 std::string BodyLength::pop() {
     std::string tmp = _body;
 
-    _body   = "";
-    _total  += read_body();
-    tmp     += _buffer;
-    _buffer = "";
+    _uniform    = false;
+    _body       = "";
+    _total      += read_body();
+    tmp         += _buffer;
+    _buffer     = "";
     return (tmp);
+}
+
+void BodyLength::clean() {
+    pop();
 }

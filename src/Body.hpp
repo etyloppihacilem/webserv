@@ -14,6 +14,10 @@
 #include <cstddef>
 #include <string>
 
+/*
+ * Using pop or clean only one time will make get innefiscient
+ * DO NOT USE BOTH AT THE SAME TIME
+ * */
 class Body {
     public:
         Body(int fd, std::string &buffer);
@@ -21,15 +25,17 @@ class Body {
 
         virtual std::string &get()  = 0;
         virtual std::string pop()   = 0;
-        bool                is_done() const; // return true if body was read
+        virtual void        clean() = 0;
+        bool                is_done() const;         // return true if body was read
         size_t              length() const;
 
     protected:
         int                 _fd;
         std::string         &_buffer;
         bool                _done;
+        bool                _uniform;   // if false, cant use get
         std::string         _body;
-        size_t              _total; // TODO implementer max_body_length
+        size_t              _total;     // TODO implementer max_body_length
 };
 
 #endif  // INCLUDE_SRC_BODY_HPP_

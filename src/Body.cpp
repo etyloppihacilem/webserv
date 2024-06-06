@@ -17,6 +17,7 @@ Body::Body(int fd, std::string &buffer):
     _fd     (fd),
     _buffer (buffer),
     _done   (false),
+    _uniform(true),
     _body   () {}
 
 Body::~Body() {}

@@ -23,6 +23,7 @@ class BodyChunk: public Body {
 
         std::string &get();
         std::string pop();
+        void        clean();
         size_t      read_body();
 
     private:
