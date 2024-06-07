@@ -10,6 +10,7 @@
 
 #include "Response.hpp"
 #include "HttpStatusCodes.hpp"
+#include <sstream>
 #include <string>
 
 Response::Response():
@@ -43,4 +44,10 @@ std::string Response::build_response() {
     // - headers
     // - body
     return (res);
+}
+
+std::string Response::generate_status_line() const {
+    std::stringstream line;
+    line << "HTTP/1.1 " << _code << " " << status_string(_code) << "\r\n";
+    return (line.str());
 }

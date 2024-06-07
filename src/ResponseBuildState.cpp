@@ -13,6 +13,8 @@
 
 ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request):
     ProcessState(fd),
-    _request    (request) {}
+    _request    (request) {
+    (void) _request; // todo delete this
+}
 
 ResponseBuildState::~ResponseBuildState() {}

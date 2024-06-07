@@ -14,6 +14,11 @@
 #include "HttpStatusCodes.hpp"
 #include <map>
 #include <string>
+
+#ifdef TESTING
+#include "gtest/gtest.h"
+#endif
+
 class Response {
     public:
         Response();
@@ -26,9 +31,13 @@ class Response {
         std::string                         build_response();
 
     private:
+        std::string                         generate_status_line() const;
         HttpCode                            _code;
         std::map<std::string, std::string>  _header;
         std::string                         _body;
+#ifdef TESTING
+        FRIEND_TEST(ResponseTestSuite,   generate_status_line);
+#endif
 };
 
 #endif  // INCLUDE_SRC_RESPONSE_HPP_

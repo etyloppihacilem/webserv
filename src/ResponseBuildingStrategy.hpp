@@ -21,7 +21,7 @@ class ResponseBuildingStrategy {
 
         virtual void        buildResponse() = 0;
         Response            &get_response();
-        bool is_done();
+        bool                is_done();
 
     private:
         ResponseBuildState  &_state;

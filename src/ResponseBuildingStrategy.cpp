@@ -12,7 +12,9 @@
 #include "Response.hpp"
 
 ResponseBuildingStrategy::ResponseBuildingStrategy(ResponseBuildState &state):
-    _state(state) {}
+    _state(state), _response(), _done(false){
+    (void) _state; // TODO delete this
+}
 
 ResponseBuildingStrategy::~ResponseBuildingStrategy() {}
 
