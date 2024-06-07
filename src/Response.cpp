@@ -40,14 +40,26 @@ std::string Response::build_response() {
     std::string res = "";
 
     // TODO construire la Response
-    // - premiere ligne
-    // - headers
-    // - body
+    // [x] premiere ligne
+    // [x] headers
+    // [ ] body
+    //      [ ] length
+    //      [ ] chunked
     return (res);
 }
 
 std::string Response::generate_status_line() const {
     std::stringstream line;
+
     line << "HTTP/1.1 " << _code << " " << status_string(_code) << "\r\n";
     return (line.str());
+}
+
+std::string Response::generate_header() const {
+    std::stringstream headers;
+
+    for (mapit i = _header.begin(); i != _header.end(); i++) {
+        headers << i->first << ": " << i->second << "\r\n";
+    }
+    return (headers.str());
 }

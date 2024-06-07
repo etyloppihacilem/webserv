@@ -19,6 +19,8 @@
 #include "gtest/gtest.h"
 #endif
 
+typedef std::map<std::string, std::string>::const_iterator mapit;
+
 class Response {
     public:
         Response();
@@ -32,11 +34,13 @@ class Response {
 
     private:
         std::string                         generate_status_line() const;
+        std::string                         generate_header() const;
+
         HttpCode                            _code;
         std::map<std::string, std::string>  _header;
-        std::string                         _body;
+        std::string                         _body; // TODO will not be a string
 #ifdef TESTING
-        FRIEND_TEST(ResponseTestSuite,   generate_status_line);
+        FRIEND_TEST(ResponseTestSuite, generate_status_line);
 #endif
 };
 
