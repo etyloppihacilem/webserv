@@ -14,7 +14,13 @@
 #include "BodyWriter.hpp"
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include <cstddef>
+#include <dirent.h>
+#include <list>
 #include <string>
+
+typedef struct dirent dir_item;
+
 
 class GetIndexStrategy: public ResponseBuildingStrategy {
     public:
@@ -26,6 +32,9 @@ class GetIndexStrategy: public ResponseBuildingStrategy {
 
     private:
         std::string _location;
+        DIR         *_dir;
+        bool        _init_done;
+        bool        _deinit_done;
 };
 
 #endif  // INCLUDE_SRC_GETINDEXSTRATEGY_HPP_
