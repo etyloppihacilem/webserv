@@ -49,6 +49,6 @@ void Logger::log(const char *format, ...) {
         << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year << ": " << buffer << std::endl;
 }
 
-Logger  info(std::cerr, "INFO", _GREY, 5);
+Logger  info(std::cerr, "INFO", _BLUE, 5);
 Logger  warn(std::cerr, "WARN", _YELLOW, 5);
 Logger  error(std::cerr, "ERROR", _RED, 5);

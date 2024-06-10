@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "Logger.hpp"
+#include "MemoryHandler.hpp"
 #include <iostream>
 
 int main(int ac, char **av) {
@@ -17,5 +18,6 @@ int main(int ac, char **av) {
     info.log("info message -> %d", 1024);
     warn.log("warn message -> %s", "hihi");
     error.log("error message -> %p", "mais");
+    mem.allocate(); // allocating memory
     return (0);
 }
