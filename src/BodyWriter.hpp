@@ -30,7 +30,7 @@ class BodyWriter {
         virtual std::string         generate(size_t size = BUFFER_SIZE) = 0;
         bool                        is_done() const;
 
-    private:
+    protected:
         bool                        _done;
         ResponseBuildingStrategy    *_strategy; // interdependance
         std::string                 _buffer;

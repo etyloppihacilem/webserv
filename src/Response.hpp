@@ -28,9 +28,9 @@ class Response {
         ~Response();
 
         void                                set_body(BodyWriter *body);
-        void                                set_body(std::string &data);
-        void                                add_header(std::string &field, std::string &value);
-        void                                set_code(HttpCode &code);
+        void                                set_body(const std::string &data);
+        void                                add_header(const std::string &field, const std::string &value);
+        void                                set_code(const HttpCode &code);
         HttpCode                            get_code() const;
         std::string                         build_response();
 

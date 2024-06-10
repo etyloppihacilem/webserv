@@ -28,11 +28,11 @@ void Response::set_body(BodyWriter *body) {
     _body = body;
 }
 
-void Response::add_header(std::string &field, std::string &value) {
+void Response::add_header(const std::string &field, const std::string &value) {
     _header[field] = value;
 }
 
-void Response::set_code(HttpCode &code) {
+void Response::set_code(const HttpCode &code) {
     _code = code;
 }
 

@@ -27,7 +27,7 @@ class ResponseBuildingStrategy {
         bool                is_done();
         virtual bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER) = 0;
 
-    private:
+    protected:
         ResponseBuildState  &_state;
         Response            _response;
         bool                _done;
