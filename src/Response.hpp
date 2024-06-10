@@ -11,6 +11,7 @@
 #ifndef INCLUDE_SRC_RESPONSE_HPP_
 #define INCLUDE_SRC_RESPONSE_HPP_
 
+#include "BodyWriter.hpp"
 #include "HttpStatusCodes.hpp"
 #include <map>
 #include <string>
@@ -26,9 +27,10 @@ class Response {
         Response();
         ~Response();
 
-        void                                set_body(std::string body);
-        void                                add_header(std::string field, std::string value);
-        void                                set_code(HttpCode code);
+        void                                set_body(BodyWriter *body);
+        void                                set_body(std::string &data);
+        void                                add_header(std::string &field, std::string &value);
+        void                                set_code(HttpCode &code);
         HttpCode                            get_code() const;
         std::string                         build_response();
 
@@ -38,7 +40,7 @@ class Response {
 
         HttpCode                            _code;
         std::map<std::string, std::string>  _header;
-        std::string                         _body; // TODO will not be a string
+        BodyWriter                          *_body;
 #ifdef TESTING
         FRIEND_TEST(ResponseTestSuite, generate_status_line);
 #endif

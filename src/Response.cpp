@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "Response.hpp"
+#include "BodyWriter.hpp"
 #include "HttpStatusCodes.hpp"
 #include <sstream>
 #include <string>
@@ -16,19 +17,22 @@
 Response::Response():
     _code   (OK),
     _header (),
-    _body   () {}
+    _body   (0) {}
 
-Response::~Response() {}
+Response::~Response() {
+    if (_body)
+        delete _body;
+}
 
-void Response::set_body(std::string body) {
+void Response::set_body(BodyWriter *body) {
     _body = body;
 }
 
-void Response::add_header(std::string field, std::string value) {
+void Response::add_header(std::string &field, std::string &value) {
     _header[field] = value;
 }
 
-void Response::set_code(HttpCode code) {
+void Response::set_code(HttpCode &code) {
     _code = code;
 }
 

@@ -11,6 +11,7 @@
 #ifndef INCLUDE_SRC_RESPONSEBUILDSTATE_HPP_
 #define INCLUDE_SRC_RESPONSEBUILDSTATE_HPP_
 
+#include "BodyWriter.hpp"
 #include "ClientRequest.hpp"
 #include "ProcessState.hpp"
 
@@ -21,6 +22,7 @@ class ResponseBuildState : ProcessState {
 
     private:
         ClientRequest *_request;
+        ResponseBuildingStrategy *_strategy;
 };
 
 #endif  // INCLUDE_SRC_RESPONSEBUILDSTATE_HPP_

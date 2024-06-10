@@ -13,6 +13,9 @@
 
 #include "Response.hpp"
 #include "ResponseBuildState.hpp"
+#include "todo.hpp"
+#include <cstddef>
+#include <string>
 
 class ResponseBuildingStrategy {
     public:
@@ -22,6 +25,7 @@ class ResponseBuildingStrategy {
         virtual void        buildResponse() = 0;
         Response            &get_response();
         bool                is_done();
+        virtual bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER) = 0;
 
     private:
         ResponseBuildState  &_state;
@@ -30,3 +34,7 @@ class ResponseBuildingStrategy {
 };
 
 #endif  // INCLUDE_SRC_RESPONDEBUILDINGSTRATEGY_CPP_
+
+// TODO optimization
+// str.shrink_to_fit();
+// this method free memory from previously allocated string stuff that is no longer used

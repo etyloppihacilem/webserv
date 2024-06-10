@@ -13,8 +13,10 @@
 
 ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request):
     ProcessState(fd),
-    _request    (request) {
-    (void) _request; // todo delete this
+    _request    (request),
+    _strategy   (0) {   // TODO check where to free this once it is allocated
+    (void) _request;    // TODO delete this
+    (void) _strategy;   // TODO delete this
 }
 
 ResponseBuildState::~ResponseBuildState() {}
