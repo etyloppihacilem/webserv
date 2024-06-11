@@ -12,6 +12,7 @@
 #define INCLUDE_SRC_BODYCHUNK_HPP_
 
 #include "Body.hpp"
+#include "todo.hpp"
 #ifdef TESTING
 #include "gtest/gtest.h"
 #endif

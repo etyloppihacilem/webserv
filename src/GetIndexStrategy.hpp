@@ -21,7 +21,6 @@
 
 typedef struct dirent dir_item;
 
-
 class GetIndexStrategy: public ResponseBuildingStrategy {
     public:
         GetIndexStrategy(const std::string &location, ResponseBuildState &state);

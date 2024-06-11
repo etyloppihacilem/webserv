@@ -24,13 +24,16 @@ class ResponseBuildingStrategy {
 
         virtual void        buildResponse() = 0;
         Response            &get_response();
-        bool                is_done();
+        bool                is_done() const;
         virtual bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER) = 0;
+        size_t              get_estimated_size() const;
 
     protected:
-        ResponseBuildState  &_state;
+        ResponseBuildState  *_state;
         Response            _response;
         bool                _done;
+        size_t              _estimated_size;
+        std::string _buffer; // TODO check if used
 };
 
 #endif  // INCLUDE_SRC_RESPONDEBUILDINGSTRATEGY_CPP_

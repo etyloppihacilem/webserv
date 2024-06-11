@@ -9,7 +9,23 @@
 ############################################################################# */
 
 #include "BodyWriterChunk.hpp"
+#include "ResponseBuildingStrategy.hpp"
+#include <cstddef>
+#include <string>
 
-BodyWriterChunk::BodyWriterChunk() {}
+BodyWriterChunk::BodyWriterChunk(ResponseBuildingStrategy *state):
+    BodyWriter(state) {
+    _strategy->buildResponse();
+}
 
 BodyWriterChunk::~BodyWriterChunk() {}
+
+std::string BodyWriterChunk::generate(size_t size) {
+    if (_done)
+        return ("");
+
+    std::string temp;
+
+    _done = _strategy->fill_buffer(temp, size);
+    return (temp);
+}

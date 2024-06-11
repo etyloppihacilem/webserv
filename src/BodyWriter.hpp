@@ -33,9 +33,8 @@ class BodyWriter {
     protected:
         bool                        _done;
         ResponseBuildingStrategy    *_strategy; // interdependance
-        std::string                 _buffer;
 };
 
-std::ostream &operator<<(std::ostream &os, BodyWriter &obj); // TODO is this useful
+std::ostream &operator<<(std::ostream &os, BodyWriter &obj); // TODO is this useful ??
 
 #endif  // INCLUDE_SRC_BODYWRITER_HPP_

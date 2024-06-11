@@ -12,8 +12,7 @@
 
 BodyWriter::BodyWriter(ResponseBuildingStrategy *state):
     _strategy   (state),
-    _done       (false),
-    _buffer     () {}
+    _done       (false) {}
 
 BodyWriter::~BodyWriter() {}
 

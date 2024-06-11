@@ -28,6 +28,7 @@ class Response {
         ~Response();
 
         void                                set_body(BodyWriter *body);
+        void                                set_body(ResponseBuildingStrategy *strategy);
         void                                set_body(const std::string &data);
         void                                add_header(const std::string &field, const std::string &value);
         void                                set_code(const HttpCode &code);
@@ -37,6 +38,7 @@ class Response {
     private:
         std::string                         generate_status_line() const;
         std::string                         generate_header() const;
+        void                                clean_body();
 
         HttpCode                            _code;
         std::map<std::string, std::string>  _header;

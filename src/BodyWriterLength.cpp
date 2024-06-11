@@ -9,7 +9,28 @@
 ############################################################################# */
 
 #include "BodyWriterLength.hpp"
+#include "BodyWriter.hpp"
+#include "Logger.hpp"
+#include <cstddef>
+#include <cstdint>
+#include <string>
 
-BodyWriterLength::BodyWriterLength() {}
+BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy *state):
+    BodyWriter(state) {}
 
 BodyWriterLength::~BodyWriterLength() {}
+
+std::string BodyWriterLength::generate(size_t size) {
+    if (_done)
+        return ("");
+
+    std::string temp;
+    uint16_t    i = 0;
+
+    while (!(_done = _strategy->fill_buffer(temp)) && ++i) // size is MAX_BODY_BUFFER so i is to prevent infinite loop
+        ;
+    if (i == 0)
+        error.log("BodyWriterLength : maximum fill_buffer iterations exceeded. This happens to prevent infinite loop. "
+                  "Result may be incomplete. Check value of MAX_BODY_BUFFER.");
+    return (temp);
+}

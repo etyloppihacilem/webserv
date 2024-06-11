@@ -11,6 +11,10 @@
 #include "Response.hpp"
 #include "BodyWriter.hpp"
 #include "HttpStatusCodes.hpp"
+#include "todo.hpp"
+#include "BodyWriterChunk.hpp"
+#include "BodyWriterLength.hpp"
+#include "ResponseBuildingStrategy.hpp"
 #include <sstream>
 #include <string>
 
@@ -66,4 +70,18 @@ std::string Response::generate_header() const {
         headers << i->first << ": " << i->second << "\r\n";
     }
     return (headers.str());
+}
+
+void Response::clean_body() {
+    if (_body)
+        delete _body;
+    _body = 0;
+}
+
+void Response::set_body(ResponseBuildingStrategy *strategy) {
+    clean_body();
+    if (strategy->get_estimated_size() > MAX_BODY_BUFFER)
+        _body = new BodyWriterChunk(strategy);
+    else
+        _body = new BodyWriterLength(strategy);
 }

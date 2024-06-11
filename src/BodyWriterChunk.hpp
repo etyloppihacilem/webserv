@@ -12,14 +12,15 @@
 #define INCLUDE_SRC_BODYWRITERCHUNK_HPP_
 
 #include "BodyWriter.hpp"
+#include "ResponseBuildingStrategy.hpp"
 #include <string>
 
 class BodyWriterChunk : public BodyWriter {
     public:
-        BodyWriterChunk();
+        BodyWriterChunk(ResponseBuildingStrategy *state);
         ~BodyWriterChunk();
 
-        std::string generate();
+        std::string generate(size_t size = BUFFER_SIZE);
     private:
 };
 

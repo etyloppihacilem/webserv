@@ -12,14 +12,17 @@
 #define INCLUDE_SRC_BODYWRITERLENGTH_HPP_
 
 #include "BodyWriter.hpp"
+#include "ResponseBuildingStrategy.hpp"
+#include "todo.hpp"
+#include <cstddef>
 #include <string>
 
 class BodyWriterLength: public BodyWriter {
     public:
-        BodyWriterLength();
+        BodyWriterLength(ResponseBuildingStrategy *state);
         ~BodyWriterLength();
 
-        std::string generate();
+        std::string generate(size_t size = BUFFER_SIZE);
     private:
 };
 
