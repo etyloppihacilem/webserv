@@ -13,7 +13,7 @@
 #include <cstddef>
 #include <string>
 
-BodyWriterChunk::BodyWriterChunk(ResponseBuildingStrategy *state):
+BodyWriterChunk::BodyWriterChunk(ResponseBuildingStrategy &state):
     BodyWriter(state) {
     _strategy->buildResponse();
 }

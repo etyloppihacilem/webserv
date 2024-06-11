@@ -13,7 +13,7 @@
 #include <cstddef>
 
 ResponseBuildingStrategy::ResponseBuildingStrategy(ResponseBuildState &state):
-    _state          (state),
+    _state          (&state),
     _response       (),
     _done           (false),
     _estimated_size (0) {

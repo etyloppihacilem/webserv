@@ -17,7 +17,7 @@
 
 class BodyWriterChunk : public BodyWriter {
     public:
-        BodyWriterChunk(ResponseBuildingStrategy *state);
+        BodyWriterChunk(ResponseBuildingStrategy &state);
         ~BodyWriterChunk();
 
         std::string generate(size_t size = BUFFER_SIZE);

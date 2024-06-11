@@ -24,7 +24,7 @@ class ResponseBuildingStrategy;
  */
 class BodyWriter {
     public:
-        BodyWriter(ResponseBuildingStrategy *state);
+        BodyWriter(ResponseBuildingStrategy &state);
         virtual ~BodyWriter() = 0;
 
         virtual std::string         generate(size_t size = BUFFER_SIZE) = 0;

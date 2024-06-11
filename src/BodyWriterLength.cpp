@@ -12,10 +12,10 @@
 #include "BodyWriter.hpp"
 #include "Logger.hpp"
 #include <cstddef>
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 
-BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy *state):
+BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state):
     BodyWriter(state) {}
 
 BodyWriterLength::~BodyWriterLength() {}
@@ -27,6 +27,7 @@ std::string BodyWriterLength::generate(size_t size) {
     std::string temp;
     uint16_t    i = 0;
 
+    (void) size; // size is not needed for BodyWriterLength. The point is to get the whole body in one call
     while (!(_done = _strategy->fill_buffer(temp)) && ++i) // size is MAX_BODY_BUFFER so i is to prevent infinite loop
         ;
     if (i == 0)

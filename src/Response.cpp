@@ -78,9 +78,9 @@ void Response::clean_body() {
     _body = 0;
 }
 
-void Response::set_body(ResponseBuildingStrategy *strategy) {
+void Response::set_body(ResponseBuildingStrategy &strategy) {
     clean_body();
-    if (strategy->get_estimated_size() > MAX_BODY_BUFFER)
+    if (strategy.get_estimated_size() > MAX_BODY_BUFFER)
         _body = new BodyWriterChunk(strategy);
     else
         _body = new BodyWriterLength(strategy);

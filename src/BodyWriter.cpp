@@ -10,9 +10,9 @@
 
 #include "BodyWriter.hpp"
 
-BodyWriter::BodyWriter(ResponseBuildingStrategy *state):
-    _strategy   (state),
-    _done       (false) {}
+BodyWriter::BodyWriter(ResponseBuildingStrategy &state):
+    _done       (false),
+    _strategy   (&state) {}
 
 BodyWriter::~BodyWriter() {}
 

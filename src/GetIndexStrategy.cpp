@@ -16,6 +16,7 @@
 #include "todo.hpp"
 #include <cerrno>
 #include <cstddef>
+#include <cstdlib>
 #include <dirent.h>
 #include <new>
 #include <sstream>
@@ -64,8 +65,15 @@ void GetIndexStrategy::buildResponse() {
         warn.log("GetIndexStrategy : trying to build response, but is already built.");
         return;
     }
-    {                                                                   // different scope to free stack at the end
-        int size_temp = scandir(_location.c_str(), 0, 0, versionsort);  // TODO tester avec arg[2] null bc douteux,
+    {                                                                           // different scope to free stack at the
+                                                                                // end
+        int size_temp;
+        {
+            dirent **namelist;
+
+            size_temp = scandir(_location.c_str(), &namelist, 0, versionsort);  // TODO tester avec arg[2] null bc
+            free(namelist);                                                     // douteux,
+        }
 
         // attention leaks, verifier si version sort est necessaire ou si peut etre remplacé par null
         // sinon faire une structure et free immediatement.

@@ -19,7 +19,7 @@
 
 class BodyWriterLength: public BodyWriter {
     public:
-        BodyWriterLength(ResponseBuildingStrategy *state);
+        BodyWriterLength(ResponseBuildingStrategy &state);
         ~BodyWriterLength();
 
         std::string generate(size_t size = BUFFER_SIZE);
