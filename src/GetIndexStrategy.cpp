@@ -19,8 +19,12 @@
 #include <cstdlib>
 #include <dirent.h>
 #include <new>
+#include <random>
 #include <sstream>
 #include <string>
+#include <strings.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 // location ending in /
 GetIndexStrategy::GetIndexStrategy(const std::string &location, ResponseBuildState &state):
@@ -35,19 +39,50 @@ GetIndexStrategy::~GetIndexStrategy() {
         closedir(_dir);
 }
 
+std::string GetIndexStrategy::getType(mode_t mode) {
+    if (S_ISREG(mode))
+        return ("REG");
+    if (S_ISDIR(mode))
+        return ("DIR");
+    if (S_ISCHR(mode))
+        return ("CHR");
+    if (S_ISBLK(mode))
+        return ("BLK");
+    if (S_ISFIFO(mode))
+        return ("FIO");
+    if (S_ISLNK(mode))
+        return ("LNK");
+    if (S_ISSOCK(mode))
+        return ("SCK");
+    return ("XXX");
+}
+
+std::string GetIndexStrategy::generateLine(char *name, struct stat *st) {
+    std::string path = _location + std::string(name);
+
+    if (!stat(name, st))
+        return (name);
+    else {
+        bzero(st, sizeof(struct stat));
+        return ("Could not access file.");
+    }
+}
+
 bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     if (_done || !_dir)
         return (_done);
     if (!_init_done)
-        buffer += "<head></head><body><h1>" + _location + "</h1><table>";
+        buffer += "<head></head><body><h1>" + _location + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
 
     dir_item            *item;
     std::stringstream   stream;
+    std::string name;
+    struct stat         st;
 
     while ((item = readdir(_dir)) && buffer.length() < size) {
-        stream  << "<tr><td>" << (item->d_type
-                                  == DT_DIR ? "DIR" : "REG") << "</td><td><a href=\"" << _location
-                << std::string(item->d_name) << "\">" << item->d_name << "</a></td></tr>";
+        name = generateLine(item->d_name, &st);
+        stream  << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _location
+                << name << "\">" << name << "</a></td><td>" << (S_ISREG(st.st_mode) ? st.st_size : 0) << "</td></tr>";
         stream >> buffer; // TODO check link href value
     }
     if (errno == EBADF)

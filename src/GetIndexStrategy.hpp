@@ -16,8 +16,9 @@
 #include "ResponseBuildingStrategy.hpp"
 #include <cstddef>
 #include <dirent.h>
-#include <list>
 #include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 typedef struct dirent dir_item;
 
@@ -30,6 +31,8 @@ class GetIndexStrategy: public ResponseBuildingStrategy {
         bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
 
     private:
+        std::string generateLine(char *name, struct stat *st);
+        std::string getType(mode_t mode);
         std::string _location;
         DIR         *_dir;
         bool        _init_done;
