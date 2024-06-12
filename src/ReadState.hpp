@@ -30,14 +30,13 @@ class ReadState : public ProcessState {
 
         bool            process();
         t_state         process_buffer(char *buffer);
-        // TODO is a function to check header requirements needed ??
+        // TODO is a function to check header requirements needed ?? for example host requirements (that are checked)
         ClientRequest   &get_message(); // when message is ready to process
         void            done_message(); // when message is done process, to free
 
     private:
         t_state         _state;
         std::string     _buffer;        // buffer is supposed clean at the end of a successful parsing on it.
-        ClientRequest   *_ready;
         ClientRequest   *_in_progress;
 
         size_t          find_method();

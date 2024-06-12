@@ -31,6 +31,10 @@ class HttpError: public std::exception {
             return (_code);
         }
 
+        std::string get_message() const {
+            return (_message);
+        }
+
     private:
         HttpCode    _code;
         std::string _message;

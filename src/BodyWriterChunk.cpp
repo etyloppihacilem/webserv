@@ -14,7 +14,8 @@
 #include <string>
 
 BodyWriterChunk::BodyWriterChunk(ResponseBuildingStrategy &state):
-    BodyWriter(state) {
+    BodyWriter  (state),
+    _length     (0) {
     _strategy->buildResponse();
 }
 
@@ -26,6 +27,15 @@ std::string BodyWriterChunk::generate(size_t size) {
 
     std::string temp;
 
-    _done = _strategy->fill_buffer(temp, size);
+    _done   = _strategy->fill_buffer(temp, size);
+    _length += temp.length();
     return (temp);
+}
+
+size_t BodyWriterChunk::length() const {
+    return (_length);
+}
+
+void BodyWriterChunk::save_mem() {
+    ;
 }

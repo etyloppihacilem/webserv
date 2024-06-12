@@ -21,12 +21,9 @@ ReadState::ReadState(int fd):
     ProcessState(fd),
     _state      (waiting),
     _buffer     (),
-    _ready      (0),
     _in_progress(0) {}
 
 ReadState::~ReadState() {
-    if (_ready)
-        delete _ready;
     if (_in_progress)
         delete _in_progress;
 }
@@ -46,6 +43,7 @@ size_t ReadState::find_method() {
 bool ReadState::process() {
     if (_state == ready || _state == ready_body)
         return (true);
+
     size_t  bytes_read;
     char    buffer[BUFFER_SIZE + 1] = {
         0
@@ -71,32 +69,35 @@ t_state ReadState::process_buffer(char *buffer) {
 
         size_t begin = find_method();
 
-        if (begin == _buffer.npos)
+        if (begin == _buffer.npos) {
             _buffer = "";
-        return (_state);
-        if (begin != 0)
-            _buffer = _buffer.substr(begin, _buffer.length() - begin);
+            return (_state);
+        }
 
         // verifier la longueur du buffer
         size_t end = _buffer.find("\r\n\r\n", 0);
 
         if (end == _buffer.npos)
             return (_state);
-        // if (end - begin > MAX_HEADER) // est-ce que le max header existe ??
+        if (begin != 0)
+            _buffer = _buffer.substr(begin, _buffer.length() - begin);
+        // if (end - begin > MAX_HEADER) // TODO est-ce que le max header existe ??
         // _buffer = "" et il faut repondre par une erreur
         _in_progress = new ClientRequest;
         if (!_in_progress->parse_header(_buffer))
-            return (_state = error);
+            return (_state = error); // TODO close connection after error response is sent.
         _buffer = _buffer.substr(0, end);
-        if (_in_progress->init_body(_buffer, _fd)) {
-            _state          = ready_body;
-            _ready          = _in_progress;
-            _in_progress    = 0;
-        } else {
-            _state          = ready;
-            _ready          = _in_progress;
-            _in_progress    = 0;
-        }
+        if (_in_progress->init_body(_buffer, _fd))
+            _state = ready_body;
+        else
+            _state = ready;
     }
     return (_state);
+}
+
+void ReadState::done_message() {
+    if (_in_progress)
+        delete _in_progress;
+    _in_progress    = 0;
+    _state          = waiting;
 }

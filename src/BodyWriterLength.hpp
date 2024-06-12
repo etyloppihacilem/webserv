@@ -23,7 +23,12 @@ class BodyWriterLength: public BodyWriter {
         ~BodyWriterLength();
 
         std::string generate(size_t size = BUFFER_SIZE);
+        size_t      length() const;
+        void        save_mem(); // save_mem should be put on every object to save memory if needed
+
     private:
+        std::string _body;
+        bool        _recovered;
 };
 
 #endif  // INCLUDE_SRC_BODYWRITERLENGTH_HPP_

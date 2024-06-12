@@ -33,6 +33,7 @@ class GetIndexStrategy: public ResponseBuildingStrategy {
     private:
         std::string generateLine(char *name, struct stat *st);
         std::string getType(mode_t mode);
+
         std::string _location;
         DIR         *_dir;
         bool        _init_done;

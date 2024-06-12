@@ -13,6 +13,7 @@
 
 #include "BodyWriter.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include <cstddef>
 #include <string>
 
 class BodyWriterChunk : public BodyWriter {
@@ -21,7 +22,11 @@ class BodyWriterChunk : public BodyWriter {
         ~BodyWriterChunk();
 
         std::string generate(size_t size = BUFFER_SIZE);
+        size_t      length() const;
+        void        save_mem();
+
     private:
+        size_t      _length;
 };
 
 #endif  // INCLUDE_SRC_BODYWRITERCHUNK_HPP_

@@ -19,7 +19,6 @@
 #include <cstdlib>
 #include <dirent.h>
 #include <new>
-#include <random>
 #include <sstream>
 #include <string>
 #include <strings.h>
@@ -72,17 +71,18 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     if (_done || !_dir)
         return (_done);
     if (!_init_done)
-        buffer += "<head></head><body><h1>" + _location + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
+        buffer += "<head></head><body><h1>" + _location
+                  + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
 
     dir_item            *item;
     std::stringstream   stream;
-    std::string name;
+    std::string         name;
     struct stat         st;
 
     while ((item = readdir(_dir)) && buffer.length() < size) {
         name = generateLine(item->d_name, &st);
-        stream  << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _location
-                << name << "\">" << name << "</a></td><td>" << (S_ISREG(st.st_mode) ? st.st_size : 0) << "</td></tr>";
+        stream  << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _location << name << "\">" << name
+                << "</a></td><td>" << (S_ISREG(st.st_mode) ? st.st_size : 0) << "</td></tr>";
         stream >> buffer; // TODO check link href value
     }
     if (errno == EBADF)
@@ -119,7 +119,7 @@ void GetIndexStrategy::buildResponse() {
                                                                         // memory, so using least buffer stuff
         // TODO see if reducing buffer size if memory error with errno is possible
         else
-            _estimated_size = 47 + 15 + (56 * size_temp);
+            _estimated_size = 47 + 15 + (56 * size_temp); // TODO revoir ces estimations
     }
     _dir = opendir(_location.c_str());
     if (!_dir) {
@@ -131,4 +131,5 @@ void GetIndexStrategy::buildResponse() {
             throw (std::bad_alloc()); // to begin memory recovery procedure
         throw (HttpError(InternalServerError));
     }
+    _response.set_body(*this);
 }

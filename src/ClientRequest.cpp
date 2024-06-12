@@ -67,28 +67,31 @@ static void replace_all(std::string &str, const std::string &to_find, const std:
 }
 
 void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
-    size_t  sp_protocol;
-    size_t  protocol;
+    {
+        size_t  sp_protocol;
+        size_t  protocol;
 
-    sp_protocol = in.find_first_of(" \t", pos + 1);
-    protocol    = in.find("HTTP", pos);
-    if (protocol == std::string::npos || sp_protocol == std::string::npos)
-        throw (HttpError(BadRequest));
-    if ((protocol - 1) - (pos + 1) > MAX_URI)
-        throw (HttpError(URITooLong));
-    if (sp_protocol != protocol - 1) {  // there are SP remaining in URI, that is wrong, going for 301 MovedPermanently.
-        // TODO IF NOT IN ORIGIN FORM, ADD HOST TO LOCATION !!!
-        std::string redirect = in.substr(pos + 1, (protocol - 1) - (pos + 1));
+        sp_protocol = in.find_first_of(" \t", pos + 1);
+        protocol    = in.find("HTTP", pos);
+        if (protocol == std::string::npos || sp_protocol == std::string::npos)
+            throw (HttpError(BadRequest));
+        if ((protocol - 1) - (pos + 1) > MAX_URI)
+            throw (HttpError(URITooLong));
+        if (sp_protocol != protocol - 1) {                  // there are SP remaining in URI, that is wrong, going for
+                                                            // 301
+                                                            // MovedPermanently.
+            // TODO IF NOT IN ORIGIN FORM, ADD HOST TO LOCATION !!!
+            std::string redirect = in.substr(pos + 1, (protocol - 1) - (pos + 1));
 
-        replace_all(redirect,   " ",    "%20");
-        replace_all(redirect,   "\t",   "%09");
-        throw (HttpError(MovedPermanently, redirect));
+            replace_all(redirect,   " ",    "%20");
+            replace_all(redirect,   "\t",   "%09");
+            throw (HttpError(MovedPermanently, redirect));  // message is the redirect location
+        }
+        _target = in.substr(pos + 1, (protocol - 1) - (pos + 1));
     }
-    _target = in.substr(pos + 1, (protocol - 1) - (pos + 1));
-
     size_t host = _target.find("http://");
 
-    if (host == 0) {                // absolute form
+    if (host == 0) {                                        // absolute form
         size_t host_end = _target.find("/", 7);
 
         if (host_end == std::string::npos || host_end == 7)
@@ -149,20 +152,24 @@ void ClientRequest::init_header(const std::string &in) {
 }
 
 bool ClientRequest::parse_header(const std::string &in) {
-    size_t sp = in.find_first_of(" \t");
+    {
+        size_t sp = in.find_first_of(" \t");
 
-    try {
-        _method = parse_method(in, sp);
-    } catch (HttpError &e) {
-        _method = none;
-        _status = e.get_code();
-        return (false);
-    }
-    try {
-        parse_target(in, sp);
-    } catch (HttpError &e) {
-        _status = e.get_code();
-        return (false);
+        try {
+            _method = parse_method(in, sp);
+        } catch (HttpError &e) {
+            _method = none;
+            _status = e.get_code();
+            return (false);
+        }
+        try {
+            parse_target(in, sp);
+        } catch (HttpError &e) {
+            _status = e.get_code();
+            if (_status == MovedPermanently)
+                _header["Location"] = e.get_message(); // Location is the only header to redirect
+            return (false);
+        }
     }
     try {
         init_header(in);
@@ -177,11 +184,11 @@ bool ClientRequest::init_body(std::string &buffer, int fd) {
     (void) buffer;
     (void) fd;
     if (_header.find("Transfer-Encoding") != _header.end()) {
-        _body_exists = true;
-        _body = new BodyChunk(fd, buffer);
+        _body_exists    = true;
+        _body           = new BodyChunk(fd, buffer);
     } else if (_header.find("Content-Length") != _header.end()) {
-        _body_exists = true;
-        _body = new BodyLength(fd, buffer, _header["Content-Length"]);
+        _body_exists    = true;
+        _body           = new BodyLength(fd, buffer, _header["Content-Length"]);
     } else { // no body
         _body_exists = false;
     }

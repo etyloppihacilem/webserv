@@ -14,6 +14,7 @@
 #include "todo.hpp"
 #include <cstddef>
 #include <iostream>
+#include <iterator>
 #include <string>
 
 class ResponseBuildingStrategy;
@@ -27,14 +28,16 @@ class BodyWriter {
         BodyWriter(ResponseBuildingStrategy &state);
         virtual ~BodyWriter() = 0;
 
-        virtual std::string         generate(size_t size = BUFFER_SIZE) = 0;
+        virtual std::string         generate(size_t size    = BUFFER_SIZE) = 0;
+        virtual size_t              length() const          = 0;
         bool                        is_done() const;
+        virtual void                save_mem() = 0;
 
     protected:
         bool                        _done;
-        ResponseBuildingStrategy    *_strategy; // interdependance
+        ResponseBuildingStrategy    *_strategy;                 // interdependance
 };
 
-std::ostream &operator<<(std::ostream &os, BodyWriter &obj); // TODO is this useful ??
+std::ostream &operator<<(std::ostream &os, BodyWriter &obj);    // TODO is this useful ??
 
 #endif  // INCLUDE_SRC_BODYWRITER_HPP_
