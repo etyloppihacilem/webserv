@@ -17,6 +17,7 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdlib>
+#include <cstring>
 #include <dirent.h>
 #include <new>
 #include <sstream>
@@ -95,6 +96,10 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     return (_done);
 }
 
+int compare(const struct dirent **a, const struct dirent **b) {
+    return (strcmp((*a)->d_name, (*b)->d_name));
+}
+
 void GetIndexStrategy::buildResponse() {
     if (_dir) {
         warn.log("GetIndexStrategy : trying to build response, but is already built.");
@@ -106,7 +111,7 @@ void GetIndexStrategy::buildResponse() {
         {
             dirent **namelist;
 
-            size_temp = scandir(_location.c_str(), &namelist, 0, versionsort);  // TODO tester avec arg[2] null bc
+            size_temp = scandir(_location.c_str(), &namelist, 0, compare);  // TODO tester avec arg[2] null bc
             free(namelist);                                                     // douteux,
         }
 

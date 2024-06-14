@@ -44,13 +44,13 @@ bool ReadState::process() {
     if (_state == ready || _state == ready_body)
         return (true);
 
-    size_t  bytes_read;
-    char    buffer[BUFFER_SIZE + 1] = {
+    // size_t  bytes_read;
+    char buffer[BUFFER_SIZE + 1] = {
         0
     };
 
     if (_state == waiting) {
-        bytes_read = read(_fd, buffer, BUFFER_SIZE);
+        read(_fd, buffer, BUFFER_SIZE);
     }
     process_buffer(buffer);
     return (_state == ready || _state == ready_body);
