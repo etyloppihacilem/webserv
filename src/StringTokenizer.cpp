@@ -1,149 +1,172 @@
-/*
- ***********************************************************************
- * Note: This library has been deprecated in favour of the C++ String  *
- * Toolkit Library (StrTk).                                            *
- * URL: http://www.partow.net/programming/strtk/index.html             *
- ***********************************************************************
-*/
-
 #include "StringTokenizer.hpp"
 
-StringTokenizer::StringTokenizer(const std::string& _str, const std::string& _delim)
+StringTokenizer::StringTokenizer(const std::string &str, const std::string &delim)
 {
-	if ((_str.length() == 0) || (_delim.length() == 0)) return;
+	if ((str.size() == 0) || (delim.size() == 0))
+	{
+		return;
+	}
 
-	token_str = _str;
-	delim     = _delim;
+	_tokenString = str;
+	_delimiter = delim;
+	_delimiterLen = delim.size();
 
 	/* Remove sequential delimiter */
-	std::size_t curr_pos = 0;
-
+	std::size_t	currentPosition = 0;
 	while(true)
 	{
-		if ((curr_pos = token_str.find(delim,curr_pos)) != std::string::npos)
+		currentPosition = _tokenString.find(_delimiter,currentPosition);
+		if (currentPosition != std::string::npos)
 		{
-			curr_pos += delim.length();
-
-			while(token_str.find(delim,curr_pos) == curr_pos)
+			currentPosition += _delimiterLen;
+			while(_tokenString.find(_delimiter, currentPosition) == currentPosition)
 			{
-				token_str.erase(curr_pos,delim.length());
+				_tokenString.erase(currentPosition, _delimiterLen);
 			}
 		}
 		else
-		 break;
+		{
+			break ;
+		}
 	}
 
 	/* Trim leading delimiter */
-	if (token_str.find(delim,0) == 0)
+	if (_tokenString.find(_delimiter, 0) == 0)
 	{
-		token_str.erase(0,delim.length());
+		_tokenString.erase(0, _delimiterLen);
 	}
 
 	/* Trim ending delimiter */
-	if ((curr_pos = token_str.rfind(delim)) != std::string::npos)
+	if ((currentPosition = _tokenString.rfind(_delimiter)) != std::string::npos)
 	{
-		if (curr_pos != (token_str.length() - delim.length())) return;
-		token_str.erase(token_str.length() - delim.length(),delim.length());
-	}
-}
-
-int StringTokenizer::countTokens()
-{
-	if (token_str.length() > 0)
-	{
-		std::size_t	curr_pos = 0;
-		int			num_tokens = 0;
-
-		while(true)
+		if (currentPosition != (_tokenString.size() - _delimiterLen))
 		{
-			if ((curr_pos = token_str.find(delim,curr_pos)) != std::string::npos)
-			{
-				num_tokens++;
-				curr_pos += delim.length();
-			}
-			else
-				break;
+			return ;
 		}
-		return ++num_tokens;
-	}
-	else
-	{
-		return 0;
+		_tokenString.erase(_tokenString.size() - _delimiterLen, _delimiterLen);
 	}
 }
+
+StringTokenizer::~StringTokenizer() {}
 
 bool StringTokenizer::hasMoreTokens()
 {
-	return (token_str.length() > 0);
-}
-
-std::string StringTokenizer::nextToken()
-{
-	if (token_str.length() == 0)
-		return "";
-
-	std::string tmp_str = "";
-	std::size_t pos = token_str.find(delim,0);
-
-	if (pos != std::string::npos)
-	{
-		tmp_str = token_str.substr(0,pos);
-		token_str = token_str.substr(pos+delim.length(),token_str.length()-pos);
-	}
-	else
-	{
-		tmp_str = token_str.substr(0,token_str.length());
-		token_str = "";
-	}
-	return tmp_str;
-}
-
-int StringTokenizer::nextIntToken()
-{
-	return atoi(nextToken().c_str());
-}
-
-double StringTokenizer::nextFloatToken()
-{
-	return atof(nextToken().c_str());
-}
-
-std::string StringTokenizer::nextToken(const std::string& delimiter)
-{
-	if (token_str.length() == 0)
-		return "";
-
-	std::string  tmp_str = "";
-	unsigned long int pos     = token_str.find(delimiter,0);
-
-	if (pos != std::string::npos)
-	{
-		tmp_str   = token_str.substr(0,pos);
-		token_str = token_str.substr(pos + delimiter.length(),token_str.length() - pos);
-	}
-	else
-	{
-		tmp_str   = token_str.substr(0,token_str.length());
-		token_str = "";
-	}
-
-	return tmp_str;
+	return (_tokenString.size() > 0);
 }
 
 std::string StringTokenizer::remainingString()
 {
-	return token_str;
+	return _tokenString;
 }
 
-std::string StringTokenizer::filterNextToken(const std::string& filterStr)
+std::size_t StringTokenizer::countTokens()
 {
-	std::string tmp_str    = nextToken();
-	std::size_t currentPos = 0;
-
-	while((currentPos = tmp_str.find(filterStr,currentPos)) != std::string::npos)
+	if (_tokenString.size() > 0)
 	{
-		tmp_str.erase(currentPos,filterStr.length());
+		std::size_t	count = 0;
+		std::size_t	currentPosition = 0;
+
+		while(true)
+		{
+			currentPosition = _tokenString.find(_delimiter, currentPosition);
+			if (currentPosition != std::string::npos)
+			{
+				++count;
+				currentPosition += _delimiterLen;
+			}
+			else
+			{
+				break ;
+			}
+		}
+		return ++count;
+	}
+	return 0;
+}
+
+std::size_t StringTokenizer::countTokens(const std::string &separator)
+{
+	if (_tokenString.size() > 0)
+	{
+		std::size_t	count = 0;
+		std::size_t	currentPosition = 0;
+
+		while(true)
+		{
+			currentPosition = _tokenString.find(separator, currentPosition);
+			if (currentPosition != std::string::npos)
+			{
+				++count;
+				currentPosition += separator.size();
+			}
+			else
+			{
+				break ;
+			}
+		}
+		return ++count;
+	}
+	return 0;
+}
+
+std::string StringTokenizer::nextToken()
+{
+	if (_tokenString.size() == 0)
+	{
+		return "";
 	}
 
-	return tmp_str;
+	std::string	token = "";
+	std::size_t	delimiterPosition = _tokenString.find(_delimiter, 0);
+
+	if (delimiterPosition != std::string::npos)
+	{
+		token = _tokenString.substr(0, delimiterPosition);
+		_tokenString = _tokenString.substr(delimiterPosition + _delimiterLen,
+						_tokenString.size() - delimiterPosition);
+	}
+	else
+	{
+		token = _tokenString.substr(0, _tokenString.size());
+		_tokenString = "";
+	}
+	return token;
 }
+
+std::string StringTokenizer::nextToken(const std::string& separator)
+{
+	if (_tokenString.size() == 0)
+	{
+		return "";
+	}
+
+	std::string	token = "";
+	std::size_t	delimiterPosition = _tokenString.find(separator, 0);
+
+	if (delimiterPosition != std::string::npos)
+	{
+		token = _tokenString.substr(0, delimiterPosition);
+		_tokenString = _tokenString.substr(delimiterPosition + separator.size(),
+						_tokenString.size() - delimiterPosition);
+	}
+	else
+	{
+		token = _tokenString.substr(0, _tokenString.size());
+		_tokenString = "";
+	}
+
+	return token;
+}
+
+// std::string StringTokenizer::filterNextToken(const std::string& filterStr)
+// {
+// 	std::string tmpString    = nextToken();
+// 	std::size_t currentPos = 0;
+
+// 	while((currentPos = tmpString.find(filterStr, currentPos)) != std::string::npos)
+// 	{
+// 		tmpString.erase(currentPos, filterStr.size());
+// 	}
+//
+// 	return tmpString;
+// }

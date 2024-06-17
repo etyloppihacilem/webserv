@@ -1,49 +1,30 @@
-/*
- ***********************************************************************
- * Class: StringTokenizer                                              *
- * By Arash Partow - 2000                                              *
- * URL: http://www.partow.net/programming/stringtokenizer/index.html   *
- *                                                                     *
- * Copyright Notice:                                                   *
- * Free use of this library is permitted under the guidelines and      *
- * in accordance with the most current version of the Common Public    *
- * License.                                                            *
- * http://www.opensource.org/licenses/cpl1.0.php                       *
- *                                                                     *
- * Note: This library has been deprecated in favour of the C++ String  *
- * Toolkit Library (StrTk).                                            *
- * URL: http://www.partow.net/programming/strtk/index.html             *
- *                                                                     *
- ***********************************************************************
-*/
-
-
 #ifndef INCLUDE_STRINGTOKENIZER_H
 #define INCLUDE_STRINGTOKENIZER_H
 
 
+#include <cstddef>
 #include <string>
 
 
 class StringTokenizer
 {
 public:
-	StringTokenizer(const std::string& _str, const std::string& _delim);
-	~StringTokenizer(){};
+	StringTokenizer(const std::string& str, const std::string& delim);
+	~StringTokenizer();
 
-	int countTokens();
 	bool hasMoreTokens();
-	std::string nextToken();
-	int nextIntToken();
-	double nextFloatToken();
-	std::string nextToken(const std::string& delim);
 	std::string remainingString();
-	std::string filterNextToken(const std::string& filterStr);
+	std::size_t countTokens();
+	std::size_t countTokens(const std::string &separator);
+	std::string nextToken();
+	std::string nextToken(const std::string& separator);
+	// std::string filterNextToken(const std::string& filterStr);
 
 private:
 
-	std::string  token_str;
-	std::string  delim;
+	std::string	_tokenString;
+	std::string	_delimiter;
+	std::size_t	_delimiterLen;
 };
 
 #endif
