@@ -99,3 +99,7 @@ void Response::set_body(ResponseBuildingStrategy &strategy) {
         _header["Content-Length"] = st.str();
     }
 }
+
+void Response::save_mem() {
+    _body->save_mem();
+}

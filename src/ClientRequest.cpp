@@ -16,6 +16,7 @@
 #include "HttpStatusCodes.hpp"
 #include "HttpUtils.hpp"
 #include "Logger.hpp"
+#include "StringUtils.hpp"
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -184,4 +185,10 @@ bool ClientRequest::init_body(std::string &buffer, int fd) {
         _body_exists = false;
     }
     return _body_exists;
+}
+
+void ClientRequest::save_mem() {
+    shrink_to_fit(_method);
+    shrink_to_fit(_target);
+    _body->save_mem();
 }

@@ -34,6 +34,7 @@ class Response {
         void                                set_code(const HttpCode &code);
         HttpCode                            get_code() const;
         std::string                         build_response();
+        void save_mem();
 
     private:
         std::string                         generate_status_line() const;

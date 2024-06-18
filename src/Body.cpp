@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "Body.hpp"
+#include "StringUtils.hpp"
 #include "todo.hpp"
 #include <cstddef>
 #include <unistd.h>
@@ -28,4 +29,9 @@ bool Body::is_done() const {
 
 size_t Body::length() const {
     return _total;
+}
+
+void Body::save_mem() {
+    shrink_to_fit(_buffer);
+    shrink_to_fit(_body);
 }

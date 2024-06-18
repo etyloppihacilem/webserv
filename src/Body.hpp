@@ -28,6 +28,7 @@ class Body {
         virtual void        clean() = 0;
         bool                is_done() const;         // return true if body was read
         size_t              length() const;
+        void                save_mem();
 
     protected:
         int                 _fd;

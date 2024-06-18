@@ -27,6 +27,7 @@ class ResponseBuildingStrategy {
         bool                is_done() const;
         virtual bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER) = 0;
         size_t              get_estimated_size() const;
+        virtual void        save_mem();
 
     protected:
         ResponseBuildState  *_state;

@@ -10,6 +10,7 @@
 
 #include "ResponseBuildingStrategy.hpp"
 #include "Response.hpp"
+#include "StringUtils.hpp"
 #include <cstddef>
 
 ResponseBuildingStrategy::ResponseBuildingStrategy(ResponseBuildState &state):
@@ -32,4 +33,9 @@ bool ResponseBuildingStrategy::is_done() const {
 
 size_t ResponseBuildingStrategy::get_estimated_size() const {
     return _estimated_size;
+}
+
+void ResponseBuildingStrategy::save_mem() {
+    shrink_to_fit(_buffer);
+    _response.save_mem();
 }

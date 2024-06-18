@@ -36,6 +36,7 @@ class ClientRequest {
         void                                parse_header_line(const std::string &in,
             size_t                                                              begin,
             size_t                                                              end);
+        void                                save_mem();
 
         std::string                         _method;
         std::string                         _target;

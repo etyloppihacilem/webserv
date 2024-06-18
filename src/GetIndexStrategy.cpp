@@ -13,6 +13,7 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include "StringUtils.hpp"
 #include "todo.hpp"
 #include <cerrno>
 #include <cstddef>
@@ -92,6 +93,7 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
         buffer += "</table></body>";
         closedir(_dir);
         _dir = 0;
+        _done = true;
     }
     return _done;
 }
@@ -137,4 +139,10 @@ void GetIndexStrategy::buildResponse() {
         throw HttpError(InternalServerError);
     }
     _response.set_body(*this);
+}
+
+void GetIndexStrategy::save_mem() {
+    shrink_to_fit(  _buffer);
+    shrink_to_fit(  _location);
+    _response.save_mem();
 }

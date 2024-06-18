@@ -71,8 +71,8 @@ TEST(BodyLengthTestSuite, BadConstructor) {
 
 TEST(BodyLengthTestSuite, read_body) {
     static const char buf[]
-        = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de compren"
-          "dre comment pouvoir lire de facon certaine.";
+        = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir "
+          "lire de facon certaine.";
     std::string tmp1(buf);
     std::string tmp2;
     int         fd[2];
@@ -96,8 +96,8 @@ TEST(BodyLengthTestSuite, read_body) {
 
 TEST(BodyLengthTestSuite, get) {
     static const char buf[]
-        = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de compren"
-          "dre comment pouvoir lire de facon certaine.";
+        = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir "
+          "lire de facon certaine.";
     std::string tmp1(buf);
     std::string tmp2;
     std::string res;
@@ -121,8 +121,8 @@ TEST(BodyLengthTestSuite, get) {
 
 TEST(BodyLengthTestSuite, pop) {
     static const char buf[]
-        = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de compren"
-          "dre comment pouvoir lire de facon certaine.";
+        = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir "
+          "lire de facon certaine.";
     std::string tmp1(buf);
     std::string tmp2;
     std::string res;
