@@ -1,77 +1,91 @@
-#include "ServerConf.hpp"
-#include "ServerConfTokenize.hpp"
-#include "ServerConfTrim.hpp"
+#include "ServerConfFields.hpp"
+#include "ServerConfValidate.hpp"
 #include "StringTokenizer.hpp"
-#include <exception>
-#include <string>
-#include <vector>
+#include "ServerConfTokenize.hpp"
 #include <algorithm>
 
-namespace ServerConf
+std::string tokenizeFile(const std::string &input)
 {
-
-
-typedef std::pair<std::string, std::string> Field;
-std::string trimIsspaceLeft(const std::string& input);
-
-// std::vector <std::string> tokenize(const std::string& text, const std::string& delimiter)
-// {
-// 	std::vector <std::string> tokens;
-// 	size_t lastPos = text.find_first_of(delimiter, 0);
-// 	size_t pos = text.find_first_of(delimiter, lastPos);
-//
-// 	if (std::string::npos == pos || std::string::npos == pos)
-// 	{
-// 		tokens.push_back(text);
-// 	}
-// 	while (std::string::npos != pos || std::string::npos != lastPos)
-// 	{
-// 		tokens.push_back (text.substr(lastPos, pos - lastPos));
-// 		lastPos = text.find_first_of(delimiter, pos);
-// 		pos = text.find_first_of(delimiter, lastPos);
-// 	}
-// 	return tokens;
-// }
-
-bool tokenizeHttp(StringTokenizer strtok)
-{
-	if ()
+	std::string tokenString(input);
+	const char delim = '|';
+	std::replace(tokenString.begin(), tokenString.end(), ' ', delim);
+	std::replace(tokenString.begin(), tokenString.end(), '\t', delim);
+	StringTokenizer tokenizedFile(tokenString, "|");
+	if (!isValidHttp(tokenizedFile.remainingString()))
 	{
-		return true;
+		throw(ConfError());
 	}
-	return false;
+	std::string currentToken = tokenizedFile.nextToken(); // remove http
+	if (currentToken != ConfFieldString(ConfField::http))
+	{
+		throw(ConfError());
+	}
+	currentToken = tokenizedFile.nextToken(); // remove open bracket
+	if (currentToken != "{")
+	{
+		throw(ConfError());
+	}
+	return tokenizedFile.nextToken(findClosingBrace(tokenizedFile.remainingString()), "}");
 }
 
-void tokenizeFile(const std::string& input)
+std::string tokenizeServer(StringTokenizer &tokenizedFile)
 {
-	replace(input.begin(), input.end(), " ", "|");
-	replace(input.begin(), input.end(), "\t", "|");
-	StringTokenizer strtok = StringTokenizer(input,"|");
-	if (false == tokenizeHttp(strtok))
+	if (!isValidServer(tokenizedFile.remainingString()))
 	{
-		throw std::exception();
+		throw(ConfError());
 	}
-	return ;
+	std::string currentToken = tokenizedFile.nextToken(); // remove Server
+	if (currentToken != ConfFieldString(ConfField::server))
+	{
+		throw(ConfError());
+	}
+	currentToken = tokenizedFile.nextToken(); // remove open bracket
+	if (currentToken != "{")
+	{
+		throw(ConfError());
+	}
+	return tokenizedFile.nextToken(findClosingBrace(tokenizedFile.remainingString()), "}");
 }
 
-// std::vector<std::string> tokenizeConfFile(std::ifstream &input)
-// {
-// 	std::string isspace = " 	";
-// 	std::vector<std::string> tokens;
-//
-// 	return tokens;
-// }
-//
-// std::vector<Field> tokenizeServer(const std::string &)
-// {
-// 	std::vector<Field> fieldList;
-// 	return fieldList;
-// }
-//
-// std::vector<Field> tokenizeLocation(const std::string &)
-// {
-// 	std::vector<Field> fieldList;
-// 	return fieldList;
-// }
+std::pair<std::string, std::string> tokenizeLocation(StringTokenizer &tokenizedServer)
+{
+	std::pair<std::string, std::string> location;
+	if (!isValidLocation(tokenizedServer.remainingString()))
+	{
+		throw(ConfError());
+	}
+	std::string currentToken = tokenizedServer.nextToken(); // remove location
+	if (currentToken != ConfFieldString(ConfField::location))
+	{
+		throw(ConfError());
+	}
+	location.first = tokenizedServer.nextToken(); // extract location root
+	currentToken = tokenizedServer.nextToken(); // remove open bracket
+	if (currentToken != "{")
+	{
+		throw(ConfError());
+	}
+	location.second = tokenizedServer.nextToken(findClosingBrace(tokenizedServer.remainingString()), "}");
+	return location;
+}
 
+size_t	findClosingBrace(const std::string &tokenString)
+{
+	size_t	ob_count;
+	size_t	cb_count;
+
+	if (tokenString.size() != 0)
+		return (0);
+	ob_count = 1;
+	cb_count = 0;
+	for (std::string::const_iterator it = tokenString.begin(); it < tokenString.end(); ++it)
+	{
+		if (*it == '{')
+			ob_count++;
+		if (*it == '}')
+			cb_count++;
+		if (ob_count == cb_count)
+			return (std::distance(tokenString.begin(), it));
+	}
+	return (0);
 }

@@ -1,17 +1,19 @@
-#ifdef INCLUDE_SRC_SERVERCONFTOKENIZE_HPP_
+#ifndef INCLUDE_SRC_SERVERCONFTOKENIZE_HPP_
 #define INCLUDE_SRC_SERVERCONFTOKENIZE_HPP_
 
 #include <string>
+#include <vector>
+#include "StringTokenizer.hpp"
 
-namespace ServerConf
-{
+typedef std::pair<std::string, std::string> Field;
+typedef std::vector<std::string> ValueList;
 
-void tokenzieFile(const std::string& );
-bool tokenizeHttp(StringTokenizer );
-bool tokenizeServer(StringTokenizer );
-bool tokenizeLocation(StringTokenizer );
-bool tokenizeField(StringTokenizer );
+// void tokenizeFile(const std::string& input);
+std::string tokenizeHttp(StringTokenizer strtok);
+std::string tokenizeServer(StringTokenizer );
+std::pair<std::string, std::string> tokenizeLocation(StringTokenizer );
+std::vector<std::string> tokenizeField(const std::string &value);
 
-}
+size_t findClosingBrace(const std::string &tokenString);
 
-#endif // __INCLUDE_SRC_SERVERCONFTOKENIZE_HPP
+#endif // INCLUDE_SRC_SERVERCONFTOKENIZE_HPP_

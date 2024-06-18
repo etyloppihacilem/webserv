@@ -13,6 +13,9 @@
 
 #include <string>
 
+#define MIN_METHOD_SIZE 2
+#define MAX_METHOD_SIZE 8
+
 enum HttpMethod {
     none    = -1,
     GET     = 0,
