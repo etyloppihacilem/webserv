@@ -167,7 +167,8 @@ bool ClientRequest::parse_header(const std::string &in) {
         } catch (HttpError &e) {
             _status = e.get_code();
             if (_status == MovedPermanently)
-                _header["Location"] = e.get_message(); // Location is the only header to redirect
+                _header["Location"] = e.get_message();  // Location is the only header to redirect
+                                                        // it is the only header at all because init_header isnt called.
             return (false);
         }
     }
