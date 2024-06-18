@@ -150,6 +150,7 @@ sanitize: fclean al
 
 ./googletest/build:
 	git submodule init
+	git submodule sync
 	git submodule update
 	cd googletest && mkdir build
 
