@@ -41,36 +41,36 @@ GetIndexStrategy::~GetIndexStrategy() {
 
 std::string GetIndexStrategy::getType(mode_t mode) {
     if (S_ISREG(mode))
-        return ("REG");
+        return "REG";
     if (S_ISDIR(mode))
-        return ("DIR");
+        return "DIR";
     if (S_ISCHR(mode))
-        return ("CHR");
+        return "CHR";
     if (S_ISBLK(mode))
-        return ("BLK");
+        return "BLK";
     if (S_ISFIFO(mode))
-        return ("FIO");
+        return "FIO";
     if (S_ISLNK(mode))
-        return ("LNK");
+        return "LNK";
     if (S_ISSOCK(mode))
-        return ("SCK");
-    return ("XXX");
+        return "SCK";
+    return "XXX";
 }
 
 std::string GetIndexStrategy::generateLine(char *name, struct stat *st) {
     std::string path = _location + std::string(name);
 
     if (!stat(name, st))
-        return (name);
+        return name;
     else {
         bzero(st, sizeof(struct stat));
-        return ("Could not access file.");
+        return "Could not access file.";
     }
 }
 
 bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     if (_done || !_dir)
-        return (_done);
+        return _done;
     if (!_init_done)
         buffer += "<head></head><body><h1>" + _location
                   + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
@@ -87,17 +87,17 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
         stream >> buffer; // TODO check link href value
     }
     if (errno == EBADF)
-        throw (HttpError(InternalServerError));
+        throw HttpError(InternalServerError);
     if (buffer.length() < size && !_deinit_done) {
         buffer += "</table></body>";
         closedir(_dir);
         _dir = 0;
     }
-    return (_done);
+    return _done;
 }
 
 int compare(const struct dirent **a, const struct dirent **b) {
-    return (strcmp((*a)->d_name, (*b)->d_name));
+    return strcmp((*a)->d_name, (*b)->d_name);
 }
 
 void GetIndexStrategy::buildResponse() {
@@ -105,14 +105,14 @@ void GetIndexStrategy::buildResponse() {
         warn.log("GetIndexStrategy : trying to build response, but is already built.");
         return;
     }
-    {                                                                           // different scope to free stack at the
-                                                                                // end
+    {                                                                       // different scope to free stack at the
+                                                                            // end
         int size_temp;
         {
             dirent **namelist;
 
             size_temp = scandir(_location.c_str(), &namelist, 0, compare);  // TODO tester avec arg[2] null bc
-            free(namelist);                                                     // douteux,
+            free(namelist);                                                 // douteux,
         }
 
         // attention leaks, verifier si version sort est necessaire ou si peut etre remplacé par null
@@ -120,21 +120,21 @@ void GetIndexStrategy::buildResponse() {
         // TODO tester si ce ne serait pas utile d'utiliser cette fonction plutot que plusieurs readdir surtout avec un
         // alpha sort ou un version sort
         if (size_temp < 0)
-            _estimated_size = MAX_BODY_BUFFER + 1;                      // if an error occur, it is mostly because of
-                                                                        // memory, so using least buffer stuff
+            _estimated_size = MAX_BODY_BUFFER + 1;          // if an error occur, it is mostly because of
+                                                            // memory, so using least buffer stuff
         // TODO see if reducing buffer size if memory error with errno is possible
         else
-            _estimated_size = 47 + 15 + (56 * size_temp); // TODO revoir ces estimations
+            _estimated_size = 47 + 15 + (56 * size_temp);   // TODO revoir ces estimations
     }
     _dir = opendir(_location.c_str());
     if (!_dir) {
         if (errno == EACCES)
-            throw (HttpError(Forbidden));
+            throw HttpError(Forbidden);
         if (errno == ENOENT)
-            throw (HttpError(NotFound));
+            throw HttpError(NotFound);
         if (errno == ENOMEM)
-            throw (std::bad_alloc()); // to begin memory recovery procedure
-        throw (HttpError(InternalServerError));
+            throw std::bad_alloc(); // to begin memory recovery procedure
+        throw HttpError(InternalServerError);
     }
     _response.set_body(*this);
 }

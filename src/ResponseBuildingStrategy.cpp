@@ -23,13 +23,13 @@ ResponseBuildingStrategy::ResponseBuildingStrategy(ResponseBuildState &state):
 ResponseBuildingStrategy::~ResponseBuildingStrategy() {}
 
 Response &ResponseBuildingStrategy::get_response() {
-    return (_response);
+    return _response;
 }
 
 bool ResponseBuildingStrategy::is_done() const {
-    return (_done);
+    return _done;
 }
 
 size_t ResponseBuildingStrategy::get_estimated_size() const {
-    return (_estimated_size);
+    return _estimated_size;
 }

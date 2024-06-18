@@ -10,17 +10,17 @@
 
 #include "BodyWriter.hpp"
 
-BodyWriter::BodyWriter(ResponseBuildingStrategy &state):
+BodyWriter::BodyWriter(ResponseBuildingStrategy &strategy):
     _done       (false),
-    _strategy   (&state) {}
+    _strategy   (&strategy) {}
 
 BodyWriter::~BodyWriter() {}
 
 std::ostream &operator<<(std::ostream &os, BodyWriter &obj) {
     os << obj.generate();
-    return (os);
+    return os;
 }
 
 bool BodyWriter::is_done() const {
-    return (_done);
+    return _done;
 }

@@ -172,13 +172,13 @@ INSTANTIATE_TEST_SUITE_P(ClientRequestTargetSuite,
 {
     // Can use info.param here to generate the test suffix
     std::string name = info.param.name;
-    return (name);
+    return name;
 });
 
 TEST(ClientRequestTestSuite, ParseHeaderLineTestHost) {
-    std::string header      = "Host: www.example.com";
-    std::string header_2    = "Host: www.coucou.com";
-    ClientRequest     test;
+    std::string     header      = "Host: www.example.com";
+    std::string     header_2    = "Host: www.coucou.com";
+    ClientRequest   test;
 
     EXPECT_NO_THROW(test.parse_header_line(header, 0, header.length()));
     EXPECT_EQ(test._header["Host"], "www.example.com");
@@ -226,7 +226,7 @@ INSTANTIATE_TEST_SUITE_P(ClientRequestParseHeaderLineSuite,
 {
     // Can use info.param here to generate the test suffix
     std::string name = info.param.name;
-    return (name);
+    return name;
 });
 
 TEST_P(ClientRequestTestInitHeader, InitHeaderTest) {
@@ -262,5 +262,5 @@ INSTANTIATE_TEST_SUITE_P(ClientRequestTestInitHeaderSuite,
 {
     // Can use info.param here to generate the test suffix
     std::string name = info.param.name;
-    return (name);
+    return name;
 });

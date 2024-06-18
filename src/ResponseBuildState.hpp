@@ -21,8 +21,8 @@ class ResponseBuildState : ProcessState {
         ~ResponseBuildState();
 
     private:
-        ClientRequest *_request;
-        ResponseBuildingStrategy *_strategy;
+        ClientRequest               *_request;
+        ResponseBuildingStrategy    *_strategy;
 };
 
 #endif  // INCLUDE_SRC_RESPONSEBUILDSTATE_HPP_

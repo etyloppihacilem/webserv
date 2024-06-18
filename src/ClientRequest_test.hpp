@@ -106,8 +106,7 @@ static const t_test_target ClientRequestTargetSuiteValues[] {
         "ool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/c"
         "ool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/c"
         "ool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/c"
-        "ool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool HTTP/1.1",
-        "URITooLong", ""
+        "ool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool HTTP/1.1", "URITooLong", ""
     }, {
         "no_protocol", "/dev?using AHAH/1.0", "BadRequest", ""
     }, {
@@ -170,13 +169,8 @@ static const t_test_messages ClientRequestTestData[] {
     // },
     {
         "base",
-        "GET / HTTP/1.1\r\n"
-        "Host: www.example.com\r\n"
-        "Infos: il_n'y_a_rien_ici\r\n"
-        "coucou: jesuisheureux\r\n"
-        "\r\n"
-        "Eheheheheh voici des donnees\r\n",
-        {
+        "GET / HTTP/1.1\r\n""Host: www.example.com\r\n""Infos: il_n'y_a_rien_ici\r\n""coucou: jesuisheureux\r\n""\r\n"
+        "Eheheheheh voici des donnees\r\n", {
             {
                 "Host", "www.example.com"
             }, {
@@ -185,14 +179,10 @@ static const t_test_messages ClientRequestTestData[] {
                 "coucou", "jesuisheureux"
             },
         }, "/", GET, false, unset
-    },
-    {
+    }, {
         "no_body",
-        "GET / HTTP/1.1\r\n"
-        "Host: www.example.com\r\n"
-        "Infos: il_n'y_a_rien_ici\r\n"
-        "coucou: jesuisheureux\r\n"
-        "\r\n", // no data
+        "GET / HTTP/1.1\r\n""Host: www.example.com\r\n""Infos: il_n'y_a_rien_ici\r\n""coucou: jesuisheureux\r\n""\r\n", // no
+                                                                                                                        // data
         {
             {
                 "Host", "www.example.com"
@@ -202,22 +192,14 @@ static const t_test_messages ClientRequestTestData[] {
                 "coucou", "jesuisheureux"
             },
         }, "/", GET, false, unset
-    },
-    {
-        "no_headers",
-        "GET / HTTP/1.1\r\n"
-        "\r\n"
-        "Il n'y a pas de headers !!\r\n",
+    }, {
+        "no_headers", "GET / HTTP/1.1\r\n""\r\n""Il n'y a pas de headers !!\r\n", {}, "/", GET, false, BadRequest
+    }, {
+        "no_headers_absolute", "GET http://superjesuisheureux.com/ HTTP/1.1\r\n""\r\n""Il n'y a pas de headers !!\r\n",
         {
-        }, "/", GET, false, BadRequest
-    },
-    {
-        "no_headers_absolute",
-        "GET http://superjesuisheureux.com/ HTTP/1.1\r\n"
-        "\r\n"
-        "Il n'y a pas de headers !!\r\n",
-        {
-            {"Host", "superjesuisheureux.com"}
+            {
+                "Host", "superjesuisheureux.com"
+            }
         }, "/", GET, true, unset
     },
 };

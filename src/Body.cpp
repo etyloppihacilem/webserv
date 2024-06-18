@@ -23,9 +23,9 @@ Body::Body(int fd, std::string &buffer):
 Body::~Body() {}
 
 bool Body::is_done() const {
-    return (_done);
+    return _done;
 }
 
 size_t Body::length() const {
-    return (_total);
+    return _total;
 }

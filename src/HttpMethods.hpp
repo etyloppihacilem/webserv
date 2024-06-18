@@ -22,13 +22,13 @@ enum HttpMethod {
 inline std::string method_string(const int &code) {
     switch (code) {
         case 0:
-            return ("GET");
+            return "GET";
         case 1:
-            return ("POST");
+            return "POST";
         case 2:
-            return ("DELETE");
+            return "DELETE";
         default:
-            return (std::string());
+            return std::string();
     }
 }
 

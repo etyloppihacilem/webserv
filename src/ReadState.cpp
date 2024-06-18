@@ -15,7 +15,7 @@
 #include "todo.hpp"
 #include <cstddef>
 #include <strings.h>
-#include <unistd.h>
+#include <unistd.h> // TODO nettoyer les headers partout
 
 ReadState::ReadState(int fd):
     ProcessState(fd),
@@ -36,13 +36,13 @@ size_t ReadState::find_method() {
         ret = found;
     found = _buffer.find("DELETE", 0);
     if (found < ret)
-        return (found);
-    return (ret);
+        return found;
+    return ret;
 }
 
 bool ReadState::process() {
     if (_state == ready || _state == ready_body)
-        return (true);
+        return true;
 
     // size_t  bytes_read;
     char buffer[BUFFER_SIZE + 1] = {
@@ -53,7 +53,7 @@ bool ReadState::process() {
         read(_fd, buffer, BUFFER_SIZE);
     }
     process_buffer(buffer);
-    return (_state == ready || _state == ready_body);
+    return _state == ready || _state == ready_body;
 }
 
 t_state ReadState::process_buffer(char *buffer) {
@@ -71,28 +71,28 @@ t_state ReadState::process_buffer(char *buffer) {
 
         if (begin == _buffer.npos) {
             _buffer = "";
-            return (_state);
+            return _state;
         }
 
         // verifier la longueur du buffer
         size_t end = _buffer.find("\r\n\r\n", 0);
 
         if (end == _buffer.npos)
-            return (_state);
+            return _state;
         if (begin != 0)
             _buffer = _buffer.substr(begin, _buffer.length() - begin);
         // if (end - begin > MAX_HEADER) // TODO est-ce que le max header existe ??
         // _buffer = "" et il faut repondre par une erreur
         _in_progress = new ClientRequest;
         if (!_in_progress->parse_header(_buffer))
-            return (_state = error); // TODO close connection after error response is sent.
+            return _state = error; // TODO close connection after error response is sent.
         _buffer = _buffer.substr(0, end);
         if (_in_progress->init_body(_buffer, _fd))
             _state = ready_body;
         else
             _state = ready;
     }
-    return (_state);
+    return _state;
 }
 
 void ReadState::done_message() {

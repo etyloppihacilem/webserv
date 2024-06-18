@@ -35,26 +35,16 @@ ClientRequest::~ClientRequest() {
         delete _body;
 }
 
-ClientRequest::ClientRequest(const ClientRequest &other) {
-    (void) other;
-}
-
-ClientRequest &ClientRequest::operator=(const ClientRequest &other) {
-    if (&other == this)
-        return (*this);
-    return (*this);
-}
-
 HttpMethod ClientRequest::parse_method(const std::string &method, const size_t &end) {
     if (method.length() < 2 || end > MAX_METHOD)
-        throw (HttpError(NotImplemented));
+        throw HttpError(NotImplemented);
     if (method[0] == 'G' && method.find(method_string(GET)) == 0 && end == 3)
-        return (GET);
+        return GET;
     if (method[0] == 'P' && method.find(method_string(POST)) == 0 && end == 4)
-        return (POST);
+        return POST;
     if (method[0] == 'D' && method.find(method_string(DELETE)) == 0 && end == 6)
-        return (DELETE);
-    throw (HttpError(NotImplemented));
+        return DELETE;
+    throw HttpError(NotImplemented);
 }
 
 static void replace_all(std::string &str, const std::string &to_find, const std::string &to_replace) {
@@ -74,9 +64,9 @@ void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
         sp_protocol = in.find_first_of(" \t", pos + 1);
         protocol    = in.find("HTTP", pos);
         if (protocol == std::string::npos || sp_protocol == std::string::npos)
-            throw (HttpError(BadRequest));
+            throw HttpError(BadRequest);
         if ((protocol - 1) - (pos + 1) > MAX_URI)
-            throw (HttpError(URITooLong));
+            throw HttpError(URITooLong);
         if (sp_protocol != protocol - 1) {                  // there are SP remaining in URI, that is wrong, going for
                                                             // 301
                                                             // MovedPermanently.
@@ -85,7 +75,7 @@ void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
 
             replace_all(redirect,   " ",    "%20");
             replace_all(redirect,   "\t",   "%09");
-            throw (HttpError(MovedPermanently, redirect));  // message is the redirect location
+            throw HttpError(MovedPermanently, redirect);    // message is the redirect location
         }
         _target = in.substr(pos + 1, (protocol - 1) - (pos + 1));
     }
@@ -95,12 +85,12 @@ void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
         size_t host_end = _target.find("/", 7);
 
         if (host_end == std::string::npos || host_end == 7)
-            throw (HttpError(BadRequest));
+            throw HttpError(BadRequest);
         _header["Host"] = _target.substr(7, host_end - 7);
         _target         = _target.substr(host_end, _target.length() - host_end);
         _absolute_form  = true;
     } else if (_target[0] != '/')   // not origin form
-        throw (HttpError(BadRequest));
+        throw HttpError(BadRequest);
 }
 
 void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_t end) {
@@ -108,7 +98,7 @@ void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_
     size_t  ows = in.find_first_of(" \t", begin);
 
     if (ows < sep || sep > end || sep <= begin || sep == std::string::npos)
-        throw (HttpError(BadRequest));
+        throw HttpError(BadRequest);
 
     std::string key = in.substr(begin, sep - begin);
 
@@ -122,12 +112,12 @@ void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_
     } while (ows == end);   // end is last optional whistspace after this
     if (key == "Host") {
         if (!_absolute_form && _header.find("Host") != _header.end())
-            throw (HttpError(BadRequest));
+            throw HttpError(BadRequest);
         else if (_absolute_form)
             return;
     }
     if (end + 1 <= sep)
-        throw (HttpError(BadRequest));
+        throw HttpError(BadRequest);
     else if (_header.find(key) != _header.end())
         _header[key] += in.substr(sep, (end + 1) - sep);
     else
@@ -139,16 +129,16 @@ void ClientRequest::init_header(const std::string &in) {
     size_t  end     = in.find("\r\n", begin + 2);
 
     if (begin == std::string::npos || end == std::string::npos)
-        throw (HttpError(BadRequest));
+        throw HttpError(BadRequest);
     while (begin + 2 != end) {
         parse_header_line(in, begin + 2, end);
         begin   = end;
         end     = in.find("\r\n", begin + 2);
         if (begin == std::string::npos || end == std::string::npos)
-            throw (HttpError(BadRequest));
+            throw HttpError(BadRequest);
     }
     if (_header.find("Host") == _header.end())
-        throw (HttpError(BadRequest));
+        throw HttpError(BadRequest);
 }
 
 bool ClientRequest::parse_header(const std::string &in) {
@@ -160,7 +150,7 @@ bool ClientRequest::parse_header(const std::string &in) {
         } catch (HttpError &e) {
             _method = none;
             _status = e.get_code();
-            return (false);
+            return false;
         }
         try {
             parse_target(in, sp);
@@ -169,16 +159,16 @@ bool ClientRequest::parse_header(const std::string &in) {
             if (_status == MovedPermanently)
                 _header["Location"] = e.get_message();  // Location is the only header to redirect
                                                         // it is the only header at all because init_header isnt called.
-            return (false);
+            return false;
         }
     }
     try {
         init_header(in);
     } catch (HttpError &e) {
         _status = e.get_code();
-        return (false);
+        return false;
     }
-    return (true);
+    return true;
 }
 
 bool ClientRequest::init_body(std::string &buffer, int fd) {
@@ -193,5 +183,5 @@ bool ClientRequest::init_body(std::string &buffer, int fd) {
     } else { // no body
         _body_exists = false;
     }
-    return (_body_exists);
+    return _body_exists;
 }

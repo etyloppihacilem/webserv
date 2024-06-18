@@ -32,7 +32,7 @@ BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state):
         _body = "";
         shrink_to_fit(_body);
         // usage after emptying it;
-        throw (std::bad_alloc());
+        throw std::bad_alloc();
     }
     if (i == 0)
         error.log("BodyWriterLength : maximum fill_buffer iterations exceeded. This happens to prevent infinite loop. "
@@ -45,11 +45,11 @@ BodyWriterLength::~BodyWriterLength() {}
 std::string BodyWriterLength::generate(size_t size) {
     (void) size;    // size is not needed for BodyWriterLength. The point is to
     _recovered = true;
-    return (_body); // get the whole body in one call
+    return _body;   // get the whole body in one call
 }
 
 size_t BodyWriterLength::length() const {
-    return (_body.length());
+    return _body.length();
 }
 
 void BodyWriterLength::save_mem() {

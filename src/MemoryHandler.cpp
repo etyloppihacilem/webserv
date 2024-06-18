@@ -25,28 +25,28 @@ MemoryHandler::~MemoryHandler() {
 bool MemoryHandler::allocate() {
     if (_allocated) {
         warn.log("Memory handler is allready allocated.");
-        return (_allocated);
+        return _allocated;
     }
     try {
         _storage = new char[_size];
         info.log("Memory handler succesfully allocated.");
     } catch (std::bad_alloc) {
         error.log("FATAL could not allocate handler buffer memory.");
-        return (_allocated);
+        return _allocated;
     }
     _allocated = true;
-    return (_allocated);
+    return _allocated;
 }
 
 bool MemoryHandler::deallocate() {
     if (!_allocated) {
         warn.log("Memory handler is not allocated.");
-        return (_allocated);
+        return _allocated;
     }
     delete [] _storage;
     info.log("Memory handler succesfully deallocated.");
     _allocated = false;
-    return (_allocated);
+    return _allocated;
 }
 
 MemoryHandler mem(1024);

@@ -19,5 +19,5 @@ int main(int ac, char **av) {
     warn.log("warn message -> %s", "hihi");
     error.log("error message -> %p", "mais");
     mem.allocate(); // allocating memory
-    return (0);
+    return 0;
 }

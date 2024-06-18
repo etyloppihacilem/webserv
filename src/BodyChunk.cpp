@@ -29,7 +29,7 @@ BodyChunk::~BodyChunk() {}
 
 size_t BodyChunk::read_body() {
     if (_done)
-        return (0);
+        return 0;
 
     char    buf[BUFFER_SIZE + 1] = {
         0
@@ -38,12 +38,12 @@ size_t BodyChunk::read_body() {
 
     size_read   = read(_fd, buf, BUFFER_SIZE);
     _buffer     += std::string(buf);
-    return (size_read);
+    return size_read;
 }
 
 std::string &BodyChunk::get() {
     if (_done || !_uniform)
-        return (_body);
+        return _body;
     read_body();
     init_chunk();
     if (_bytes_remaining) {
@@ -54,14 +54,14 @@ std::string &BodyChunk::get() {
         _bytes_remaining    -= to_save;
         _total              += to_save;
     }
-    return (_body);
+    return _body;
 }
 
 std::string BodyChunk::pop() {
     std::string ret = "";
 
-    _uniform = false;
-    _body = "";
+    _uniform    = false;
+    _body       = "";
     read_body();
     init_chunk();
     if (_bytes_remaining) {
@@ -72,10 +72,10 @@ std::string BodyChunk::pop() {
         _bytes_remaining    -= to_save;
         _total              += to_save;
     }
-    return (ret);
+    return ret;
 }
 
-void BodyChunk::clean(){
+void BodyChunk::clean() {
     pop();
 }
 
@@ -97,16 +97,16 @@ bool BodyChunk::init_chunk() { // discard until a size line is found
         }
     }
     if (_bytes_remaining > 0 || _done)
-        return (false);
+        return false;
     while (it != _buffer.end()) {
         for (i = it; i != _buffer.end() && is_hex(*i); i++)
             ; // nothing
         if (i == _buffer.end())
-            return (false);
+            return false;
         if (i - it > 0) {
             sp = _buffer.find("\r\n", 0);
             if (sp == _buffer.npos)
-                return (false);
+                return false;
 
             std::stringstream tmp;
 
@@ -121,26 +121,26 @@ bool BodyChunk::init_chunk() { // discard until a size line is found
                     _done       = false;
                 } else
                     _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2)); // skipping trailer section
-                return (false);
+                return false;
             }
-            return (true);
+            return true;
         } else {
             sp = _buffer.find("\r\n", 0);
             if (sp == _buffer.npos) {
                 _buffer = "";
-                return (false);
+                return false;
             }
             _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));
         }
         it = _buffer.begin();
     }
-    return (false);
+    return false;
 }
 
 bool BodyChunk::is_hex(int c) {
     if (std::isdigit(c))
-        return (true);
+        return true;
     if (('a' <= c && c <= 'f') || ('A' <= c && c <= 'F'))
-        return (true);
-    return (false);
+        return true;
+    return false;
 }

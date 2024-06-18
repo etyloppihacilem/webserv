@@ -25,10 +25,8 @@
 class ClientRequest {
     public:
         ClientRequest();
-        ClientRequest(const ClientRequest&);
         ~ClientRequest();
 
-        ClientRequest                             &operator=(const ClientRequest&);
         bool                                parse_header(const std::string &in);
         bool                                init_body(std::string &buffer, int fd);
     private:
@@ -49,12 +47,12 @@ class ClientRequest {
         bool                                _absolute_form;
 
 #ifdef TESTING
-        FRIEND_TEST(ClientRequestTestSuite,   ParseMethodTestExpectedOK);
-        FRIEND_TEST(ClientRequestTestSuite,   ParseMethodTestExpectedFail);
-        FRIEND_TEST(ClientRequestTestTarget,  ParseTargetTest);
-        FRIEND_TEST(ClientRequestTestSuite,   ParseHeaderLineTestHost);
-        FRIEND_TEST(ClientRequestTestParseHeader, ParseHeaderLineTest);
-        FRIEND_TEST(ClientRequestTestInitHeader,  InitHeaderTest);
+        FRIEND_TEST(ClientRequestTestSuite,     ParseMethodTestExpectedOK);
+        FRIEND_TEST(ClientRequestTestSuite,     ParseMethodTestExpectedFail);
+        FRIEND_TEST(ClientRequestTestTarget,    ParseTargetTest);
+        FRIEND_TEST(ClientRequestTestSuite,     ParseHeaderLineTestHost);
+        FRIEND_TEST(ClientRequestTestParseHeader,   ParseHeaderLineTest);
+        FRIEND_TEST(ClientRequestTestInitHeader,    InitHeaderTest);
 #endif
 };
 

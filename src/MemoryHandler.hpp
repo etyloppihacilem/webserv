@@ -18,13 +18,13 @@ class MemoryHandler {
         MemoryHandler(size_t size = 1024);
         ~MemoryHandler();
 
-        bool allocate();
-        bool deallocate();
+        bool    allocate();
+        bool    deallocate();
 
     private:
-        char        *_storage;
-        size_t      _size;
-        bool        _allocated;
+        char    *_storage;
+        size_t  _size;
+        bool    _allocated;
 };
 
 extern MemoryHandler mem;

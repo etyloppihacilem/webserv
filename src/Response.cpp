@@ -42,7 +42,7 @@ void Response::set_code(const HttpCode &code) {
 }
 
 HttpCode Response::get_code() const {
-    return (_code);
+    return _code;
 }
 
 std::string Response::build_response() {
@@ -54,14 +54,14 @@ std::string Response::build_response() {
     // [ ] body
     //      [ ] length
     //      [ ] chunked
-    return (res);
+    return res;
 }
 
 std::string Response::generate_status_line() const {
     std::stringstream line;
 
     line << "HTTP/1.1 " << _code << " " << status_string(_code) << "\r\n";
-    return (line.str());
+    return line.str();
 }
 
 std::string Response::generate_header() const {
@@ -70,7 +70,7 @@ std::string Response::generate_header() const {
     for (mapit i = _header.begin(); i != _header.end(); i++) {
         headers << i->first << ": " << i->second << "\r\n";
     }
-    return (headers.str());
+    return headers.str();
 }
 
 void Response::clean_body() {

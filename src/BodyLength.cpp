@@ -24,20 +24,20 @@ BodyLength::BodyLength(int fd, std::string &buffer, std::string length):
     _read_length(_buffer.length()) {
     for (std::string::iterator i = length.begin(); i != length.end(); i++) {
         if (!isdigit(*i))
-            throw (HttpError(BadRequest));  // inbalid length
+            throw HttpError(BadRequest);    // inbalid length
     }
 
     std::stringstream tmp(length);
 
     if (!(tmp >> _length))
-        throw (HttpError(BadRequest));      // other invalid length
+        throw HttpError(BadRequest);        // other invalid length
 }
 
 BodyLength::~BodyLength() {}
 
 size_t BodyLength::read_body() {
     if (_done)
-        return (0);
+        return 0;
 
     char    buf[BUFFER_SIZE + 1] = {
         0
@@ -49,14 +49,14 @@ size_t BodyLength::read_body() {
     _read_length    += size_read;
     if (_length <= _read_length)
         _done = true;
-    return (size_read);
+    return size_read;
 }
 
 std::string &BodyLength::get() {
     _total  += read_body();
     _body   += _buffer;
     _buffer = "";
-    return (_body);
+    return _body;
 }
 
 std::string BodyLength::pop() {
@@ -67,7 +67,7 @@ std::string BodyLength::pop() {
     _total      += read_body();
     tmp         += _buffer;
     _buffer     = "";
-    return (tmp);
+    return tmp;
 }
 
 void BodyLength::clean() {

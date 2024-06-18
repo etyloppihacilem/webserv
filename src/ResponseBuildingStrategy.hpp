@@ -33,7 +33,7 @@ class ResponseBuildingStrategy {
         Response            _response;
         bool                _done;
         size_t              _estimated_size;
-        std::string _buffer; // TODO check if used
+        std::string         _buffer; // TODO check if used
 };
 
 #endif  // INCLUDE_SRC_RESPONDEBUILDINGSTRATEGY_CPP_

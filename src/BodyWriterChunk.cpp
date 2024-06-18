@@ -23,17 +23,17 @@ BodyWriterChunk::~BodyWriterChunk() {}
 
 std::string BodyWriterChunk::generate(size_t size) {
     if (_done)
-        return ("");
+        return "";
 
     std::string temp;
 
     _done   = _strategy->fill_buffer(temp, size);
     _length += temp.length();
-    return (temp);
+    return temp;
 }
 
 size_t BodyWriterChunk::length() const {
-    return (_length);
+    return _length;
 }
 
 void BodyWriterChunk::save_mem() {

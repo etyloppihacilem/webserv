@@ -24,5 +24,5 @@ void RedirectStrategy::buildResponse() {
 bool RedirectStrategy::fill_buffer(std::string &buffer, size_t size) {
     (void) buffer;
     (void) size;
-    return (false);
+    return false;
 }

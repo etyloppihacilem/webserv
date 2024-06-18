@@ -24,15 +24,15 @@ class HttpError: public std::exception {
         virtual ~HttpError() throw () {}
 
         const char  *what() const throw () {
-            return (_message.c_str());
+            return _message.c_str();
         }
 
         HttpCode    get_code() const {
-            return (_code);
+            return _code;
         }
 
         std::string get_message() const {
-            return (_message);
+            return _message;
         }
 
     private:

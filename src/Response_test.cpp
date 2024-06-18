@@ -16,6 +16,6 @@ TEST(ResponseTestSuite, generate_status_line) {
     Response test;
 
     test.set_code(OK);
-    EXPECT_EQ(test.get_code(), OK);
-    EXPECT_EQ(test.generate_status_line(), "HTTP/1.1 200 OK\r\n");
+    EXPECT_EQ(  test.get_code(), OK);
+    EXPECT_EQ(  test.generate_status_line(), "HTTP/1.1 200 OK\r\n");
 }
