@@ -1,5 +1,5 @@
-#ifndef INCLUDE_STRINGTOKENIZER_H
-#define INCLUDE_STRINGTOKENIZER_H
+#ifndef INCLUDE_STRINGTOKENIZER_HPP_
+#define INCLUDE_STRINGTOKENIZER_HPP_
 
 
 #include <cstddef>
@@ -9,16 +9,18 @@
 class StringTokenizer
 {
 public:
-	StringTokenizer(const std::string& str, const std::string& delim);
+	StringTokenizer(const std::string &str, const std::string &delim);
 	~StringTokenizer();
 
 	bool hasMoreTokens();
 	std::string remainingString();
 	std::size_t countTokens();
 	std::size_t countTokens(const std::string &separator);
+	std::string peakToken();
 	std::string nextToken();
-	std::string nextToken(const std::string& separator);
-	// std::string filterNextToken(const std::string& filterStr);
+	std::string nextToken(const std::string &separator); // unused so far
+	std::string nextToken(std::size_t separatorPosition, const std::string &separator);
+	std::string filterNextToken(const std::string& filterString);
 
 private:
 
@@ -27,5 +29,4 @@ private:
 	std::size_t	_delimiterLen;
 };
 
-#endif
-
+#endif // INCLUDE_SRC_STRINGTOKENIZER_HPP_

@@ -109,6 +109,27 @@ std::size_t StringTokenizer::countTokens(const std::string &separator)
 	return 0;
 }
 
+std::string StringTokenizer::peakToken()
+{
+	if (_tokenString.size() == 0)
+	{
+		return "";
+	}
+
+	std::string	token = "";
+	std::size_t	delimiterPosition = _tokenString.find(_delimiter, 0);
+
+	if (delimiterPosition != std::string::npos)
+	{
+		token = _tokenString.substr(0, delimiterPosition);
+	}
+	else
+	{
+		token = _tokenString;
+	}
+	return token;
+}
+
 std::string StringTokenizer::nextToken()
 {
 	if (_tokenString.size() == 0)
@@ -133,7 +154,7 @@ std::string StringTokenizer::nextToken()
 	return token;
 }
 
-std::string StringTokenizer::nextToken(const std::string& separator)
+std::string StringTokenizer::nextToken(const std::string &separator)
 {
 	if (_tokenString.size() == 0)
 	{
@@ -141,13 +162,16 @@ std::string StringTokenizer::nextToken(const std::string& separator)
 	}
 
 	std::string	token = "";
-	std::size_t	delimiterPosition = _tokenString.find(separator, 0);
-
-	if (delimiterPosition != std::string::npos)
+	std::size_t	separatorPosition = _tokenString.find(separator, 0);
+	if (separatorPosition != std::string::npos)
 	{
-		token = _tokenString.substr(0, delimiterPosition);
-		_tokenString = _tokenString.substr(delimiterPosition + separator.size(),
-						_tokenString.size() - delimiterPosition);
+		if (_tokenString.find(_delimiter, separatorPosition + 1) == separatorPosition + 1)
+		{
+			separatorPosition += _delimiterLen;
+		}
+		token = _tokenString.substr(0, separatorPosition);
+		_tokenString = _tokenString.substr(separatorPosition + separator.size(),
+						_tokenString.size() - separatorPosition);
 	}
 	else
 	{
@@ -158,15 +182,41 @@ std::string StringTokenizer::nextToken(const std::string& separator)
 	return token;
 }
 
-// std::string StringTokenizer::filterNextToken(const std::string& filterStr)
-// {
-// 	std::string tmpString    = nextToken();
-// 	std::size_t currentPos = 0;
+std::string StringTokenizer::nextToken(std::size_t separatorPosition, const std::string &separator)
+{
+	if (_tokenString.size() == 0)
+	{
+		return "";
+	}
 
-// 	while((currentPos = tmpString.find(filterStr, currentPos)) != std::string::npos)
-// 	{
-// 		tmpString.erase(currentPos, filterStr.size());
-// 	}
-//
-// 	return tmpString;
-// }
+	std::string	token = "";
+
+	if (separatorPosition != std::string::npos)
+	{
+		if (_tokenString.find(_delimiter, separatorPosition + 1) == separatorPosition + 1)
+		{
+			separatorPosition += _delimiterLen;
+		}
+		token = _tokenString.substr(0, separatorPosition);
+		_tokenString = _tokenString.substr(separatorPosition + separator.size(),
+						_tokenString.size() - separatorPosition);
+	}
+	else
+	{
+		token = _tokenString.substr(0, _tokenString.size());
+		_tokenString = "";
+	}
+
+	return token;
+}
+
+std::string StringTokenizer::filterNextToken(const std::string &filterString)
+{
+	std::string tmpString    = nextToken();
+	std::size_t currentPos = 0;
+	while((currentPos = tmpString.find(filterString, currentPos)) != std::string::npos)
+	{
+		tmpString.erase(currentPos, filterString.size());
+	}
+	return tmpString;
+}
