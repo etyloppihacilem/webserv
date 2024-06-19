@@ -16,7 +16,7 @@ std::string tokenizeFile(const std::string &input)
 		throw(ConfError());
 	}
 	std::string currentToken = tokenizedFile.nextToken(); // remove http
-	if (currentToken != ConfFieldString(ConfField::http))
+	if (currentToken != ConfFieldString(http))
 	{
 		throw(ConfError());
 	}
@@ -35,7 +35,7 @@ std::string tokenizeServer(StringTokenizer &tokenizedFile)
 		throw(ConfError());
 	}
 	std::string currentToken = tokenizedFile.nextToken(); // remove Server
-	if (currentToken != ConfFieldString(ConfField::server))
+	if (currentToken != ConfFieldString(server))
 	{
 		throw(ConfError());
 	}
@@ -49,24 +49,24 @@ std::string tokenizeServer(StringTokenizer &tokenizedFile)
 
 std::pair<std::string, std::string> tokenizeLocation(StringTokenizer &tokenizedServer)
 {
-	std::pair<std::string, std::string> location;
+	std::pair<std::string, std::string> locationInfo;
 	if (!isValidLocation(tokenizedServer.remainingString()))
 	{
 		throw(ConfError());
 	}
 	std::string currentToken = tokenizedServer.nextToken(); // remove location
-	if (currentToken != ConfFieldString(ConfField::location))
+	if (currentToken != ConfFieldString(location))
 	{
 		throw(ConfError());
 	}
-	location.first = tokenizedServer.nextToken(); // extract location root
+	locationInfo.first = tokenizedServer.nextToken(); // extract location root
 	currentToken = tokenizedServer.nextToken(); // remove open bracket
 	if (currentToken != "{")
 	{
 		throw(ConfError());
 	}
-	location.second = tokenizedServer.nextToken(findClosingBrace(tokenizedServer.remainingString()), "}");
-	return location;
+	locationInfo.second = tokenizedServer.nextToken(findClosingBrace(tokenizedServer.remainingString()), "}");
+	return locationInfo;
 }
 
 size_t	findClosingBrace(const std::string &tokenString)

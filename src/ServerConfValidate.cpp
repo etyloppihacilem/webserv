@@ -2,6 +2,7 @@
 #include "ServerConfValidate.hpp"
 #include <string>
 #include <vector>
+#include <cstdlib>
 #include <climits>
 #include <sys/types.h>
 #include <sys/stat.h>
