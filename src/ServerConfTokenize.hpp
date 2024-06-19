@@ -9,7 +9,7 @@ std::string tokenizeFile(StringTokenizer strtok);
 std::string tokenizeServer(StringTokenizer &);
 Field tokenizeLocation(StringTokenizer &);
 Field tokenizeField(StringTokenizer &);
-ValueList tokenizeField(const std::string &value);
+ValueList tokenizeValue(const std::string &value);
 
 size_t findClosingBrace(const std::string &tokenString);
 

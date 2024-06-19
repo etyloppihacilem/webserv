@@ -8,6 +8,20 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+bool isValidConfigFile(const std::string &configFile)
+{
+	if (configFile.size() == 0)
+	{
+		return false;
+	}
+	std::string	CONF = ".conf";
+	if (configFile.find(CONF, 0) == configFile.size() - CONF.size())
+	{
+		return true;
+	}
+	return false;
+}
+
 bool isValidFieldName(const std::string &name)
 {
 	for (int i = 0; i < COUNT_CONF_FIELD; i++)
