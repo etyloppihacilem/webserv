@@ -2,8 +2,9 @@
 
 StringTokenizer::StringTokenizer(const std::string &str, const std::string &delim)
 {
-	if ((str.size() == 0) || (delim.size() == 0))
+	if (str.empty() || delim.empty())
 	{
+		_tokenString = "";
 		return;
 	}
 
@@ -86,7 +87,7 @@ std::size_t StringTokenizer::countTokens()
 
 std::size_t StringTokenizer::countTokens(const std::string &separator)
 {
-	if (_tokenString.size() > 0)
+	if (!_tokenString.empty())
 	{
 		std::size_t	count = 0;
 		std::size_t	currentPosition = 0;
@@ -111,7 +112,7 @@ std::size_t StringTokenizer::countTokens(const std::string &separator)
 
 std::string StringTokenizer::peakToken()
 {
-	if (_tokenString.size() == 0)
+	if (_tokenString.empty())
 	{
 		return "";
 	}
@@ -132,7 +133,7 @@ std::string StringTokenizer::peakToken()
 
 std::string StringTokenizer::nextToken()
 {
-	if (_tokenString.size() == 0)
+	if (_tokenString.empty())
 	{
 		return "";
 	}
@@ -156,7 +157,7 @@ std::string StringTokenizer::nextToken()
 
 std::string StringTokenizer::nextToken(const std::string &separator)
 {
-	if (_tokenString.size() == 0)
+	if (_tokenString.empty())
 	{
 		return "";
 	}
@@ -184,7 +185,7 @@ std::string StringTokenizer::nextToken(const std::string &separator)
 
 std::string StringTokenizer::nextToken(std::size_t separatorPosition, const std::string &separator)
 {
-	if (_tokenString.size() == 0)
+	if (_tokenString.empty())
 	{
 		return "";
 	}
