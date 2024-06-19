@@ -142,6 +142,19 @@ void ClientRequest::init_header(const std::string &in) {
         throw HttpError(BadRequest);
 }
 
+/// Parsing header of request.
+
+/**
+  Will first parse the method, then the target and parameters, and the headers.
+
+  It returns true if it is ready to continue or false if an error occurred.
+  The `_status` code is set accordingly and should be use to determine which error page to reply with. When false is
+  returned, this does not guarantee that the whole object is set, and therefor it should not be used normally (like
+  continuing the response generation).
+
+  In the particular case of a 3xx code (redirect), the only item in `_header` should be 'Location', containing a string to
+  redirect to. This should be the *only* header set.
+  */
 bool ClientRequest::parse_header(const std::string &in) {
     {
         size_t sp = in.find_first_of(" \t");
@@ -172,6 +185,13 @@ bool ClientRequest::parse_header(const std::string &in) {
     return true;
 }
 
+/**
+  This function is used to initiate body (if any).
+
+  It returns true if a body is found, false if not and sets _body_exists accordingly.
+  _body_exists should be checked before any action is performed on a supposed _body.
+  TODO check if there is no better way to protect this (in getter for example).
+  */
 bool ClientRequest::init_body(std::string &buffer, int fd) {
     (void) buffer;
     (void) fd;
@@ -188,7 +208,7 @@ bool ClientRequest::init_body(std::string &buffer, int fd) {
 }
 
 void ClientRequest::save_mem() {
-    shrink_to_fit(_method);
-    shrink_to_fit(_target);
+    shrink_to_fit(  _method);
+    shrink_to_fit(  _target);
     _body->save_mem();
 }
