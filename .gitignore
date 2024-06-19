@@ -15,3 +15,6 @@ obj
 obj/**
 webserv
 webserv_test
+.nfs*
+Session.vim
+webserv_tokened.conf

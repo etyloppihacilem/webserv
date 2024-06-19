@@ -16,7 +16,7 @@ namespace ServerConf
 	static const int INPUT_TIMEOUT = 15; //second
 	static const int OUTPUT_TIMEOUT = 180; //second
 	static const int CGI_TIMEOUT = 180; //second
-	static const std::string ISSPACE = " 	";
+	static const std::string ISSPACE = " \t";
 
 	typedef std::pair<std::string, std::string> Field;
 

@@ -28,22 +28,22 @@
 class StringTokenizer
 {
 public:
-   StringTokenizer(const std::string& _str, const std::string& _delim);
-  ~StringTokenizer(){};
+	StringTokenizer(const std::string& _str, const std::string& _delim);
+	~StringTokenizer(){};
 
-   int         countTokens();
-   bool        hasMoreTokens();
-   std::string nextToken();
-   int         nextIntToken();
-   double      nextFloatToken();
-   std::string nextToken(const std::string& delim);
-   std::string remainingString();
-   std::string filterNextToken(const std::string& filterStr);
+	int countTokens();
+	bool hasMoreTokens();
+	std::string nextToken();
+	int nextIntToken();
+	double nextFloatToken();
+	std::string nextToken(const std::string& delim);
+	std::string remainingString();
+	std::string filterNextToken(const std::string& filterStr);
 
 private:
 
-   std::string  token_str;
-   std::string  delim;
+	std::string  token_str;
+	std::string  delim;
 };
 
 #endif
