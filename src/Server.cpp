@@ -66,14 +66,15 @@ bool Server::hasRoute(const std::string &path) const
 	return _routes.find(path) == _routes.end() ? false : true;
 }
 
-Route &Server::findRoute(const std::string &path)
+// Route &Server::findRoute(const std::string &path)
+// {
+// 	return _routes[path];
+// 	return _routes.find(path) == _routes.end() ? 0 : &_routes.find(path)->second;
+// }
+
+Route &Server::getRoute(const std::string &path)
 {
 	return _routes[path];
-}
-
-Route *Server::getRoute(const std::string &path)
-{
-	return _routes.find(path) == _routes.end() ? 0 : &_routes.find(path)->second;
 }
 
 bool Server::hasServeName(const std::string &serverName) const

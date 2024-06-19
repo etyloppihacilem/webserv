@@ -6,8 +6,8 @@
 
 #include "HttpMethods.hpp"
 
-class Route {
-
+class Route
+{
 private:
 	bool _autoindex;
 	std::vector<HttpMethod > _methods;
@@ -49,7 +49,6 @@ public:
 	bool hasUpload() const;
 	bool hasRedir() const;
 	bool hasCgi() const;
-
 };
 
 #endif // !__INCLUDE_SRC_ROUTE__

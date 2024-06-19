@@ -7,11 +7,8 @@
 #include "HttpMethods.hpp"
 #include "Route.hpp"
 
-	// unsigned int _maxBodySize;
-	// unsigned int _maxConnection;
-
-class Server {
-
+class Server
+{
 private:
 	std::vector<std::string> _serverName;
 	unsigned int _port;
@@ -33,6 +30,7 @@ public:
 	Server(std::string);
 	~Server();
 
+	bool hasServeName(const std::string &serverName) const;
 	std::vector<std::string> getServerName() const;
 	unsigned int getPort() const;
 	bool getAutoindex() const;
@@ -41,10 +39,18 @@ public:
 	std::vector<std::string> getIndexPage() const;
 	std::map<std::string, std::string> getErrorPages() const;
 	bool hasRoute(const std::string &path) const;
-	Route &findRoute(const std::string &path);
-	Route *getRoute(const std::string &path);
-	bool hasServeName(const std::string &serverName) const;
+	Route &getRoute(const std::string &path);
 
+	void setServerName(const std::string &);
+	void setPort(const std::string &);
+	void setAutoindex(const std::string &);
+	void setMethods(const std::string &);
+	void setRootDir(const std::string &);
+	void setIndexPage(const std::string &);
+	void addRoute(const std::string &);
+	void addErrorPage(const std::string &);
+
+	// Route *getRoute(const std::string &path);
 };
 
 #endif // !__INCLUDE_SRC_SERVER__

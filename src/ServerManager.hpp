@@ -5,16 +5,16 @@
 #include <vector>
 class Server;
 
-class ServerManager {
-	
+class ServerManager
+{
 private:
 	ServerManager(const std::string& configFile);
 	ServerManager(ServerManager &rhs);
 	void operator=(const ServerManager &rhs);
 
-	static ServerManager* instance;
-	std::string value;
-	std::vector<Server> Servers;
+	static ServerManager* _instance;
+	std::string _configFile;
+	std::vector<Server> _servers;
 
 public:
 	static ServerManager *getInstance(const std::string &configFile);
@@ -22,7 +22,6 @@ public:
 	~ServerManager();
 
 	Server &getServer(const std::string &serverName, int port);
-
 };
 
 #endif // !__INCLUDE_SRC_SERVERMANAGER_
