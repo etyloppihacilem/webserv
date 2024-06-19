@@ -1,4 +1,5 @@
 #include "HttpMethods.hpp"
+#include "ServerConfFields.hpp"
 #include "ServerConfValidate.hpp"
 #include <string>
 #include <vector>
@@ -7,7 +8,17 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-typedef std::pair<std::string, std::string> Field;
+bool isValidFieldName(const std::string &name)
+{
+	for (int i = 0; i < COUNT_CONF_FIELD; i++)
+	{
+		if (name == ConfFieldString(i))
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
 bool isValidHttp(const std::string &value)
 {

@@ -2,21 +2,27 @@
 #define INCLUDE_SRC_SERVERCONFFIELDS_HPP_
 
 #include <string>
+#include <vector>
 
 #define MIN_FIELD_SIZE 4
 #define MAX_FIELD_SIZE 20
-#define MAX_PORT = 65535;
-#define MAX_BODY_SIZE = INT_MAX;
-#define MAX_CLIENT_CONNECTION = 5;
-#define CONNECTION_TIMEOUT = 180; //second
-#define REQUEST_TIMEOUT = 60; //second
-#define INPUT_TIMEOUT = 15; //second
-#define OUTPUT_TIMEOUT = 180; //second
-#define CGI_TIMEOUT = 180; //second
+#define MAX_PORT 65535
+#define MAX_BODY_SIZE INT_MAX
+#define MAX_CLIENT_CONNECTION 5
+#define CONNECTION_TIMEOUT 180 //second
+#define REQUEST_TIMEOUT 60 //second
+#define INPUT_TIMEOUT 15 //second
+#define OUTPUT_TIMEOUT 180 //second
+#define CGI_TIMEOUT 180 //second
+
+#define COUNT_CONF_FIELD 15
+
+typedef std::vector<std::string> ValueList;
+typedef std::pair<std::string, std::string> Field;
 
 enum ConfField
 {
-    none = -1,
+    // none = -1,
     http = 0,
     server = 1,
     location = 2,
@@ -37,8 +43,8 @@ enum ConfField
 inline std::string ConfFieldString(const int &code)
 {
     switch (code) {
-    	case -1:
-    		return "none";
+    	// case -1:
+    	// 	return "none";
     	case 0:
     		return "http";
     	case 1:
@@ -80,6 +86,21 @@ class ConfError: public std::exception {
             _message(message) {}
 
         virtual ~ConfError() throw () {}
+
+        const char  *what() const throw () {
+            return (_message.c_str());
+        }
+
+    private:
+        std::string _message;
+};
+
+class ConfWarn: public std::exception {
+    public:
+        ConfWarn(std::string message = "") throw ():
+            _message(message) {}
+
+        virtual ~ConfWarn() throw () {}
 
         const char  *what() const throw () {
             return (_message.c_str());

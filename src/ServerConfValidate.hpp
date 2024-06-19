@@ -3,6 +3,7 @@
 
 #include <string>
 
+bool isValidFieldName(const std::string &);
 bool isValidHttp(const std::string &);
 bool isValidServer(const std::string &);
 bool isValidLocation(const std::string &);

@@ -1,7 +1,5 @@
-#include "ServerConfFields.hpp"
-#include "ServerConfValidate.hpp"
-#include "StringTokenizer.hpp"
 #include "ServerConfTokenize.hpp"
+#include "ServerConfValidate.hpp"
 #include <algorithm>
 
 std::string tokenizeFile(const std::string &input)
@@ -47,9 +45,9 @@ std::string tokenizeServer(StringTokenizer &tokenizedFile)
 	return tokenizedFile.nextToken(findClosingBrace(tokenizedFile.remainingString()), "}");
 }
 
-std::pair<std::string, std::string> tokenizeLocation(StringTokenizer &tokenizedServer)
+Field tokenizeLocation(StringTokenizer &tokenizedServer)
 {
-	std::pair<std::string, std::string> locationInfo;
+	Field locationInfo;
 	if (!isValidLocation(tokenizedServer.remainingString()))
 	{
 		throw(ConfError());
@@ -67,6 +65,31 @@ std::pair<std::string, std::string> tokenizeLocation(StringTokenizer &tokenizedS
 	}
 	locationInfo.second = tokenizedServer.nextToken(findClosingBrace(tokenizedServer.remainingString()), "}");
 	return locationInfo;
+}
+
+Field tokenizeField(StringTokenizer &tokenizedServer)
+{
+	Field fieldInfo;
+	std::string currentToken = tokenizedServer.nextToken(); // remove Server
+	if (isValidFieldName(currentToken))
+	{
+		tokenizedServer.nextToken(";");
+		throw(ConfError());
+	}
+	fieldInfo.first = currentToken;
+	fieldInfo.second = tokenizedServer.nextToken(";"); // remove open bracket
+	return fieldInfo;
+}
+
+ValueList tokenizeValue(const std::string &value)
+{
+	ValueList valueList;
+	StringTokenizer tokenizedValue(value, "|");
+	while (tokenizedValue.hasMoreTokens())
+	{
+		valueList.push_back(tokenizedValue.nextToken());
+	}
+	return valueList;
 }
 
 size_t	findClosingBrace(const std::string &tokenString)
