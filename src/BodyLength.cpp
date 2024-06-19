@@ -24,7 +24,7 @@ BodyLength::BodyLength(int fd, std::string &buffer, std::string length):
     _read_length(_buffer.length()) {
     for (std::string::iterator i = length.begin(); i != length.end(); i++) {
         if (!isdigit(*i))
-            throw HttpError(BadRequest);    // inbalid length
+            throw HttpError(BadRequest);    // invalid length
     }
 
     std::stringstream tmp(length);
@@ -35,6 +35,9 @@ BodyLength::BodyLength(int fd, std::string &buffer, std::string length):
 
 BodyLength::~BodyLength() {}
 
+/**
+  Function used to fill _buffer. Will read the body until last byte and not more.
+  */
 size_t BodyLength::read_body() {
     if (_done)
         return 0;

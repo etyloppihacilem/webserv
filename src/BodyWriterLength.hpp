@@ -27,8 +27,9 @@ class BodyWriterLength: public BodyWriter {
         void        save_mem(); // save_mem should be put on every object to save memory if needed
 
     private:
-        std::string _body;
-        bool        _recovered;
+        std::string _body;      ///< Body content.
+        bool        _recovered; ///< Tells if body was read at least once. It allows save_mem() to free body if called
+                                ///< and body is already read.
 };
 
 #endif  // INCLUDE_SRC_BODYWRITERLENGTH_HPP_

@@ -17,6 +17,19 @@
 #include "gtest/gtest.h"
 #endif
 
+/**
+  BodyChunk is meant to read chunked body from ClientRequest.
+
+  A chunk body will have the following structure :
+  ```
+  SIZE\r\n                  // a chunk
+  <content of SIZE>\r\n
+  ...                       // some more chunks
+  0\r\n                     // end chunk
+  <Discarded trailing optional stuff>\r\n
+  ```
+  with SIZE being the hex number of bytes.
+  */
 class BodyChunk: public Body {
     public:
         BodyChunk(int fd, std::string &buffer);
@@ -25,12 +38,12 @@ class BodyChunk: public Body {
         std::string &get();
         std::string pop();
         void        clean();
-        size_t      read_body();
 
     private:
-        size_t      _bytes_remaining;
-        bool        _trailing;
+        size_t      _bytes_remaining;   ///< Number of bytes left to read in current chunk
+        bool        _trailing;          ///< Tells if body is read but trailing info is left to read and discard
 
+        size_t      read_body();
         bool        init_chunk();
         bool        is_hex(int c);
 #ifdef TESTING

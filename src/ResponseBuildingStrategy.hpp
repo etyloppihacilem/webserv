@@ -17,6 +17,9 @@
 #include <cstddef>
 #include <string>
 
+/**
+  This is the abstract class to create object in charge of handling ClientRequest and generating an appropriate Response.
+  */
 class ResponseBuildingStrategy {
     public:
         ResponseBuildingStrategy(ResponseBuildState &state);
@@ -30,11 +33,12 @@ class ResponseBuildingStrategy {
         virtual void        save_mem();
 
     protected:
-        ResponseBuildState  *_state;
-        Response            _response;
-        bool                _done;
-        size_t              _estimated_size;
-        std::string         _buffer; // TODO check if used
+        ResponseBuildState  *_state;            ///< ResponseBuildState to have interdependence and access ClientRequest
+        Response            _response;          ///< The response object
+        bool                _done;              ///< State of the current object
+        size_t              _estimated_size;    ///< Estimated size of response body if needed
+        std::string         _buffer;            ///< String buffer in case too much is read. Not used yet ig TODO check
+        ///< if used
 };
 
 #endif  // INCLUDE_SRC_RESPONDEBUILDINGSTRATEGY_CPP_

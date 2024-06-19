@@ -27,16 +27,20 @@ BodyChunk::BodyChunk(int fd, std::string &buffer):
 
 BodyChunk::~BodyChunk() {}
 
+/**
+  This function will read from the socket and happen the result to _buffer to be processed.
+  */
 size_t BodyChunk::read_body() {
     if (_done)
         return 0;
 
     char    buf[BUFFER_SIZE + 1] = {
         0
-    };                               // whole buffer is set to 0
+    };                                          // whole buffer is set to 0
     size_t  size_read;
 
-    size_read   = read(_fd, buf, BUFFER_SIZE);
+    size_read   = read(_fd, buf, BUFFER_SIZE);  // TODO read only chunk size so buffer is not filled with crap at the
+                                                // end ? See in BodyLength what I mean.
     _buffer     += std::string(buf);
     return size_read;
 }
@@ -79,8 +83,14 @@ void BodyChunk::clean() {
     pop();
 }
 
-// returns true if a new chunk is found and updates _bytes remaining
-// does nothing if _bytes_remaining is not 0
+/**
+  This functions looks for the hex size of a chunk to initiate its reading.
+
+  Calling init_chunk() before the beginning of the chunk will discard any bytes found before the first hex size.
+
+  Calling init_chunk() if a chunk is currently being read (aka if _bytes_remaining != 0) will not do anything and
+  triggers a warning.
+  */
 bool BodyChunk::init_chunk() { // discard until a size line is found
     size_t                  sp;
     std::string::iterator   it = _buffer.begin();
@@ -96,8 +106,10 @@ bool BodyChunk::init_chunk() { // discard until a size line is found
             _done       = true;
         }
     }
-    if (_bytes_remaining > 0 || _done)
+    if (_bytes_remaining > 0 || _done) {
+        warn.log("Trying to initiate a chunk while another is still being read.");
         return false;
+    }
     while (it != _buffer.end()) {
         for (i = it; i != _buffer.end() && is_hex(*i); i++)
             ; // nothing
@@ -137,6 +149,7 @@ bool BodyChunk::init_chunk() { // discard until a size line is found
     return false;
 }
 
+/// Returns true if c is a hex character
 bool BodyChunk::is_hex(int c) {
     if (std::isdigit(c))
         return true;

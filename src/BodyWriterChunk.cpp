@@ -21,6 +21,9 @@ BodyWriterChunk::BodyWriterChunk(ResponseBuildingStrategy &state):
 
 BodyWriterChunk::~BodyWriterChunk() {}
 
+/**
+  Returns string of maximum size, of body.
+  */
 std::string BodyWriterChunk::generate(size_t size) {
     if (_done)
         return "";

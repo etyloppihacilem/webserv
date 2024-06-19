@@ -39,10 +39,15 @@ BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state):
 
 BodyWriterLength::~BodyWriterLength() {}
 
-std::string BodyWriterLength::generate(size_t size) {
-    (void) size;    // size is not needed for BodyWriterLength. The point is to
+/**
+  Return whole body.
+  */
+std::string BodyWriterLength::generate(size_t size /** is discarded because not needed in BodyWriterLength*/) {
+    (void) size;
+    if (_recovered)
+        warn.log("Body already recovered. Risk of loosing body data if save_mem procedures are initiated.");
     _recovered = true;
-    return _body;   // get the whole body in one call
+    return _body;
 }
 
 size_t BodyWriterLength::length() const {

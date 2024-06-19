@@ -19,9 +19,14 @@
 
 #include "Body.hpp"
 
+/**
+  BodyLength is mean to read body sent with the Content-Length header.
+
+  There is no particular body structure.
+  */
 class BodyLength : public Body {
     public:
-        BodyLength(int fd, std::string &buffer, std::string length);
+        BodyLength(int fd, std::string &buffer, std::string length /** is a string representing a decimal. */);
         ~BodyLength();
 
         std::string &get();
@@ -30,8 +35,11 @@ class BodyLength : public Body {
         size_t      read_body();
 
     private:
-        size_t      _length;
-        size_t      _read_length;
+        size_t      _length;        ///< Length to read
+        size_t      _read_length;   ///< Length read from socket.
+        /**< May differ from _total because _total is length of the things that are already returned by get() or pop().
+        */
+
 #ifdef TESTING
         FRIEND_TEST(BodyLengthTestSuite,    Constructor);
         FRIEND_TEST(BodyLengthTestSuite,    BadConstructor);

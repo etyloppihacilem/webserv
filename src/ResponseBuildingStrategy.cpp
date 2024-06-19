@@ -23,18 +23,32 @@ ResponseBuildingStrategy::ResponseBuildingStrategy(ResponseBuildState &state):
 
 ResponseBuildingStrategy::~ResponseBuildingStrategy() {}
 
+/**
+  To get the response. _response can only be used when is_done() returns true.
+  */
 Response &ResponseBuildingStrategy::get_response() {
     return _response;
 }
 
+/**
+  Returns true if response building is done.
+  */
 bool ResponseBuildingStrategy::is_done() const {
     return _done;
 }
 
+/**
+  Returns estimated size. Is mostly used to choose which BodyWriter type is going to be built.
+  This is approximate because in most case, the whole content have not been read yet to save on performances.
+  */
 size_t ResponseBuildingStrategy::get_estimated_size() const {
     return _estimated_size;
 }
 
+/**
+  This function is used to save as most memory as possible in case more heap is needed. This is not at every actions
+  because of performances issues in normal operations.
+  */
 void ResponseBuildingStrategy::save_mem() {
     shrink_to_fit(_buffer);
     _response.save_mem();
