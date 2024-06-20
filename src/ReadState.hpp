@@ -17,10 +17,10 @@
 #include <string>
 
 typedef enum e_state {
-    error = -1,
-    waiting,    // waiting for header to exist or to end
-    ready,
-    ready_body, // waiting for body to arrive or to end
+    error = -1, ///< if there is an error
+    waiting,    ///< waiting for header to exist or to end
+    ready,      ///< done
+    ready_body, ///< done but body exists TODO check if used
 } t_state;
 
 class ReadState : public ProcessState {
@@ -30,14 +30,15 @@ class ReadState : public ProcessState {
 
         bool            process();
         t_state         process_buffer(char *buffer);
-        // TODO is a function to check header requirements needed ?? for example host requirements (that are checked)
-        ClientRequest   &get_message(); // when message is ready to process
-        void            done_message(); // when message is done process, to free
+        // TODO is a function to check header requirements needed ?? For example host requirements (that are checked)
+        ClientRequest   *get_message();
+        void            done_message();
 
     private:
-        t_state         _state;
-        std::string     _buffer;        // buffer is supposed clean at the end of a successful parsing on it.
-        ClientRequest   *_in_progress;
+        t_state         _state;         ///< State of the object
+        std::string     _buffer;        ///< Buffer for parsing on fd
+        /**< buffer is supposed clean at the end of a successful parsing on it. */
+        ClientRequest   *_in_progress;  ///< ClientRequest that is built
 
         size_t          find_method();
 #ifdef TESTING

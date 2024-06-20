@@ -15,6 +15,7 @@ obj
 obj/**
 webserv
 webserv_test
-Doxyfile
 doc
 doc/*
+doc.tar.gz
+doc.zip

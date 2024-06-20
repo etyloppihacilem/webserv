@@ -9,19 +9,26 @@
 ############################################################################# */
 
 #include "RedirectStrategy.hpp"
+#include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "ResponseBuildingStrategy.hpp"
 
-RedirectStrategy::RedirectStrategy(const std::string &location, ResponseBuildState &state):
+RedirectStrategy::RedirectStrategy(const std::string &location, ResponseBuildState &state, HttpCode code):
     ResponseBuildingStrategy(state),
-    _location               (location) {}
+    _location               (location),
+    _code                   (code) {
+    if (!isRedirection(code)) {
+        error.log("Trying to redirect with a non redirect code : %d", code);
+        throw HttpError(InternalServerError);
+    }
+}
 
 RedirectStrategy::~RedirectStrategy() {}
 
 void RedirectStrategy::buildResponse() {
     _response.add_header("Location", _location);
-    _response.set_code(MovedPermanently);
+    _response.set_code(_code);
 }
 
 bool RedirectStrategy::fill_buffer(std::string &buffer, size_t size) {

@@ -28,6 +28,11 @@ class ResponseBuildingStrategy {
         virtual void        buildResponse() = 0;
         Response            &get_response();
         bool                is_done() const;
+        /**
+          fill_buffer() is meant to be use by a BodyWriter object to build or read body.
+
+          This is meant to save memory by not having the whole body in memory all at once.
+          */
         virtual bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER) = 0;
         size_t              get_estimated_size() const;
         virtual void        save_mem();

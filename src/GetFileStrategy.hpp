@@ -20,7 +20,7 @@ class GetFileStrategy : public ResponseBuildingStrategy {
         ~GetFileStrategy();
 
         void    buildResponse();
-        bool    fill_buffer();
+        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
         void    save_mem();
 
     private:

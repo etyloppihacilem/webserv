@@ -40,6 +40,18 @@ GetIndexStrategy::~GetIndexStrategy() {
         closedir(_dir);
 }
 
+/**
+  Returns the type of the item on 3 character.
+
+  Types are :
+    - REG : registry aka normal file
+    - DIR : directory aka folder
+    - CHR : character peripheral (I have no idea)
+    - BLK : block peripheral
+    - FIO : FIFO pipe
+    - LNK : link
+    - SCK : socket
+  */
 std::string GetIndexStrategy::getType(mode_t mode) {
     if (S_ISREG(mode))
         return "REG";
@@ -58,6 +70,11 @@ std::string GetIndexStrategy::getType(mode_t mode) {
     return "XXX";
 }
 
+/**
+  Used to fill the stat structure with informations.
+
+  Returns name value or an error message to display.
+  */
 std::string GetIndexStrategy::generateLine(char *name, struct stat *st) {
     std::string path = _location + std::string(name);
 
@@ -92,8 +109,8 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     if (buffer.length() < size && !_deinit_done) {
         buffer += "</table></body>";
         closedir(_dir);
-        _dir = 0;
-        _done = true;
+        _dir    = 0;
+        _done   = true;
     }
     return _done;
 }

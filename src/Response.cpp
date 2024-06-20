@@ -29,22 +29,39 @@ Response::~Response() {
         delete _body;
 }
 
+/**
+  Set a body that is already built. Remember that Response will delete any saved body at destruction.
+  */
 void Response::set_body(BodyWriter *body) {
     _body = body;
 }
 
+/**
+  Add header to Response _header
+  */
 void Response::add_header(const std::string &field, const std::string &value) {
     _header[field] = value;
 }
 
+/**
+  Sets response code.
+  */
 void Response::set_code(const HttpCode &code) {
     _code = code;
 }
 
+/**
+  Returns response code.
+  */
 HttpCode Response::get_code() const {
     return _code;
 }
 
+/**
+  Generate response.
+
+  I do not know what it really means yet. Mayby just the headers.
+  */
 std::string Response::build_response() {
     std::string res = "";
 
@@ -57,6 +74,13 @@ std::string Response::build_response() {
     return res;
 }
 
+/**
+  Generate status line with the following syntax :
+  ```
+  HTTP/1.1 CODE STATUS_MESSAGE\r\n
+  ```
+  With CODE being the status code and STATUS_MESSAGE the default status string.
+  */
 std::string Response::generate_status_line() const {
     std::stringstream line;
 
@@ -64,6 +88,12 @@ std::string Response::generate_status_line() const {
     return line.str();
 }
 
+/**
+  Generate headers for response. The syntax is the following :
+  ```
+  NAME: VALUE\r\n
+  ```
+  */
 std::string Response::generate_header() const {
     std::stringstream headers;
 
@@ -73,12 +103,20 @@ std::string Response::generate_header() const {
     return headers.str();
 }
 
+/**
+  Delete _body and sets it to 0
+  */
 void Response::clean_body() {
     if (_body)
         delete _body;
     _body = 0;
 }
 
+/**
+  Builds body from a ResponseBuildingStrategy object.
+
+  BodyWriter object uses the ResponseBuildingStrategy.fill_buffer() method to send body chunked or by length.
+  */
 void Response::set_body(ResponseBuildingStrategy &strategy) {
     clean_body();
     if (strategy.get_estimated_size() > MAX_BODY_BUFFER) {

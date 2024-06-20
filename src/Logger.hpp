@@ -17,17 +17,29 @@
 
 #define LOG_MAX_SIZE 1024
 
+/**
+  Object used to log to terminal or file (any std::ostream) log messages with timestamp.
+
+  Do usage of color if in stdout or stderr and enables them automatically.
+
+  Any message have a maximal length of LOG_MAX_SIZE.
+  */
 class Logger {
     public:
-        Logger(std::ostream &os, std::string level = "INFO", std::string color = "", size_t width = 0);
+        Logger(
+            std::ostream    &os,                ///< Out stream
+            std::string     level   = "INFO",   ///< Level to display
+            std::string     color   = "",       ///< Color ANSI code (no reset, but including ESC)
+            size_t          width   = 0         ///< Width to align level
+            );
         ~Logger();
 
         void            log(const char *format, ...);
 
     private:
-        std::string     _level;
-        std::ofstream   _os;
-        int             _width;
+        std::string     _level; ///< Log level
+        std::ofstream   _os;    ///< Out stream
+        int             _width; ///< Width to align level
 };
 
 extern Logger   info;

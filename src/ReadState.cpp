@@ -40,6 +40,9 @@ size_t ReadState::find_method() {
     return ret;
 }
 
+/**
+  Function that read from fd and processes the buffer.
+  */
 bool ReadState::process() {
     if (_state == ready || _state == ready_body)
         return true;
@@ -56,6 +59,11 @@ bool ReadState::process() {
     return _state == ready || _state == ready_body;
 }
 
+/**
+  Function that processes the buffer without reading from fd.
+
+  Called by process().
+  */
 t_state ReadState::process_buffer(char *buffer) {
     _buffer += buffer;
     if (_state == waiting) {
@@ -95,9 +103,21 @@ t_state ReadState::process_buffer(char *buffer) {
     return _state;
 }
 
+/**
+  Function to delete message once the server is done generating response.
+
+  Message should not be deleted anywhere else.
+  */
 void ReadState::done_message() {
     if (_in_progress)
         delete _in_progress;
     _in_progress    = 0;
     _state          = waiting;
 }
+
+/**
+  Returns pointer on generated (or generating message)
+  */
+ClientRequest *ReadState::get_message() {
+    return _in_progress;
+

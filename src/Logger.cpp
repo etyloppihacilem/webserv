@@ -33,6 +33,11 @@ Logger::Logger(std::ostream &os, std::string level, std::string color, size_t wi
 
 Logger::~Logger() {}
 
+/**
+  Print a log message. Same syntax as printf, with format string and variadic parameters. Do add a \n at the end.
+
+  Any message have a maximal length of LOG_MAX_SIZE.
+  */
 void Logger::log(const char *format, ...) {
     time_t  now     = time(0);
     tm      *ltm    = localtime(&now);

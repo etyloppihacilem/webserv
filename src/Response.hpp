@@ -22,6 +22,9 @@
 
 typedef std::map<std::string, std::string>::const_iterator mapit;
 
+/**
+  Response object. This contains everything needed to store and generate a response header and body.
+  */
 class Response {
     public:
         Response();
@@ -34,16 +37,16 @@ class Response {
         void                                set_code(const HttpCode &code);
         HttpCode                            get_code() const;
         std::string                         build_response();
-        void save_mem();
+        void                                save_mem();
 
     private:
         std::string                         generate_status_line() const;
         std::string                         generate_header() const;
         void                                clean_body();
 
-        HttpCode                            _code;
-        std::map<std::string, std::string>  _header;
-        BodyWriter                          *_body;
+        HttpCode                            _code;      ///< HttpStatusCodes of response
+        std::map<std::string, std::string>  _header;    ///< Header map
+        BodyWriter                          *_body;     ///< Body of response (if any)
 #ifdef TESTING
         FRIEND_TEST(ResponseTestSuite, generate_status_line);
 #endif

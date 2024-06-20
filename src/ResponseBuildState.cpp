@@ -11,9 +11,9 @@
 #include "ResponseBuildState.hpp"
 #include "ProcessState.hpp"
 
-/*
- * this class is in charge of choosing the right strategy depending on the request
- * */
+/**
+ This class is in charge of choosing the right strategy depending on the request.
+ */
 ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request):
     ProcessState(fd),
     _request    (request),
