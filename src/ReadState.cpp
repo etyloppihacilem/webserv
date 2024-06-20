@@ -9,13 +9,8 @@
 ############################################################################# */
 
 #include "ReadState.hpp"
-#include "HttpMethods.hpp"
-#include "ClientRequest.hpp"
-#include "ProcessState.hpp"
 #include "todo.hpp"
-#include <cstddef>
-#include <strings.h>
-#include <unistd.h> // TODO nettoyer les headers partout
+#include <unistd.h>
 
 ReadState::ReadState(int fd):
     ProcessState(fd),
@@ -47,7 +42,6 @@ bool ReadState::process() {
     if (_state == ready || _state == ready_body)
         return true;
 
-    // size_t  bytes_read;
     char buffer[BUFFER_SIZE + 1] = {
         0
     };
@@ -120,4 +114,4 @@ void ReadState::done_message() {
   */
 ClientRequest *ReadState::get_message() {
     return _in_progress;
-
+}

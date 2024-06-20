@@ -15,17 +15,11 @@
 #include "Logger.hpp"
 #include "StringUtils.hpp"
 #include "todo.hpp"
-#include <cerrno>
-#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <dirent.h>
-#include <new>
 #include <sstream>
 #include <string>
-#include <strings.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 // location ending in /
 GetIndexStrategy::GetIndexStrategy(const std::string &location, ResponseBuildState &state):

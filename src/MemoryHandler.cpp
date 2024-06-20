@@ -9,7 +9,6 @@
 ############################################################################# */
 
 #include "MemoryHandler.hpp"
-#include <new>
 #include "Logger.hpp"
 
 MemoryHandler::MemoryHandler(size_t size):

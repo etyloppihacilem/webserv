@@ -10,9 +10,6 @@
 
 #include "Body.hpp"
 #include "StringUtils.hpp"
-#include "todo.hpp"
-#include <cstddef>
-#include <unistd.h>
 
 Body::Body(int fd, std::string &buffer):
     _fd     (fd),
@@ -32,6 +29,6 @@ size_t Body::length() const {
 }
 
 void Body::save_mem() {
-    shrink_to_fit(_buffer);
-    shrink_to_fit(_body);
+    shrink_to_fit(  _buffer);
+    shrink_to_fit(  _body);
 }

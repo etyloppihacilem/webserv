@@ -11,7 +11,6 @@
 #ifndef INCLUDE_SRC_LOGGER_HPP_
 #define INCLUDE_SRC_LOGGER_HPP_
 
-#include <cstddef>
 #include <fstream>
 #include <string>
 

@@ -10,9 +10,7 @@
 
 #include "RedirectStrategy.hpp"
 #include "HttpError.hpp"
-#include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
-#include "ResponseBuildingStrategy.hpp"
 
 RedirectStrategy::RedirectStrategy(const std::string &location, ResponseBuildState &state, HttpCode code):
     ResponseBuildingStrategy(state),

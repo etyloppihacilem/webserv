@@ -31,8 +31,8 @@ class RedirectStrategy : public ResponseBuildingStrategy {
         bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
 
     private:
-        HttpCode    _code;
         std::string _location;
+        HttpCode    _code;
 };
 
 #endif  // INCLUDE_SRC_REDIRECTSTRATEGY_HPP_

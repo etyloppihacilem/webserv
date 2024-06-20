@@ -9,16 +9,10 @@
 ############################################################################# */
 
 #include "BodyChunk.hpp"
-#include "Body.hpp"
 #include "Logger.hpp"
-#include "todo.hpp"
-#include <cctype>
-#include <cstddef>
-#include <ios>
-#include <iterator>
 #include <sstream>
-#include <string>
 #include <unistd.h>
+#include "todo.hpp"
 
 BodyChunk::BodyChunk(int fd, std::string &buffer):
     Body            (fd, buffer),
@@ -39,9 +33,9 @@ size_t BodyChunk::read_body() {
     };                                          // whole buffer is set to 0
     size_t  size_read;
 
-    size_read   = read(_fd, buf, BUFFER_SIZE);  // TODO read only chunk size so buffer is not filled with crap at the
+    size_read = read(_fd, buf, BUFFER_SIZE);    // TODO read only chunk size so buffer is not filled with crap at the
                                                 // end ? See in BodyLength what I mean.
-    _buffer     += std::string(buf);
+    _buffer += std::string(buf);
     return size_read;
 }
 

@@ -9,12 +9,9 @@
 ############################################################################# */
 
 #include "BodyWriterLength.hpp"
-#include "BodyWriter.hpp"
 #include "Logger.hpp"
 #include "StringUtils.hpp"
 #include "todo.hpp"
-#include <cstddef>
-#include <new>
 #include <stdint.h>
 #include <string>
 

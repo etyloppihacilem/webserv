@@ -10,12 +10,8 @@
 
 #include "Logger.hpp"
 #include <cstdarg>
-#include <cstddef>
-#include <cstdio>
 #include <iomanip>
-#include <ios>
 #include <iostream>
-#include <ctime>
 #include "colors.hpp"
 
 Logger::Logger(std::ostream &os, std::string level, std::string color, size_t width) {

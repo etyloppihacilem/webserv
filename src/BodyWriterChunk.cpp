@@ -9,8 +9,6 @@
 ############################################################################# */
 
 #include "BodyWriterChunk.hpp"
-#include "ResponseBuildingStrategy.hpp"
-#include <cstddef>
 #include <string>
 
 BodyWriterChunk::BodyWriterChunk(ResponseBuildingStrategy &state):

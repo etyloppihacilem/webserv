@@ -11,8 +11,8 @@
 #ifndef INCLUDE_SRC_BODYLENGTH_HPP_
 #define INCLUDE_SRC_BODYLENGTH_HPP_
 
-#include <cstddef>
 #include <string>
+
 #ifdef TESTING
 #include "gtest/gtest.h"
 #endif

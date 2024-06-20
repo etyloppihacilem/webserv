@@ -22,8 +22,10 @@ void GetFileStrategy::buildResponse() {
     ;
 }
 
-bool GetFileStrategy::fill_buffer() {
-    ;
+bool GetFileStrategy::fill_buffer(std::string &buffer, size_t size) {
+    (void) buffer;
+    (void) size;
+    return false;
 }
 
 void GetFileStrategy::save_mem() {

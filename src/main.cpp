@@ -10,7 +10,6 @@
 
 #include "Logger.hpp"
 #include "MemoryHandler.hpp"
-#include <iostream>
 
 int main(int ac, char **av) {
     (void) ac;

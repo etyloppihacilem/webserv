@@ -15,12 +15,11 @@
 #include "gtest/gtest.h"
 #endif
 
-#include <map>
-#include <sstream>
-#include <string>
+#include "Body.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
-#include "Body.hpp"
+#include <map>
+#include <string>
 
 class ClientRequest {
     public:
