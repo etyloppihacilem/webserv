@@ -19,7 +19,9 @@ typedef enum e_state {
     error = -1, ///< if there is an error
     waiting,    ///< waiting for header to exist or to end
     ready,      ///< done
-    ready_body, ///< done but body exists TODO check if used
+    ready_body, ///< done but body exists
+    // TODO check if used
+    // update it is used but is it useful ??
 } t_state;
 
 class ReadState : public ProcessState {

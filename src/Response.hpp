@@ -30,9 +30,10 @@ class Response {
         Response();
         ~Response();
 
-        void                                set_body(BodyWriter *body); // TODO delete if not used
+        void                                set_body(BodyWriter *body);         // TODO delete if not used
         void                                set_body(ResponseBuildingStrategy &strategy);
-        void                                set_body(const std::string &data);
+        void                                set_body(const std::string &data);  // TODO delete if not used NOT
+                                                                                // IMPLEMENTED YET
         void                                add_header(const std::string &field, const std::string &value);
         void                                set_code(const HttpCode &code);
         HttpCode                            get_code() const;
