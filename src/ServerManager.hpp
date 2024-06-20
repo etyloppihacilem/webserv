@@ -3,18 +3,33 @@
 
 #include <string>
 #include <vector>
-class Server;
+#include "Server.hpp"
 
 class ServerManager
 {
+
+class ServerNotFoundWarn: public std::exception
+{
+    public:
+        ServerNotFoundWarn(std::string message = "") throw () :
+        	_message(message) {}
+        virtual ~ServerNotFoundWarn() throw () {}
+        const char  *what() const throw () {
+            return (_message.c_str());
+        }
+
+    private:
+        std::string _message;
+};
+
 private:
-	ServerManager(const std::string& configFile);
-	ServerManager(ServerManager &rhs);
-	void operator=(const ServerManager &rhs);
+	ServerManager(const std::string &configFile);
+	ServerManager(ServerManager &other) { (void)other; }
+	void operator=(const ServerManager &other) { (void)other; }
 
 	static ServerManager* _instance;
-	std::string _configFile;
 	std::vector<Server> _servers;
+	// ServerReactor _reactor;
 
 public:
 	static ServerManager *getInstance(const std::string &configFile);
@@ -22,6 +37,7 @@ public:
 	~ServerManager();
 
 	Server &getServer(const std::string &serverName, int port);
+	Server &getServer(int port);
 };
 
 #endif // !__INCLUDE_SRC_SERVERMANAGER_

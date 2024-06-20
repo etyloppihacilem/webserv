@@ -5,12 +5,12 @@
 #include "StringTokenizer.hpp"
 #include "ServerConfFields.hpp"
 
-std::string tokenizeFile(StringTokenizer strtok);
+std::string tokenizeFile(const std::string &);
 std::string tokenizeServer(StringTokenizer &);
 Field tokenizeLocation(StringTokenizer &);
 Field tokenizeField(StringTokenizer &);
-ValueList tokenizeValue(const std::string &value);
+ValueList tokenizeValue(const std::string &);
 
-size_t findClosingBrace(const std::string &tokenString);
+size_t findClosingBrace(const std::string &);
 
 #endif // INCLUDE_SRC_SERVERCONFTOKENIZE_HPP_
