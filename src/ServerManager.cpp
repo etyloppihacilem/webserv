@@ -1,102 +1,102 @@
 #include "ServerManager.hpp"
+#include "ServerConfFields.hpp"
 #include "ServerConfTokenize.hpp"
 #include "ServerConfValidate.hpp"
 #include "StringTokenizer.hpp"
 #include <exception>
 #include <fstream>
-#include <cstdlib>
+#include <algorithm>
 
 ServerManager *ServerManager::_instance = nullptr;
 
 ServerManager *ServerManager::getInstance(const std::string &configFile)
 {
-	if (_instance == nullptr)
-	{
-		try{
-			_instance = new ServerManager(configFile);
-		}
-		catch(std::exception &e)
-		{
-			_instance = nullptr;
-		}
-	}
-	return _instance;
+    if (_instance == nullptr) {
+        try {
+            _instance = new ServerManager(configFile);
+        } catch (std::exception &e) {
+            _instance = nullptr;
+        }
+    }
+    return _instance;
 }
 
 void ServerManager::deleteInstance()
 {
-	if (_instance != nullptr)
-	{
-		delete _instance;
-		_instance = nullptr;
-	}
+    if (_instance != nullptr) {
+        delete _instance;
+        _instance = nullptr;
+    }
 }
 
-ServerManager::~ServerManager()
-{
-}
+ServerManager::~ServerManager() {}
 
 std::string readConfFile(std::ifstream &configStream)
 {
-	std::string buff;
-	std::string fileContent;
-	while (std::getline(configStream, buff))
-	{
-		if (buff.empty())
-		{
-			continue ;
-		}
-		fileContent += buff;
-	}
-	return fileContent;
+    std::string buff;
+    std::string fileContent;
+
+    while (std::getline(configStream, buff)) {
+        if (buff.empty()) {
+            continue;
+        }
+        fileContent += buff;
+    }
+    return fileContent;
 }
 
-ServerManager::ServerManager(const std::string &configFile)
-{
-	if (!isValidConfigFile(configFile))
-	{
-		throw(ConfError(configFile + ": file is not in the expected format [ *.conf ]."));
-	}
-	std::ifstream configStream(configFile);
-	if (configStream.fail())
-	{
-		throw(ConfError(configFile + ": fail to open file."));
-	}
-	std::string fileContent = tokenizeFile(readConfFile(configStream));
-	if (fileContent.empty() || !isValidHttp(fileContent))
-	{
-		throw(ConfError(configFile + ": no file root in config file."));
-	}
-	StringTokenizer tokenizedFile(fileContent, "|");
-	std::vector<std::string> tokenizedServers;
-	while (tokenizedFile.hasMoreTokens())
-	{
-		std::string serverContent = tokenizeServer(tokenizedFile);
-		if (isValidServer(serverContent))
-		{
-			try {
-				Server newServer(serverContent);
-			} catch (std::exception &e) {
-				continue ;
-			}
-		}
-	}
-	if (_servers.empty())
-	{
-		throw(ConfError(configFile + ": no valid server child in config file."));
-	}
-	// TODO start Reactor from here
+ServerManager::ServerManager(const std::string &configFile) {
+    try {
+        if (!isValidConfigFile(configFile)) {
+            throw ServerConfError(configFile + ": file is not in the expected format [ *.conf ].");
+        }
+
+        std::ifstream configStream(configFile);
+
+        if (configStream.fail()) {
+            throw ServerConfError(configFile + ": fail to open file.");
+        }
+
+        std::string fileContent = tokenizeFile(readConfFile(configStream));
+
+        if (!isValidHttp(fileContent)) {
+            std::replace(fileContent.begin(), fileContent.end(), "|", " ");
+            throw ServerConfError(fileContent.substr(0, 30)
+                    + " ... : this 'http' module does not possess at least one 'server' module, parsing canceled");
+        }
+
+        StringTokenizer tokenizedFile(fileContent, "|");
+
+        while (tokenizedFile.hasMoreTokens()) {
+            std::string serverContent = tokenizeServer(tokenizedFile);
+
+            if (!isValidServer(serverContent)) {
+                std::replace(serverContent.begin(), serverContent.end(), "|", " ");
+                warn.log(std::string("server: " + serverContent.substr(0, 30)
+                        + " ... : this 'server' module does not possess mandatory fields, parsing canceled").c_str());
+                continue ;
+            }
+            Server newServer(serverContent);
+        }
+        if (_servers.empty()) {
+            throw ServerConfError(configFile + ": no valid server child in config file.");
+        }
+    } catch (ServerConfError &e) {
+        throw FailToInitServerError();
+    }
+    // TODO start Reactor from here
 }
 
 Server &ServerManager::getServer(const std::string &serverName, int port)
 {
-	for (std::vector<Server>::iterator it = _servers.begin(); it < _servers.end(); ++it)
-	{
-		if (it->hasServeName(serverName) && it->getPort() == static_cast<unsigned int>(port))
-		{
-			return *it;
-		}
-	}
-	char *str = itoa(port);
-	throw(ServerNotFoundWarn(serverName + std::string(std::itoa(port))));
+    for (std::vector<Server>::iterator it = _servers.begin(); it < _servers.end(); ++it) {
+        if (it->hasServeName(serverName) && it->getPort() == static_cast<unsigned int>(port)) {
+            return *it;
+        }
+    }
+
+	std::string  toto= itoa(port);
+	char* toti= itoa(port);
+
+    throw ServerNotFoundWarn(serverName + std::string(std::itoa(port)));
 }

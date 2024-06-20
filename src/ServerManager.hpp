@@ -1,43 +1,58 @@
 #ifndef __INCLUDE_SRC_SERVERMANAGER_HPP_
 #define __INCLUDE_SRC_SERVERMANAGER_HPP_
 
+#include <exception>
 #include <string>
 #include <vector>
+#include "HttpStatusCodes.hpp"
 #include "Server.hpp"
 
-class ServerManager
-{
+class ServerManager{
+    class ServerNotFoundWarn: public std::exception{
+        public:
+            ServerNotFoundWarn(std::string message = "") throw ():
+                _message(message) {}
 
-class ServerNotFoundWarn: public std::exception
-{
-    public:
-        ServerNotFoundWarn(std::string message = "") throw () :
-        	_message(message) {}
-        virtual ~ServerNotFoundWarn() throw () {}
-        const char  *what() const throw () {
-            return (_message.c_str());
-        }
+            virtual ~ServerNotFoundWarn() throw () {}
+
+            const char  *what() const throw () {
+                return _message.c_str();
+            }
+
+        private:
+            std::string _message;
+    };
+
+    class FailToInitServerError: public std::exception{
+        public:
+            FailToInitServerError() throw () {}
+
+            virtual ~FailToInitServerError() throw () {}
+    };
 
     private:
-        std::string _message;
-};
+        ServerManager(const std::string &configFile);
 
-private:
-	ServerManager(const std::string &configFile);
-	ServerManager(ServerManager &other) { (void)other; }
-	void operator=(const ServerManager &other) { (void)other; }
+        ServerManager(ServerManager &other) {
+            (void) other;
+        }
 
-	static ServerManager* _instance;
-	std::vector<Server> _servers;
-	// ServerReactor _reactor;
+        void                    operator=(const ServerManager &other) {
+            (void) other;
+        }
 
-public:
-	static ServerManager *getInstance(const std::string &configFile);
-	void deleteInstance();
-	~ServerManager();
+        static ServerManager    *_instance;
+        std::vector<Server>     _servers;
 
-	Server &getServer(const std::string &serverName, int port);
-	Server &getServer(int port);
+    // ServerReactor _reactor;
+
+    public:
+        static ServerManager    *getInstance(const std::string &configFile);
+        void                    deleteInstance();
+        ~ServerManager();
+
+        Server                  &getServer(const std::string &serverName, int port);
+        Server                  &getServer(int port);
 };
 
 #endif // !__INCLUDE_SRC_SERVERMANAGER_

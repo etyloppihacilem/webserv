@@ -14,15 +14,24 @@ std::string tokenizeFile(const std::string &input)
     std::string     currentToken = tokenizedFile.nextToken();   // remove http
 
     if (currentToken != ConfFieldString(http)) {
-        return std::string();
+        std::replace(tokenizedFile.remainingString().begin(), tokenizedFile.remainingString().end(), "|", " ");
+        throw ServerConfError(tokenizedFile.remainingString().substr(0, 30)
+                + " ... : the first token is not 'http', parsing canceled");
     }
     currentToken = tokenizedFile.nextToken();                   // remove open bracket
     if (currentToken != "{") {
-        return std::string();
+        std::replace(tokenizedFile.remainingString().begin(), tokenizedFile.remainingString().end(), "|", " ");
+        throw ServerConfError(tokenizedFile.remainingString().substr(0, 30)
+                + " ... : token '{' is missing after token 'http' , parsing canceled");
     }
 
     size_t closingBracePos = findClosingBrace(tokenizedFile.remainingString());
 
+    if (closingBracePos == std::string::npos) {
+        std::replace(tokenizedFile.remainingString().begin(), tokenizedFile.remainingString().end(), "|", " ");
+        throw ServerConfError(tokenizedFile.remainingString().substr(0, 30)
+                + " ... : token '}' is missing unable to locate the end of 'http' module , parsing canceled");
+    }
     return tokenizedFile.nextToken(closingBracePos, "}");
 }
 
@@ -31,15 +40,24 @@ std::string tokenizeServer(StringTokenizer &tokenizedFile)
     std::string currentToken = tokenizedFile.nextToken();   // remove Server
 
     if (currentToken != ConfFieldString(server)) {
-        return std::string();
+        std::replace(tokenizedFile.remainingString().begin(), tokenizedFile.remainingString().end(), "|", " ");
+        throw ServerConfError(tokenizedFile.remainingString().substr(0, 30)
+                + " ... : the first token is not 'server', parsing canceled");
     }
     currentToken = tokenizedFile.nextToken();               // remove open bracket
     if (currentToken != "{") {
-        return std::string();
+        std::replace(tokenizedFile.remainingString().begin(), tokenizedFile.remainingString().end(), "|", " ");
+        throw ServerConfError(tokenizedFile.remainingString().substr(0, 30)
+                + " ... : token '{' is missing after token 'server' , parsing canceled");
     }
 
     size_t closingBracePos = findClosingBrace(tokenizedFile.remainingString());
 
+    if (closingBracePos == std::string::npos) {
+        std::replace(tokenizedFile.remainingString().begin(), tokenizedFile.remainingString().end(), "|", " ");
+        throw ServerConfError(tokenizedFile.remainingString().substr(0, 30)
+                + " ... : token '}' is missing unable to locate the end of 'server' module , parsing canceled");
+    }
     return tokenizedFile.nextToken(closingBracePos, "}");
 }
 
@@ -47,35 +65,45 @@ Field tokenizeLocation(StringTokenizer &tokenizedServer)
 {
     Field locationInfo;
 
-    if (!isValidLocation(tokenizedServer.remainingString())) {
-        throw ConfError();
-    }
-
-    std::string currentToken = tokenizedServer.nextToken(); // remove location
+    std::string currentToken = tokenizedServer.nextToken(); // remove location field name
 
     if (currentToken != ConfFieldString(location)) {
-        throw ConfError();
+        std::replace(tokenizedServer.remainingString().begin(), tokenizedServer.remainingString().end(), "|", " ");
+        throw ServerConfError(tokenizedServer.remainingString().substr(0, 30)
+                + " ... : the first token is not 'location', parsing canceled");
     }
     locationInfo.first  = tokenizedServer.nextToken();      // extract location root
     currentToken        = tokenizedServer.nextToken();      // remove open bracket
     if (currentToken != "{") {
-        throw ConfError();
+        std::replace(tokenizedServer.remainingString().begin(), tokenizedServer.remainingString().end(), "|", " ");
+        throw ServerConfError(tokenizedServer.remainingString().substr(0, 30)
+                + " ... : token '{' is missing after token 'location' , parsing canceled");
     }
-    locationInfo.second = tokenizedServer.nextToken(findClosingBrace(tokenizedServer.remainingString()), "}");
+
+    size_t closingBracePos = findClosingBrace(tokenizedServer.remainingString());
+
+    if (closingBracePos == std::string::npos) {
+        std::replace(tokenizedServer.remainingString().begin(), tokenizedServer.remainingString().end(), "|", " ");
+        throw ServerConfError(tokenizedServer.remainingString().substr(0, 30)
+                + " ... : token '}' is missing unable to locate the end of 'location' module , parsing canceled");
+    }
+    locationInfo.second = tokenizedServer.nextToken(closingBracePos, "}");
     return locationInfo;
 }
 
 Field tokenizeField(StringTokenizer &tokenizedServer)
 {
-    Field       fieldInfo;
-    std::string currentToken = tokenizedServer.nextToken(); // remove Server
+    Field fieldInfo;
 
-    if (isValidFieldName(currentToken)) {
+    fieldInfo.first = tokenizedServer.nextToken();      // remove Server
+    if (isValidFieldName(fieldInfo.first)) {
         tokenizedServer.nextToken(";");
-        throw ConfError();
+        throw ServerConfWarn(fieldInfo.first + ": field name is not listed in server conf.");
     }
-    fieldInfo.first     = currentToken;
-    fieldInfo.second    = tokenizedServer.nextToken(";"); // remove open bracket
+    fieldInfo.second = tokenizedServer.nextToken(";");  // remove open bracket
+    if (fieldInfo.second.empty()) {
+        throw ServerConfWarn(fieldInfo.first + ": field value is empty.");
+    }
     return fieldInfo;
 }
 
