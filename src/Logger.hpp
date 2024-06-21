@@ -12,6 +12,8 @@
 #define INCLUDE_SRC_LOGGER_HPP_
 
 #include <fstream>
+#include <ios>
+#include <ostream>
 #include <string>
 
 #define LOG_MAX_SIZE 1024
@@ -23,7 +25,7 @@
 
   Any message have a maximal length of LOG_MAX_SIZE.
   */
-class Logger {
+class Logger : public std::ios_base {
     public:
         Logger(
             std::ostream    &os,                ///< Out stream
@@ -33,7 +35,18 @@ class Logger {
             );
         ~Logger();
 
-        void            log(const char *format, ...);
+        Logger   &        log(const char *format, ...);
+        friend Logger          &operator<<(Logger &l, const std::string &msg);
+        friend Logger          &operator<<(Logger &l, const char *str);
+        friend Logger          &operator<<(Logger &l, const int nb);
+        friend Logger          &operator<<(Logger &l, const long nb);
+        friend Logger          &operator<<(Logger &l, const long long nb);
+        friend Logger          &operator<<(Logger &l, const unsigned int nb);
+        friend Logger          &operator<<(Logger &l, const unsigned long nb);
+        friend Logger          &operator<<(Logger &l, const unsigned long long nb);
+        friend Logger          &operator<<(Logger &l, const char nb);
+        std::string     endl(bool crlf = false);
+        Logger          &log();
 
     private:
         std::string     _level; ///< Log level
