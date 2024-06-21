@@ -5,6 +5,7 @@
 #include "StringTokenizer.hpp"
 #include <exception>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 
 ServerManager *ServerManager::_instance = nullptr;
@@ -74,8 +75,9 @@ ServerManager::ServerManager(const std::string &configFile) {
                 std::replace(serverContent.begin(), serverContent.end(), "|", " ");
                 warn.log(std::string("server: " + serverContent.substr(0, 30)
                         + " ... : this 'server' module does not possess mandatory fields, parsing canceled").c_str());
-                continue ;
+                continue;
             }
+
             Server newServer(serverContent);
         }
         if (_servers.empty()) {
@@ -95,8 +97,9 @@ Server &ServerManager::getServer(const std::string &serverName, int port)
         }
     }
 
-	std::string  toto= itoa(port);
-	char* toti= itoa(port);
+    std::stringstream   portStr;
 
-    throw ServerNotFoundWarn(serverName + std::string(std::itoa(port)));
+    portStr << port;
+
+    throw ServerNotFoundWarn(serverName + portStr.str());
 }
