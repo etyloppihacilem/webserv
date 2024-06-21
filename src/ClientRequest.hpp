@@ -63,6 +63,7 @@ class ClientRequest {
         FRIEND_TEST(ClientRequestTestParseHeader, ParseHeaderLineTest);
         FRIEND_TEST(ClientRequestTestInitHeader, InitHeaderTest);
         FRIEND_TEST(ClientRequestTestSuite,     decode_target);
+        FRIEND_TEST(ClientRequestTestSuite,     parse_parameters);
 #endif
 };
 

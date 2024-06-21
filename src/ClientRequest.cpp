@@ -210,11 +210,12 @@ bool ClientRequest::init_body(std::string &buffer, int fd) {
 }
 
 void ClientRequest::decode_target() {
-    size_t percent;
-    int c;
+    size_t  percent;
+    int     c;
 
     while ((percent = _target.find('%')) != _target.npos) {
         std::stringstream st;
+
         st << std::hex << _target.substr(percent + 1, 2);
         st >> c;
         _target.replace(percent, 3, 1, c);
@@ -239,16 +240,18 @@ void ClientRequest::parse_parameters() {
     first   = _target.find('?');
     begin   = first;
     while (begin != _target.npos) {
-        end     = _target.find('&', begin + 1); // end CAN be _target.npos
+        end     = _target.find('&', begin + 1); // end CAN be _target.npos update it cant
         equal   = _target.find('=', begin);
-        if (equal >= end)                       // if there is no value
+        if (end == _target.npos && begin + 1 == _target.length())
+            ;
+        else if (equal >= end)                       // if there is no value
             _parameters[_target.substr(begin + 1, end - (begin + 1))] = "";
         else
             _parameters[_target.substr(begin + 1, equal - (begin + 1))] = _target.substr(equal + 1, end - (equal + 1));
         begin = end;
     }
     if (first != _target.npos)
-        _target = _target.substr(0, _target.length() - first);
+        _target = _target.substr(0, first);
 }
 
 void ClientRequest::save_mem() {
