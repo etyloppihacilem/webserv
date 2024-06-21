@@ -12,6 +12,7 @@
 #define INCLUDE_SRC_GETFILESTRATEGY_HPP_
 
 #include "ResponseBuildingStrategy.hpp"
+#include <fstream>
 #include <string>
 
 class GetFileStrategy : public ResponseBuildingStrategy {
@@ -19,12 +20,15 @@ class GetFileStrategy : public ResponseBuildingStrategy {
         GetFileStrategy(std::string &location, ResponseBuildingStrategy &state);
         ~GetFileStrategy();
 
-        void    buildResponse();
-        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void    save_mem();
+        void            buildResponse();
+        bool            fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void            save_mem();
 
     private:
-        std::string _location;
+        void            set_mime_type();
+
+        std::string     _location;
+        std::fstream    _file;
 };
 
 #endif  // INCLUDE_SRC_GETFILESTRATEGY_HPP_
