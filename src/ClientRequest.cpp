@@ -18,6 +18,8 @@
 #include "Logger.hpp"
 #include "StringUtils.hpp"
 #include <algorithm>
+#include <cstddef>
+#include <ios>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -167,7 +169,7 @@ bool ClientRequest::parse_header(const std::string &in) {
             return false;
         }
         try {
-            parse_target(in, sp);
+            parse_target(in, sp);                       // TODO after this parse _parameters
         } catch (HttpError &e) {
             _status = e.get_code();
             if (_status == MovedPermanently)
@@ -205,6 +207,48 @@ bool ClientRequest::init_body(std::string &buffer, int fd) {
         _body_exists = false;
     }
     return _body_exists;
+}
+
+void ClientRequest::decode_target() {
+    size_t percent;
+    int c;
+
+    while ((percent = _target.find('%')) != _target.npos) {
+        std::stringstream st;
+        st << std::hex << _target.substr(percent + 1, 2);
+        st >> c;
+        _target.replace(percent, 3, 1, c);
+    }
+}
+
+/**
+  This function will init _parameters depending on _target value. It will update and clean _target too.
+
+  Syntax :
+  ```
+  target/stuff?parameter=value&parameter2=value
+  ```
+  If there is no value, the value of parameter will be an empty string.
+  */
+void ClientRequest::parse_parameters() {
+    size_t  first;
+    size_t  begin;
+    size_t  end;
+    size_t  equal;
+
+    first   = _target.find('?');
+    begin   = first;
+    while (begin != _target.npos) {
+        end     = _target.find('&', begin + 1); // end CAN be _target.npos
+        equal   = _target.find('=', begin);
+        if (equal >= end)                       // if there is no value
+            _parameters[_target.substr(begin + 1, end - (begin + 1))] = "";
+        else
+            _parameters[_target.substr(begin + 1, equal - (begin + 1))] = _target.substr(equal + 1, end - (equal + 1));
+        begin = end;
+    }
+    if (first != _target.npos)
+        _target = _target.substr(0, _target.length() - first);
 }
 
 void ClientRequest::save_mem() {

@@ -31,6 +31,8 @@ class ClientRequest {
     private:
         HttpMethod                          parse_method(const std::string &method, const size_t &end);
         void                                parse_target(const std::string &in, const size_t &pos);
+        void                                decode_target();
+        void                                parse_parameters();
         void                                init_header(const std::string &in);
         void                                parse_header_line(const std::string &in,
             size_t                                                              begin,
@@ -58,8 +60,9 @@ class ClientRequest {
         FRIEND_TEST(ClientRequestTestSuite,     ParseMethodTestExpectedFail);
         FRIEND_TEST(ClientRequestTestTarget,    ParseTargetTest);
         FRIEND_TEST(ClientRequestTestSuite,     ParseHeaderLineTestHost);
-        FRIEND_TEST(ClientRequestTestParseHeader,   ParseHeaderLineTest);
-        FRIEND_TEST(ClientRequestTestInitHeader,    InitHeaderTest);
+        FRIEND_TEST(ClientRequestTestParseHeader, ParseHeaderLineTest);
+        FRIEND_TEST(ClientRequestTestInitHeader, InitHeaderTest);
+        FRIEND_TEST(ClientRequestTestSuite,     decode_target);
 #endif
 };
 

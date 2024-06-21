@@ -264,3 +264,23 @@ INSTANTIATE_TEST_SUITE_P(ClientRequestTestInitHeaderSuite,
     std::string name = info.param.name;
     return name;
 });
+
+TEST(ClientRequestTestSuite, decode_target) {
+    ClientRequest test;
+    // with nothing
+    test._target = "Coucou je suis heureux";
+    test.decode_target();
+    EXPECT_EQ(test._target, "Coucou je suis heureux");
+    // with something
+    test._target = "Coucou%20je%20suis%20heureux";
+    test.decode_target();
+    EXPECT_EQ(test._target, "Coucou je suis heureux");
+    // with only one thing
+    test._target = "%20";
+    test.decode_target();
+    EXPECT_EQ(test._target, " ");
+    // with everything
+    test._target = "%43%6F%75%63%6F%75%20%6A%65%20%73%75%69%73%20%68%65%75%72%65%75%78";
+    test.decode_target();
+    EXPECT_EQ(test._target, "Coucou je suis heureux");
+}
