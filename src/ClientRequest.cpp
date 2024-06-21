@@ -209,6 +209,14 @@ bool ClientRequest::init_body(std::string &buffer, int fd) {
     return _body_exists;
 }
 
+/**
+    Replace every % encoded character by its char.
+    Format is :
+    ```
+    %HEX
+    ```
+    `HEX` being a 2 digit hex value.
+  */
 void ClientRequest::decode_target() {
     size_t  percent;
     int     c;

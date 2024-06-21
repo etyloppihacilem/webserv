@@ -34,7 +34,7 @@ Logger::Logger(std::ostream &os, std::string level, std::string color, size_t wi
 Logger::~Logger() {}
 
 /**
-  Print a log message. Same syntax as printf, with format string and variadic parameters. Do dd a \n at the end.
+  Print a log message. Same syntax as printf, with format string and variadic parameters. Does add a \n at the end.
 
   Any message have a maximal length of LOG_MAX_SIZE.
   */
