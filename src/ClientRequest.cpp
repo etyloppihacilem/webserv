@@ -68,17 +68,18 @@ void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
         protocol    = in.find("HTTP", pos);
         if (protocol == std::string::npos || sp_protocol == std::string::npos)
             throw HttpError(BadRequest);
+        if (in.substr(protocol, 7) != "HTTP/1." || (in[8] != '0' && in[8] == '1'))
+            throw HttpError(HTTPVersionNotSupported);
         if ((protocol - 1) - (pos + 1) > MAX_URI)
             throw HttpError(URITooLong);
-        if (sp_protocol != protocol - 1) {                  // there are SP remaining in URI, that is wrong, going for
-                                                            // 301
-                                                            // MovedPermanently.
+        if (sp_protocol != protocol - 1) {  // there are SP remaining in URI, that is wrong, going for
+                                            // 301 MovedPermanently.
             // TODO IF NOT IN ORIGIN FORM, ADD HOST TO LOCATION !!!
             std::string redirect = in.substr(pos + 1, (protocol - 1) - (pos + 1));
 
             replace_all(redirect,   " ",    "%20");
             replace_all(redirect,   "\t",   "%09");
-            throw HttpError(MovedPermanently, redirect);    // message is the redirect location
+            throw HttpError(MovedPermanently, redirect); // message is the redirect location
         }
         _target = in.substr(pos + 1, (protocol - 1) - (pos + 1));
     }
@@ -252,7 +253,7 @@ void ClientRequest::parse_parameters() {
         equal   = _target.find('=', begin);
         if (end == _target.npos && begin + 1 == _target.length())
             ;
-        else if (equal >= end)                       // if there is no value
+        else if (equal >= end)                  // if there is no value
             _parameters[_target.substr(begin + 1, end - (begin + 1))] = "";
         else
             _parameters[_target.substr(begin + 1, equal - (begin + 1))] = _target.substr(equal + 1, end - (equal + 1));
