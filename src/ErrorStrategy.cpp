@@ -52,3 +52,7 @@ void ErrorStrategy::generateErrorPage(std::string &buffer) {
         << "automatically generated.</div></body>";
     buffer += st.str();
 }
+
+void ErrorStrategy::save_mem() {
+    ;
+}
