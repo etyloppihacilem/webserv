@@ -82,38 +82,15 @@ inline std::string ConfFieldString(const int &code)
 
 class ServerConfError: public std::exception {
     public:
-        ServerConfError(std::string message = "") throw ():
-            _message(message) {}
+        ServerConfError() throw () {}
 
         virtual ~ServerConfError() throw () {}
-
-        const char  *what() const throw () {
-            if (!_message.empty()) {
-                error.log(_message.c_str());
-            }
-            return _message.c_str();
-        }
-
-    private:
-        std::string _message;
 };
 
 class ServerConfWarn: public std::exception {
     public:
-        ServerConfWarn(std::string message = "") throw ():
-            _message(message) {}
-
+        ServerConfWarn() {}
         virtual ~ServerConfWarn() throw () {}
-
-        const char  *what() const throw () {
-            if (!_message.empty()) {
-                warn.log(_message.c_str());
-            }
-            return _message.c_str();
-        }
-
-    private:
-        std::string _message;
 };
 
 #endif  // INCLUDE_SRC_SERVERCONFFIELDS_HPP_

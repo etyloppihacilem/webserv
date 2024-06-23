@@ -49,21 +49,24 @@ std::string readConfFile(std::ifstream &configStream)
 ServerManager::ServerManager(const std::string &configFile) {
     try {
         if (!isValidConfigFile(configFile)) {
-            throw ServerConfError(configFile + ": file is not in the expected format [ *.conf ].");
+            error.log() << configFile + ": file is not in the expected format [ *.conf ]." << std::endl;
+            throw ServerConfError();
         }
 
         std::ifstream configStream(configFile);
 
         if (configStream.fail()) {
-            throw ServerConfError(configFile + ": fail to open file.");
+            error.log() << configFile + ": fail to open file." << std::endl;
+            throw ServerConfError();
         }
 
         std::string fileContent = tokenizeFile(readConfFile(configStream));
 
         if (!isValidHttp(fileContent)) {
             std::replace(fileContent.begin(), fileContent.end(), "|", " ");
-            throw ServerConfError(fileContent.substr(0, 30)
-                    + " ... : this 'http' module does not possess at least one 'server' module, parsing canceled");
+            error.log() << fileContent.substr(0, 30)
+                    + " ... : this 'http' module does not possess at least one 'server' module, parsing canceled" << std::endl;
+            throw ServerConfError();
         }
 
         StringTokenizer tokenizedFile(fileContent, "|");
@@ -73,15 +76,16 @@ ServerManager::ServerManager(const std::string &configFile) {
 
             if (!isValidServer(serverContent)) {
                 std::replace(serverContent.begin(), serverContent.end(), "|", " ");
-                warn.log(std::string("server: " + serverContent.substr(0, 30)
-                        + " ... : this 'server' module does not possess mandatory fields, parsing canceled").c_str());
+                warn.log() << "server: " + serverContent.substr(0, 30)
+                        + " ... : this 'server' module does not possess mandatory fields, parsing canceled" << std::endl;
                 continue;
             }
 
             Server newServer(serverContent);
         }
         if (_servers.empty()) {
-            throw ServerConfError(configFile + ": no valid server child in config file.");
+            error.log() << configFile + ": no valid server child in config file." << std::endl;
+            throw ServerConfError();
         }
     } catch (ServerConfError &e) {
         throw FailToInitServerError();

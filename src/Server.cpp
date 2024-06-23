@@ -53,9 +53,9 @@ Server::Server(const std::string &serverContent) {
                 fieldContent = tokenizeLocation(tokenizedServer);
                 if (!isValidLocation(fieldContent.second)) {
                     std::replace(fieldContent.second.begin(), fieldContent.second.end(), "|", " ");
-                    warn.log(std::string("location " + fieldContent.first + " : "
+                    warn.log() << "location " + fieldContent.first + " : "
                             + tokenizedServer.remainingString().substr(0, 30)
-                            + " ... : this 'location' module does not possess mandatory fields, parsing canceled").c_str());
+                            + " ... : this 'location' module does not possess mandatory fields, parsing canceled" << std::endl;
                 }
             } else {
                 fieldContent = tokenizeField(tokenizedServer);
@@ -90,7 +90,8 @@ Server::Server(const std::string &serverContent) {
                     this->setMaxBodySize(valueContent);
                     break;
                 default:
-                    throw ServerConfWarn(fieldContent.first + ": is not a valide Server Conf Field");
+                	warn.log() << fieldContent.first + ": is not a valide Server Conf Field" << std::endl;
+                    throw ServerConfWarn();
             }
         } catch (ServerConfWarn &e) {
             continue;
@@ -171,7 +172,7 @@ void Server::addErrorPage(const ValueList &valueContent)
         _errorPages[HttpCode(errorCode)] = valueContent[1];
         return ;
     }
-    warn.log(std::string(valueContent[0] + ": is not a valid error page").c_str());
+    warn.log() << valueContent[0] + ": is not a valid error page" << std::endl;
 }
 
 void Server::setServerName(const ValueList &valueContent)
@@ -179,7 +180,7 @@ void Server::setServerName(const ValueList &valueContent)
     for (ValueList::const_iterator it = valueContent.begin(); it < valueContent.end(); ++it) {
     	if (!isValidIPAddress(*it) || !isValidHostName(*it))
     	{
-    		warn.log(std::string(*it + ": is not a valid server name.").c_str());
+    		warn.log() << *it + ": is not a valid server name." << std::endl;
     	}
     	_serverName.push_back(*it);
     }
@@ -193,11 +194,11 @@ void Server::setPort(const ValueList &valueContent)
 	std::stringstream port(valueContent[0]);
 	int portNumber;
 	if (port >> portNumber) {
-		warn.log(std::string(valueContent[0] + ": is not a valid int.").c_str());
+		warn.log() << valueContent[0] + ": is not a valid int." << std::endl;
 	}
 	if (!isValidPort(portNumber))
 	{
-		warn.log(std::string(valueContent[0] + ": is not a valid port number.").c_str());
+		warn.log() << valueContent[0] + ": is not a valid port number." << std::endl;
 	}
 	_port = portNumber;
 }
