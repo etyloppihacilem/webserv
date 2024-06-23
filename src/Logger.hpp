@@ -27,7 +27,7 @@
 
   Any message have a maximal length of LOG_MAX_SIZE.
   */
-class Logger : std::ostream {
+class Logger : public std::ostream {
     public:
         Logger(
             std::ostream    &os,                ///< Out stream

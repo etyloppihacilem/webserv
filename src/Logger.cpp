@@ -22,8 +22,8 @@ Logger::Logger(std::ostream &os, std::string level, std::string color, size_t wi
     width   += 3;
     _level  = "[" + level + "]";
     _width  = (width <= _level.length()) ? _level.length() : width;
-    if (os.rdbuf() == std::cout.rdbuf() || os.rdbuf() == std::cerr.rdbuf()) { // if log to stdout or stderr enable color
-        _width  += color.length() + sizeof(_RESET) - 1;
+    if (os.rdbuf() == std::cout.rdbuf() || os.rdbuf() == std::cerr.rdbuf()) {
+        _width  += color.length() + sizeof(_RESET) - 1;// if log to stdout or stderr enable color
         _level  = "[" + color + level + _RESET "]";
     }
     _os.copyfmt(os);
@@ -47,7 +47,7 @@ Logger &Logger::log(const char *format, ...) {
     va_start(args, format);
     vsnprintf(buffer, LOG_MAX_SIZE, format, args);
     va_end(args);
-    _os << std::setw(_width) << std::setfill(' ') << std::left << _level << std::right << std::setw(2)
+    _os << std::dec << std::setw(_width) << std::setfill(' ') << std::left << _level << std::right << std::setw(2)
         << std::setfill('0') << ltm->tm_hour << ":" << std::setw(2) << std::setfill('0') << ltm->tm_min << ":"
         << std::setw(2) << std::setfill('0') << ltm->tm_sec << " " << std::setw(2) << std::setfill('0')
         << ltm->tm_mday << "/" << std::setw(2) << std::setfill('0') << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year
@@ -64,7 +64,7 @@ std::ofstream &Logger::log() {
     time_t  now     = time(0);
     tm      *ltm    = localtime(&now);
 
-    _os << std::setw(_width) << std::setfill(' ') << std::left << _level << std::right << std::setw(2)
+    _os << std::dec << std::setw(_width) << std::setfill(' ') << std::left << _level << std::right << std::setw(2)
         << std::setfill('0') << ltm->tm_hour << ":" << std::setw(2) << std::setfill('0') << ltm->tm_min << ":"
         << std::setw(2) << std::setfill('0') << ltm->tm_sec << " " << std::setw(2) << std::setfill('0')
         << ltm->tm_mday << "/" << std::setw(2) << std::setfill('0') << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year
