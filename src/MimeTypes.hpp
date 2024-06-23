@@ -28,6 +28,7 @@
 class MimeTypes {
     public:
         MimeTypes(std::string path = "./conf/mime.types");
+        MimeTypes(MimeTypes &other);
         ~MimeTypes();
 
         std::string                         get_type(std::string extension);

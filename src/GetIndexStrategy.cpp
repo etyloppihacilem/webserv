@@ -118,8 +118,7 @@ void GetIndexStrategy::buildResponse() {
         warn.log() << "GetIndexStrategy : trying to build response, but is already built." << std::endl;
         return;
     }
-    {                                                                       // different scope to free stack at the
-                                                                            // end
+    {                                                                       // different scope to free stack at the end
         int size_temp;
         {
             dirent **namelist;
@@ -149,6 +148,7 @@ void GetIndexStrategy::buildResponse() {
             throw std::bad_alloc(); // to begin memory recovery procedure
         throw HttpError(InternalServerError);
     }
+    _response.add_header("Content-Type", "text/html; charset=utf-8");
     _response.set_body(*this);
 }
 

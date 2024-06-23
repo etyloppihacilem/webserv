@@ -11,13 +11,14 @@
 #ifndef INCLUDE_SRC_GETFILESTRATEGY_HPP_
 #define INCLUDE_SRC_GETFILESTRATEGY_HPP_
 
+#include "MimeTypes.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include <fstream>
 #include <string>
 
 class GetFileStrategy : public ResponseBuildingStrategy {
     public:
-        GetFileStrategy(std::string &location, ResponseBuildingStrategy &state);
+        GetFileStrategy(MimeTypes &mime, std::string &location, ResponseBuildingStrategy &state);
         ~GetFileStrategy();
 
         void            buildResponse();
@@ -25,8 +26,7 @@ class GetFileStrategy : public ResponseBuildingStrategy {
         void            save_mem();
 
     private:
-        void            set_mime_type();
-
+        MimeTypes       &_mime;
         std::string     _location;
         std::fstream    _file;
 };

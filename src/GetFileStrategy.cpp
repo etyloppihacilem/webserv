@@ -13,6 +13,7 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include "StringUtils.hpp"
 #include <cerrno>
 #include <fstream>
 #include <ios>
@@ -20,8 +21,9 @@
 #include <string>
 #include <sys/stat.h>
 
-GetFileStrategy::GetFileStrategy(std::string &location, ResponseBuildingStrategy &state):
+GetFileStrategy::GetFileStrategy(MimeTypes &mime, std::string &location, ResponseBuildingStrategy &state):
     ResponseBuildingStrategy(state),
+    _mime                   (mime),
     _location               (location) {}
 
 GetFileStrategy::~GetFileStrategy() {
@@ -57,7 +59,8 @@ void GetFileStrategy::buildResponse() {
                     << std::endl;
         throw HttpError(InternalServerError);
     }
-    _response.set_body(*this); // TODO there is some mime type things to be done.
+    _response.set_body(*this);
+    _response.add_header("Content-Type", _mime.get_type(extract_extension(_location)));
 }
 
 bool GetFileStrategy::fill_buffer(std::string &buffer, size_t size) {
@@ -76,10 +79,6 @@ bool GetFileStrategy::fill_buffer(std::string &buffer, size_t size) {
     return _done;
 }
 
-void GetFileStrategy::set_mime_type() {
-    ; // TODO we were here
-}
-
 void GetFileStrategy::save_mem() {
-    ;
+    shrink_to_fit(_location);
 }

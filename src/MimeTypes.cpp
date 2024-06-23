@@ -10,6 +10,7 @@
 
 #include "MimeTypes.hpp"
 #include "Logger.hpp"
+#include <cmath>
 #include <cstddef>
 #include <fstream>
 #include <string>
@@ -61,6 +62,13 @@ MimeTypes::MimeTypes(std::string path):
         error.log() << path << ": MimeTypes parsing unsuccessful." << std::endl;
     }
     file.close();
+}
+
+MimeTypes::MimeTypes(MimeTypes &other):
+    _done   (),
+    _types  () {
+    (void) other;
+    error.log() << "FATAL you should not duplicate any MimeTypes object." << std::endl;
 }
 
 MimeTypes::~MimeTypes() {}
