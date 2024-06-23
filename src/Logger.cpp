@@ -97,6 +97,11 @@ Logger &operator<<(Logger &l, const char *str) {
     return l;
 }
 
+Logger &operator<<(Logger &l, const void *ptr) {
+    l._os << ptr;
+    return l;
+}
+
 // TODO comprendre pour les conversions avec std::hex
 
 std::string Logger::endl(bool crlf) {

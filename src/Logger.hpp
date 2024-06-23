@@ -35,23 +35,24 @@ class Logger : public std::ios_base {
             );
         ~Logger();
 
-        Logger   &        log(const char *format, ...);
-        friend Logger          &operator<<(Logger &l, const std::string &msg);
-        friend Logger          &operator<<(Logger &l, const char *str);
-        friend Logger          &operator<<(Logger &l, const int nb);
-        friend Logger          &operator<<(Logger &l, const long nb);
-        friend Logger          &operator<<(Logger &l, const long long nb);
-        friend Logger          &operator<<(Logger &l, const unsigned int nb);
-        friend Logger          &operator<<(Logger &l, const unsigned long nb);
-        friend Logger          &operator<<(Logger &l, const unsigned long long nb);
-        friend Logger          &operator<<(Logger &l, const char nb);
-        std::string     endl(bool crlf = false);
-        Logger          &log();
+        Logger              &log(const char *format, ...);
+        friend Logger       &operator<<(Logger &l, const std::string &msg);
+        friend Logger       &operator<<(Logger &l, const char *str);
+        friend Logger       &operator<<(Logger &l, const int nb);
+        friend Logger       &operator<<(Logger &l, const long nb);
+        friend Logger       &operator<<(Logger &l, const long long nb);
+        friend Logger       &operator<<(Logger &l, const unsigned int nb);
+        friend Logger       &operator<<(Logger &l, const unsigned long nb);
+        friend Logger       &operator<<(Logger &l, const unsigned long long nb);
+        friend Logger       &operator<<(Logger &l, const char nb);
+        friend Logger       &operator<<(Logger &l, const void *ptr);
+        static std::string  endl(bool crlf = false);
+        Logger              &log();
 
     private:
-        std::string     _level; ///< Log level
-        std::ofstream   _os;    ///< Out stream
-        int             _width; ///< Width to align level
+        std::string         _level; ///< Log level
+        std::ofstream       _os;    ///< Out stream
+        int                 _width; ///< Width to align level
 };
 
 extern Logger   info;

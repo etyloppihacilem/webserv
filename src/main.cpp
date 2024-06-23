@@ -10,16 +10,17 @@
 
 #include "Logger.hpp"
 #include "MemoryHandler.hpp"
+#include <ios>
 
 int main(int ac, char **av) {
     (void) ac;
     (void) av;
     info.log("info message -> %d", 1024);
-    info.log() << "info message -> " << 1024 << info.endl();
     warn.log("warn message -> %s", "hihi");
-    warn.log() << "warn message -> " << "hihi" << error.endl();
     error.log("error message -> %p", "mais");
-    error.log() << "error message -> " << std::ios_base::hex << "mais" << error.endl();
+    info.log() << "info message -> " << 1024 << Logger::endl();
+    warn.log() << "warn message -> " << "hihi" << Logger::endl();
+    error.log() << "error message -> " << (void *) "mais" << Logger::endl();
     mem.allocate(); // allocating memory
     return 0;
 }
