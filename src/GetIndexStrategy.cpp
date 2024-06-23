@@ -115,7 +115,7 @@ int compare(const struct dirent **a, const struct dirent **b) {
 
 void GetIndexStrategy::buildResponse() {
     if (_dir) {
-        warn.log("GetIndexStrategy : trying to build response, but is already built.");
+        warn.log() << "GetIndexStrategy : trying to build response, but is already built." << std::endl;
         return;
     }
     {                                                                       // different scope to free stack at the

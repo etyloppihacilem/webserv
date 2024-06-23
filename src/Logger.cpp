@@ -10,9 +10,12 @@
 
 #include "Logger.hpp"
 #include <cstdarg>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <ostream>
 #include <string>
+#include "HttpStatusCodes.hpp"
 #include "colors.hpp"
 
 Logger::Logger(std::ostream &os, std::string level, std::string color, size_t width) {
@@ -52,65 +55,12 @@ Logger &Logger::log(const char *format, ...) {
     return *this;
 }
 
-Logger &operator<<(Logger &l, const int nb) {
-    l._os << nb;
-    return l;
+std::ostream &operator<<(std::ostream &os, const HttpCode code) {
+    os << static_cast<int>(code) << " " << status_string(code);
+    return os;
 }
 
-Logger &operator<<(Logger &l, const long nb) {
-    l._os << nb;
-    return l;
-}
-
-Logger &operator<<(Logger &l, const long long nb) {
-    l._os << nb;
-    return l;
-}
-
-Logger &operator<<(Logger &l, const unsigned int nb) {
-    l._os << nb;
-    return l;
-}
-
-Logger &operator<<(Logger &l, const unsigned long nb) {
-    l._os << nb;
-    return l;
-}
-
-Logger &operator<<(Logger &l, const unsigned long long nb) {
-    l._os << nb;
-    return l;
-}
-
-Logger &operator<<(Logger &l, const char c) {
-    l._os << c;
-    return l;
-}
-
-Logger &operator<<(Logger &l, const std::string &msg) {
-    l._os << msg;
-    return l;
-}
-
-Logger &operator<<(Logger &l, const char *str) {
-    l._os << str;
-    return l;
-}
-
-Logger &operator<<(Logger &l, const void *ptr) {
-    l._os << ptr;
-    return l;
-}
-
-// TODO comprendre pour les conversions avec std::hex
-
-std::string Logger::endl(bool crlf) {
-    if (crlf)
-        return "\r\n";
-    return "\n";
-}
-
-Logger &Logger::log() {
+std::ofstream &Logger::log() {
     time_t  now     = time(0);
     tm      *ltm    = localtime(&now);
 
@@ -119,7 +69,7 @@ Logger &Logger::log() {
         << std::setw(2) << std::setfill('0') << ltm->tm_sec << " " << std::setw(2) << std::setfill('0')
         << ltm->tm_mday << "/" << std::setw(2) << std::setfill('0') << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year
         << ": ";
-    return *this;
+    return _os;
 }
 
 Logger  info(std::cerr, "INFO", _BLUE, 5);

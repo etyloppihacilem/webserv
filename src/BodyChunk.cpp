@@ -101,7 +101,7 @@ bool BodyChunk::init_chunk() { // discard until a size line is found
         }
     }
     if (_bytes_remaining > 0 || _done) {
-        warn.log("Trying to initiate a chunk while another is still being read.");
+        warn.log() << "Trying to initiate a chunk while another is still being read." << std::endl;
         return false;
     }
     while (it != _buffer.end()) {

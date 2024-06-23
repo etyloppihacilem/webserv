@@ -23,14 +23,14 @@ MemoryHandler::~MemoryHandler() {
 
 bool MemoryHandler::allocate() {
     if (_allocated) {
-        warn.log("Memory handler is allready allocated.");
+        warn.log() << "Memory handler is allready allocated." << std::endl;
         return _allocated;
     }
     try {
         _storage = new char[_size];
-        info.log("Memory handler succesfully allocated.");
+        info.log() << "Memory handler succesfully allocated." << std::endl;
     } catch (std::bad_alloc) {
-        error.log("FATAL could not allocate handler buffer memory.");
+        error.log() << "FATAL could not allocate handler buffer memory." << std::endl;
         return _allocated;
     }
     _allocated = true;
@@ -39,11 +39,11 @@ bool MemoryHandler::allocate() {
 
 bool MemoryHandler::deallocate() {
     if (!_allocated) {
-        warn.log("Memory handler is not allocated.");
+        warn.log() << "Memory handler is not allocated." << std::endl;
         return _allocated;
     }
     delete [] _storage;
-    info.log("Memory handler succesfully deallocated.");
+    info.log() << "Memory handler succesfully deallocated." << std::endl;
     _allocated = false;
     return _allocated;
 }

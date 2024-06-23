@@ -29,8 +29,9 @@ BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state):
         throw std::bad_alloc();
     }
     if (i == 0)
-        error.log("BodyWriterLength : maximum fill_buffer iterations exceeded. This happens to prevent infinite loop. "
-                  "Result may be incomplete. Check value of MAX_BODY_BUFFER.");
+        error.log() << "BodyWriterLength : maximum fill_buffer iterations exceeded. This happens to prevent "
+                    << "infinite loop. " << "Result may be incomplete. Check value of MAX_BODY_BUFFER."
+                    << std::endl;
     _done = true;
 }
 
@@ -39,10 +40,11 @@ BodyWriterLength::~BodyWriterLength() {}
 /**
   Return whole body.
   */
-std::string BodyWriterLength::generate(size_t size /** is discarded because not needed in BodyWriterLength*/) {
+std::string BodyWriterLength::generate(size_t size /** is discarded because not needed in BodyWriterLength */) {
     (void) size;
     if (_recovered)
-        warn.log("Body already recovered. Risk of loosing body data if save_mem procedures are initiated.");
+        warn.log()  << "Body already recovered. Risk of loosing body data if save_mem procedures are initiated."
+                    << std::endl;
     _recovered = true;
     return _body;
 }

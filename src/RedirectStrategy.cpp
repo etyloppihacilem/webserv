@@ -11,13 +11,14 @@
 #include "RedirectStrategy.hpp"
 #include "HttpError.hpp"
 #include "Logger.hpp"
+#include <ostream>
 
 RedirectStrategy::RedirectStrategy(const std::string &location, ResponseBuildState &state, HttpCode code):
     ResponseBuildingStrategy(state),
     _location               (location),
     _code                   (code) {
     if (!isRedirection(code)) {
-        error.log("Trying to redirect with a non redirect code : %d", code);
+        error.log() << "Trying to redirect with a non redirect code : " << code << std::endl;
         throw HttpError(InternalServerError);
     }
 }
@@ -32,6 +33,6 @@ void RedirectStrategy::buildResponse() {
 bool RedirectStrategy::fill_buffer(std::string &buffer, size_t size) {
     (void) buffer;
     (void) size;
-    warn.log("fill_buffer called in an object with no body (RedirectStrategy).");
+    warn.log() << "fill_buffer called in an object with no body (RedirectStrategy)." << std::endl;
     return true; // body is not supposed to even exists
 }
