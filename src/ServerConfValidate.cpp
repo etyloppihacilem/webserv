@@ -70,23 +70,6 @@ bool isValidLocation(const std::string &value)
     return false;
 }
 
-// bool isValidServeNames(const ValueList &valueContent)
-// {
-//     if (valueContent.empty()) {
-//         return false;
-//     }
-//     for (ValueList::const_iterator it = valueContent.begin(); it < valueContent.end(); ++it) {
-//         if (isdigit((*it)[0])) {
-//             if (!isValidIPAddress(*it))
-//                 return false;
-//         } else {
-//             if (!isValidHostName(*it))
-//                 return false;
-//         }
-//     }
-//     return true;
-// }
-
 bool isValidHostname(const std::string &value)
 {
     for (std::string::const_iterator it = value.begin(); it < value.end(); ++it) {
@@ -226,27 +209,6 @@ bool isValidClientMaxBodySize(const std::string &value)
     return false;
 }
 
-bool isValidErrorPage(const ValueList &valueContent)
-{
-    if (valueContent.size() != 2) {
-        return false;
-    }
-
-    std::stringstream   error(valueContent[0]);
-    int                 errorCode;
-
-    if (error >> errorCode) {
-        return false;
-    }
-    if (isError(errorCode) && isValidPath(valueContent[1])) {
-        if (errorCode > 599) {
-            warn.log(std::string(valueContent[0] + ": this error code is not standard because above 599.").c_str());
-        }
-        return true;
-    }
-    return false;
-}
-
 bool isValidAutoindex(const std::string &value)
 {
     size_t len = value.size();
@@ -272,19 +234,4 @@ bool isValidFileExt(const std::string &value)
         return true;
     }
     return false;
-}
-
-bool isValidRewrite(const ValueList&)
-{
-    return true;
-}
-
-bool isValidUpload(const ValueList&)
-{
-    return true;
-}
-
-bool isValidCgi(const ValueList&)
-{
-    return true;
 }

@@ -10,6 +10,22 @@
 #include "Route.hpp"
 
 class Server{
+
+    class RouteNotFoundWarn: public std::exception{
+        public:
+            RouteNotFoundWarn(std::string message = "") throw ():
+                _message(message) {}
+
+            virtual ~RouteNotFoundWarn() throw () {}
+
+            const char  *what() const throw () {
+                return _message.c_str();
+            }
+
+        private:
+            std::string _message;
+    };
+
     private:
         std::vector<std::string>        _serverName;
         unsigned int                    _port;
