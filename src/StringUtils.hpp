@@ -14,6 +14,7 @@
 #include <string>
 
 // redefinition because is not implemented in c++98.
-void shrink_to_fit(std::string &s);
+void        shrink_to_fit(std::string &s);
+std::string extract_extension(std::string &s);
 
 #endif  // INCLUDE_SRC_STRINGUTILS_HPP_
