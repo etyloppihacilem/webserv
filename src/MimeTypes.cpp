@@ -15,7 +15,8 @@
 #include <string>
 
 MimeTypes::MimeTypes(std::string path):
-    _types() {
+    _done   (false),
+    _types  () {
     std::fstream file;
 
     _types["txt"] = "text/plain"; // default, should always be there.
@@ -25,7 +26,6 @@ MimeTypes::MimeTypes(std::string path):
         return;
     }
 
-    bool        done = false;
     size_t      coma; // it looks for semicolon
     size_t      count = 0;
     std::string type;
@@ -39,7 +39,7 @@ MimeTypes::MimeTypes(std::string path):
         if (count++ < 2)
             continue;
         if (word == "}") {
-            done = true;
+            _done = true;
             break;
         }
         if (type == "")
@@ -56,13 +56,34 @@ MimeTypes::MimeTypes(std::string path):
                 _types[word] = type;
         }
     }
-    if (!done)
+    if (!_done) {
+        _types["txt"] = "text/plain"; // default, should always be there.
         error.log() << path << ": MimeTypes parsing unsuccessful." << std::endl;
+    }
     file.close();
 }
 
 MimeTypes::~MimeTypes() {}
 
+/**
+  Returns mime type for given extension.
+
+  If the extension is unknown, text/plain is returned.
+  */
 std::string MimeTypes::get_type(std::string extension) {
+    if (_types.find(extension) == _types.end()) {
+        warn.log() << "MimeTypes.get_type(" << extension << ")" << std::endl;
+        return "text/plain";
+    }
     return _types[extension];
+}
+
+/**
+  Returns true if object is built with no mistakes.
+
+  False means there were mistakes while building it and that every mime type may not be present. There will always be
+  a "txt text/plain" as mime type.
+  */
+bool MimeTypes::is_done() const {
+    return _done;
 }

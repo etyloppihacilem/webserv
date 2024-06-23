@@ -31,8 +31,10 @@ class MimeTypes {
         ~MimeTypes();
 
         std::string                         get_type(std::string extension);
+        bool                                is_done() const;
 
     private:
+        bool                                _done;  ///< Tells if object is build without mistakes
         std::map<std::string, std::string>  _types; ///< Stores mime types <extension>:<mimetype>
 };
 
