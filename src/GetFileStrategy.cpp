@@ -33,7 +33,7 @@ void GetFileStrategy::buildResponse() {
     struct stat buf;
 
     if (_file.is_open()) {
-        warn.log("File %s was already opened. Closing and reopening.", _location.c_str());
+        warn.log() << "File " << _location << " was already opened. Closing and reopening." << std::endl;
         _file.close();
     }
     if (stat(_location.c_str(), &buf)) {
@@ -51,11 +51,10 @@ void GetFileStrategy::buildResponse() {
         throw HttpError(InternalServerError);
     }
     _estimated_size = buf.st_size;
-    _file.open(_location, std::fstream::binary);
+    _file.open(_location.c_str(), std::fstream::binary);
     if (!_file.is_open()) {
-        error.log("Undetected error opening file %s. Sending 500 %s",
-                _location.c_str(),
-                status_string(InternalServerError).c_str());
+        error.log() << "Undetected error opening file " << _location << ". Sending " << InternalServerError
+                    << std::endl;
         throw HttpError(InternalServerError);
     }
     _response.set_body(*this); // TODO there is some mime type things to be done.
@@ -64,9 +63,8 @@ void GetFileStrategy::buildResponse() {
 bool GetFileStrategy::fill_buffer(std::string &buffer, size_t size) {
     char buf[size + 1];
 
-    if (!_file.is_open())
-    {
-        error.log("File %s is read but not open.", _location.c_str());
+    if (!_file.is_open()) {
+        error.log() << "File " << _location << " is read but not open." << std::endl;
         throw HttpError(InternalServerError);
     }
     if (_done)
