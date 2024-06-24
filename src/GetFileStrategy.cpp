@@ -31,7 +31,7 @@ GetFileStrategy::~GetFileStrategy() {
         _file.close();
 }
 
-void GetFileStrategy::buildResponse() {
+bool GetFileStrategy::build_response() {
     {
         struct stat buf;
 
@@ -63,6 +63,7 @@ void GetFileStrategy::buildResponse() {
     }
     _response.set_body(*this);
     _response.add_header("Content-Type", _mime.get_type(extract_extension(_location)));
+    return _built = true;
 }
 
 bool GetFileStrategy::fill_buffer(std::string &buffer, size_t size) {

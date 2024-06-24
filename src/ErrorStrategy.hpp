@@ -26,7 +26,7 @@ class ErrorStrategy: public ResponseBuildingStrategy {
         // TODO trouver comment recuperer la map des fichiers d'erreurs.
         ~ErrorStrategy();
 
-        void        buildResponse();
+        bool        build_response();
         bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
         void        save_mem();
 

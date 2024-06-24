@@ -15,6 +15,8 @@
 #include "ClientRequest.hpp"
 #include "ProcessState.hpp"
 
+// TODO this is supposed to build response some times or another
+
 class ResponseBuildState : ProcessState {
     public:
         ResponseBuildState(int fd, ClientRequest *request);

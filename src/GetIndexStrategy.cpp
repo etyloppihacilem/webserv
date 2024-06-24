@@ -113,10 +113,10 @@ int compare(const struct dirent **a, const struct dirent **b) {
     return strcmp((*a)->d_name, (*b)->d_name);
 }
 
-void GetIndexStrategy::buildResponse() {
-    if (_dir) {
+bool GetIndexStrategy::build_response() {
+    if (_built) {
         warn.log() << "GetIndexStrategy : trying to build response, but is already built." << std::endl;
-        return;
+        return _built;
     }
     {                                                                       // different scope to free stack at the end
         int size_temp;
@@ -150,6 +150,7 @@ void GetIndexStrategy::buildResponse() {
     }
     _response.add_header("Content-Type", "text/html; charset=utf-8");
     _response.set_body(*this);
+    return _built = true;
 }
 
 void GetIndexStrategy::save_mem() {

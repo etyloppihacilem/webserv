@@ -24,9 +24,10 @@ class ResponseBuildingStrategy {
         ResponseBuildingStrategy(ResponseBuildState &state);
         ~ResponseBuildingStrategy();
 
-        virtual void        buildResponse() = 0;
+        virtual bool        build_response() = 0;
         Response            &get_response();
         bool                is_done() const;
+        bool                is_built() const;
         /**
           fill_buffer() is meant to be use by a BodyWriter object to build or read body.
 
@@ -39,6 +40,7 @@ class ResponseBuildingStrategy {
     protected:
         ResponseBuildState  *_state;            ///< ResponseBuildState to have interdependence and access ClientRequest
         Response            _response;          ///< The response object
+        bool                _built;             ///< If response is built yet
         bool                _done;              ///< State of the current object
         size_t              _estimated_size;    ///< Estimated size of response body if needed
         std::string         _buffer;            ///< String buffer in case too much is read. Not used yet ig TODO check

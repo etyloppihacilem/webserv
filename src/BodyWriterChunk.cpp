@@ -13,9 +13,7 @@
 
 BodyWriterChunk::BodyWriterChunk(ResponseBuildingStrategy &state):
     BodyWriter  (state),
-    _length     (0) {
-    _strategy->buildResponse();
-}
+    _length     (0) {}
 
 BodyWriterChunk::~BodyWriterChunk() {}
 

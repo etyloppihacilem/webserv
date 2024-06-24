@@ -23,13 +23,14 @@ ErrorStrategy::ErrorStrategy(ResponseBuildState &state, HttpCode code, bool reco
 
 ErrorStrategy::~ErrorStrategy() {}
 
-void ErrorStrategy::buildResponse() {
+bool ErrorStrategy::build_response() {
     if (_recovery) {
         _response.add_header("Content-Type", "text/html; charset=utf-8");
         _estimated_size = 0; // choose BodyWriterLength
     } else
         ; // TODO mettre le bon mimetype selon le fichier d'erreur
     _response.set_code(_code);
+    return _built = true;
 }
 
 bool ErrorStrategy::fill_buffer(std::string &buffer, size_t size) {
@@ -57,7 +58,7 @@ void ErrorStrategy::generateErrorPage(std::string &buffer) {
         buffer += st.str();
     } catch (std::bad_alloc &e) { // in case of heap going missing.
         error.log() << "bad_alloc during recovery, running basic error generation." << std::endl;
-        buffer += std::to_string(_code) + " " + status_string(_code);
+        buffer += status_string(_code);
     }
 }
 

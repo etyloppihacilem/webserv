@@ -15,6 +15,7 @@
 ResponseBuildingStrategy::ResponseBuildingStrategy(ResponseBuildState &state):
     _state          (&state),
     _response       (),
+    _built          (false),
     _done           (false),
     _estimated_size (0) {
     (void) _state; // TODO delete this
@@ -30,10 +31,17 @@ Response &ResponseBuildingStrategy::get_response() {
 }
 
 /**
-  Returns true if response building is done.
+  Returns true if response generating is done.
   */
 bool ResponseBuildingStrategy::is_done() const {
     return _done;
+}
+
+/**
+  Returns true if response building is done.
+  */
+bool ResponseBuildingStrategy::is_built() const {
+    return _built;
 }
 
 /**

@@ -26,9 +26,10 @@ RedirectStrategy::RedirectStrategy(const std::string &location, ResponseBuildSta
 
 RedirectStrategy::~RedirectStrategy() {}
 
-void RedirectStrategy::buildResponse() {
+bool RedirectStrategy::build_response() {
     _response.add_header("Location", _location);
     _response.set_code(_code);
+    return _built = true;
 }
 
 bool RedirectStrategy::fill_buffer(std::string &buffer, size_t size) {
@@ -39,7 +40,7 @@ bool RedirectStrategy::fill_buffer(std::string &buffer, size_t size) {
 }
 
 void RedirectStrategy::save_mem() {
-    shrink_to_fit(_location);
-    shrink_to_fit(_buffer);
+    shrink_to_fit(  _location);
+    shrink_to_fit(  _buffer);
     _response.save_mem();
 }

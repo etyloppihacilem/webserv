@@ -27,7 +27,7 @@ class GetIndexStrategy: public ResponseBuildingStrategy {
         GetIndexStrategy(const std::string &location, ResponseBuildState &state);
         ~GetIndexStrategy();
 
-        void        buildResponse();
+        bool        build_response();
         bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
         void        save_mem();
 
