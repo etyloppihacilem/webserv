@@ -21,6 +21,7 @@
 #include <cstddef>
 #include <ios>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
 
@@ -261,6 +262,36 @@ void ClientRequest::parse_parameters() {
     }
     if (first != _target.npos)
         _target = _target.substr(0, first);
+}
+
+std::string &ClientRequest::get_target() {
+    return _target;
+}
+
+std::string &ClientRequest::get_method() {
+    return _method;
+}
+
+Body *ClientRequest::get_body() {
+    if (!_body_exists)
+        warn.log() << "Getting a request body that does not exists." << std::endl;
+    return _body;
+}
+
+std::map<std::string, std::string> &ClientRequest::get_header() {
+    return _header;
+}
+
+std::map<std::string, std::string> &ClientRequest::get_parameters() {
+    return _parameters;
+}
+
+bool ClientRequest::have_body() const {
+    return _body_exists;
+}
+
+HttpCode ClientRequest::get_status() const {
+    return _status;
 }
 
 void ClientRequest::save_mem() {

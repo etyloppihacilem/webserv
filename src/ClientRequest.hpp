@@ -29,6 +29,16 @@ class ClientRequest {
         bool                                parse_header(const std::string &in);
         bool                                init_body(std::string &buffer, int fd);
         void                                save_mem();
+        std::string                         &get_target();
+        std::string                         &get_method();
+        Body                                *get_body();
+
+        std::map<std::string, std::string>  &get_header();
+        std::map<std::string, std::string>  &get_parameters();
+
+        bool                                have_body() const;
+        HttpCode                            get_status() const;
+
     private:
         HttpMethod                          parse_method(const std::string &method, const size_t &end);
         void                                parse_target(const std::string &in, const size_t &pos);
