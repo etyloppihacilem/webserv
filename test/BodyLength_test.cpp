@@ -11,10 +11,10 @@
 #include "BodyLength.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
-#include "Logger.hpp"
 #include "todo.hpp"
 #include "gtest/gtest.h"
 #include <cstddef>
+#include <exception>
 #include <string>
 #include <unistd.h>
 

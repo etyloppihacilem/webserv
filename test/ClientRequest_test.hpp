@@ -11,7 +11,6 @@
 #ifndef INCLUDE_SRC_MESSAGE_TEST_HPP_
 #define INCLUDE_SRC_MESSAGE_TEST_HPP_
 
-#include "HttpError.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include <map>

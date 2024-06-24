@@ -13,24 +13,25 @@
 
 #include "ClientRequest.hpp"
 #include "gtest/gtest.h"
-#include <string>
-#include <vector>
 #include "ClientRequest_test.hpp"
 
 class ClientRequestTestTarget: public testing::TestWithParam<t_test_target> {
     public:
+        ClientRequestTestTarget() : test(0) {}
     protected:
         ClientRequest test;
 };
 
 class ClientRequestTestParseHeader: public testing::TestWithParam<t_test_target> {
     public:
+        ClientRequestTestParseHeader() : test(0) {}
     protected:
         ClientRequest test;
 };
 
 class ClientRequestTestInitHeader: public testing::TestWithParam<s_test_messages> {
     public:
+        ClientRequestTestInitHeader() : test(0) {}
     protected:
         ClientRequest test;
 };

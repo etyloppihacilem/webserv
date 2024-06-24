@@ -8,10 +8,9 @@
 
 ############################################################################# */
 
-#include "Body.hpp"
 #include "BodyChunk.hpp"
+#include "Body.hpp"
 #include "Logger.hpp"
-#include "todo.hpp"
 #include <cctype>
 #include <cstddef>
 #include <ios>
@@ -20,6 +19,7 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
+#include "todo.hpp"
 
 BodyChunk::BodyChunk(int fd, std::string &buffer):
     Body            (fd, buffer),
@@ -50,8 +50,18 @@ size_t BodyChunk::read_body() {
 std::string &BodyChunk::get() {
     if (_done || !_uniform)
         return _body;
-    read_body();
-    init_chunk();
+
+    size_t i = 0;
+
+    while (!_bytes_remaining && i <= BUFFER_SIZE) {
+        read_body();
+        init_chunk();
+        i++;
+    }
+    if (i > BUFFER_SIZE)
+        error.log() << "Reading body error" << std::endl;
+    if (_bytes_remaining)
+        read_body();
     if (_bytes_remaining) {
         size_t to_save = (_bytes_remaining > _buffer.length() ? _buffer.length() : _bytes_remaining);
 
@@ -71,15 +81,15 @@ std::string BodyChunk::pop() {
     size_t      i   = 0;
 
     _uniform = false;
-    while (_bytes_remaining < BUFFER_SIZE && i <= BUFFER_SIZE) {
+    while (!_bytes_remaining && i <= BUFFER_SIZE) {
         read_body();
         init_chunk();
         i++;
-        if (_trailing || _done)
-            break;
     }
     if (i > BUFFER_SIZE)
         error.log() << "Reading body error" << std::endl;
+    if (_bytes_remaining)
+        read_body();
     if (_bytes_remaining) {
         size_t to_save = (_bytes_remaining > _buffer.length() ? _buffer.length() : _bytes_remaining);
 

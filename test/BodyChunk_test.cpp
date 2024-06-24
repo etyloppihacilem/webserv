@@ -12,7 +12,7 @@
 #include "gtest/gtest.h"
 #include <cstddef>
 #include <string>
-#include "Logger.hpp"
+#include <unistd.h>
 #include "todo.hpp"
 
 TEST(BodyChunkTestSuite, is_hex) {
@@ -108,7 +108,8 @@ TEST(BodyChunkTestSuite, init_chunk_none) {
     EXPECT_EQ(  test._buffer, "");
 }
 
-TEST(BodyChunkTestSuite, read_body) {
+// suspended because of change of approach for reading with chunks
+/* TEST(BodyChunkTestSuite, read_body) {
     static const char buf[]
         = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de compren"
           "dre comment pouvoir lire de facon certaine.";
@@ -129,7 +130,7 @@ TEST(BodyChunkTestSuite, read_body) {
         EXPECT_EQ(  tmp2,   test._buffer);
         EXPECT_EQ(  tmp2,   buffer);
     }
-}
+} */
 
 TEST(BodyChunkTestSuite, get) {
     static const char buf[]

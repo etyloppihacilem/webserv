@@ -38,12 +38,12 @@ bool UploadStrategy::build_response() {
     std::fstream    file;
 
     file.open(_location.c_str(), std::fstream::in);
-    if (!file.is_open()) // check difference of status code if file does not exists yet
+    if (!file.is_open() || _replace) // check difference of status code if file does not exists yet
         _response.set_code(Created);
     else
         _response.set_code(OK);
     file.close();
-    file.open(_location.c_str(), std::fstream::out | std::fstream::app);
+    file.open(_location.c_str(), std::fstream::out |  (_replace ? std::fstream::trunc : std::fstream::app));
     if (!file.is_open()) {
         error.log() << "Cannot open " << _location << " to upload. Sending " << Forbidden << std::endl;
         throw HttpError(Forbidden);
@@ -53,6 +53,7 @@ bool UploadStrategy::build_response() {
     }
     file.close();
     _built = true;
+    _response.add_header("Location", _location); // TODO trouver la bonne location CF redirect
     return _built;
 }
 

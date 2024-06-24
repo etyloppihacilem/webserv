@@ -9,9 +9,8 @@
 ############################################################################# */
 
 #include "gtest/gtest.h"
+#include <cstddef>
 #include <exception>
-#include <iostream>
-#include <ostream>
 #include <string>
 #include "HttpError.hpp"
 #include "HttpMethods.hpp"
@@ -25,7 +24,7 @@
  * LSP is wrong
  * */
 TEST(ClientRequestTestSuite, ParseMethodTestExpectedOK) {
-    ClientRequest test;
+    ClientRequest test(0);
 
     EXPECT_EQ(  test.parse_method("GET", 3),    GET);
     EXPECT_EQ(  test.parse_method("POST", 4),   POST);
@@ -36,7 +35,7 @@ TEST(ClientRequestTestSuite, ParseMethodTestExpectedOK) {
 }
 
 TEST(ClientRequestTestSuite, ParseMethodTestExpectedFail) {
-    ClientRequest test;
+    ClientRequest test(0);
 
     EXPECT_THROW({
         try {
@@ -178,7 +177,7 @@ INSTANTIATE_TEST_SUITE_P(ClientRequestTargetSuite,
 TEST(ClientRequestTestSuite, ParseHeaderLineTestHost) {
     std::string     header      = "Host: www.example.com";
     std::string     header_2    = "Host: www.coucou.com";
-    ClientRequest   test;
+    ClientRequest   test(0);
 
     EXPECT_NO_THROW(test.parse_header_line(header, 0, header.length()));
     EXPECT_EQ(test._header["Host"], "www.example.com");
@@ -266,7 +265,7 @@ INSTANTIATE_TEST_SUITE_P(ClientRequestTestInitHeaderSuite,
 });
 
 TEST(ClientRequestTestSuite, decode_target) {
-    ClientRequest test;
+    ClientRequest test(0);
 
     // with nothing
     test._target = "Coucou je suis heureux";
@@ -287,7 +286,7 @@ TEST(ClientRequestTestSuite, decode_target) {
 }
 
 TEST(ClientRequestTestSuite, parse_parameters) {
-    ClientRequest test;
+    ClientRequest test(0);
 
     // with nothing
     test._target = "/coucou";
