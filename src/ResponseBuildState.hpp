@@ -22,6 +22,9 @@ class ResponseBuildState : ProcessState {
         ResponseBuildState(int fd, ClientRequest *request);
         ~ResponseBuildState();
 
+        ClientRequest               *get_request();
+        ResponseBuildingStrategy    *get_response_strategy();
+
     private:
         ClientRequest               *_request;
         ResponseBuildingStrategy    *_strategy;

@@ -9,6 +9,8 @@
 ############################################################################# */
 
 #include "ResponseBuildState.hpp"
+#include "BodyWriter.hpp"
+#include "ClientRequest.hpp"
 #include "ProcessState.hpp"
 
 /**
@@ -20,6 +22,14 @@ ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request):
     _strategy   (0) {   // TODO check where to free this once it is allocated
     (void) _request;    // TODO delete this
     (void) _strategy;   // TODO delete this
+}
+
+ClientRequest *ResponseBuildState::get_request() {
+    return _request;
+}
+
+ResponseBuildingStrategy *ResponseBuildState::get_response_strategy() {
+    return _strategy;
 }
 
 ResponseBuildState::~ResponseBuildState() {}
