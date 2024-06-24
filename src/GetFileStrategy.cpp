@@ -8,16 +8,19 @@
 
 ############################################################################# */
 
-#include "GetFileStrategy.hpp"
 #include "BodyWriter.hpp"
+#include "GetFileStrategy.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include "MimeTypes.hpp"
 #include "StringUtils.hpp"
+#include "todo.hpp"
 #include <cerrno>
+#include <cstddef>
 #include <fstream>
-#include <ios>
 #include <new>
+#include <ostream>
 #include <string>
 #include <sys/stat.h>
 
@@ -67,7 +70,7 @@ bool GetFileStrategy::build_response() {
 }
 
 bool GetFileStrategy::fill_buffer(std::string &buffer, size_t size) {
-    char buf[size + 1];
+    char buf[BUFFER_SIZE];
 
     if (!_file.is_open()) {
         error.log() << "File " << _location << " is read but not open." << std::endl;
@@ -75,7 +78,7 @@ bool GetFileStrategy::fill_buffer(std::string &buffer, size_t size) {
     }
     if (_done)
         return _done;
-    _file.read(buf, size);
+    _file.read(buf, size > BUFFER_SIZE ? BUFFER_SIZE : size);
     if (_file.eof())
         _done = true;
     buffer += buf;

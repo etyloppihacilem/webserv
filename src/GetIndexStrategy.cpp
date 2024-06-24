@@ -13,13 +13,20 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include "ResponseBuildState.hpp"
 #include "StringUtils.hpp"
 #include "todo.hpp"
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <dirent.h>
+#include <new>
+#include <ostream>
 #include <sstream>
 #include <string>
+#include <strings.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 // location ending in /
 GetIndexStrategy::GetIndexStrategy(const std::string &location, ResponseBuildState &state):

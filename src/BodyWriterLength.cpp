@@ -8,10 +8,15 @@
 
 ############################################################################# */
 
+#include "BodyWriter.hpp"
 #include "BodyWriterLength.hpp"
 #include "Logger.hpp"
+#include "ResponseBuildingStrategy.hpp"
 #include "StringUtils.hpp"
 #include "todo.hpp"
+#include <cstddef>
+#include <new>
+#include <ostream>
 #include <stdint.h>
 #include <string>
 

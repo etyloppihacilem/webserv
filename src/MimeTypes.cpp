@@ -13,6 +13,7 @@
 #include <cmath>
 #include <cstddef>
 #include <fstream>
+#include <ostream>
 #include <string>
 
 MimeTypes::MimeTypes(std::string path):

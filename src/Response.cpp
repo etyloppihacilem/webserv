@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "Response.hpp"
+#include "BodyWriter.hpp"
 #include "HttpStatusCodes.hpp"
 #include "todo.hpp"
 #include "BodyWriterChunk.hpp"
@@ -16,6 +17,7 @@
 #include "ResponseBuildingStrategy.hpp"
 #include <new>
 #include <sstream>
+#include <string>
 
 Response::Response():
     _code   (OK),

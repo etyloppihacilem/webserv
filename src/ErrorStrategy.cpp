@@ -12,7 +12,10 @@
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "ResponseBuildState.hpp"
+#include "ResponseBuildingStrategy.hpp"
+#include <cstddef>
 #include <new>
+#include <ostream>
 #include <sstream>
 #include <string>
 
@@ -40,7 +43,7 @@ bool ErrorStrategy::fill_buffer(std::string &buffer, size_t size) {
         generateErrorPage(buffer);
         return _done = true;
     }
-    (void) size; // TODO response with size
+    (void) size; // TODO response with size in case not a recovery
     return "";
 }
 

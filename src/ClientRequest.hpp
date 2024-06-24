@@ -11,6 +11,7 @@
 #ifndef INCLUDE_SRC_MESSAGE_HPP_
 #define INCLUDE_SRC_MESSAGE_HPP_
 
+#include <cstddef>
 #ifdef TESTING
 #include "gtest/gtest.h"
 #endif
@@ -30,7 +31,7 @@ class ClientRequest {
         bool                                init_body(std::string &buffer);
         void                                save_mem();
         std::string                         &get_target();
-        std::string                         &get_method();
+        HttpMethod                          get_method();
         Body                                *get_body();
 
         std::map<std::string, std::string>  &get_header();
@@ -51,7 +52,7 @@ class ClientRequest {
             size_t                                                              end);
 
         int                                 _fd;
-        std::string                         _method;        ///< Method used for request
+        HttpMethod                          _method;        ///< Method used for request
         std::string                         _target;        ///< Target of request
         std::map<std::string, std::string>  _header;        ///< Map containing headers
         std::map<std::string, std::string>  _parameters;    ///< Parameters from request

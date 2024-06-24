@@ -10,6 +10,10 @@ CompileFlags:
     - "-I$(realpath header)"
     - "-I$(realpath src)"
 
+Diagnostics:
+  UnusedIncludes: Strict
+  MissingIncludes: Strict
+
 ---
 If:
   PathMatch: .*_test\.cpp

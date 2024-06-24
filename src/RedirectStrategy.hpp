@@ -12,7 +12,10 @@
 #define INCLUDE_SRC_REDIRECTSTRATEGY_HPP_
 
 #include "HttpStatusCodes.hpp"
+#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "todo.hpp"
+#include <cstddef>
 #include <string>
 
 /**

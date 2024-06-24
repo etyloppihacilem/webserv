@@ -10,9 +10,14 @@
 
 #include "RedirectStrategy.hpp"
 #include "HttpError.hpp"
+#include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include "ResponseBuildState.hpp"
+#include "ResponseBuildingStrategy.hpp"
 #include "StringUtils.hpp"
+#include <cstddef>
 #include <ostream>
+#include <string>
 
 RedirectStrategy::RedirectStrategy(const std::string &location, ResponseBuildState &state, HttpCode code):
     ResponseBuildingStrategy(state),
@@ -36,7 +41,7 @@ bool RedirectStrategy::fill_buffer(std::string &buffer, size_t size) {
     (void) buffer;
     (void) size;
     warn.log() << "fill_buffer called in an object with no body (RedirectStrategy)." << std::endl;
-    return true; // body is not supposed to even exists
+    return _done = true;
 }
 
 void RedirectStrategy::save_mem() {

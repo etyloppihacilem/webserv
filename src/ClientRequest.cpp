@@ -8,16 +8,16 @@
 
 ############################################################################# */
 
-#include "ClientRequest.hpp"
+#include "Body.hpp"
 #include "BodyChunk.hpp"
 #include "BodyLength.hpp"
-#include "HttpMethods.hpp"
+#include "ClientRequest.hpp"
 #include "HttpError.hpp"
+#include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "HttpUtils.hpp"
 #include "Logger.hpp"
 #include "StringUtils.hpp"
-#include <algorithm>
 #include <cstddef>
 #include <ios>
 #include <iostream>
@@ -267,7 +267,7 @@ std::string &ClientRequest::get_target() {
     return _target;
 }
 
-std::string &ClientRequest::get_method() {
+HttpMethod ClientRequest::get_method() {
     return _method;
 }
 
@@ -298,7 +298,6 @@ int ClientRequest::get_fd() const {
 }
 
 void ClientRequest::save_mem() {
-    shrink_to_fit(  _method);
-    shrink_to_fit(  _target);
+    shrink_to_fit(_target);
     _body->save_mem();
 }

@@ -12,10 +12,14 @@
 #define INCLUDE_SRC_GETINDEXSTRATEGY_HPP_
 
 #include "BodyWriter.hpp"
+#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "todo.hpp"
+#include <cstddef>
 #include <dirent.h>
 #include <string>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 typedef struct dirent dir_item;
 

@@ -13,6 +13,7 @@
 
 #include "ClientRequest.hpp"
 #include "ProcessState.hpp"
+#include <cstddef>
 #include <string>
 
 typedef enum e_state {

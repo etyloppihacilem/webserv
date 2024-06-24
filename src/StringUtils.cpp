@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "StringUtils.hpp"
+#include <cstddef>
 #include <string>
 
 /**

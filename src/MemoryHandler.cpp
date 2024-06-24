@@ -10,6 +10,9 @@
 
 #include "MemoryHandler.hpp"
 #include "Logger.hpp"
+#include <cstddef>
+#include <new>
+#include <ostream>
 
 MemoryHandler::MemoryHandler(size_t size):
     _storage    (0),

@@ -8,10 +8,15 @@
 
 ############################################################################# */
 
+#include "Body.hpp"
 #include "BodyLength.hpp"
 #include "HttpError.hpp"
+#include "HttpStatusCodes.hpp"
 #include "todo.hpp"
+#include <cctype>
+#include <cstddef>
 #include <sstream>
+#include <string>
 #include <unistd.h>
 
 BodyLength::BodyLength(int fd, std::string &buffer, std::string length):

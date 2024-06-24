@@ -11,7 +11,6 @@
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "MemoryHandler.hpp"
-#include "MimeTypes.hpp"
 #include <ios>
 #include <ostream>
 

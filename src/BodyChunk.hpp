@@ -12,6 +12,8 @@
 #define INCLUDE_SRC_BODYCHUNK_HPP_
 
 #include "Body.hpp"
+#include <cstddef>
+#include <string>
 
 #ifdef TESTING
 #include "gtest/gtest.h"

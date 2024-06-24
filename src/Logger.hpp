@@ -12,9 +12,8 @@
 #define INCLUDE_SRC_LOGGER_HPP_
 
 #include "HttpStatusCodes.hpp"
+#include <cstddef>
 #include <fstream>
-#include <ios>
-#include <istream>
 #include <ostream>
 #include <string>
 

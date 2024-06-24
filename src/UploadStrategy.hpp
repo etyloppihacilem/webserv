@@ -13,6 +13,7 @@
 
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include <cstddef>
 #include <string>
 
 /**
@@ -22,11 +23,15 @@
   */
 class UploadStrategy : public ResponseBuildingStrategy {
     public:
-        UploadStrategy(ResponseBuildState &state, std::string location);
+        UploadStrategy(ResponseBuildState &state, std::string location, bool replace = false);
         ~UploadStrategy();
+
+        bool        build_response();
+        bool        fill_buffer(std::string &buffer, size_t size);
 
     private:
         std::string _location;
+        bool        _replace;
 };
 
 #endif  // INCLUDE_SRC_UPLOADSTRATEGY_HPP_

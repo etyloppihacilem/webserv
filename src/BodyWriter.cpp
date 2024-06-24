@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "BodyWriter.hpp"
+#include <ostream>
 
 BodyWriter::BodyWriter(ResponseBuildingStrategy &strategy):
     _done       (false),

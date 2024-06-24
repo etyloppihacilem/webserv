@@ -9,8 +9,11 @@
 ############################################################################# */
 
 #include "ReadState.hpp"
+#include "ClientRequest.hpp"
+#include "ProcessState.hpp"
 #include "StringUtils.hpp"
 #include "todo.hpp"
+#include <cstddef>
 #include <unistd.h>
 
 ReadState::ReadState(int fd):
@@ -86,11 +89,11 @@ t_state ReadState::process_buffer(char *buffer) {
             _buffer = _buffer.substr(begin, _buffer.length() - begin);
         // if (end - begin > MAX_HEADER) // TODO est-ce que le max header existe ??
         // _buffer = "" et il faut repondre par une erreur
-        _in_progress = new ClientRequest;
+        _in_progress = new ClientRequest(_fd);
         if (!_in_progress->parse_header(_buffer))
             return _state = error; // TODO close connection after error response is sent.
         _buffer = _buffer.substr(0, end);
-        if (_in_progress->init_body(_buffer, _fd))
+        if (_in_progress->init_body(_buffer))
             _state = ready_body;
         else
             _state = ready;

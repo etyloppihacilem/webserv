@@ -14,6 +14,7 @@
 #include "BodyWriter.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
+#include <cstddef>
 #include <string>
 
 class BodyWriterLength: public BodyWriter {

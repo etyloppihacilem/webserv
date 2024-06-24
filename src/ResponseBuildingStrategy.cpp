@@ -9,6 +9,8 @@
 ############################################################################# */
 
 #include "ResponseBuildingStrategy.hpp"
+#include "Response.hpp"
+#include "ResponseBuildState.hpp"
 #include "StringUtils.hpp"
 #include <cstddef>
 

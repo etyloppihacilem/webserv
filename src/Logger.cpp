@@ -10,6 +10,8 @@
 
 #include "Logger.hpp"
 #include <cstdarg>
+#include <cstdio>
+#include <ctime>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
