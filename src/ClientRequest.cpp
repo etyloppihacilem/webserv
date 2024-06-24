@@ -25,7 +25,8 @@
 #include <sstream>
 #include <string>
 
-ClientRequest::ClientRequest():
+ClientRequest::ClientRequest(int fd):
+    _fd             (fd),
     _method         (),
     _target         (),
     _header         (),
@@ -196,15 +197,13 @@ bool ClientRequest::parse_header(const std::string &in) {
   _body_exists should be checked before any action is performed on a supposed _body.
   TODO check if there is no better way to protect this (in getter for example).
   */
-bool ClientRequest::init_body(std::string &buffer, int fd) {
-    (void) buffer;
-    (void) fd;
+bool ClientRequest::init_body(std::string &buffer) {
     if (_header.find("Transfer-Encoding") != _header.end()) {
         _body_exists    = true;
-        _body           = new BodyChunk(fd, buffer);
+        _body           = new BodyChunk(_fd, buffer);
     } else if (_header.find("Content-Length") != _header.end()) {
         _body_exists    = true;
-        _body           = new BodyLength(fd, buffer, _header["Content-Length"]);
+        _body           = new BodyLength(_fd, buffer, _header["Content-Length"]);
     } else { // no body
         _body_exists = false;
     }
@@ -292,6 +291,10 @@ bool ClientRequest::have_body() const {
 
 HttpCode ClientRequest::get_status() const {
     return _status;
+}
+
+int ClientRequest::get_fd() const {
+    return _fd;
 }
 
 void ClientRequest::save_mem() {
