@@ -11,9 +11,10 @@
 #include "BodyChunk.hpp"
 #include "gtest/gtest.h"
 #include <cstddef>
+#include <ostream>
 #include <string>
 #include <unistd.h>
-#include "todo.hpp"
+#include "Logger.hpp"
 
 TEST(BodyChunkTestSuite, is_hex) {
     std::string buffer = "ca32\r\n";
@@ -56,6 +57,7 @@ TEST(BodyChunkTestSuite, init_chunk) {
     std::string buffer = "ca32\r\ncoucou";
     BodyChunk   test(0, buffer);
 
+    info.log() << "Warning are normal for this test." << std::endl;
     EXPECT_EQ(test._bytes_remaining, (size_t) 0);
     test._bytes_remaining = 2;
     EXPECT_FALSE(test.init_chunk());
@@ -78,6 +80,7 @@ TEST(BodyChunkTestSuite, init_chunk_end) {
           "dre comment pouvoir lire de facon certaine.\r\n\r\n";
     BodyChunk test(0, buffer);
 
+    info.log() << "Warning are normal for this test." << std::endl;
     test._bytes_remaining = 0;
     EXPECT_TRUE(test.init_chunk());
     EXPECT_EQ(test._bytes_remaining, (size_t) 0x16);

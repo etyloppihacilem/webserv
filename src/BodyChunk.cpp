@@ -53,16 +53,17 @@ std::string &BodyChunk::get() {
 
     size_t i = 0;
 
-    while (!_bytes_remaining && i <= BUFFER_SIZE) {
+    while ((!_bytes_remaining && i <= BUFFER_SIZE) || (_trailing && !_done)) {
         read_body();
         init_chunk();
-        i++;
+        i += !_trailing;
+        if (_done)
+            return _body;
     }
     if (i > BUFFER_SIZE)
         error.log() << "Reading body error" << std::endl;
-    if (_bytes_remaining)
-        read_body();
     if (_bytes_remaining) {
+        read_body();
         size_t to_save = (_bytes_remaining > _buffer.length() ? _buffer.length() : _bytes_remaining);
 
         _body               += _buffer.substr(0, to_save);
@@ -81,10 +82,12 @@ std::string BodyChunk::pop() {
     size_t      i   = 0;
 
     _uniform = false;
-    while (!_bytes_remaining && i <= BUFFER_SIZE) {
+    while ((!_bytes_remaining && i <= BUFFER_SIZE) || (_trailing && !_done)) {
         read_body();
         init_chunk();
-        i++;
+        i += !_trailing;
+        if (_done)
+            return _body;
     }
     if (i > BUFFER_SIZE)
         error.log() << "Reading body error" << std::endl;
@@ -129,7 +132,9 @@ bool BodyChunk::init_chunk() { // discard until a size line is found
             _done       = true;
         }
     }
-    if (_bytes_remaining > 0 || _done) {
+    if (_done)
+        return false;
+    if (_bytes_remaining > 0) {
         warn.log() << "Trying to initiate a chunk while another is still being read." << std::endl;
         return false;
     }
