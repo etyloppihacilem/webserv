@@ -34,14 +34,16 @@ class ReadState : public ProcessState {
         // TODO is a function to check header requirements needed ?? For example host requirements (that are checked)
         ClientRequest   *get_message();
         void            done_message();
+        void            save_mem();
 
     private:
+        size_t          find_method();
+
         t_state         _state;         ///< State of the object
         std::string     _buffer;        ///< Buffer for parsing on fd
         /**< buffer is supposed clean at the end of a successful parsing on it. */
         ClientRequest   *_in_progress;  ///< ClientRequest that is built
 
-        size_t          find_method();
 #ifdef TESTING
         FRIEND_TEST(ReadStateSuite, FindMethod);
 #endif

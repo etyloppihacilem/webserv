@@ -28,6 +28,7 @@ class ClientRequest {
 
         bool                                parse_header(const std::string &in);
         bool                                init_body(std::string &buffer, int fd);
+        void                                save_mem();
     private:
         HttpMethod                          parse_method(const std::string &method, const size_t &end);
         void                                parse_target(const std::string &in, const size_t &pos);
@@ -37,22 +38,18 @@ class ClientRequest {
         void                                parse_header_line(const std::string &in,
             size_t                                                              begin,
             size_t                                                              end);
-        void                                save_mem();
 
         std::string                         _method;        ///< Method used for request
         std::string                         _target;        ///< Target of request
         std::map<std::string, std::string>  _header;        ///< Map containing headers
         std::map<std::string, std::string>  _parameters;    ///< Parameters from request
-        // TODO parameters not implemented !!! is it really needed ????? at least discard them in case it messes up the
-        // target location
         bool                                _body_exists;   ///< True if there's a body in this request.
         /**< Determined by the presence of Content-Length or Transfer-Encoding headers in request.*/
         Body                                *_body;         ///< Pointer on body object if present
         HttpCode                            _status;        ///< Status of request (not 200 if error)
         bool                                _absolute_form; ///< True if request is in absolute form.
-        /**<
-        Absolute form means having the Host value in the request line and having no 'Host' header. Any 'Host' headers
-        found while in absolute form is discarded.
+        /**< Absolute form means having the Host value in the request line and having no 'Host' header.
+             Any 'Host' headers found while in absolute form is discarded.
         */
 
 #ifdef TESTING

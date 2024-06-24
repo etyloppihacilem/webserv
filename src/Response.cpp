@@ -38,7 +38,14 @@ void Response::set_body(BodyWriter *body) {
   Add header to Response _header
   */
 void Response::add_header(const std::string &field, const std::string &value) {
-    _header[field] = value;
+    if (value == "") {
+        _header.erase(field);
+        return;
+    }
+    if (_header.find(field) != _header.end())
+        _header[field] += ", " + value;
+    else
+        _header[field] = value;
 }
 
 /**

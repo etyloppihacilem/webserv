@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "ReadState.hpp"
+#include "StringUtils.hpp"
 #include "todo.hpp"
 #include <unistd.h>
 
@@ -114,4 +115,10 @@ void ReadState::done_message() {
   */
 ClientRequest *ReadState::get_message() {
     return _in_progress;
+}
+
+void ReadState::save_mem() {
+    shrink_to_fit(_buffer);
+    if (_in_progress)
+        _in_progress->save_mem();
 }

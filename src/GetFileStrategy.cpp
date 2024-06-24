@@ -32,27 +32,29 @@ GetFileStrategy::~GetFileStrategy() {
 }
 
 void GetFileStrategy::buildResponse() {
-    struct stat buf;
+    {
+        struct stat buf;
 
-    if (_file.is_open()) {
-        warn.log() << "File " << _location << " was already opened. Closing and reopening." << std::endl;
-        _file.close();
-    }
-    if (stat(_location.c_str(), &buf)) {
-        if (errno == ENOENT)
-            throw HttpError(NotFound);
-        if (errno == EACCES)
-            throw HttpError(Forbidden);
-        if (errno == ENOMEM)
-            throw std::bad_alloc();
-        if (errno == ENOTDIR)
-            throw HttpError(Forbidden, "DIR");  // this is to tell the difference between directory forbidden and no
-                                                // directory forbidden
-        if (errno == ENAMETOOLONG)
-            throw HttpError(URITooLong);
-        throw HttpError(InternalServerError);
-    }
-    _estimated_size = buf.st_size;
+        if (_file.is_open()) {
+            warn.log() << "File " << _location << " was already opened. Closing and reopening." << std::endl;
+            _file.close();
+        }
+        if (stat(_location.c_str(), &buf)) {
+            if (errno == ENOENT)
+                throw HttpError(NotFound);
+            if (errno == EACCES)
+                throw HttpError(Forbidden);
+            if (errno == ENOMEM)
+                throw std::bad_alloc();
+            if (errno == ENOTDIR)
+                throw HttpError(Forbidden, "DIR");  // this is to tell the difference between directory forbidden and no
+                                                    // directory forbidden
+            if (errno == ENAMETOOLONG)
+                throw HttpError(URITooLong);
+            throw HttpError(InternalServerError);
+        }
+        _estimated_size = buf.st_size;
+    } // saving stack
     _file.open(_location.c_str(), std::fstream::binary);
     if (!_file.is_open()) {
         error.log() << "Undetected error opening file " << _location << ". Sending " << InternalServerError

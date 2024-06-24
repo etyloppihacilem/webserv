@@ -22,7 +22,8 @@
 class ErrorStrategy: public ResponseBuildingStrategy {
     public:
         ErrorStrategy(ResponseBuildState &state, HttpCode code = InternalServerError, bool recovery = true);
-        // TODO trouver comment recuperer la map des fichiers d'erreures.
+
+        // TODO trouver comment recuperer la map des fichiers d'erreurs.
         ~ErrorStrategy();
 
         void        buildResponse();
@@ -31,6 +32,7 @@ class ErrorStrategy: public ResponseBuildingStrategy {
 
     private:
         void        generateErrorPage(std::string &buffer);
+
         HttpCode    _code;
         bool        _recovery;
 };
