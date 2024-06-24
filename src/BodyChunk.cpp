@@ -37,13 +37,19 @@ size_t BodyChunk::read_body() {
 
     char    buf[BUFFER_SIZE + 1] = {
         0
-    };                                          // whole buffer is set to 0
+    };                                  // whole buffer is set to 0
     size_t  size_read;
 
-    size_read = read(_fd, buf,
-            (_bytes_remaining ? _bytes_remaining : 1)
-            > BUFFER_SIZE ? BUFFER_SIZE : (_bytes_remaining ? _bytes_remaining : 1));
-    _buffer += std::string(buf);
+    if (_bytes_remaining)
+        size_read = _bytes_remaining;
+    else if (_buffer == "") // dark optimisation not to go past end of buffer
+        size_read = _trailing ? 2 : 3;
+    else if (_buffer.back() != '\r')
+        size_read = 2;
+    else
+        size_read = 1;
+    size_read   = read(_fd, buf, size_read > BUFFER_SIZE ? BUFFER_SIZE : size_read);
+    _buffer     += std::string(buf);
     return size_read;
 }
 
@@ -64,6 +70,7 @@ std::string &BodyChunk::get() {
         error.log() << "Reading body error" << std::endl;
     if (_bytes_remaining) {
         read_body();
+
         size_t to_save = (_bytes_remaining > _buffer.length() ? _buffer.length() : _bytes_remaining);
 
         _body               += _buffer.substr(0, to_save);
