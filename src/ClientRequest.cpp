@@ -61,6 +61,10 @@ static void replace_all(std::string &str, const std::string &to_find, const std:
     }
 }
 
+/**
+  Parse target. If is origin form, parses it normally, and if is absolute form, parses it in a way to make it normal
+  and adding Host header.
+  */
 void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
     {
         size_t  sp_protocol;
@@ -76,18 +80,19 @@ void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
             throw HttpError(URITooLong);
         if (sp_protocol != protocol - 1) {  // there are SP remaining in URI, that is wrong, going for
                                             // 301 MovedPermanently.
-            // TODO IF NOT IN ORIGIN FORM, ADD HOST TO LOCATION !!!
+            // TODO IF NOT IN ORIGIN FORM, ADD HOST TO LOCATION !!! im not sure
             std::string redirect = in.substr(pos + 1, (protocol - 1) - (pos + 1));
 
             replace_all(redirect,   " ",    "%20");
             replace_all(redirect,   "\t",   "%09");
             throw HttpError(MovedPermanently, redirect); // message is the redirect location
         }
-        _target = in.substr(pos + 1, (protocol - 1) - (pos + 1));
+        _target = in.substr(pos + 1, (protocol - 1) - (pos + 1));   // if origin form, nothing to do because target is
+                                                                    // already right.
     }
     size_t host = _target.find("http://");
 
-    if (host == 0) {                                        // absolute form
+    if (host == 0) { // absolute form
         size_t host_end = _target.find("/", 7);
 
         if (host_end == std::string::npos || host_end == 7)
@@ -95,10 +100,18 @@ void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
         _header["Host"] = _target.substr(7, host_end - 7);
         _target         = _target.substr(host_end, _target.length() - host_end);
         _absolute_form  = true;
-    } else if (_target[0] != '/')   // not origin form
+    } else if (_target[0] != '/') // not origin form
         throw HttpError(BadRequest);
 }
 
+/**
+  Parses a header line.
+
+  In case header already exists, it adds it to the existing value.
+
+  In case header is Host, if request is in absolute form it does nothing, and if it is in origin form it checks if
+  Host is not yet defined.
+  */
 void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_t end) {
     size_t  sep = in.find_first_of(":", begin);
     size_t  ows = in.find_first_of(" \t", begin);
@@ -125,7 +138,7 @@ void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_
     if (end + 1 <= sep)
         throw HttpError(BadRequest);
     else if (_header.find(key) != _header.end())
-        _header[key] += in.substr(sep, (end + 1) - sep);
+        _header[key] += ", " + in.substr(sep, (end + 1) - sep);
     else
         _header[key] = in.substr(sep, (end + 1) - sep);
 }
