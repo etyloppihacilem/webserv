@@ -52,9 +52,9 @@ bool UploadStrategy::build_response() {
         file << body->pop();
     }
     file.close();
-    _built = true;
     _response.add_header("Location", _location); // TODO trouver la bonne location CF redirect
-    return _built;
+    _done = true;
+    return _built = true;
 }
 
 bool UploadStrategy::fill_buffer(std::string &buffer, size_t size) {

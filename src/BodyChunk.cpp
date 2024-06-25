@@ -44,7 +44,7 @@ size_t BodyChunk::read_body() {
         size_read = _bytes_remaining;
     else if (_buffer == "") // dark optimisation not to go past end of buffer
         size_read = _trailing ? 2 : 3;
-    else if (_buffer.back() != '\r')
+    else if (*_buffer.rbegin() != '\r')
         size_read = 2;
     else
         size_read = 1;
