@@ -15,10 +15,9 @@ bool isValidIPAddress(const std::string &);
 bool isValidPort(int value);
 bool isValidMethods(const std::string &);
 bool isValidRoot(const std::string &);
-bool isValidPath(const std::string &);
-bool isValidIndex(const std::string &);
+bool isValidPath(const std::string &, const std::string &root = "");
+bool isValidIndex(const std::string &, const std::string &);
 bool isValidClientMaxBodySize(const std::string &);
-bool isValidErrorPage(const ValueList &);
 bool isValidAutoindex(const std::string &);
 bool isValidFileExt(const std::string &);
 

@@ -1,5 +1,4 @@
 #include "HttpMethods.hpp"
-#include "HttpStatusCodes.hpp"
 #include "ServerConfFields.hpp"
 #include "ServerConfValidate.hpp"
 #include <cctype>
@@ -8,7 +7,6 @@
 #include <climits>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sstream>
 
 bool isValidConfigFile(const std::string &configFile)
 {
@@ -168,13 +166,13 @@ bool isValidRoot(const std::string &value)
     return false;
 }
 
-bool isValidPath(const std::string &value)
+bool isValidPath(const std::string &value, const std::string &root)
 {
     if (value.size() == 0) {
         return false;
     }
 
-    std::string pathString("/" + value);
+    std::string pathString(root + "/" + value);
     struct stat path;
 
     if (value[0] == '/' && stat(pathString.c_str(), &path) == 0 && path.st_mode && S_ISREG(path.st_mode)) {
@@ -190,10 +188,9 @@ bool isValidIndex(const std::string &value, const std::string &root)
     }
 
     std::string HTML = ".html";
-    std::string path("/" + root + "/" + value);
 
     if (value.find(HTML, 0) == value.size() - HTML.size()
-        && isValidPath(path)) {
+        && isValidPath(value, root)) {
         return true;
     }
     return false;
