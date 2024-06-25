@@ -26,6 +26,8 @@ ErrorStrategy::ErrorStrategy(ResponseBuildState &state, HttpCode code, bool reco
 
 ErrorStrategy::~ErrorStrategy() {}
 
+// TODO finir ErrorStrategy !!!
+
 bool ErrorStrategy::build_response() {
     if (_recovery) {
         _response.add_header("Content-Type", "text/html; charset=utf-8");
