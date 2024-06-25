@@ -157,3 +157,13 @@ size_t findClosingBrace(const std::string &tokenString)
     }
     return 0;
 }
+
+int findFieldCode(const std::string &fieldName)
+{
+    for (int i = 0; i < COUNT_CONF_FIELD; ++i) {
+        if (fieldName == ConfFieldString(i)) {
+            return i;
+        }
+    }
+    return -1;
+}

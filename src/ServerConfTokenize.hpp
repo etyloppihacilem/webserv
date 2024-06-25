@@ -12,5 +12,6 @@ Field tokenizeField(StringTokenizer &);
 ValueList tokenizeValue(const std::string &);
 
 size_t findClosingBrace(const std::string &);
+int findFieldCode(const std::string &);
 
 #endif // INCLUDE_SRC_SERVERCONFTOKENIZE_HPP_

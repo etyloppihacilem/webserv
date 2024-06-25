@@ -10,7 +10,6 @@
 #include "Route.hpp"
 
 class Server{
-
     class RouteNotFoundWarn: public std::exception{
         public:
             RouteNotFoundWarn(std::string message = "") throw ():
@@ -37,6 +36,16 @@ class Server{
         std::map<std::string, Route>    _routes;
         std::map<HttpCode, std::string> _errorPages;
 
+		bool _serverNameSet;
+    	bool _portSet;
+    	bool _autoindexSet;
+    	bool _indexPageSet;
+    	bool _methodsSet;
+    	bool _rootDirSet;
+		bool _maxBodySizeSet;
+
+		bool checkMandatoryField() const;
+
     public:
         Server();
         Server(const std::string&);
@@ -55,15 +64,15 @@ class Server{
         bool                            hasRoute(const std::string &path) const;
         Route                           &getRoute(const std::string &path);
 
-        void                            setServerName(const ValueList &);
-        void                            setPort(const ValueList &);
-        void                            setAutoindex(const ValueList &);
-        void                            setMethods(const ValueList &);
-        void                            setRootDir(const ValueList &);
-        void                            setIndexPage(const ValueList &);
-        void                            setMaxBodySize(const ValueList &);
-        void                            addRoute(const Field &);
-        void                            addErrorPage(const ValueList &);
+        void                            setServerName(const ValueList&);
+        void                            setPort(const ValueList&);
+        void                            setRootDir(const ValueList&);
+        void                            setIndexPage(const ValueList&);
+        void                            setAutoindex(const ValueList&);
+        void                            setMethods(const ValueList&);
+        void                            setMaxBodySize(const ValueList&);
+        void                            addRoute(const Field&);
+        void                            addErrorPage(const ValueList&);
 
         // Route *getRoute(const std::string &path);
 };

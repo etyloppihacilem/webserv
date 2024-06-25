@@ -1,11 +1,13 @@
-#include "Server.hpp"
 #include "HttpMethods.hpp"
-#include "StringTokenizer.hpp"
+#include "Logger.hpp"
+#include "Server.hpp"
+#include "ServerConfFields.hpp"
 #include "ServerConfTokenize.hpp"
 #include "ServerConfValidate.hpp"
-#include "Logger.hpp"
-#include <sstream>
+#include "StringTokenizer.hpp"
 #include <algorithm>
+#include <sstream>
+#include <string>
 
 Server::Server():
     _serverName (),
@@ -32,22 +34,35 @@ Server::Server():
     _errorPages[HTTPVersionNotSupported]    = "error_pages/505.html";
 }
 
-int findFieldCode(const std::string &fieldName)
-{
-    for (int i = 0; i < COUNT_CONF_FIELD; ++i) {
-        if (fieldName == ConfFieldString(i)) {
-            return i;
-        }
-    }
-    return -1;
-}
+Server::Server(const std::string &serverContent):
+    _serverName     (),
+    _port           (8080),
+    _autoindex      (true),
+    _methods        (),
+    _rootDir        ("./"),
+    _indexPage      (),
+    _maxBodySize    (1000000),
+    _routes         (),
+    _errorPages     (),
+    _serverNameSet  (false),
+    _portSet        (false),
+    _autoindexSet   (false),
+    _indexPageSet   (false),
+    _methodsSet     (false),
+    _rootDirSet     (false),
+    _maxBodySizeSet (false) {
+    _serverName.push_back("localhost");
+    _indexPage.push_back("index.html");
+    _methods.push_back(GET);
 
-Server::Server(const std::string &serverContent) {
-    StringTokenizer tokenizedServer(serverContent, "|");
+    StringTokenizer         tokenizedServer(serverContent, "|");
+    std::vector<Field>      tokenizedLocations;
+    std::vector<ValueList>  tokenizedErrorPages;
 
-    std::replace(serverContent.begin(), serverContent.end(), "|", " ");
-    info.log() << "server: " + serverContent.substr(0, 30)
-        + " ... : parsing started..." << std::endl;
+    std::string infoStr = serverContent.substr(0, 30);
+
+    std::replace(infoStr.begin(), infoStr.end(), "|", " ");
+    info.log() << "server: " << infoStr << " ... : parsing started..." << std::endl;
     while (tokenizedServer.hasMoreTokens()) {
         try {
             Field fieldContent;
@@ -57,8 +72,8 @@ Server::Server(const std::string &serverContent) {
                 if (!isValidLocation(fieldContent.second)) {
                     std::replace(fieldContent.second.begin(), fieldContent.second.end(), "|", " ");
                     warn.log()
-                        << "location " + fieldContent.first + " : " + tokenizedServer.remainingString().substr(0, 30)
-                        + " ... : this 'location' module does not possess mandatory fields, parsing canceled"
+                        << "location " << fieldContent.first << " : " << fieldContent.second.substr(0, 30)
+                        << " ... : this 'location' module does not possess mandatory fields, parsing canceled"
                         << std::endl;
                 }
             } else {
@@ -70,37 +85,96 @@ Server::Server(const std::string &serverContent) {
 
             switch (fieldCode) {
                 case 2:
-                    this->addRoute(fieldContent);
+                    tokenizedLocations.push_back(fieldContent);
                     break;
                 case 3:
-                    this->addErrorPage(valueContent);
+                    tokenizedErrorPages.push_back(valueContent);
                     break;
                 case 4:
+                    if (_serverNameSet) {
+                        warn.log() << "server_name: ";
+                        for (size_t i = 0; i < valueContent.size(); ++i) {
+                            warn.log() << valueContent[i] << " ";
+                        }
+                        warn.log() << ", is a redifinition of the current value, field ignored." << std::endl;
+                        break;
+                    }
                     this->setServerName(valueContent);
                     break;
                 case 5:
+                    if (_portSet) {
+                        warn.log()  << "listen: " << valueContent[0]
+                                    << ", is a redifinition of the current value, field ignored." << std::endl;
+                        break;
+                    }
                     this->setPort(valueContent);
                     break;
                 case 6:
+                    if (_rootDirSet) {
+                        warn.log()  << "root: " << valueContent[0]
+                                    << ", is a redifinition of the current value, field ignored." << std::endl;
+                        break;
+                    }
                     this->setRootDir(valueContent);
                     break;
                 case 7:
+                    if (_indexPageSet) {
+                        warn.log() << "index: ";
+                        for (size_t i = 0; i < valueContent.size(); ++i) {
+                            warn.log() << valueContent[i] << " ";
+                        }
+                        warn.log() << ", is a redifinition of the current value, field ignored." << std::endl;
+                        break;
+                    }
                     this->setIndexPage(valueContent);
                     break;
                 case 8:
+                    if (_autoindexSet) {
+                        warn.log()  << "autoindex: " << valueContent[0]
+                                    << ",  is a redifinition of the current value, field ignored." << std::endl;
+                        break;
+                    }
                     this->setAutoindex(valueContent);
                     break;
                 case 9:
+                    if (_methodsSet) {
+                        warn.log() << "methods: ";
+                        for (size_t i = 0; i < valueContent.size(); ++i) {
+                            warn.log() << valueContent[i] << " ";
+                        }
+                        warn.log() << ", is a redifinition of the current value, field ignored." << std::endl;
+                        break;
+                    }
+                    this->setMethods(valueContent);
+                    break;
+                case 10:
+                    if (_maxBodySizeSet) {
+                        warn.log()  << "max_body_size: " << valueContent[0]
+                                    << ",  is a redifinition of the current value, field ignored." << std::endl;
+                        break;
+                    }
                     this->setMaxBodySize(valueContent);
                     break;
                 default:
-                    warn.log() << fieldContent.first + ": is not a valide Server Conf Field" << std::endl;
+                    warn.log() << fieldContent.first << ": is not a valide Server Conf Field" << std::endl;
                     throw ServerConfWarn();
             }
         } catch (ServerConfWarn &e) {
             continue;
-        } catch (ServerConfError &e) {
-            throw;
+        }
+        for (std::vector<Field>::iterator it = tokenizedLocations.begin(); it < tokenizedLocations.end(); ++it) {
+            try {
+                this->addRoute(*it);
+            } catch (ServerConfWarn &e) {
+                continue;
+            }
+        }
+        for (std::vector<ValueList>::iterator it = tokenizedErrorPages.begin(); it < tokenizedErrorPages.end(); ++it) {
+            try {
+                this->addErrorPage(*it);
+            } catch (ServerConfWarn &e) {
+                continue;
+            }
         }
     }
 }
@@ -160,13 +234,21 @@ bool Server::hasServeName(const std::string &serverName) const{
 
 void Server::addRoute(const Field &locationContent)
 {
-    _routes[locationContent.first] = Route(locationContent.second);
+    if (!isValidPath(locationContent.first)) {
+        warn.log() << "location: " << locationContent.first << ": is not a valid url path." << std::endl;
+        throw ServerConfWarn();
+    }
+    _routes[locationContent.first] = Route(locationContent.second, *this);
 }
 
 void Server::addErrorPage(const ValueList &valueContent)
 {
     if (valueContent.size() != 2) {
-        warn.log() << "fail to parse 'error_page', accept only a error code and a path value." << std::endl;
+        warn.log() << "error_page: ";
+        for (size_t i = 0; i < valueContent.size(); ++i) {
+            warn.log() << valueContent[i] << " ";
+        }
+        warn.log() << ", fail to parse field, it accept only a error code and a path value." << std::endl;
         throw ServerConfWarn();
     }
 
@@ -174,26 +256,28 @@ void Server::addErrorPage(const ValueList &valueContent)
     int                 errorCode;
 
     if (errorStr >> errorCode) {
-        error.log() << "error_page: " << valueContent[0] << ": is not a valid int." << std::endl;
-        throw ServerConfError();
+        warn.log() << "error_page: " << valueContent[0] << ": is not a valid int." << std::endl;
+        throw ServerConfWarn();
     }
     if (!isError(errorCode)) {
-        error.log() << "error_page: " << valueContent[0] << ": is not a valid Http error." << std::endl;
-        throw ServerConfError();
+        warn.log() << "error_page: " << valueContent[0] << ": is not a valid Http error." << std::endl;
+        throw ServerConfWarn();
     }
     if (errorCode > 599) {
         info.log()  << "error_page: " << valueContent[0] << ": this error code is not standard because above 599."
                     << std::endl;
     }
-    if (!isValidPath(valueContent[1])) {
+    if (!isValidPath(valueContent[1], _rootDir)) {
         warn.log()  << "error_page: " << valueContent[0] << " " << valueContent[1] << "is not a valid path."
                     << std::endl;
+        throw ServerConfWarn();
     }
     _errorPages[HttpCode(errorCode)] = valueContent[1];
 }
 
 void Server::setServerName(const ValueList &valueContent)
 {
+    _serverNameSet = true;
     for (ValueList::const_iterator it = valueContent.begin(); it < valueContent.end(); ++it) {
         if (!isValidIPAddress(*it)) {
             if (!isValidHostName(*it)) {
@@ -203,51 +287,59 @@ void Server::setServerName(const ValueList &valueContent)
         }
         _serverName.push_back(*it);
     }
-    if (_serverName.empty()) {
-        error.log() << "The server does not possess any valid server name, parsing canceled." << std::endl;
-        throw ServerConfError();
-    }
 }
 
 void Server::setPort(const ValueList &valueContent)
 {
+    _portSet = true;
     if (valueContent.size() != 1) {
-        error.log() << "fail to parse 'listen', accept only one value." << std::endl;
-        throw ServerConfError();
+        warn.log() << "listen: ";
+        for (size_t i = 0; i < valueContent.size(); ++i) {
+            warn.log() << valueContent[i] << " ";
+        }
+        warn.log() << ", fail to parse field, it accept only one value." << std::endl;
+        throw ServerConfWarn();
     }
 
     std::stringstream   port(valueContent[0]);
     int                 portNumber;
 
     if (port >> portNumber) {
-        error.log() << "port: " << valueContent[0] << ": is not a valid int." << std::endl;
-        throw ServerConfError();
+        warn.log() << "listen: " << valueContent[0] << ": is not a valid int." << std::endl;
+        throw ServerConfWarn();
     }
     if (!isValidPort(portNumber)) {
-        error.log() << "port: " << valueContent[0] << ": is not a valid port number." << std::endl;
-        throw ServerConfError();
+        warn.log() << "listen: " << valueContent[0] << ": is not a valid port number." << std::endl;
+        throw ServerConfWarn();
     }
     _port = portNumber;
 }
 
 void Server::setRootDir(const ValueList &valueContent)
 {
+    _rootDirSet = true;
     if (valueContent.size() != 1) {
-        error.log() << "fail to parse 'root', accept only one value." << std::endl;
-        throw ServerConfError();
+        warn.log() << "root: ";
+        for (size_t i = 0; i < valueContent.size(); ++i) {
+            warn.log() << valueContent[i] << " ";
+        }
+        warn.log() << ", fail to parse field, it accept only one value." << std::endl;
+        throw ServerConfWarn();
     }
     if (!isValidRoot(valueContent[0])) {
-        error.log() << "root: " << valueContent[0] << ": is not a valid root." << std::endl;
+        warn.log() << "root: " << valueContent[0] << ": is not a valid root." << std::endl;
+        throw ServerConfWarn();
     }
     _rootDir = valueContent[0];
 }
 
 void Server::setIndexPage(const ValueList &valueContent)
 {
+    _indexPageSet = true;
     for (ValueList::const_iterator it = valueContent.begin(); it < valueContent.end(); ++it) {
-        if (!isValidIndex(*it)) {
+        if (!isValidIndex(*it, _rootDir)) {
             warn.log() << "index: " << *it << ": is not a valid index page." << std::endl;
-            throw ServerConfWarn();
+            continue;
         }
         _indexPage.push_back(*it);
     }
@@ -255,41 +347,68 @@ void Server::setIndexPage(const ValueList &valueContent)
 
 void Server::setAutoindex(const ValueList &valueContent)
 {
+    _autoindexSet = true;
     if (valueContent.size() != 1) {
-        error.log() << "fail to parse 'autoindex', accept only one value." << std::endl;
-        throw ServerConfError();
+        warn.log() << "autoindex: ";
+        for (size_t i = 0; i < valueContent.size(); ++i) {
+            warn.log() << valueContent[i] << " ";
+        }
+        warn.log() << ", fail to parse field, it accept only one value." << std::endl;
+        throw ServerConfWarn();
     }
+    if (!isValidAutoindex(valueContent[0])) {
+        warn.log() << "autoindex: " << valueContent[0] << ": is not a valid bool." << std::endl;
+        throw ServerConfWarn();
+    }
+    if (valueContent[0] == "true") {
+        _autoindex = true;
+    } else {
+        _autoindex = false;
+    }
+}
 
-    if (!isValidAutoindex(valueContent[0]))
-    {
-    	warn.log() << "autoindex: " << valueContent[0] << ": is not a valid bool." << std::endl;
+void Server::setMethods(const ValueList &valueContent)
+{
+    _methodsSet = true;
+    for (ValueList::const_iterator it = valueContent.begin(); it < valueContent.end(); ++it) {
+        if (!isValidMethods(*it)) {
+            warn.log() << "methods: " << *it << ": is not a valid Http method." << std::endl;
+            continue;
+        }
+        if (*it == "GET") {
+            _methods.push_back(GET);
+        }
+        if (*it == "POST") {
+            _methods.push_back(POST);
+        }
+        if (*it == "DELETE") {
+            _methods.push_back(DELETE);
+        }
     }
-	if (valueContent[0] == "true")
-	{
-		_autoindex = true;
-	}
-	else {
-		_autoindex = false;
-	}
 }
 
 void Server::setMaxBodySize(const ValueList &valueContent)
 {
+    _maxBodySizeSet = true;
     if (valueContent.size() != 1) {
-        error.log() << "fail to parse 'max_body_size', accept only one value." << std::endl;
-        throw ServerConfError();
+        warn.log() << "max_body_size: ";
+        for (size_t i = 0; i < valueContent.size(); ++i) {
+            warn.log() << valueContent[i] << " ";
+        }
+        warn.log() << ", fail to parse field, it accept only one value." << std::endl;
+        throw ServerConfWarn();
     }
 
     std::stringstream   maxBodySizeStr(valueContent[0]);
     int                 maxBodySizeNumber;
 
     if (maxBodySizeStr >> maxBodySizeNumber) {
-        error.log() << "max_body_size: " << valueContent[0] << ": is not a valid int." << std::endl;
-        throw ServerConfError();
+        warn.log() << "max_body_size: " << valueContent[0] << ": is not a valid int." << std::endl;
+        throw ServerConfWarn();
     }
     if (!isValidPort(maxBodySizeNumber)) {
-        error.log() << "max_body_size: " << valueContent[0] << ": is not a valid max_body_size number." << std::endl;
-        throw ServerConfError();
+        warn.log() << "max_body_size: " << valueContent[0] << ": is not a valid size number." << std::endl;
+        throw ServerConfWarn();
     }
-    _port = maxBodySizeNumber;
+    _maxBodySize = maxBodySizeNumber;
 }
