@@ -8,14 +8,16 @@
 
 ############################################################################# */
 
-#include "Response.hpp"
 #include "BodyWriter.hpp"
-#include "HttpStatusCodes.hpp"
-#include "todo.hpp"
 #include "BodyWriterChunk.hpp"
 #include "BodyWriterLength.hpp"
+#include "HttpStatusCodes.hpp"
+#include "Logger.hpp"
+#include "Response.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "todo.hpp"
 #include <new>
+#include <ostream>
 #include <sstream>
 #include <string>
 
@@ -27,13 +29,6 @@ Response::Response():
 Response::~Response() {
     if (_body)
         delete _body;
-}
-
-/**
-  Set a body that is already built. Remember that Response will delete any saved body at destruction.
-  */
-void Response::set_body(BodyWriter *body) {
-    _body = body;
 }
 
 /**
@@ -65,6 +60,22 @@ HttpCode Response::get_code() const {
 }
 
 /**
+  Returns body.
+  */
+BodyWriter *Response::get_body() {
+    if (!_body)
+        warn.log() << "Getting response body, but it does not exist." << std::endl;
+    return _body;
+}
+
+/**
+  Returns true if BodyWriter exists
+  */
+bool Response::have_body() {
+    return _body != 0;
+}
+
+/**
   Generate response.
 
   I do not know what it really means yet. Mayby just the headers.
@@ -72,12 +83,8 @@ HttpCode Response::get_code() const {
 std::string Response::build_response() {
     std::string res = "";
 
-    // TODO construire la Response
-    // [x] premiere ligne
-    // [x] headers
-    // [ ] body
-    //      [ ] length
-    //      [ ] chunked
+    res = generate_status_line();
+    res += generate_header();
     return res;
 }
 
@@ -91,7 +98,7 @@ std::string Response::build_response() {
 std::string Response::generate_status_line() const {
     std::stringstream line;
 
-    line << "HTTP/1.1 " << _code << " " << status_string(_code) << "\r\n";
+    line << "HTTP/1.1 " << _code << "\r\n"; // overload with HttpStatusCodes
     return line.str();
 }
 
