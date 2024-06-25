@@ -34,8 +34,8 @@ RedirectStrategy::~RedirectStrategy() {}
 bool RedirectStrategy::build_response() {
     _response.add_header("Location", _location);
     _response.set_code(_code);
-    _done = true;
-    return _built = true;
+    _done           = true;
+    return _built   = true;
 }
 
 bool RedirectStrategy::fill_buffer(std::string &buffer, size_t size) {

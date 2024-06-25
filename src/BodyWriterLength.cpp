@@ -35,8 +35,7 @@ BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state):
     }
     if (i == 0)
         error.log() << "BodyWriterLength : maximum fill_buffer iterations exceeded. This happens to prevent "
-                    << "infinite loop. " << "Result may be incomplete. Check value of MAX_BODY_BUFFER."
-                    << std::endl;
+                    << "infinite loop. " << "Result may be incomplete. Check value of MAX_BODY_BUFFER." << std::endl;
     _done = true;
 }
 

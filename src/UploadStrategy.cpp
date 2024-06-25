@@ -43,7 +43,7 @@ bool UploadStrategy::build_response() {
     else
         _response.set_code(OK);
     file.close();
-    file.open(_location.c_str(), std::fstream::out |  (_replace ? std::fstream::trunc : std::fstream::app));
+    file.open(_location.c_str(), std::fstream::out | (_replace ? std::fstream::trunc : std::fstream::app));
     if (!file.is_open()) {
         error.log() << "Cannot open " << _location << " to upload. Sending " << Forbidden << std::endl;
         throw HttpError(Forbidden);
@@ -53,8 +53,8 @@ bool UploadStrategy::build_response() {
     }
     file.close();
     _response.add_header("Location", _location); // TODO trouver la bonne location CF redirect
-    _done = true;
-    return _built = true;
+    _done           = true;
+    return _built   = true;
 }
 
 bool UploadStrategy::fill_buffer(std::string &buffer, size_t size) {

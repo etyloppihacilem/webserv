@@ -40,8 +40,8 @@ bool DeleteStrategy::build_response() {
         throw HttpError(InternalServerError);
     }
     _response.set_code(NoContent); // 204, everything is done and there's no content
-    _done = true;
-    return _built = true;
+    _done           = true;
+    return _built   = true;
 }
 
 bool DeleteStrategy::fill_buffer(std::string &buffer, size_t size) {

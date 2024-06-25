@@ -28,7 +28,7 @@ class Body {
         Body(int fd, std::string &buffer);
         virtual ~Body() = 0;
 
-        virtual std::string &get()  = 0;        ///< Is used to read the body as a whole and saves it in the _body
+        virtual std::string &get() = 0;         ///< Is used to read the body as a whole and saves it in the _body
                                                 ///< string.
         virtual std::string pop()   = 0;        ///< Is used to save memory and read the body chunk by chunk.
         virtual void        clean() = 0;        ///< Used to empty _body. Do dealocate memory
