@@ -234,7 +234,7 @@ bool Server::hasServeName(const std::string &serverName) const{
 
 void Server::addRoute(const Field &locationContent)
 {
-    if (!isValidPath(locationContent.first)) {
+    if (!isValidUrl(locationContent.first)) {
         warn.log() << "location: " << locationContent.first << ": is not a valid url path." << std::endl;
         throw ServerConfWarn();
     }

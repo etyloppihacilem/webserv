@@ -335,7 +335,7 @@ void Route::setRedirection(const ValueList &valueContent) {
         warn.log() << "rewrite: " << valueContent[0] << " is not a valid Http redir." << std::endl;
         throw ServerConfWarn();
     }
-    if (!isValidPath(valueContent[1], _rootDir)) {
+    if (!isValidUrl(valueContent[1])) {
         warn.log()  << "rewrite: " << valueContent[0] << " " << valueContent[1] << " " << valueContent[1]
                     << " is not a valid path." << std::endl;
         throw ServerConfWarn();

@@ -70,15 +70,16 @@ bool isValidLocation(const std::string &value)
 
 bool isValidHostname(const std::string &value)
 {
+    if (value.size() == 0) {
+        return false;
+    }
     for (std::string::const_iterator it = value.begin(); it < value.end(); ++it) {
         if (isalnum(*it)) {
-        	continue ;
-        }
-        else if (*it == '.' || *it == '-') {
-        	continue ;
-        }
-        else {
-        	return false;
+            continue;
+        } else if (*it == '.' || *it == '-') {
+            continue;
+        } else {
+            return false;
         }
     }
     return true;
@@ -168,17 +169,35 @@ bool isValidRoot(const std::string &value)
 
 bool isValidPath(const std::string &value, const std::string &root)
 {
-    if (value.size() == 0) {
+    if (value.size() == 0 || value[0] != '/') {
         return false;
     }
 
-    std::string pathString(root + "/" + value);
+    std::string pathString(root + value);
     struct stat path;
 
     if (value[0] == '/' && stat(pathString.c_str(), &path) == 0 && path.st_mode && S_ISREG(path.st_mode)) {
         return true;
     }
     return false;
+}
+
+bool isValidUrl(const std::string &value)
+{
+    if (value.size() == 0 || value[0] != '/') {
+        return false;
+    }
+    for (std::string::const_iterator it = value.begin(); it < value.end(); ++it) {
+        if (isalnum(*it)) {
+            continue;
+        } else if (*it == '/' || *it == '-' || *it == '_' || *it == '.' || *it == '#' || *it == ':' || *it == '%'
+                   || *it == '?' || *it == '&' || *it == '=') {
+            continue;
+        } else {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool isValidIndex(const std::string &value, const std::string &root)
