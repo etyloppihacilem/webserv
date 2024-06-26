@@ -37,6 +37,7 @@ ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request):
 ResponseBuildState::~ResponseBuildState() {}
 
 bool ResponseBuildState::process() {
+    (void) _was_error; // TODO delete if the rest is uncommented
     try {
         if (!_strategy)
             init_strategy();
