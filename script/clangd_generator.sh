@@ -10,6 +10,7 @@ CompileFlags:
     - "-I$(realpath header)"
     - "-I$(realpath src)"
     - "-std=c++98"
+    - "-ferror-limit=0"
 
 Diagnostics:
   UnusedIncludes: Strict
