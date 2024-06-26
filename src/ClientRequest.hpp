@@ -40,6 +40,7 @@ class ClientRequest {
         bool                                have_body() const;
         HttpCode                            get_status() const;
         int                                 get_fd() const;
+        int                                 get_port() const;
 
     private:
         HttpMethod                          parse_method(const std::string &method, const size_t &end);
@@ -50,6 +51,7 @@ class ClientRequest {
         void                                parse_header_line(const std::string &in,
             size_t                                                              begin,
             size_t                                                              end);
+        void                                parse_port();
 
         int                                 _fd;
         HttpMethod                          _method;        ///< Method used for request
@@ -61,6 +63,7 @@ class ClientRequest {
         Body                                *_body;         ///< Pointer on body object if present
         HttpCode                            _status;        ///< Status of request (not 200 if error)
         bool                                _absolute_form; ///< True if request is in absolute form.
+        int                                 _port;          ///< Port of the request.
         /**< Absolute form means having the Host value in the request line and having no 'Host' header.
              Any 'Host' headers found while in absolute form is discarded.
         */
@@ -74,6 +77,7 @@ class ClientRequest {
         FRIEND_TEST(ClientRequestTestInitHeader, InitHeaderTest);
         FRIEND_TEST(ClientRequestTestSuite,     decode_target);
         FRIEND_TEST(ClientRequestTestSuite,     parse_parameters);
+        FRIEND_TEST(ClientRequestTestSuite,     parse_port);
 #endif
 };
 

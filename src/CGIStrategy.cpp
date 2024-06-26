@@ -25,6 +25,8 @@ bool CGIStrategy::build_response() {
 }
 
 bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) {
+    (void) buffer;
+    (void) size;
     return _done;
 }
 

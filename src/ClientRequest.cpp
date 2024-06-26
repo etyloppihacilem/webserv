@@ -33,7 +33,8 @@ ClientRequest::ClientRequest(int fd):
     _body_exists    (),
     _body           (0),
     _status         (unset),
-    _absolute_form  (false) {}
+    _absolute_form  (false),
+    _port           (80) {}
 
 ClientRequest::~ClientRequest() {
     if (_body)
@@ -276,6 +277,26 @@ void ClientRequest::parse_parameters() {
         _target = _target.substr(0, first);
 }
 
+/**
+  Parse port off Host.
+  */
+void ClientRequest::parse_port() {
+    if (_header.find("Host") == _header.end())
+        throw HttpError(BadRequest); // missing host header
+
+    std::string &host   = _header["Host"];
+    size_t      sep     = host.find(':');
+
+    if (sep != host.npos) {
+        std::stringstream st;
+
+        st << host.substr(sep + 1, host.length() - (sep + 1));
+        if (!(st >> _port))
+            throw HttpError(BadRequest);
+        host.resize(sep); // removing end of host
+    }
+}
+
 std::string &ClientRequest::get_target() {
     return _target;
 }
@@ -308,6 +329,10 @@ HttpCode ClientRequest::get_status() const {
 
 int ClientRequest::get_fd() const {
     return _fd;
+}
+
+int ClientRequest::get_port() const {
+    return _port;
 }
 
 void ClientRequest::save_mem() {

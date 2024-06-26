@@ -322,3 +322,52 @@ TEST(ClientRequestTestSuite, parse_parameters) {
     ASSERT_EQ(test._parameters.size(), (size_t) 0);
     EXPECT_EQ(test._target, "/coucou");
 }
+
+TEST(ClientRequestTestSuite, parse_port) {
+    ClientRequest test(0);
+
+    EXPECT_THROW({
+        try {
+            test.parse_port();
+        } catch (HttpError &e) {
+            EXPECT_EQ(e.get_code(), BadRequest);
+            throw;
+        } catch (std::exception &e) {
+            throw;
+        }
+    }, HttpError);
+    test._header["Host"] = "";
+    std::string &host = test._header["Host"];
+    host = "coucou";
+    test.parse_port();
+    EXPECT_EQ(test._port, 80);
+    EXPECT_EQ(host, "coucou");
+    host = "coucou:42";
+    test.parse_port();
+    EXPECT_EQ(test._port, 42);
+    EXPECT_EQ(host, "coucou");
+    host = "coucou:eheh";
+    EXPECT_THROW({
+        try {
+            test.parse_port();
+        } catch (HttpError &e) {
+            EXPECT_EQ(e.get_code(), BadRequest);
+            throw;
+        } catch (std::exception &e) {
+            throw;
+        }
+    }, HttpError);
+    EXPECT_EQ(host, "coucou:eheh");
+    host = "coucou:";
+    EXPECT_THROW({
+        try {
+            test.parse_port();
+        } catch (HttpError &e) {
+            EXPECT_EQ(e.get_code(), BadRequest);
+            throw;
+        } catch (std::exception &e) {
+            throw;
+        }
+    }, HttpError);
+    EXPECT_EQ(host, "coucou:");
+}
