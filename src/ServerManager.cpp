@@ -1,12 +1,17 @@
-#include "ServerManager.hpp"
+#include "Logger.hpp"
+#include "Server.hpp"
 #include "ServerConfFields.hpp"
 #include "ServerConfTokenize.hpp"
 #include "ServerConfValidate.hpp"
+#include "ServerManager.hpp"
 #include "StringTokenizer.hpp"
 #include <exception>
 #include <fstream>
+#include <ostream>
 #include <sstream>
 #include <algorithm>
+#include <string>
+#include <vector>
 
 ServerManager *ServerManager::_instance = 0;
 

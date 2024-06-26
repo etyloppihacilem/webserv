@@ -3,7 +3,8 @@
 
 #include <string>
 #include <vector>
-#include "Logger.hpp"
+#include <exception>
+#include <utility>
 
 #define MIN_FIELD_SIZE 4
 #define MAX_FIELD_SIZE 20
@@ -90,6 +91,7 @@ class ServerConfError: public std::exception {
 class ServerConfWarn: public std::exception {
     public:
         ServerConfWarn() {}
+
         virtual ~ServerConfWarn() throw () {}
 };
 

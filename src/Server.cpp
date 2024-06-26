@@ -1,19 +1,25 @@
 #include "HttpMethods.hpp"
+#include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "Server.hpp"
+#include "Route.hpp"
 #include "ServerConfFields.hpp"
 #include "ServerConfTokenize.hpp"
 #include "ServerConfValidate.hpp"
 #include "StringTokenizer.hpp"
 #include <algorithm>
+#include <cstddef>
+#include <map>
+#include <ostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 Server::Server():
     _serverName (),
     _port       (8080),
     _autoindex  (true),
-    _methods    (1),
+    _methods    (),
     _rootDir    ("./"),
     _indexPage  (),
     _maxBodySize(1000000),
@@ -21,6 +27,7 @@ Server::Server():
     _errorPages () {
     _serverName.push_back("localhost");
     _indexPage.push_back("index.html");
+    _methods.push_back(GET);
 
     _routes["./"] = Route();
 

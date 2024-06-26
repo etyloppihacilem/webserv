@@ -2,6 +2,7 @@
 #include "ServerConfFields.hpp"
 #include "ServerConfValidate.hpp"
 #include <cctype>
+#include <string>
 #include <vector>
 #include <cstdlib>
 #include <climits>

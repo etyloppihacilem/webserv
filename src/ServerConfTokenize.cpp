@@ -1,6 +1,13 @@
+#include "Logger.hpp"
+#include "ServerConfFields.hpp"
 #include "ServerConfTokenize.hpp"
 #include "ServerConfValidate.hpp"
+#include "StringTokenizer.hpp"
 #include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <ostream>
+#include <string>
 
 std::string tokenizeFile(const std::string &input)
 {
@@ -44,7 +51,7 @@ std::string tokenizeServer(StringTokenizer &tokenizedFile)
 
     std::replace(errorString.begin(), errorString.end(), '|', ' ');
 
-    std::string currentToken = tokenizedFile.nextToken();    // remove Server
+    std::string currentToken = tokenizedFile.nextToken();   // remove Server
 
     if (currentToken != ConfFieldString(server)) {
         error.log() << errorString << " ... : the first token is not 'server', parsing canceled" << std::endl;
@@ -75,7 +82,7 @@ Field tokenizeLocation(StringTokenizer &tokenizedServer)
 
     std::replace(errorString.begin(), errorString.end(), '|', ' ');
 
-    std::string currentToken = tokenizedServer.nextToken();    // remove location field name
+    std::string currentToken = tokenizedServer.nextToken(); // remove location field name
 
     if (currentToken != ConfFieldString(location)) {
         error.log() << errorString << " ... : the first token is not 'location', parsing canceled" << std::endl;

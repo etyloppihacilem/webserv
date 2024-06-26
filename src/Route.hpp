@@ -60,7 +60,7 @@ class Route{
         void                        setAutoindex(const ValueList&);
         void                        setRedirection(const ValueList&);
         void                        setUpload(const ValueList&);
-        void                        setCgi(const ValueList &, const ValueList &);
+        void                        setCgi(const ValueList&, const ValueList&);
         void                        setCgiPath(const ValueList&);
         void                        setCgiExtension(const ValueList&);
 };

@@ -1,11 +1,10 @@
 #ifndef __INCLUDE_SRC_SERVERMANAGER_HPP_
 #define __INCLUDE_SRC_SERVERMANAGER_HPP_
 
+#include "Server.hpp"
 #include <exception>
 #include <string>
 #include <vector>
-#include "HttpStatusCodes.hpp"
-#include "Server.hpp"
 
 class ServerManager{
     class ServerNotFoundWarn: public std::exception{

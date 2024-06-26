@@ -1,4 +1,6 @@
 #include "StringTokenizer.hpp"
+#include <cstddef>
+#include <string>
 
 StringTokenizer::StringTokenizer(const std::string &str, const std::string &delim)
 {
