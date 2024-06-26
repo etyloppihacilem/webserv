@@ -9,6 +9,7 @@ CompileFlags:
     - "-I$(realpath googletest/googlemock/include)"
     - "-I$(realpath header)"
     - "-I$(realpath src)"
+    - "-std=c++98"
 
 Diagnostics:
   UnusedIncludes: Strict
@@ -21,6 +22,10 @@ If:
 Diagnostics:
   Suppress: access
 
+CompileFlags:
+  Add:
+    - "-std=c++20"
+
 ---
 If:
   PathMatch: .*Test\.cpp
@@ -28,11 +33,19 @@ If:
 Diagnostics:
   Suppress: access
 
+CompileFlags:
+  Add:
+    - "-std=c++20"
+
 ---
 If:
   PathMatch: .*test/.*\.cpp
 
 Diagnostics:
   Suppress: access
+
+CompileFlags:
+  Add:
+    - "-std=c++20"
 EOF
 echo Clangd correctly configured
