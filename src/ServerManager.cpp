@@ -8,15 +8,15 @@
 #include <sstream>
 #include <algorithm>
 
-ServerManager *ServerManager::_instance = nullptr;
+ServerManager *ServerManager::_instance = 0;
 
 ServerManager *ServerManager::getInstance(const std::string &configFile)
 {
-    if (_instance == nullptr) {
+    if (_instance == 0) {
         try {
             _instance = new ServerManager(configFile);
         } catch (std::exception &e) {
-            _instance = nullptr;
+            _instance = 0;
         }
     }
     return _instance;
@@ -24,9 +24,9 @@ ServerManager *ServerManager::getInstance(const std::string &configFile)
 
 void ServerManager::deleteInstance()
 {
-    if (_instance != nullptr) {
+    if (_instance != 0) {
         delete _instance;
-        _instance = nullptr;
+        _instance = 0;
     }
 }
 
@@ -53,7 +53,7 @@ ServerManager::ServerManager(const std::string &configFile) {
             throw ServerConfError();
         }
 
-        std::ifstream configStream(configFile);
+        std::ifstream configStream(configFile.c_str());
 
         if (configStream.fail()) {
             error.log() << configFile + ": fail to open file." << std::endl;
@@ -63,9 +63,12 @@ ServerManager::ServerManager(const std::string &configFile) {
         std::string fileContent = tokenizeFile(readConfFile(configStream));
 
         if (!isValidHttp(fileContent)) {
-            std::replace(fileContent.begin(), fileContent.end(), "|", " ");
-            error.log() << fileContent.substr(0, 30)
-                    + " ... : this 'http' module does not possess at least one 'server' module, parsing canceled" << std::endl;
+            std::string errorStr = fileContent.substr(0, 30);
+
+            std::replace(errorStr.begin(), errorStr.end(), '|', ' ');
+            error.log() << errorStr
+                        << " ... : this 'http' module does not possess at least one 'server' module, parsing canceled"
+                        << std::endl;
             throw ServerConfError();
         }
 
@@ -75,9 +78,12 @@ ServerManager::ServerManager(const std::string &configFile) {
             std::string serverContent = tokenizeServer(tokenizedFile);
 
             if (!isValidServer(serverContent)) {
-                std::replace(serverContent.begin(), serverContent.end(), "|", " ");
-                warn.log() << "server: " + serverContent.substr(0, 30)
-                        + " ... : this 'server' module does not possess mandatory fields, parsing canceled" << std::endl;
+                std::string errorStr = serverContent.substr(0, 30);
+
+                std::replace(errorStr.begin(), errorStr.end(), '|', ' ');
+                warn.log()  << "server: " << errorStr
+                            << " ... : this 'server' module does not possess mandatory fields, parsing canceled"
+                            << std::endl;
                 continue;
             }
 
@@ -101,7 +107,7 @@ Server &ServerManager::getServer(const std::string &serverName, int port)
         }
     }
 
-    std::stringstream   portStr;
+    std::stringstream portStr;
 
     portStr << port;
 

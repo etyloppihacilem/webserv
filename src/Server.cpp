@@ -61,7 +61,7 @@ Server::Server(const std::string &serverContent):
 
     std::string infoStr = serverContent.substr(0, 30);
 
-    std::replace(infoStr.begin(), infoStr.end(), "|", " ");
+    std::replace(infoStr.begin(), infoStr.end(), '|', ' ');
     info.log() << "server: " << infoStr << " ... : parsing started..." << std::endl;
     while (tokenizedServer.hasMoreTokens()) {
         try {
@@ -70,7 +70,7 @@ Server::Server(const std::string &serverContent):
             if (tokenizedServer.peakToken() == ConfFieldString(location)) {
                 fieldContent = tokenizeLocation(tokenizedServer);
                 if (!isValidLocation(fieldContent.second)) {
-                    std::replace(fieldContent.second.begin(), fieldContent.second.end(), "|", " ");
+                    std::replace(fieldContent.second.begin(), fieldContent.second.end(), '|', ' ');
                     warn.log()
                         << "location " << fieldContent.first << " : " << fieldContent.second.substr(0, 30)
                         << " ... : this 'location' module does not possess mandatory fields, parsing canceled"
@@ -280,7 +280,7 @@ void Server::setServerName(const ValueList &valueContent)
     _serverNameSet = true;
     for (ValueList::const_iterator it = valueContent.begin(); it < valueContent.end(); ++it) {
         if (!isValidIPAddress(*it)) {
-            if (!isValidHostName(*it)) {
+            if (!isValidHostname(*it)) {
                 warn.log() << "server_name: " << *it << ": is not a valid Hostname." << std::endl;
             }
             warn.log() << "server_name: " << *it << ": is not a a valid IP address." << std::endl;

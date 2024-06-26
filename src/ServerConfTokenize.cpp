@@ -13,7 +13,7 @@ std::string tokenizeFile(const std::string &input)
     StringTokenizer tokenizedFile(tokenString, "|");
     std::string     errorString = tokenizedFile.remainingString().substr(0, 30);
 
-    std::   replace(errorString.begin(),    errorString.end(),  "|",    " ");
+    std::   replace(errorString.begin(),    errorString.end(),  '|',    ' ');
 
     std::string currentToken = tokenizedFile.nextToken();       // remove http
 
@@ -23,7 +23,6 @@ std::string tokenizeFile(const std::string &input)
     }
     currentToken = tokenizedFile.nextToken();                   // remove open bracket
     if (currentToken != "{") {
-        std::replace(errorString.begin(), errorString.end(), "|", " ");
         error.log() << errorString << " ... : token '{' is missing after token 'http' , parsing canceled" << std::endl;
         throw ServerConfError();
     }
@@ -31,7 +30,6 @@ std::string tokenizeFile(const std::string &input)
     size_t closingBracePos = findClosingBrace(tokenizedFile.remainingString());
 
     if (closingBracePos == std::string::npos) {
-        std::replace(errorString.begin(), errorString.end(), "|", " ");
         error.log() << errorString
                     << " ... : token '}' is missing unable to locate the end of 'http' module , parsing canceled"
                     << std::endl;
@@ -44,18 +42,16 @@ std::string tokenizeServer(StringTokenizer &tokenizedFile)
 {
     std::string errorString = tokenizedFile.remainingString().substr(0, 30);
 
-    std::replace(errorString.begin(), errorString.end(), "|", " ");
+    std::replace(errorString.begin(), errorString.end(), '|', ' ');
 
     std::string currentToken = tokenizedFile.nextToken();    // remove Server
 
     if (currentToken != ConfFieldString(server)) {
-        std::replace(errorString.begin(), errorString.end(), "|", " ");
         error.log() << errorString << " ... : the first token is not 'server', parsing canceled" << std::endl;
         throw ServerConfError();
     }
     currentToken = tokenizedFile.nextToken();               // remove open bracket
     if (currentToken != "{") {
-        std::replace(errorString.begin(), errorString.end(), "|", " ");
         error.log() << errorString << " ... : token '{' is missing after token 'server' , parsing canceled"
                     << std::endl;
         throw ServerConfError();
@@ -64,7 +60,6 @@ std::string tokenizeServer(StringTokenizer &tokenizedFile)
     size_t closingBracePos = findClosingBrace(tokenizedFile.remainingString());
 
     if (closingBracePos == std::string::npos) {
-        std::replace(errorString.begin(), errorString.end(), "|", " ");
         error.log() << errorString
                     << " ... : token '}' is missing unable to locate the end of 'server' module , parsing canceled"
                     << std::endl;
@@ -78,19 +73,17 @@ Field tokenizeLocation(StringTokenizer &tokenizedServer)
     Field       locationInfo;
     std::string errorString = tokenizedServer.remainingString();
 
-    std::replace(errorString.begin(), errorString.end(), "|", " ");
+    std::replace(errorString.begin(), errorString.end(), '|', ' ');
 
     std::string currentToken = tokenizedServer.nextToken();    // remove location field name
 
     if (currentToken != ConfFieldString(location)) {
-        std::replace(errorString.begin(), errorString.end(), "|", " ");
         error.log() << errorString << " ... : the first token is not 'location', parsing canceled" << std::endl;
         throw ServerConfError();
     }
     locationInfo.first  = tokenizedServer.nextToken();      // extract location root
     currentToken        = tokenizedServer.nextToken();      // remove open bracket
     if (currentToken != "{") {
-        std::replace(errorString.begin(), errorString.end(), "|", " ");
         error.log() << errorString << " ... : token '{' is missing after token 'location' , parsing canceled"
                     << std::endl;
         throw ServerConfError();
@@ -99,7 +92,6 @@ Field tokenizeLocation(StringTokenizer &tokenizedServer)
     size_t closingBracePos = findClosingBrace(tokenizedServer.remainingString());
 
     if (closingBracePos == std::string::npos) {
-        std::replace(errorString.begin(), errorString.end(), "|", " ");
         error.log() << errorString
                     << " ... : token '}' is missing unable to locate the end of 'location' module , parsing canceled"
                     << std::endl;

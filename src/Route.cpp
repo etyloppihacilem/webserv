@@ -53,7 +53,7 @@ Route::Route(const std::string &locationContent, Server &server):
 
     std::string infoStr = locationContent.substr(0, 30);
 
-    std::replace(infoStr.begin(), infoStr.end(), "|", " ");
+    std::replace(infoStr.begin(), infoStr.end(), '|', ' ');
     info.log() << "location: " << infoStr << " ... : parsing started..." << std::endl;
     while (tokenizedLocation.hasMoreTokens()) {
         try {

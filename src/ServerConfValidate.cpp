@@ -22,7 +22,7 @@ bool isValidConfigFile(const std::string &configFile)
     return false;
 }
 
-bool isValidFieldNames(const std::string &name)
+bool isValidFieldName(const std::string &name)
 {
     for (int i = 0; i < COUNT_CONF_FIELD; i++) {
         if (name == ConfFieldString(i)) {
