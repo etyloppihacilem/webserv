@@ -33,7 +33,7 @@ bool ErrorStrategy::build_response() {
         _response.add_header("Content-Type", "text/html; charset=utf-8");
         _estimated_size = 0; // choose BodyWriterLength
     } else
-        ; // TODO mettre le bon mimetype selon le fichier d'erreur
+        (void) _response; // TODO mettre le bon mimetype selon le fichier d'erreur
     _response.set_code(_code);
     return _built = true;
 }

@@ -32,7 +32,7 @@ bool MemoryHandler::allocate() {
     try {
         _storage = new char[_size];
         info.log() << "Memory handler succesfully allocated." << std::endl;
-    } catch (std::bad_alloc) {
+    } catch (std::bad_alloc &e) {
         error.log() << "FATAL could not allocate handler buffer memory." << std::endl;
         return _allocated;
     }

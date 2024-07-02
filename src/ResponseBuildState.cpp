@@ -96,7 +96,7 @@ void ResponseBuildState::init_strategy() {
 void ResponseBuildState::init_strategy(HttpCode code) {
     try {
         _strategy = new ErrorStrategy(*this, code);
-    } catch (std::exception) {
+    } catch (std::exception &e) {
         _strategy = new ErrorStrategy(*this, code, true);
     }
 }
