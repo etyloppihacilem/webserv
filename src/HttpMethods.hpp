@@ -19,18 +19,21 @@
 enum HttpMethod {
     none    = -1,
     GET     = 0,
-    POST    = 1,
-    DELETE  = 2,
+    POST,
+    DELETE,
+    PUT, // just in case
 };
 
 inline std::string method_string(const int &code) {
     switch (code) {
-        case 0:
+        case GET:
             return "GET";
-        case 1:
+        case POST:
             return "POST";
-        case 2:
+        case DELETE:
             return "DELETE";
+        case PUT:
+            return "PUT";
         default:
             return std::string();
     }

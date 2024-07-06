@@ -31,7 +31,7 @@ enum ConfField{
     server_name             = 4,
     listen                  = 5,
     root                    = 6,
-    index                   = 7,
+    index_f                 = 7, // because it does not work on a mac
     autoindex               = 8,
     methods                 = 9,
     client_max_body_size    = 10,

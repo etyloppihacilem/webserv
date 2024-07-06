@@ -18,6 +18,7 @@
 #include "ProcessState.hpp"
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include <array>
 #include <exception>
 #include <new>
 #include <ostream>
@@ -73,27 +74,39 @@ ResponseBuildingStrategy *ResponseBuildState::get_response_strategy() {
   This function build the right strategy for a given ClientRequest.
   */
 void ResponseBuildState::init_strategy() {
-    //  +CGI
-    //     CGI strategy
     //  error
     //      error strategy (init_strategy(HttpCode code))
-    //  redirect
-    //      redirect
+    if (isError(_request->get_status()))
+        init_strategy(_request->get_status());
+    else if (isRedirection(_request->get_status()))
+        ; // init redirectstrategy
+    else if (_request->get_method() == GET)
+        ;
     //  get;
     //      verifier la location
     //          fichier
     //              GetFile
+    //              or CGI thing
     //          dossier
     //              IndexStrategy (ou 403)
+    else if (_request->get_method() == POST)
+        ;
     //  post;
     //      upload
-    //  delete;
-    //      delete
-    ;
+    else if (_request->get_method() == DELETE) // or <= for put but change flag
+        //  delete;
+        //      delete
+        ;
     // trouver le moyen de construire une location
+    // and to know what is allowed at this location
 }
 
+/**
+  Build error strategy for a given http code.
+  */
 void ResponseBuildState::init_strategy(HttpCode code) {
+    if (!isError(code))
+        warn.log() << "Generating error for non error code " << code << std::endl;
     try {
         _strategy = new ErrorStrategy(*this, code);
     } catch (std::exception &e) {
