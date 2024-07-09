@@ -18,7 +18,6 @@
 #include "ProcessState.hpp"
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
-#include <array>
 #include <exception>
 #include <new>
 #include <ostream>
@@ -78,10 +77,10 @@ void ResponseBuildState::init_strategy() {
     //      error strategy (init_strategy(HttpCode code))
     if (isError(_request->get_status()))
         init_strategy(_request->get_status());
-    else if (isRedirection(_request->get_status()))
-        ; // init redirectstrategy
-    else if (_request->get_method() == GET)
-        ;
+    // else if (isRedirection(_request->get_status()))
+    //     ; // init redirectstrategy
+    // else if (_request->get_method() == GET)
+    //     ;
     //  get;
     //      verifier la location
     //          fichier
@@ -89,14 +88,14 @@ void ResponseBuildState::init_strategy() {
     //              or CGI thing
     //          dossier
     //              IndexStrategy (ou 403)
-    else if (_request->get_method() == POST)
-        ;
+    // else if (_request->get_method() == POST)
+    //     ;
     //  post;
     //      upload
-    else if (_request->get_method() == DELETE) // or <= for put but change flag
+    // else if (_request->get_method() == DELETE) // or <= for put but change flag
         //  delete;
         //      delete
-        ;
+        // ;
     // trouver le moyen de construire une location
     // and to know what is allowed at this location
 }
