@@ -15,52 +15,23 @@
 #include <string>
 #include <vector>
 
-Server::Server():
-    _serverName (),
-    _port       (8080),
-    _autoindex  (true),
-    _methods    (),
-    _rootDir    ("./"),
-    _indexPage  (),
-    _maxBodySize(1000000),
-    _routes     (),
-    _errorPages () {
-    _serverName.push_back("localhost");
-    _indexPage.push_back("index.html");
-    _methods.push_back(GET);
-
-    _routes["./"] = Route();
-
-    _errorPages[BadRequest]                 = "error_pages/400.html";
-    _errorPages[Forbidden]                  = "error_pages/403.html";
-    _errorPages[NotFound]                   = "error_pages/404.html";
-    _errorPages[MethodNotAllowed]           = "error_pages/405.html";
-    _errorPages[ContentTooLarge]            = "error_pages/413.html";
-    _errorPages[InternalServerError]        = "error_pages/500.html";
-    _errorPages[NotImplemented]             = "error_pages/501.html";
-    _errorPages[HTTPVersionNotSupported]    = "error_pages/505.html";
-}
-
 Server::Server(const std::string &serverContent):
-    _serverName     (),
+    _serverName     (1, "localhost"),
     _port           (8080),
-    _autoindex      (true),
-    _methods        (),
-    _rootDir        ("./"),
-    _indexPage      (),
     _maxBodySize    (1000000),
+    _autoindex      (true),
+    _methods        (1, GET),
+    _rootDir        ("./"),
+    _indexPage      (1, "index.html"),
     _routes         (),
     _errorPages     (),
     _serverNameSet  (false),
     _portSet        (false),
+    _maxBodySizeSet (false),
     _autoindexSet   (false),
     _indexPageSet   (false),
     _methodsSet     (false),
-    _rootDirSet     (false),
-    _maxBodySizeSet (false) {
-    _serverName.push_back("localhost");
-    _indexPage.push_back("index.html");
-    _methods.push_back(GET);
+    _rootDirSet     (false) {
 
     StringTokenizer         tokenizedServer(serverContent, "|");
     std::vector<Field>      tokenizedLocations;
@@ -169,20 +140,23 @@ Server::Server(const std::string &serverContent):
         } catch (ServerConfWarn &e) {
             continue;
         }
-        for (std::vector<Field>::iterator it = tokenizedLocations.begin(); it < tokenizedLocations.end(); ++it) {
-            try {
-                this->addRoute(*it);
-            } catch (ServerConfWarn &e) {
-                continue;
-            }
+    }
+    for (std::vector<Field>::iterator it = tokenizedLocations.begin(); it < tokenizedLocations.end(); ++it) {
+        try {
+            this->addRoute(*it);
+        } catch (ServerConfWarn &e) {
+            continue;
         }
-        for (std::vector<ValueList>::iterator it = tokenizedErrorPages.begin(); it < tokenizedErrorPages.end(); ++it) {
-            try {
-                this->addErrorPage(*it);
-            } catch (ServerConfWarn &e) {
-                continue;
-            }
+    }
+    for (std::vector<ValueList>::iterator it = tokenizedErrorPages.begin(); it < tokenizedErrorPages.end(); ++it) {
+        try {
+            this->addErrorPage(*it);
+        } catch (ServerConfWarn &e) {
+            continue;
         }
+    }
+    if (!hasRoute("/")) {
+        _routes["/"] = (*this);
     }
 }
 

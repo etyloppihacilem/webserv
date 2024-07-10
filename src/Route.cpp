@@ -14,11 +14,11 @@
 #include <string>
 #include <vector>
 
-Route::Route():
-    _methods        (1, GET),
-    _rootDir        ("www/html"),
-    _indexPage      (1, "index.html"),
-    _autoindex      (false),
+Route::Route(Server &server):
+    _methods        (server.getMethods()),
+    _rootDir        (server.getRootDir()),
+    _indexPage      (server.getIndexPage()),
+    _autoindex      (server.getAutoindex()),
     _uploadPath     (""),
     _redirCode      (""),
     _redirPage      (""),
@@ -37,7 +37,7 @@ Route::Route(const std::string &locationContent, Server &server):
     _methods        (server.getMethods()),
     _rootDir        (server.getRootDir()),
     _indexPage      (server.getIndexPage()),
-    _autoindex      (false),
+    _autoindex      (server.getAutoindex()),
     _uploadPath     (""),
     _redirCode      (""),
     _redirPage      (""),

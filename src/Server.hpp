@@ -11,23 +11,21 @@
 #include <vector>
 
 class Server{
-    class RouteNotFoundWarn: public std::exception{
-        public:
-            RouteNotFoundWarn(std::string message = "") throw ():
-                _message(message) {}
-
-            virtual ~RouteNotFoundWarn() throw () {}
-
-            const char  *what() const throw () {
-                return _message.c_str();
-            }
-
-        private:
-            std::string _message;
-    };
-
     public:
-        Server();
+        class RouteNotFoundWarn: public std::exception{
+            public:
+                RouteNotFoundWarn(std::string message = "") throw ():
+                    _message(message) {}
+
+                virtual ~RouteNotFoundWarn() throw () {}
+
+                const char  *what() const throw () {
+                    return _message.c_str();
+                }
+
+            private:
+                std::string _message;
+        };
         Server(const std::string&);
         ~Server();
 
@@ -57,21 +55,24 @@ class Server{
     private:
         std::vector<std::string>        _serverName;
         unsigned int                    _port;
+        int                             _maxBodySize;
+
         bool                            _autoindex;
         std::vector<HttpMethod>         _methods;
         std::string                     _rootDir;
         std::vector<std::string>        _indexPage;
-        int                             _maxBodySize;
+
         std::map<std::string, Route>    _routes;
         std::map<HttpCode, std::string> _errorPages;
 
         bool                            _serverNameSet;
         bool                            _portSet;
+        bool                            _maxBodySizeSet;
+
         bool                            _autoindexSet;
         bool                            _indexPageSet;
         bool                            _methodsSet;
         bool                            _rootDirSet;
-        bool                            _maxBodySizeSet;
 };
 
 #endif // INCLUDE_SRC_SERVER_HPP_

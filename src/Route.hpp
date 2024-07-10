@@ -9,29 +9,10 @@
 
 class Server;
 
-class Route{
-    private:
-        std::vector<HttpMethod>     _methods;
-        std::string                 _rootDir;
-        std::vector<std::string>    _indexPage;
-        bool                        _autoindex;
-        std::string                 _uploadPath;
-        std::string                 _redirCode;
-        std::string                 _redirPage;
-        std::string                 _cgiPath;
-        std::string                 _cgiExtension;
-
-        bool                        _indexPageSet;
-        bool                        _autoindexSet;
-        bool                        _rootDirSet;
-        bool                        _methodsSet;
-        bool                        _redirectionSet;
-        bool                        _uploadSet;
-        bool                        _cgiPathSet;
-        bool                        _cgiExtensionSet;
-
+class Route {
     public:
         Route();
+        Route(Server&);
         Route(const std::string&, Server&);
         ~Route();
 
@@ -63,6 +44,26 @@ class Route{
         void                        setCgi(const ValueList&, const ValueList&);
         void                        setCgiPath(const ValueList&);
         void                        setCgiExtension(const ValueList&);
+
+    private:
+        std::vector<HttpMethod>     _methods;
+        std::string                 _rootDir;
+        std::vector<std::string>    _indexPage;
+        bool                        _autoindex;
+        std::string                 _uploadPath;
+        std::string                 _redirCode;
+        std::string                 _redirPage;
+        std::string                 _cgiPath;
+        std::string                 _cgiExtension;
+
+        bool                        _indexPageSet;
+        bool                        _autoindexSet;
+        bool                        _rootDirSet;
+        bool                        _methodsSet;
+        bool                        _redirectionSet;
+        bool                        _uploadSet;
+        bool                        _cgiPathSet;
+        bool                        _cgiExtensionSet;
 };
 
 #endif // !__INCLUDE_SRC_ROUTE__
