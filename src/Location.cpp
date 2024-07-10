@@ -11,6 +11,7 @@
 #include "Location.hpp"
 #include "ClientRequest.hpp"
 #include "ClientRequest.hpp"
+#include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Route.hpp"
 #include "Server.hpp"
@@ -18,14 +19,14 @@
 
 Location::Location(ClientRequest &request, Server &server):
     _status_code(OK) {
-    extern Route &route;
+    extern Route &route; // this is to get the reference out of try scope
 
     try {
         Route &route = server.getRoute(request.get_target());
 
-        (void) route;
+        (void) route; // this is not used here BUT extern so it is use out of scope
     } catch (Server::RouteNotFoundWarn &e) {
-        return;
+        throw HttpError(InternalServerError); // this is to prevent use of route out of scope if not defined
     }
     (void) route;
 }
