@@ -190,16 +190,30 @@ std::map<HttpCode, std::string> Server::getErrorPages() const{
     return _errorPages;
 }
 
-bool Server::hasRoute(const std::string &path) const{
+inline bool Server::hasRoute(const std::string &path) const{
     return _routes.find(path) == _routes.end() ? false : true;
 }
 
+// TODO test this
 Route &Server::getRoute(const std::string &path)
 {
-    if (hasRoute(path)) {
-        return _routes[path];
+    if (path[0] != '/') {
+        if (hasRoute("/"))
+            return _routes["/"];
+        error.log() << "No default route with wrong target (not starting with /): '" << path << "'" << std::endl;
+        throw RouteNotFoundWarn(path);
     }
-    throw RouteNotFoundWarn(path);
+    size_t i = path.find('/');
+    std::string last_found = "/";
+    std::string testing = path.substr(0, i + 1);
+    while (hasRoute(testing)) {
+        last_found = testing;
+        i = path.find('/', i + 1);
+        if (i == path.npos)
+            break;
+        testing = path.substr(0, i + 1);
+    }
+    return _routes[last_found]; // will return "/" route if default
 }
 
 bool Server::hasServeName(const std::string &serverName) const{

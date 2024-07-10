@@ -14,7 +14,7 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
-#include "MemoryHandler.hpp"
+#include "MemoryHandler.hpp" // do not remove yet
 #include "ProcessState.hpp"
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
@@ -44,12 +44,12 @@ bool ResponseBuildState::process() {
     } catch (HttpError &e) {
         init_strategy(e.get_code());
     } catch (std::bad_alloc &e) {
-        throw e; // gestion out of scope ? TODO decider ça
+        throw e; // gestion out of scope ? TODO decider ça : pros gestion de la memoire de tous les objets
         // mem.deallocate();
         // if (_was_error) {
         //     error.log() << "Out of heap, not recoverable, sending " << InternalServerError << std::endl;
         //     init_strategy(InternalServerError);
-        //     mem.allocate();
+        //     mem.allocate(); // wtf not now
         //     return true;
         // }
         // warn.log() << "Out of heap. Begining recovery procedures." << std::endl;
@@ -93,9 +93,9 @@ void ResponseBuildState::init_strategy() {
     //  post;
     //      upload
     // else if (_request->get_method() == DELETE) // or <= for put but change flag
-        //  delete;
-        //      delete
-        // ;
+    //  delete;
+    //      delete
+    // ;
     // trouver le moyen de construire une location
     // and to know what is allowed at this location
 }

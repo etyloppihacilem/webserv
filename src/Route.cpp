@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+Route::Route() {}
+
 Route::Route(Server &server):
     _methods        (server.getMethods()),
     _rootDir        (server.getRootDir()),
