@@ -17,6 +17,7 @@
 Route::Route() {}
 
 Route::Route(Server &server):
+    _location       ("/"),
     _methods        (server.getMethods()),
     _rootDir        (server.getRootDir()),
     _indexPage      (server.getIndexPage()),
@@ -35,7 +36,8 @@ Route::Route(Server &server):
     _cgiPathSet     (false),
     _cgiExtensionSet(false) {}
 
-Route::Route(const std::string &locationContent, Server &server):
+Route::Route(const std::string &location, const std::string &locationContent, Server &server):
+    _location       (location),
     _methods        (server.getMethods()),
     _rootDir        (server.getRootDir()),
     _indexPage      (server.getIndexPage()),
@@ -193,6 +195,10 @@ std::string Route::getCgiPath() const{
 
 std::string Route::getCgiExtension() const{
     return _cgiExtension;
+}
+
+std::string Route::getLocation() const {
+    return _location;
 }
 
 bool Route::hasAutoindex() const{

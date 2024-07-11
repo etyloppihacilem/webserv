@@ -32,7 +32,6 @@ Server::Server(const std::string &serverContent):
     _indexPageSet   (false),
     _methodsSet     (false),
     _rootDirSet     (false) {
-
     StringTokenizer         tokenizedServer(serverContent, "|");
     std::vector<Field>      tokenizedLocations;
     std::vector<ValueList>  tokenizedErrorPages;
@@ -198,17 +197,21 @@ inline bool Server::hasRoute(const std::string &path) const{
 Route &Server::getRoute(const std::string &path)
 {
     if (path[0] != '/') {
+        warn.log()  << "target '" << path << "' is not starting with '/', wrong target. Choosing default route '/'."
+                    << std::endl;
         if (hasRoute("/"))
             return _routes["/"];
         error.log() << "No default route with wrong target (not starting with /): '" << path << "'" << std::endl;
         throw RouteNotFoundWarn(path);
     }
-    size_t i = path.find('/');
-    std::string last_found = "/";
-    std::string testing = path.substr(0, i + 1);
+
+    size_t      i           = path.find('/');
+    std::string last_found  = "/";
+    std::string testing     = path.substr(0, i + 1);
+
     while (hasRoute(testing)) {
-        last_found = testing;
-        i = path.find('/', i + 1);
+        last_found  = testing;
+        i           = path.find('/', i + 1);
         if (i == path.npos)
             break;
         testing = path.substr(0, i + 1);
@@ -233,7 +236,7 @@ void Server::addRoute(const Field &locationContent)
         warn.log() << "location: " << locationContent.first << ": is not a valid url path." << std::endl;
         throw ServerConfWarn();
     }
-    _routes[locationContent.first] = Route(locationContent.second, *this);
+    _routes[locationContent.first] = Route(locationContent.first, locationContent.second, *this);
 }
 
 void Server::addErrorPage(const ValueList &valueContent)

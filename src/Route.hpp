@@ -13,7 +13,7 @@ class Route {
     public:
         Route();
         Route(Server&);
-        Route(const std::string&, Server&);
+        Route(const std::string&, const std::string&, Server&);
         ~Route();
 
         std::vector<HttpMethod>     getMethods() const;
@@ -25,6 +25,7 @@ class Route {
         std::string                 getUploadPath() const;
         std::string                 getCgiPath() const;
         std::string                 getCgiExtension() const;
+        std::string                 getLocation() const;
 
         bool                        hasMethods() const;
         bool                        hasRoot() const;
@@ -46,6 +47,7 @@ class Route {
         void                        setCgiExtension(const ValueList&);
 
     private:
+        std::string                 _location;
         std::vector<HttpMethod>     _methods;
         std::string                 _rootDir;
         std::vector<std::string>    _indexPage;
