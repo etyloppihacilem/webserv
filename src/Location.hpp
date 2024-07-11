@@ -34,11 +34,11 @@ class Location {
         bool        is_file() const;
         bool        is_cgi() const;
         bool        is_redirect() const;
-        bool        is_error() const;
         HttpCode    get_status_code() const;
         std::string get_path() const;
 
     private:
+        void        build_path(ClientRequest &request, Route &route);
         bool        _is_get;
         bool        _is_post;
         bool        _is_delete;
@@ -47,7 +47,6 @@ class Location {
         bool        _is_file;
         bool        _is_cgi;
         bool        _is_redirect;
-        bool        _is_error;
         HttpCode    _status_code;
         std::string _path;
 };
