@@ -17,6 +17,7 @@
 #include "Logger.hpp"
 #include "Route.hpp"
 #include "Server.hpp"
+#include "StringUtils.hpp"
 #include <algorithm>
 #include <cerrno>
 #include <ostream>
@@ -30,26 +31,20 @@ Location::Location(ClientRequest &request, Server &server):
     _status_code(OK) {
     Route       *route; // this is to get the reference out of try scope
     std::string target = request.get_target();
+    struct stat buf;
 
     try {
         route = &server.getRoute(target);
-
-        (void) route; // this is not used here BUT extern so it is use out of scope
     } catch (Server::RouteNotFoundWarn &e) {
         throw HttpError(InternalServerError); // this is to prevent use of route out of scope if not defined
     }
-    if (!route)
-        throw HttpError(InternalServerError); // this is to prevent use of route out of scope if not defined
     if (route->hasRedir()) {
-        _status_code = route->getRedirCode();
-        _is_redirect = true;
+        _status_code    = route->getRedirCode();
+        _is_redirect    = true;
         build_path(target, *route, route->getRedirPage());
-        return ;
+        return;
     }
     build_path(target, *route);
-
-    struct stat buf;
-
     if (stat(target.c_str(), &buf) != 0) {
         if (errno == ENOENT || errno == ENOTDIR)
             throw HttpError(NotFound); // there's nothing to see
@@ -67,6 +62,7 @@ Location::Location(ClientRequest &request, Server &server):
     _is_get     = std::find(methods.begin(), methods.end(), GET) != methods.end();
     _is_post    = std::find(methods.begin(), methods.end(), POST) != methods.end();
     _is_delete  = std::find(methods.begin(), methods.end(), DELETE) != methods.end();
+    // _is_put  = std::find(methods.begin(), methods.end(), PUT) != methods.end();
     if (S_ISDIR(buf.st_mode)) {
         const std::vector<std::string>  &indexs     = route->getIndexPage();
         const std::string               trailing    = (*_path.rbegin() == '/' ? "" : "/");
@@ -76,11 +72,13 @@ Location::Location(ClientRequest &request, Server &server):
 
             if (stat(_path.c_str(), &buf) == 0) {
                 if (!S_ISREG(buf.st_mode)) { // if index.html or so is not a file.
-                    warn.log() << *it << " is not a file, so cannot be a index. Continuing." << std::endl;
+                    warn.log() << *it << " is not a file, so cannot be an index. Continuing." << std::endl;
                     continue;
                 }
                 _path       = index_path;
                 _is_file    = true;
+                if (route->hasCgiExtension() && extract_extension(_path) == route->getCgiExtension())
+                    setup_cgi(*route);
                 return; // index file found and telling to read it
             }
             if (errno == ENOENT)
@@ -92,10 +90,11 @@ Location::Location(ClientRequest &request, Server &server):
         }
         _autoindex = route->hasAutoindex(); // if nothing else found
     } else {
-        // TODO HERE check if CGI
         _is_file = true; // not a dir
+        if (route->hasCgiExtension() && extract_extension(_path) == route->getCgiExtension())
+            setup_cgi(*route);
     }
-}
+} // 65 lines im so sorry
 
 Location::~Location() {}
 
@@ -122,6 +121,16 @@ void Location::build_path(const std::string &target, const Route &route, const s
     }
 }
 
+/**
+  Setup cgi location info for a given route.
+  */
+void Location::setup_cgi(const Route &route) {
+    if (!route.hasCgiPath() || !route.hasCgiExtension())
+        return;  // nothing to configure because cgi is incomplete
+    _is_cgi     = true;
+    _cgi_path   = route.getCgiPath();
+}
+
 bool Location::is_get() const {
     return _is_get;
 }
@@ -134,9 +143,9 @@ bool Location::is_delete() const {
     return _is_delete;
 }
 
-bool Location::is_put() const {
-    return _is_put;
-}
+// bool Location::is_put() const {
+//     return _is_put;
+// }
 
 bool Location::has_autoindex() const {
     return _autoindex;

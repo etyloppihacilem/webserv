@@ -40,16 +40,18 @@ class Location {
     private:
         void        build_path(const std::string &target, const Route &route);
         void        build_path(const std::string &target, const Route &route, const std::string &redirect);
+        void        setup_cgi(const Route &route);
 
         bool        _is_get;
         bool        _is_post;
         bool        _is_delete;
-        bool        _is_put;
+        // bool        _is_put;
         bool        _autoindex;
         bool        _is_file;
         bool        _is_cgi;
         bool        _is_redirect;
         HttpCode    _status_code;
+        std::string _cgi_path;
         std::string _path;
 };
 
