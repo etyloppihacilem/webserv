@@ -1,12 +1,13 @@
-/* #############################################################################
+/* #####################################################################################################################
 
                """          BodyChunk.cpp
         -\-    _|__
-         |\___/  . \        Created on 03 Jun. 2024 at 14:52
+         |\___/  . \        Created on 12 Jul. 2024 at 10:10
          \     /(((/        by hmelica
           \___/)))/         hmelica@student.42.fr
 
-############################################################################# */
+##################################################################################################################### */
+
 
 #include "BodyChunk.hpp"
 #include "Body.hpp"
@@ -37,7 +38,7 @@ size_t BodyChunk::read_body() {
 
     char    buf[BUFFER_SIZE + 1] = {
         0
-    };                                  // whole buffer is set to 0
+    }; // whole buffer is set to 0
     size_t  size_read;
 
     if (_bytes_remaining)
@@ -154,11 +155,12 @@ bool BodyChunk::init_chunk() { // discard until a size line is found
             sp = _buffer.find("\r\n", 0);
             if (sp == _buffer.npos)
                 return false;
+            {
+                std::stringstream tmp;
 
-            std::stringstream tmp;
-
-            tmp << std::hex << _buffer.substr(0, std::distance(_buffer.begin(), i));
-            tmp >> _bytes_remaining;
+                tmp << std::hex << _buffer.substr(0, std::distance(_buffer.begin(), i));
+                tmp >> _bytes_remaining;
+            }
             _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));
             if (!_bytes_remaining) { // if last byte
                 _done   = true;

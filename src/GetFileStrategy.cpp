@@ -65,7 +65,11 @@ bool GetFileStrategy::build_response() {
         throw HttpError(InternalServerError);
     }
     _response.set_body(*this);
-    _response.add_header("Content-Type", _mime.get_type(extract_extension(_location)));
+    std::string extension = extract_extension(_location);
+    _response.add_header("Content-Type", _mime.get_type(extension));
+    if (!_mime.has_type(extension))
+        _response.add_header("Content-Disposition", "attachment; filename=\"" + extract_basename(_location) + "\"");
+    //< this is meant to download file in case the mime type is not known.
     return _built = true;
 }
 

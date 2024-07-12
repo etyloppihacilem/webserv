@@ -33,3 +33,11 @@ std::string extract_extension(std::string &s) {
         return "";
     return s.substr(extension + 1, s.length() - (extension + 1));
 }
+
+std::string extract_basename(std::string &s) {
+    size_t  slash       = s.find_last_of("/");
+
+    if (slash == s.npos)
+        slash = 0;
+    return s.substr(slash + 1, s.length() - (slash + 1));
+}

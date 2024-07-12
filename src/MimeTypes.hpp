@@ -31,7 +31,8 @@ class MimeTypes {
         MimeTypes(MimeTypes &other);
         ~MimeTypes();
 
-        std::string                         get_type(std::string extension);
+        std::string                         get_type(const std::string &extension) const;
+        bool                                has_type(const std::string &extension) const;
         bool                                is_done() const;
 
     private:

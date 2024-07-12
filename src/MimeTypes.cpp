@@ -13,6 +13,7 @@
 #include <cmath>
 #include <cstddef>
 #include <fstream>
+#include <map>
 #include <ostream>
 #include <string>
 
@@ -21,7 +22,6 @@ MimeTypes::MimeTypes(std::string path):
     _types  () {
     std::fstream file;
 
-    _types["txt"] = "text/plain"; // default, should always be there.
     file.open(path.c_str());
     if (!file.is_open()) {
         error.log() << "Cannot open mime types file " << path << ". No mime types loaded." << std::endl;
@@ -59,7 +59,6 @@ MimeTypes::MimeTypes(std::string path):
         }
     }
     if (!_done) {
-        _types["txt"] = "text/plain"; // default, should always be there.
         error.log() << path << ": MimeTypes parsing unsuccessful." << std::endl;
     }
     file.close();
@@ -79,12 +78,18 @@ MimeTypes::~MimeTypes() {}
 
   If the extension is unknown, text/plain is returned.
   */
-std::string MimeTypes::get_type(std::string extension) {
-    if (_types.find(extension) == _types.end()) {
-        warn.log() << "MimeTypes.get_type(" << extension << ")" << std::endl;
-        return "text/plain";
+std::string MimeTypes::get_type(const std::string &extension) const {
+    std::map<std::string, std::string>::const_iterator it = _types.find(extension);
+
+    if (it == _types.end()) {
+        warn.log() << "MimeTypes.get_type(" << extension << ") while extension is not in mime table." << std::endl;
+        return "application/octet-stream";
     }
-    return _types[extension];
+    return it->second;
+}
+
+bool MimeTypes::has_type(const std::string &extension) const {
+    return _types.find(extension) != _types.end();
 }
 
 /**
