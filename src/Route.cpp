@@ -169,6 +169,10 @@ bool Route::getAutoindex() const{
     return _autoindex;
 }
 
+std::string Route::getRootDir() const {
+    return _rootDir;
+}
+
 std::vector<HttpMethod> Route::getMethods() const{
     return _methods;
 }
