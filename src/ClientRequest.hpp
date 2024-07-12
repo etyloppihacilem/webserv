@@ -30,7 +30,7 @@ class ClientRequest {
         bool                                parse_header(const std::string &in);
         bool                                init_body(std::string &buffer);
         void                                save_mem();
-        std::string                         &get_target();
+        std::string                         get_target() const;
         HttpMethod                          get_method();
         Body                                *get_body();
 

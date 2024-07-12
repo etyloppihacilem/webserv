@@ -28,17 +28,25 @@
 
 Location::Location(ClientRequest &request, Server &server):
     _status_code(OK) {
-    extern Route    &route; // this is to get the reference out of try scope
-    std::string     &target = request.get_target();
+    Route       *route; // this is to get the reference out of try scope
+    std::string target = request.get_target();
 
     try {
-        Route &route = server.getRoute(target);
+        route = &server.getRoute(target);
 
         (void) route; // this is not used here BUT extern so it is use out of scope
     } catch (Server::RouteNotFoundWarn &e) {
         throw HttpError(InternalServerError); // this is to prevent use of route out of scope if not defined
     }
-    build_path(request, route); // TODO CHECK IF REDIRECT ??????
+    if (!route)
+        throw HttpError(InternalServerError); // this is to prevent use of route out of scope if not defined
+    if (route->hasRedir()) {
+        _status_code = route->getRedirCode();
+        _is_redirect = true;
+        build_path(target, *route, route->getRedirPage());
+        return ;
+    }
+    build_path(target, *route);
 
     struct stat buf;
 
@@ -49,19 +57,18 @@ Location::Location(ClientRequest &request, Server &server):
             throw HttpError(Forbidden);
         if (errno == ENAMETOOLONG)
             throw HttpError(URITooLong);
-        error.log() << "Stat failed to check target '" << target << "' using route '" << route.getLocation()
+        error.log() << "Stat failed to check target '" << target << "' using route '" << route->getLocation()
                     << "' at location (path) '" << _path << "'." << std::endl;
         throw HttpError(InternalServerError);
     }
-    {
-        const std::vector<HttpMethod> &methods = route.getMethods();
 
-        _is_get     = std::find(methods.begin(), methods.end(), GET) != methods.end();
-        _is_post    = std::find(methods.begin(), methods.end(), POST) != methods.end();
-        _is_delete  = std::find(methods.begin(), methods.end(), DELETE) != methods.end();
-    }
+    const std::vector<HttpMethod> &methods = route->getMethods();
+
+    _is_get     = std::find(methods.begin(), methods.end(), GET) != methods.end();
+    _is_post    = std::find(methods.begin(), methods.end(), POST) != methods.end();
+    _is_delete  = std::find(methods.begin(), methods.end(), DELETE) != methods.end();
     if (S_ISDIR(buf.st_mode)) {
-        const std::vector<std::string>  &indexs     = route.getIndexPage();
+        const std::vector<std::string>  &indexs     = route->getIndexPage();
         const std::string               trailing    = (*_path.rbegin() == '/' ? "" : "/");
 
         for (std::vector<std::string>::const_iterator it = indexs.begin(); it != indexs.end(); it++) {
@@ -69,7 +76,7 @@ Location::Location(ClientRequest &request, Server &server):
 
             if (stat(_path.c_str(), &buf) == 0) {
                 if (!S_ISREG(buf.st_mode)) { // if index.html or so is not a file.
-                    warn.log() << *it << " is not a file, so cannot be a index." << std::endl;
+                    warn.log() << *it << " is not a file, so cannot be a index. Continuing." << std::endl;
                     continue;
                 }
                 _path       = index_path;
@@ -83,7 +90,7 @@ Location::Location(ClientRequest &request, Server &server):
             error.log() << "Cannot stat index file at " << index_path << "and unknown error occured." << std::endl;
             throw HttpError(InternalServerError); // anything else is sus
         }
-        _autoindex = route.hasAutoindex(); // if nothing else found
+        _autoindex = route->hasAutoindex(); // if nothing else found
     } else {
         // TODO HERE check if CGI
         _is_file = true; // not a dir
@@ -92,9 +99,27 @@ Location::Location(ClientRequest &request, Server &server):
 
 Location::~Location() {}
 
-void Location::build_path(ClientRequest &request, Route &route) {
-    _path = request.get_target();
+/**
+  Used to build path of resource
+  */
+void Location::build_path(const std::string &target, const Route &route) {
+    _path = target;
     _path.replace(0, route.getLocation().length(), route.getRootDir());
+}
+
+/**
+  Used to build redirect target (stored in path)
+  if redirect last chat is a '/', route's location is replaced by the redirection location.
+  if not, redirection is considered to redirect on a file and the whole target is replaced by the new location.
+  */
+void Location::build_path(const std::string &target, const Route &route, const std::string &redirect) {
+    if (*redirect.rbegin() != '/') {
+        _path = redirect;
+        return;
+    } else {
+        _path = target;
+        _path.replace(0, route.getLocation().length(), redirect);
+    }
 }
 
 bool Location::is_get() const {

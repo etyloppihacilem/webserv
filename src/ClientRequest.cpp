@@ -297,7 +297,7 @@ void ClientRequest::parse_port() {
     }
 }
 
-std::string &ClientRequest::get_target() {
+std::string ClientRequest::get_target() const {
     return _target;
 }
 

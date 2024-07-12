@@ -38,7 +38,9 @@ class Location {
         std::string get_path() const;
 
     private:
-        void        build_path(ClientRequest &request, Route &route);
+        void        build_path(const std::string &target, const Route &route);
+        void        build_path(const std::string &target, const Route &route, const std::string &redirect);
+
         bool        _is_get;
         bool        _is_post;
         bool        _is_delete;
