@@ -41,6 +41,7 @@ class Location {
         void        build_path(const std::string &target, const Route &route);
         void        build_path(const std::string &target, const Route &route, const std::string &redirect);
         void        setup_cgi(const Route &route);
+        bool        find_index(const Route &route, struct stat &buf);
 
         bool        _is_get;
         bool        _is_post;

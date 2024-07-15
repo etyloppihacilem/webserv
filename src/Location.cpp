@@ -47,7 +47,7 @@ Location::Location(ClientRequest &request, Server &server):
     build_path(target, *route);
     if (stat(target.c_str(), &buf) != 0) {
         if (errno == ENOENT || errno == ENOTDIR)
-            throw HttpError(NotFound); // there's nothing to see
+            throw HttpError(NotFound); // there's nothing to be found
         if (errno == EACCES)
             throw HttpError(Forbidden);
         if (errno == ENAMETOOLONG)
@@ -62,41 +62,50 @@ Location::Location(ClientRequest &request, Server &server):
     _is_get     = std::find(methods.begin(), methods.end(), GET) != methods.end();
     _is_post    = std::find(methods.begin(), methods.end(), POST) != methods.end();
     _is_delete  = std::find(methods.begin(), methods.end(), DELETE) != methods.end();
-    // _is_put  = std::find(methods.begin(), methods.end(), PUT) != methods.end();
-    if (S_ISDIR(buf.st_mode)) {
-        const std::vector<std::string>  &indexs     = route->getIndexPage();
-        const std::string               trailing    = (*_path.rbegin() == '/' ? "" : "/");
-
-        for (std::vector<std::string>::const_iterator it = indexs.begin(); it != indexs.end(); it++) {
-            std::string index_path = _path + trailing + *it;
-
-            if (stat(_path.c_str(), &buf) == 0) {
-                if (!S_ISREG(buf.st_mode)) { // if index.html or so is not a file.
-                    warn.log() << *it << " is not a file, so cannot be an index. Continuing." << std::endl;
-                    continue;
-                }
-                _path       = index_path;
-                _is_file    = true;
-                if (route->hasCgiExtension() && extract_extension(_path) == route->getCgiExtension())
-                    setup_cgi(*route);
-                return; // index file found and telling to read it
-            }
-            if (errno == ENOENT)
-                continue; // file not found so searching forward
-            if (errno == EACCES)
-                throw HttpError(Forbidden); // file found but won't open
-            error.log() << "Cannot stat index file at " << index_path << "and unknown error occured." << std::endl;
-            throw HttpError(InternalServerError); // anything else is sus
-        }
+    // _is_put  = std::find(methods.begin(), methods.end(), PUT) != methods.end(); // not implemented yet
+    if (S_ISDIR(buf.st_mode)) {         // in case target is a directory
+        if (find_index(*route, buf))    // if index file is found
+            return;
         _autoindex = route->hasAutoindex(); // if nothing else found
-    } else {
-        _is_file = true; // not a dir
+    } else {                                // in case target is anything but a directory
+        _is_file = true;                    // not a dir
         if (route->hasCgiExtension() && extract_extension(_path) == route->getCgiExtension())
             setup_cgi(*route);
     }
-} // 65 lines im so sorry
+} // 44 lines its a bit better
 
 Location::~Location() {}
+
+/**
+  Function used to find index in a repository.
+  */
+bool Location::find_index(const Route &route, struct stat &buf) {
+    const std::vector<std::string>  &indexs     = route.getIndexPage();
+    const std::string               trailing    = (*_path.rbegin() == '/' ? "" : "/");
+
+    for (std::vector<std::string>::const_iterator it = indexs.begin(); it != indexs.end(); it++) {
+        std::string index_path = _path + trailing + *it;
+
+        if (stat(_path.c_str(), &buf) == 0) {
+            if (!S_ISREG(buf.st_mode)) {     // if index.html or so is not a file.
+                warn.log() << *it << " is not a file, so cannot be an index. Continuing." << std::endl;
+                continue;
+            }
+            _path       = index_path;
+            _is_file    = true;
+            if (route.hasCgiExtension() && extract_extension(_path) == route.getCgiExtension())
+                setup_cgi(route);
+            return true;     // index file found and telling to read it
+        }
+        if (errno == ENOENT)
+            continue;     // file not found so searching forward
+        if (errno == EACCES)
+            throw HttpError(Forbidden);     // file found but won't open
+        error.log() << "Cannot stat index file at " << index_path << "and unknown error occured." << std::endl;
+        throw HttpError(InternalServerError);     // anything else is sus
+    }
+    return false;
+}
 
 /**
   Used to build path of resource
