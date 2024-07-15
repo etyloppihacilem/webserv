@@ -44,12 +44,12 @@ class ResponseBuildingStrategy {
         bool                _built;             ///< If response is built yet
         bool                _done;              ///< State of the current object
         size_t              _estimated_size;    ///< Estimated size of response body if needed
-        std::string         _buffer;            ///< String buffer in case too much is read. Not used yet ig TODO check
-        ///< if used
+        std::string         _buffer;            ///< String buffer in case too much is read. TODO:check if really used
 };
 
 #endif  // INCLUDE_SRC_RESPONDEBUILDINGSTRATEGY_CPP_
 
-// TODO optimization
+// OPTI:check for optimization
 // str.shrink_to_fit();
-// this method free memory from previously allocated string stuff that is no longer used
+// this method free memory from previously allocated string stuff that is no longer used.
+// Do this on maps and vectors at the end of config parsing.

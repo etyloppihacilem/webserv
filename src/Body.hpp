@@ -43,7 +43,7 @@ class Body {
         bool                _uniform;           ///< Used to protect get() usage if pop() or clean() are used
         std::string         _body;              ///< Whole body if get() is used, always empty if pop() is in use.
         size_t              _total;             ///< Size read
-        // TODO check max_body_length implementation
+        // TODO:check max_body_length implementation
 };
 
 #endif  // INCLUDE_SRC_BODY_HPP_

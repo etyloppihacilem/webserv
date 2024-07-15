@@ -28,7 +28,7 @@ Response::Response():
     add_header("Server", "webserv"); // adding server name
 }
 
-// TODO connection header is not there yet !!!!
+// TODO:connection header is not there yet !!!!
 
 Response::~Response() {
     if (_body)

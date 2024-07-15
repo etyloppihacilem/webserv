@@ -26,14 +26,14 @@ ErrorStrategy::ErrorStrategy(ResponseBuildState &state, HttpCode code, bool reco
 
 ErrorStrategy::~ErrorStrategy() {}
 
-// TODO finir ErrorStrategy !!!
+// TODO:finir ErrorStrategy !!!
 
 bool ErrorStrategy::build_response() {
     if (_recovery) {
         _response.add_header("Content-Type", "text/html; charset=utf-8");
         _estimated_size = 0; // choose BodyWriterLength
     } else
-        (void) _response; // TODO mettre le bon mimetype selon le fichier d'erreur
+        (void) _response; // TODO:mettre le bon mimetype selon le fichier d'erreur
     _response.set_code(_code);
     return _built = true;
 }
@@ -45,7 +45,7 @@ bool ErrorStrategy::fill_buffer(std::string &buffer, size_t size) {
         generateErrorPage(buffer);
         return _done = true;
     }
-    (void) size; // TODO response with size in case not a recovery
+    (void) size; // TODO:response with size in case not a recovery
     return "";
 }
 

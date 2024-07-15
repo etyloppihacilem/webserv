@@ -21,7 +21,7 @@ typedef enum e_state {
     waiting,    ///< waiting for header to exist or to end
     ready,      ///< done
     ready_body, ///< done but body exists
-    // TODO check if used
+    // OPTI:/check if used
     // update it is used but is it useful ??
 } t_state;
 
@@ -32,7 +32,7 @@ class ReadState : public ProcessState {
 
         bool            process();
         t_state         process_buffer(char *buffer);
-        // TODO is a function to check header requirements needed ?? For example host requirements (that are checked)
+        // WARN:is a function to check header requirements needed ?? For example host requirements (those are checked)
         ClientRequest   *get_message();
         void            done_message();
         void            save_mem();

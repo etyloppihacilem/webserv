@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 #include <vector>
 
-// TODO ask nicolas if it is possible to redefine error pages on different locations
+// TODO:ask nicolas if it is possible to redefine error pages on different locations
 
 Location::Location(ClientRequest &request, Server &server):
     _status_code(OK) {

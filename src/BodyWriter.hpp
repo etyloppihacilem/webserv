@@ -42,6 +42,6 @@ class BodyWriter {
         ResponseBuildingStrategy    *_strategy;                     ///< Strategy is needed to generate content of body
 };
 
-std::ostream &operator<<(std::ostream &os, BodyWriter &obj);        // TODO is this useful ?? NOT IMPLEMENTED YET
+std::ostream &operator<<(std::ostream &os, BodyWriter &obj);        // TODO:is this useful ?? NOT IMPLEMENTED YET
 
 #endif  // INCLUDE_SRC_BODYWRITER_HPP_

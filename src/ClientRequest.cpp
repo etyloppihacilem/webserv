@@ -81,7 +81,7 @@ void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
             throw HttpError(URITooLong);
         if (sp_protocol != protocol - 1) {  // there are SP remaining in URI, that is wrong, going for
                                             // 301 MovedPermanently.
-            // TODO IF NOT IN ORIGIN FORM, ADD HOST TO LOCATION !!! im not sure
+            // WARN:IF NOT IN ORIGIN FORM, ADD HOST TO LOCATION !!! im definitly not sure
             std::string redirect = in.substr(pos + 1, (protocol - 1) - (pos + 1));
 
             replace_all(redirect,   " ",    "%20");
@@ -186,7 +186,7 @@ bool ClientRequest::parse_header(const std::string &in) {
             return false;
         }
         try {
-            parse_target(in, sp);                       // TODO after this parse _parameters
+            parse_target(in, sp);                       // HERE:after this parse _parameters
         } catch (HttpError &e) {
             _status = e.get_code();
             if (_status == MovedPermanently)
@@ -209,7 +209,7 @@ bool ClientRequest::parse_header(const std::string &in) {
 
   It returns true if a body is found, false if not and sets _body_exists accordingly.
   _body_exists should be checked before any action is performed on a supposed _body.
-  TODO check if there is no better way to protect this (in getter for example).
+  TODO:check if there is no better way to protect this (in getter for example).
   */
 bool ClientRequest::init_body(std::string &buffer) {
     if (_header.find("Transfer-Encoding") != _header.end()) {

@@ -17,10 +17,10 @@ class ProcessState {
         virtual ~ProcessState() = 0;
 
         // process returns true when done
-        virtual bool    process() = 0; // TODO check for type change
+        virtual bool    process() = 0; // TODO:check for type change
 
     protected:
-        // handler manifestement mais osef TODO
+        // TODO:handler manifestement mais osef
         int             _fd;
 };
 

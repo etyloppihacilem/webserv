@@ -13,6 +13,7 @@
 #include "ErrorStrategy.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
+#include "Location.hpp"
 #include "Logger.hpp"
 #include "MemoryHandler.hpp" // do not remove yet
 #include "ProcessState.hpp"
@@ -29,22 +30,22 @@ ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request):
     ProcessState(fd),
     _request    (request),
     _strategy   (0),
-    _was_error  (false) {   // TODO check where to free this once it is allocated
-    (void) _request;        // TODO delete this
-    (void) _strategy;       // TODO delete this
+    _was_error  (false) {   // TODO:check where to free this once it is allocated
+    (void) _request;        // TODO:delete this
+    (void) _strategy;       // TODO:delete this
 }
 
 ResponseBuildState::~ResponseBuildState() {}
 
 bool ResponseBuildState::process() {
-    (void) _was_error; // TODO delete if the rest is uncommented
+    (void) _was_error; // OPTI delete if the rest is uncommented
     try {
         if (!_strategy)
             init_strategy();
     } catch (HttpError &e) {
         init_strategy(e.get_code());
     } catch (std::bad_alloc &e) {
-        throw e; // gestion out of scope ? TODO decider ça : pros gestion de la memoire de tous les objets
+        throw e; // gestion out of scope ? TODO:decider ça : pros gestion de la memoire de tous les objets
         // mem.deallocate();
         // if (_was_error) {
         //     error.log() << "Out of heap, not recoverable, sending " << InternalServerError << std::endl;
@@ -77,6 +78,7 @@ void ResponseBuildState::init_strategy() {
     //      error strategy (init_strategy(HttpCode code))
     if (isError(_request->get_status()))
         init_strategy(_request->get_status());
+    // Location location(*_request, _request->) HERE:
     // else if (isRedirection(_request->get_status()))
     //     ; // init redirectstrategy
     // else if (_request->get_method() == GET)

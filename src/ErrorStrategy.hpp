@@ -27,7 +27,7 @@ class ErrorStrategy: public ResponseBuildingStrategy {
     public:
         ErrorStrategy(ResponseBuildState &state, HttpCode code = InternalServerError, bool recovery = true);
 
-        // TODO trouver comment recuperer la map des fichiers d'erreurs.
+        // TODO:trouver comment recuperer la map des fichiers d'erreurs.
         ~ErrorStrategy();
 
         bool        build_response();
