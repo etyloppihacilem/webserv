@@ -12,6 +12,7 @@
 #define INCLUDE_SRC_GETFILESTRATEGY_HPP_
 
 #include "MimeTypes.hpp"
+#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include "todo.hpp"
@@ -21,7 +22,7 @@
 
 class GetFileStrategy : public ResponseBuildingStrategy {
     public:
-        GetFileStrategy(MimeTypes &mime, std::string &location, ResponseBuildingStrategy &state);
+        GetFileStrategy(const MimeTypes &mime, const std::string &location, ResponseBuildState &state);
         ~GetFileStrategy();
 
         bool            build_response();
@@ -29,7 +30,7 @@ class GetFileStrategy : public ResponseBuildingStrategy {
         void            save_mem();
 
     private:
-        MimeTypes       &_mime;
+        const MimeTypes &_mime;
         std::string     _location;
         std::fstream    _file;
 };

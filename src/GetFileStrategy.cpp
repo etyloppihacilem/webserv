@@ -14,6 +14,7 @@
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "MimeTypes.hpp"
+#include "ResponseBuildState.hpp"
 #include "StringUtils.hpp"
 #include "todo.hpp"
 #include <cerrno>
@@ -24,7 +25,7 @@
 #include <string>
 #include <sys/stat.h>
 
-GetFileStrategy::GetFileStrategy(MimeTypes &mime, std::string &location, ResponseBuildingStrategy &state):
+GetFileStrategy::GetFileStrategy(const MimeTypes &mime, const std::string &location, ResponseBuildState &state):
     ResponseBuildingStrategy(state),
     _mime                   (mime),
     _location               (location) {}

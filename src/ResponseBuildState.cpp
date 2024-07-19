@@ -10,56 +10,49 @@
 
 #include "BodyWriter.hpp"
 #include "ClientRequest.hpp"
+#include "DeleteStrategy.hpp"
 #include "ErrorStrategy.hpp"
+#include "GetFileStrategy.hpp"
+#include "GetIndexStrategy.hpp"
 #include "HttpError.hpp"
+#include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Location.hpp"
 #include "Logger.hpp"
-#include "MemoryHandler.hpp" // do not remove yet
+#include "MimeTypes.hpp"
 #include "ProcessState.hpp"
+#include "RedirectStrategy.hpp"
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "Server.hpp"
+#include "UploadStrategy.hpp"
 #include <exception>
-#include <new>
 #include <ostream>
+#include <pthread.h>
 
 /**
  This class is in charge of choosing the right strategy depending on the request.
  */
-ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request):
+ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request, Server &server):
     ProcessState(fd),
     _request    (request),
+    _server     (server),
     _strategy   (0),
-    _was_error  (false) {   // TODO:check where to free this once it is allocated
-    (void) _request;        // TODO:delete this
-    (void) _strategy;       // TODO:delete this
-}
+    _recovery   (false),
+    _code       (OK) {}           // TODO:check where to free this once it is allocated
 
 ResponseBuildState::~ResponseBuildState() {}
 
 bool ResponseBuildState::process() {
-    (void) _was_error; // OPTI delete if the rest is uncommented
-    try {
+    if (!_recovery) {
         if (!_strategy)
             init_strategy();
-    } catch (HttpError &e) {
-        init_strategy(e.get_code());
-    } catch (std::bad_alloc &e) {
-        throw e; // gestion out of scope ? TODO:decider ça : pros gestion de la memoire de tous les objets
-        // mem.deallocate();
-        // if (_was_error) {
-        //     error.log() << "Out of heap, not recoverable, sending " << InternalServerError << std::endl;
-        //     init_strategy(InternalServerError);
-        //     mem.allocate(); // wtf not now
-        //     return true;
-        // }
-        // warn.log() << "Out of heap. Begining recovery procedures." << std::endl;
-        // _request->save_mem();
-        // _was_error = true;
-        // mem.allocate();
-        // process();
+    } else {
+        if (_strategy)
+            delete _strategy;
+        init_strategy(_code); // recovery
     }
-    return true;
+    return _strategy->build_response();
 }
 
 ClientRequest *ResponseBuildState::get_request() {
@@ -78,29 +71,34 @@ void ResponseBuildState::init_strategy() {
     //      error strategy (init_strategy(HttpCode code))
     if (isError(_request->get_status()))
         init_strategy(_request->get_status());
-    // Location location(*_request, _request->) HERE:
-    // else if (isRedirection(_request->get_status()))
-    //     ; // init redirectstrategy
-    // else if (_request->get_method() == GET)
-    //     ;
-    //  get;
-    //      verifier la location
-    //          fichier
-    //              GetFile
-    //              or CGI thing
-    //          dossier
-    //              IndexStrategy (ou 403)
-    // else if (_request->get_method() == POST)
-    //     ;
-    //  post;
-    //      upload
-    // else if (_request->get_method() == DELETE) // or <= for put but change flag
-    //  delete;
-    //      delete
-    // ;
-    // trouver le moyen de construire une location
-    // and to know what is allowed at this location
-}
+
+    Location location(*_request, _server);
+
+    if (location.is_redirect())
+        _strategy = new RedirectStrategy(location.get_path(), *this, location.get_status_code());
+    else if (_request->get_method() == GET) {
+        if (!location.is_get())
+            throw HttpError(MethodNotAllowed);
+        if (location.is_file())
+            _strategy = new GetFileStrategy(mime_types, location.get_path(), *this);
+        else if (location.has_autoindex())
+            _strategy = new GetIndexStrategy(location.get_path(), *this);
+        else
+            throw HttpError(Forbidden);
+    } else if (_request->get_method() == POST) {
+        if (!location.is_post())
+            throw HttpError(MethodNotAllowed);
+        _strategy = new UploadStrategy(*this, location.get_path());
+    } else if (_request->get_method() == DELETE) {
+        if (!location.is_delete())
+            throw HttpError(MethodNotAllowed);
+        _strategy = new DeleteStrategy(location.get_path(), *this);
+    }
+    if (!_strategy) {
+        error.log() << "No strategy selected for a given request. Throwing " << InternalServerError << std::endl;
+        throw HttpError(InternalServerError);
+    }
+} // 27 not that bad
 
 /**
   Build error strategy for a given http code.

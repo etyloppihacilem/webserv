@@ -15,6 +15,7 @@
 #include "ClientRequest.hpp"
 #include "HttpStatusCodes.hpp"
 #include "ProcessState.hpp"
+#include "Server.hpp"
 
 // TODO:this is supposed to build response some times or another
 
@@ -24,7 +25,8 @@
   */
 class ResponseBuildState : public ProcessState {
     public:
-        ResponseBuildState(int fd, ClientRequest *request);
+        ResponseBuildState(int fd, ClientRequest *request, Server &server);
+        ResponseBuildState(int fd, HttpCode code); // equivalent of calling recovery on ErrorBuildingStrategy
         ~ResponseBuildState();
 
         bool                        process();
@@ -36,8 +38,10 @@ class ResponseBuildState : public ProcessState {
         void                        init_strategy(HttpCode code);
 
         ClientRequest               *_request;
+        Server                      _server;
         ResponseBuildingStrategy    *_strategy;
-        bool                        _was_error; ///< Tells if last strategy was an error to enable recovery if needed.
+        bool                        _recovery;
+        HttpCode                    _code;
 };
 
 #endif  // INCLUDE_SRC_RESPONSEBUILDSTATE_HPP_

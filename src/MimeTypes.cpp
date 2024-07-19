@@ -101,3 +101,5 @@ bool MimeTypes::has_type(const std::string &extension) const {
 bool MimeTypes::is_done() const {
     return _done;
 }
+
+MimeTypes mime_types;

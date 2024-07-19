@@ -41,9 +41,9 @@ class Logger : public std::ostream {
         std::ofstream       &log();
 
     private:
-        std::string         _level;         ///< Log level
-        std::ofstream       _os;            ///< Out stream
-        int                 _width;         ///< Width to align level
+        std::string         _level; ///< Log level
+        std::ofstream       _os;    ///< Out stream
+        int                 _width; ///< Width to align level
 };
 
 std::ostream &operator<<(std::ostream &os, const HttpCode code);

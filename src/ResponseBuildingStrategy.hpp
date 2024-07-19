@@ -23,7 +23,7 @@
 class ResponseBuildingStrategy {
     public:
         ResponseBuildingStrategy(ResponseBuildState &state);
-        ~ResponseBuildingStrategy();
+        virtual ~ResponseBuildingStrategy() = 0;
 
         virtual bool        build_response() = 0;
         Response            &get_response();

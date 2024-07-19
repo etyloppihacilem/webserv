@@ -40,4 +40,6 @@ class MimeTypes {
         std::map<std::string, std::string>  _types; ///< Stores mime types <extension>:<mimetype>
 };
 
+extern MimeTypes mime_types; // global
+
 #endif  // INCLUDE_SRC_MIMETYPES_HPP_
