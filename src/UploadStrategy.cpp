@@ -52,7 +52,7 @@ bool UploadStrategy::build_response() {
         file << body->pop();
     }
     file.close();
-    _response.add_header("Location", _location); // TODO:donner la bonne location CF redirect
+    _response.add_header("Location", _location);
     _done           = true;
     return _built   = true;
 }

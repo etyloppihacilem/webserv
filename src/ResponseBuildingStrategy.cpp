@@ -20,8 +20,8 @@ ResponseBuildingStrategy::ResponseBuildingStrategy(ResponseBuildState &state):
     _built          (false),
     _done           (false),
     _estimated_size (0) {
-    (void) _state; // OPTI:delete this
 }
+    // (void) _state; // OPTI:delete this
 
 ResponseBuildingStrategy::~ResponseBuildingStrategy() {}
 

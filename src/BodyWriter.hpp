@@ -13,7 +13,6 @@
 
 #include "todo.hpp"
 #include <cstddef>
-#include <iostream>
 #include <string>
 
 class ResponseBuildingStrategy;
@@ -41,7 +40,5 @@ class BodyWriter {
         bool                        _done;                          ///< True if body is sent.
         ResponseBuildingStrategy    *_strategy;                     ///< Strategy is needed to generate content of body
 };
-
-std::ostream &operator<<(std::ostream &os, BodyWriter &obj);        // TODO:is this useful ?? NOT IMPLEMENTED YET
 
 #endif  // INCLUDE_SRC_BODYWRITER_HPP_
