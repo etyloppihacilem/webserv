@@ -51,6 +51,7 @@ bool ResponseBuildState::process() {
         if (_strategy)
             delete _strategy;
         init_strategy(_code); // recovery
+        _recovery = false; // because it is init so just normal operation now
     }
     return _strategy->build_response();
 }
@@ -67,10 +68,10 @@ ResponseBuildingStrategy *ResponseBuildState::get_response_strategy() {
   This function build the right strategy for a given ClientRequest.
   */
 void ResponseBuildState::init_strategy() {
-    //  error
-    //      error strategy (init_strategy(HttpCode code))
-    if (isError(_request->get_status()))
-        init_strategy(_request->get_status());
+    if (isError(_request->get_status())) {
+        _strategy = new ErrorStrategy(*this, _request->get_status());
+        return;
+    }
 
     Location location(*_request, _server);
 
@@ -107,8 +108,9 @@ void ResponseBuildState::init_strategy(HttpCode code) {
     if (!isError(code))
         warn.log() << "Generating error for non error code " << code << std::endl;
     try {
-        _strategy = new ErrorStrategy(*this, code);
-    } catch (std::exception &e) {
         _strategy = new ErrorStrategy(*this, code, true);
+    } catch (std::exception &e) {
+        throw e; // OPTI: think about a default 500 to reply because here recovery did not work.
+        // WARN: check not to loop in recovery there.
     }
 }
