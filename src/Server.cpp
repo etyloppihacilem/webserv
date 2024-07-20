@@ -46,13 +46,6 @@ Server::Server(const std::string &serverContent):
 
             if (tokenizedServer.peakToken() == ConfFieldString(location)) {
                 fieldContent = tokenizeLocation(tokenizedServer);
-                if (!isValidLocation(fieldContent.second)) {
-                    std::replace(fieldContent.second.begin(), fieldContent.second.end(), '|', ' ');
-                    warn.log()
-                        << "location " << fieldContent.first << " : " << fieldContent.second.substr(0, 30)
-                        << " ... : this 'location' module does not possess mandatory fields, parsing canceled"
-                        << std::endl;
-                }
             } else {
                 fieldContent = tokenizeField(tokenizedServer);
             }

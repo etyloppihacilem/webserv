@@ -9,7 +9,6 @@
 #include <fstream>
 #include <ostream>
 #include <sstream>
-#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -35,7 +34,9 @@ void ServerManager::deleteInstance()
     }
 }
 
-ServerManager::~ServerManager() {}
+ServerManager::~ServerManager() {
+    this->deleteInstance();
+}
 
 std::string readConfFile(std::ifstream &configStream)
 {
@@ -65,34 +66,12 @@ ServerManager::ServerManager(const std::string &configFile) {
             throw ServerConfError();
         }
 
-        std::string fileContent = tokenizeFile(readConfFile(configStream));
-
-        if (!isValidHttp(fileContent)) {
-            std::string errorStr = fileContent.substr(0, 30);
-
-            std::replace(errorStr.begin(), errorStr.end(), '|', ' ');
-            error.log() << errorStr
-                        << " ... : this 'http' module does not possess at least one 'server' module, parsing canceled"
-                        << std::endl;
-            throw ServerConfError();
-        }
-
+        std::string     fileContent = tokenizeFile(readConfFile(configStream));
         StringTokenizer tokenizedFile(fileContent, "|");
 
         while (tokenizedFile.hasMoreTokens()) {
             std::string serverContent = tokenizeServer(tokenizedFile);
-
-            if (!isValidServer(serverContent)) {
-                std::string errorStr = serverContent.substr(0, 30);
-
-                std::replace(errorStr.begin(), errorStr.end(), '|', ' ');
-                warn.log()  << "server: " << errorStr
-                            << " ... : this 'server' module does not possess mandatory fields, parsing canceled"
-                            << std::endl;
-                continue;
-            }
-
-            Server newServer(serverContent);
+            Server      newServer(serverContent);
         }
         if (_servers.empty()) {
             error.log() << configFile + ": no valid server child in config file." << std::endl;
