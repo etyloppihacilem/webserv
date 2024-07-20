@@ -186,7 +186,8 @@ bool ClientRequest::parse_header(const std::string &in) {
             return false;
         }
         try {
-            parse_target(in, sp);                       // HERE:after this parse _parameters
+            parse_target(in, sp);
+            parse_parameters();
         } catch (HttpError &e) {
             _status = e.get_code();
             if (_status == MovedPermanently)
@@ -275,6 +276,18 @@ void ClientRequest::parse_parameters() {
     }
     if (first != _target.npos)
         _target = _target.substr(0, first);
+}
+
+std::string ClientRequest::get_query_string() const {
+    std::map<std::string, std::string>::const_iterator it = _parameters.begin();
+    std::string ret;
+
+    while (it != _parameters.end()) {
+        ret += it->first + "=" + it->second;
+        if (++it != _parameters.end())
+            ret += "&";
+    }
+    return ret;
 }
 
 /**

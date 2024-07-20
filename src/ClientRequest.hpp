@@ -41,6 +41,7 @@ class ClientRequest {
         HttpCode                            get_status() const;
         int                                 get_fd() const;
         int                                 get_port() const;
+        std::string                         get_query_string() const;
 
     private:
         HttpMethod                          parse_method(const std::string &method, const size_t &end);

@@ -11,6 +11,7 @@
 #ifndef INCLUDE_SRC_CGISTRATEGY_HPP_
 #define INCLUDE_SRC_CGISTRATEGY_HPP_
 
+#include "ClientRequest.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include <cstddef>
@@ -18,15 +19,16 @@
 
 class CGIStrategy: public ResponseBuildingStrategy {
     public:
-        CGIStrategy();
+        CGIStrategy(const std::string &location, ClientRequest *_request);
         ~CGIStrategy();
 
-        bool        build_response();
-        bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void        save_mem();
+        bool    build_response();
+        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void    save_mem();
 
     private:
-        std::string _location;
+        std::string     _location;
+        ClientRequest   *_request;
 };
 
 #endif  // INCLUDE_SRC_CGISTRATEGY_HPP_

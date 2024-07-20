@@ -55,7 +55,11 @@ size_t BodyChunk::read_body() {
 }
 
 std::string &BodyChunk::get() {
-    if (_done || !_uniform)
+    if (!_uniform) {
+        error.log() << "Trying to .get() body after calling .pop()." << std::endl;
+        return _body;
+    }
+    if (_done)
         return _body;
 
     size_t i = 0;
@@ -115,6 +119,7 @@ std::string BodyChunk::pop() {
 void BodyChunk::clean() {
     while (!_done)
         pop();
+    save_mem();
 }
 
 /**

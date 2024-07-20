@@ -17,8 +17,6 @@
 #include "ProcessState.hpp"
 #include "Server.hpp"
 
-// TODO:this is supposed to build response some times or another
-
 /**
   This class is in charge of initiating the right strategy for the given ClientRequest and generating the response.
   It will be done when the response will be built.

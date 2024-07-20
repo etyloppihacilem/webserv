@@ -32,6 +32,7 @@ BodyLength::BodyLength(int fd, std::string &buffer, std::string length):
 
     if (!(tmp >> _length))
         throw HttpError(BadRequest);        // other invalid length
+    _total = _length;
 }
 
 BodyLength::~BodyLength() {}
@@ -57,7 +58,7 @@ size_t BodyLength::read_body() {
 }
 
 std::string &BodyLength::get() {
-    _total  += read_body();
+    read_body();
     _body   += _buffer;
     _buffer = "";
     return _body;
@@ -68,7 +69,7 @@ std::string BodyLength::pop() {
 
     _uniform    = false;
     _body       = "";
-    _total      += read_body();
+    read_body();
     tmp         += _buffer;
     _buffer     = "";
     return tmp;

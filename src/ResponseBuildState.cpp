@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "BodyWriter.hpp"
+#include "CGIStrategy.hpp"
 #include "ClientRequest.hpp"
 #include "DeleteStrategy.hpp"
 #include "ErrorStrategy.hpp"
@@ -71,19 +72,18 @@ ResponseBuildingStrategy *ResponseBuildState::get_response_strategy() {
     return _strategy;
 }
 
-// TODO: post and delete cgi exists too !!!
-
 /**
   This function build the right strategy for a given ClientRequest.
   */
 void ResponseBuildState::init_strategy() {
     if (isError(_request->get_status())) {
-        const std::map<HttpCode, std::string> error_pages = _server.getErrorPages();
+        const std::map<HttpCode, std::string> error_pages   = _server.getErrorPages();
 
-        std::map<HttpCode, std::string>::const_iterator it = error_pages.find(_request->get_status());
+        std::map<HttpCode, std::string>::const_iterator it  = error_pages.find(_request->get_status());
+
         if (it == error_pages.end())
-            _strategy = new ErrorStrategy(_request->get_status()); // page not found
-        else // page found
+            _strategy = new ErrorStrategy(_request->get_status());  // page not found
+        else                                                        // page found
             _strategy = new GetFileStrategy(mime_types, it->second, _request->get_status());
         return;
     }
@@ -92,6 +92,8 @@ void ResponseBuildState::init_strategy() {
 
     if (location.is_redirect())
         _strategy = new RedirectStrategy(location.get_path(), location.get_status_code());
+    else if (location.is_cgi())
+        _strategy = new CGIStrategy(location.get_path(), _request);
     else if (_request->get_method() == GET) {
         if (!location.is_get())
             throw HttpError(MethodNotAllowed);

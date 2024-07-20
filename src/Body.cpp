@@ -18,7 +18,8 @@ Body::Body(int fd, std::string &buffer):
     _buffer (buffer),
     _done   (false),
     _uniform(true),
-    _body   () {}
+    _body   (),
+    _total  (0) {}
 
 Body::~Body() {}
 

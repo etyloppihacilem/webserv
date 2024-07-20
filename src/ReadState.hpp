@@ -32,7 +32,6 @@ class ReadState : public ProcessState {
 
         bool            process();
         t_state         process_buffer(char *buffer);
-        // WARN:is a function to check header requirements needed ?? For example host requirements (those are checked)
         ClientRequest   *get_message();
         void            done_message();
         void            save_mem();

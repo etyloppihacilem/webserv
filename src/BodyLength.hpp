@@ -38,8 +38,6 @@ class BodyLength : public Body {
     private:
         size_t      _length;        ///< Length to read
         size_t      _read_length;   ///< Length read from socket.
-        /**< May differ from _total because _total is length of the things that are already returned by get() or pop().
-        */
 
 #ifdef TESTING
         FRIEND_TEST(BodyLengthTestSuite,    Constructor);
