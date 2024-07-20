@@ -178,7 +178,7 @@ std::vector<std::string> Server::getIndexPage() const{
     return _indexPage;
 }
 
-std::map<HttpCode, std::string> Server::getErrorPages() const{
+const std::map<HttpCode, std::string> &Server::getErrorPages() const{
     return _errorPages;
 }
 

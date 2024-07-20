@@ -24,10 +24,11 @@
 #include <string>
 #include <sys/stat.h>
 
-GetFileStrategy::GetFileStrategy(const MimeTypes &mime, const std::string &location):
+GetFileStrategy::GetFileStrategy(const MimeTypes &mime, const std::string &location, HttpCode code):
     ResponseBuildingStrategy(),
     _mime                   (mime),
-    _location               (location) {}
+    _location               (location),
+    _code                   (code) {}
 
 GetFileStrategy::~GetFileStrategy() {
     if (_file.is_open())
@@ -72,6 +73,7 @@ bool GetFileStrategy::build_response() {
 
     std::string extension = extract_extension(_location);
 
+    _response.set_code(_code);
     _response.add_header("Content-Type", _mime.get_type(extension));
     if (!_mime.has_type(extension))
         _response.add_header("Content-Disposition", "attachment; filename=\"" + extract_basename(_location) + "\"");

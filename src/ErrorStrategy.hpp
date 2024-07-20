@@ -24,20 +24,18 @@
   */
 class ErrorStrategy: public ResponseBuildingStrategy {
     public:
-        ErrorStrategy(HttpCode code = InternalServerError, bool recovery = true);
+        ErrorStrategy(HttpCode code = InternalServerError);
 
-        // TODO:trouver comment recuperer la map des fichiers d'erreurs.
         ~ErrorStrategy();
 
-        bool        build_response();
-        bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void        save_mem();
+        bool    build_response();
+        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void    save_mem();
 
     private:
         void        generateErrorPage(std::string &buffer);
 
         HttpCode    _code;
-        bool        _recovery;
 };
 
 #endif  // INCLUDE_SRC_ERRORSTRATEGY_HPP_

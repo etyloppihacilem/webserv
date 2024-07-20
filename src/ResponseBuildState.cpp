@@ -27,8 +27,10 @@
 #include "Server.hpp"
 #include "UploadStrategy.hpp"
 #include <exception>
+#include <map>
 #include <ostream>
 #include <pthread.h>
+#include <string>
 
 /**
  This class is in charge of choosing the right strategy depending on the request.
@@ -76,7 +78,13 @@ ResponseBuildingStrategy *ResponseBuildState::get_response_strategy() {
   */
 void ResponseBuildState::init_strategy() {
     if (isError(_request->get_status())) {
-        _strategy = new ErrorStrategy(_request->get_status());
+        const std::map<HttpCode, std::string> error_pages = _server.getErrorPages();
+
+        std::map<HttpCode, std::string>::const_iterator it = error_pages.find(_request->get_status());
+        if (it == error_pages.end())
+            _strategy = new ErrorStrategy(_request->get_status()); // page not found
+        else // page found
+            _strategy = new GetFileStrategy(mime_types, it->second, _request->get_status());
         return;
     }
 
@@ -115,7 +123,7 @@ void ResponseBuildState::init_strategy(HttpCode code) {
     if (!isError(code))
         warn.log() << "Generating error for non error code " << code << std::endl;
     try {
-        _strategy = new ErrorStrategy(code, true);
+        _strategy = new ErrorStrategy(code);
     } catch (std::exception &e) {
         throw e; // OPTI: think about a default 500 to reply because here recovery did not work.
         // WARN: check not to loop in recovery there.

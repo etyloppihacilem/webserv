@@ -38,7 +38,7 @@ class Server{
         std::vector<HttpMethod>         getMethods() const;
         std::string                     getRootDir() const;
         std::vector<std::string>        getIndexPage() const;
-        std::map<HttpCode, std::string> getErrorPages() const;
+        const std::map<HttpCode, std::string> &getErrorPages() const;
         bool                            hasRoute(const std::string &path) const;
         Route                           &getRoute(const std::string &path);
 

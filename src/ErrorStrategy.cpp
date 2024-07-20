@@ -18,38 +18,29 @@
 #include <sstream>
 #include <string>
 
-ErrorStrategy::ErrorStrategy(HttpCode code, bool recovery):
+ErrorStrategy::ErrorStrategy(HttpCode code):
     ResponseBuildingStrategy(),
-    _code                   (code),
-    _recovery               (recovery) {}
+    _code                   (code) {}
 
 ErrorStrategy::~ErrorStrategy() {}
-
-// TODO:finir ErrorStrategy !!!
 
 bool ErrorStrategy::build_response() {
     if (_built) {
         warn.log() << "ErrorStrategy : trying to build response, but is already built." << std::endl;
         return _built;
     }
-    if (_recovery) {
-        _response.add_header("Content-Type", "text/html; charset=utf-8");
-        _estimated_size = 0; // choose BodyWriterLength
-    } else
-        (void) _response; // TODO:mettre le bon mimetype selon le fichier d'erreur
+    _response.add_header("Content-Type", "text/html; charset=utf-8");
+    _estimated_size = 0; // choose BodyWriterLength
     _response.set_code(_code);
-    return _built = true;
+    return _built   = true;
 }
 
 bool ErrorStrategy::fill_buffer(std::string &buffer, size_t size) {
     if (_done)
         return _done;
-    if (_recovery) {
-        generateErrorPage(buffer);
-        return _done = true;
-    }
-    (void) size; // TODO:response with size in case not a recovery
-    return "";
+    generateErrorPage(buffer);
+    return _done = true;
+    (void) size;
 }
 
 /**
