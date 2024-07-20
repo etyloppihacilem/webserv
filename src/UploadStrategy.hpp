@@ -11,9 +11,11 @@
 #ifndef INCLUDE_SRC_UPLOADSTRATEGY_HPP_
 #define INCLUDE_SRC_UPLOADSTRATEGY_HPP_
 
+#include "Body.hpp"
 #include "ClientRequest.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include <cstddef>
+#include <fstream>
 #include <string>
 
 /**
@@ -30,7 +32,11 @@ class UploadStrategy : public ResponseBuildingStrategy {
         bool            fill_buffer(std::string &buffer, size_t size);
 
     private:
-        ClientRequest   &_request;
+        void            init();
+
+        bool            _init;
+        std::fstream    _file;
+        Body            *_body;
         std::string     _location;
         bool            _replace;
 };
