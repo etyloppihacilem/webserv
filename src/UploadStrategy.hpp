@@ -25,7 +25,7 @@
   */
 class UploadStrategy : public ResponseBuildingStrategy {
     public:
-        UploadStrategy(ClientRequest &request, std::string location, bool replace = false);
+        UploadStrategy(ClientRequest &request, const std::string &location, bool replace = false);
         ~UploadStrategy();
 
         bool            build_response();
@@ -37,6 +37,7 @@ class UploadStrategy : public ResponseBuildingStrategy {
         bool            _init;
         std::fstream    _file;
         Body            *_body;
+        std::string     _target;
         std::string     _location;
         bool            _replace;
 };

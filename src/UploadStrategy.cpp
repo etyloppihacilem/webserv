@@ -21,11 +21,12 @@
 #include <string>
 #include <unistd.h>
 
-UploadStrategy::UploadStrategy(ClientRequest &request, std::string location, bool replace):
+UploadStrategy::UploadStrategy(ClientRequest &request, const std::string &location, bool replace):
     ResponseBuildingStrategy(),
     _init                   (false),
     _file                   (),
     _body                   (0),
+    _target                 (request.get_target()),
     _location               (location),
     _replace                (replace) {
     if (!request.have_body()) {
@@ -48,7 +49,6 @@ bool UploadStrategy::build_response() {
         _file << _body->pop();
     else {
         _file.close();
-        _response.add_header("Location", _location); // TODO: location here is to be checked
         _done   = true;
         _built  = true;
     }
@@ -57,6 +57,7 @@ bool UploadStrategy::build_response() {
 
 void UploadStrategy::init() {
     _file.open(_location.c_str(), std::fstream::in);
+    _response.add_header("Location", _target);
     if (!_file.is_open() || _replace) // check difference of status code if file does not exists yet
         _response.set_code(Created);
     else
