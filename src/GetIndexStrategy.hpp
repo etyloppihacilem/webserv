@@ -30,9 +30,9 @@ class GetIndexStrategy: public ResponseBuildingStrategy {
         GetIndexStrategy(const std::string &location);
         ~GetIndexStrategy();
 
-        bool        build_response();
-        bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void        save_mem();
+        bool    build_response();
+        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void    save_mem();
 
     private:
         std::string generateLine(char *name, struct stat *st);
