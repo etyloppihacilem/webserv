@@ -11,7 +11,7 @@
 #ifndef INCLUDE_SRC_UPLOADSTRATEGY_HPP_
 #define INCLUDE_SRC_UPLOADSTRATEGY_HPP_
 
-#include "ResponseBuildState.hpp"
+#include "ClientRequest.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include <cstddef>
 #include <string>
@@ -23,15 +23,16 @@
   */
 class UploadStrategy : public ResponseBuildingStrategy {
     public:
-        UploadStrategy(ResponseBuildState &state, std::string location, bool replace = false);
+        UploadStrategy(ClientRequest &request, std::string location, bool replace = false);
         ~UploadStrategy();
 
-        bool        build_response();
-        bool        fill_buffer(std::string &buffer, size_t size);
+        bool            build_response();
+        bool            fill_buffer(std::string &buffer, size_t size);
 
     private:
-        std::string _location;
-        bool        _replace;
+        ClientRequest   &_request;
+        std::string     _location;
+        bool            _replace;
 };
 
 #endif  // INCLUDE_SRC_UPLOADSTRATEGY_HPP_

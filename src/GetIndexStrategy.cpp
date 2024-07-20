@@ -13,7 +13,6 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
-#include "ResponseBuildState.hpp"
 #include "StringUtils.hpp"
 #include "todo.hpp"
 #include <cerrno>
@@ -29,8 +28,8 @@
 #include <sys/types.h>
 
 // location ending in /
-GetIndexStrategy::GetIndexStrategy(const std::string &location, ResponseBuildState &state):
-    ResponseBuildingStrategy(state),
+GetIndexStrategy::GetIndexStrategy(const std::string &location):
+    ResponseBuildingStrategy(),
     _location               (location),
     _dir                    (0),
     _init_done              (false),

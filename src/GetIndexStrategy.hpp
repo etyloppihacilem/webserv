@@ -12,7 +12,6 @@
 #define INCLUDE_SRC_GETINDEXSTRATEGY_HPP_
 
 #include "BodyWriter.hpp"
-#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include <cstddef>
@@ -28,7 +27,7 @@ typedef struct dirent dir_item;
   */
 class GetIndexStrategy: public ResponseBuildingStrategy {
     public:
-        GetIndexStrategy(const std::string &location, ResponseBuildState &state);
+        GetIndexStrategy(const std::string &location);
         ~GetIndexStrategy();
 
         bool        build_response();

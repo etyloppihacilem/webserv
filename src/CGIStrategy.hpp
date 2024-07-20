@@ -11,7 +11,6 @@
 #ifndef INCLUDE_SRC_CGISTRATEGY_HPP_
 #define INCLUDE_SRC_CGISTRATEGY_HPP_
 
-#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include <cstddef>
@@ -19,7 +18,7 @@
 
 class CGIStrategy: public ResponseBuildingStrategy {
     public:
-        CGIStrategy(ResponseBuildState &state);
+        CGIStrategy();
         ~CGIStrategy();
 
         bool        build_response();

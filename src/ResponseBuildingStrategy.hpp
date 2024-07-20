@@ -22,7 +22,7 @@
   */
 class ResponseBuildingStrategy {
     public:
-        ResponseBuildingStrategy(ResponseBuildState &state);
+        ResponseBuildingStrategy();
         virtual ~ResponseBuildingStrategy() = 0;
 
         virtual bool        build_response() = 0;
@@ -39,7 +39,6 @@ class ResponseBuildingStrategy {
         virtual void        save_mem();
 
     protected:
-        ResponseBuildState  *_state;            ///< ResponseBuildState to have interdependence and access ClientRequest
         Response            _response;          ///< The response object
         bool                _built;             ///< If response is built yet
         bool                _done;              ///< State of the current object

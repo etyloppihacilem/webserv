@@ -11,7 +11,6 @@
 #include "ErrorStrategy.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
-#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include <cstddef>
 #include <new>
@@ -19,8 +18,8 @@
 #include <sstream>
 #include <string>
 
-ErrorStrategy::ErrorStrategy(ResponseBuildState &state, HttpCode code, bool recovery):
-    ResponseBuildingStrategy(state),
+ErrorStrategy::ErrorStrategy(HttpCode code, bool recovery):
+    ResponseBuildingStrategy(),
     _code                   (code),
     _recovery               (recovery) {}
 
@@ -29,6 +28,10 @@ ErrorStrategy::~ErrorStrategy() {}
 // TODO:finir ErrorStrategy !!!
 
 bool ErrorStrategy::build_response() {
+    if (_built) {
+        warn.log() << "ErrorStrategy : trying to build response, but is already built." << std::endl;
+        return _built;
+    }
     if (_recovery) {
         _response.add_header("Content-Type", "text/html; charset=utf-8");
         _estimated_size = 0; // choose BodyWriterLength

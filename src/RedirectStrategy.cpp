@@ -12,15 +12,14 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
-#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "StringUtils.hpp"
 #include <cstddef>
 #include <ostream>
 #include <string>
 
-RedirectStrategy::RedirectStrategy(const std::string &location, ResponseBuildState &state, HttpCode code):
-    ResponseBuildingStrategy(state),
+RedirectStrategy::RedirectStrategy(const std::string &location, HttpCode code):
+    ResponseBuildingStrategy(),
     _location               (location),
     _code                   (code) {
     if (!isRedirection(code)) {
@@ -32,6 +31,10 @@ RedirectStrategy::RedirectStrategy(const std::string &location, ResponseBuildSta
 RedirectStrategy::~RedirectStrategy() {}
 
 bool RedirectStrategy::build_response() {
+    if (_built) {
+        warn.log() << "RedirectStrategy : trying to build response, but is already built." << std::endl;
+        return _built;
+    }
     _response.add_header("Location", _location);
     _response.set_code(_code);
     _done           = true;

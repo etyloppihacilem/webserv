@@ -11,30 +11,36 @@
 #include "UploadStrategy.hpp"
 #include "Body.hpp"
 #include "BodyWriter.hpp"
+#include "ClientRequest.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
-#include "ResponseBuildState.hpp"
 #include <cstddef>
 #include <fstream>
 #include <ostream>
 #include <string>
 #include <unistd.h>
 
-UploadStrategy::UploadStrategy(ResponseBuildState &state, std::string location, bool replace):
-    ResponseBuildingStrategy(state),
+UploadStrategy::UploadStrategy(ClientRequest &request, std::string location, bool replace):
+    ResponseBuildingStrategy(),
+    _request                (request),
     _location               (location),
     _replace                (replace) {}
 
 UploadStrategy::~UploadStrategy() {}
 
+// OPTI:reading incoming body is blocking the server atm. think about doing it in a virtual loop !!!
 bool UploadStrategy::build_response() {
-    if (!_state->get_request()->have_body()) {
+    if (_built) {
+        warn.log() << "UploadStrategy : trying to build response, but is already built." << std::endl;
+        return _built;
+    }
+    if (!_request.have_body()) {
         error.log() << "Upload strategy but request have no body. Sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     }
 
-    Body            *body = _state->get_request()->get_body();
+    Body            *body = _request.get_body();
     std::fstream    file;
 
     file.open(_location.c_str(), std::fstream::in);

@@ -39,7 +39,12 @@ ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request, Server &s
     _server     (server),
     _strategy   (0),
     _recovery   (false),
-    _code       (OK) {}           // TODO:check where to free this once it is allocated
+    _code       (OK) {
+    if (!_request) {
+        error.log() << "Trying to build response without request." << std::endl;
+        throw HttpError(InternalServerError);
+    }
+}           // TODO:check where to free this once it is allocated
 
 ResponseBuildState::~ResponseBuildState() {}
 
@@ -50,8 +55,8 @@ bool ResponseBuildState::process() {
     } else {
         if (_strategy)
             delete _strategy;
-        init_strategy(_code); // recovery
-        _recovery = false; // because it is init so just normal operation now
+        init_strategy(_code);   // recovery
+        _recovery = false;      // because it is init so just normal operation now
     }
     return _strategy->build_response();
 }
@@ -64,36 +69,38 @@ ResponseBuildingStrategy *ResponseBuildState::get_response_strategy() {
     return _strategy;
 }
 
+// TODO: post and delete cgi exists too !!!
+
 /**
   This function build the right strategy for a given ClientRequest.
   */
 void ResponseBuildState::init_strategy() {
     if (isError(_request->get_status())) {
-        _strategy = new ErrorStrategy(*this, _request->get_status());
+        _strategy = new ErrorStrategy(_request->get_status());
         return;
     }
 
     Location location(*_request, _server);
 
     if (location.is_redirect())
-        _strategy = new RedirectStrategy(location.get_path(), *this, location.get_status_code());
+        _strategy = new RedirectStrategy(location.get_path(), location.get_status_code());
     else if (_request->get_method() == GET) {
         if (!location.is_get())
             throw HttpError(MethodNotAllowed);
         if (location.is_file())
-            _strategy = new GetFileStrategy(mime_types, location.get_path(), *this);
+            _strategy = new GetFileStrategy(mime_types, location.get_path());
         else if (location.has_autoindex())
-            _strategy = new GetIndexStrategy(location.get_path(), *this);
+            _strategy = new GetIndexStrategy(location.get_path());
         else
             throw HttpError(Forbidden);
     } else if (_request->get_method() == POST) {
         if (!location.is_post())
             throw HttpError(MethodNotAllowed);
-        _strategy = new UploadStrategy(*this, location.get_path());
+        _strategy = new UploadStrategy(*_request, location.get_path());
     } else if (_request->get_method() == DELETE) {
         if (!location.is_delete())
             throw HttpError(MethodNotAllowed);
-        _strategy = new DeleteStrategy(location.get_path(), *this);
+        _strategy = new DeleteStrategy(location.get_path());
     }
     if (!_strategy) {
         error.log() << "No strategy selected for a given request. Throwing " << InternalServerError << std::endl;
@@ -108,7 +115,7 @@ void ResponseBuildState::init_strategy(HttpCode code) {
     if (!isError(code))
         warn.log() << "Generating error for non error code " << code << std::endl;
     try {
-        _strategy = new ErrorStrategy(*this, code, true);
+        _strategy = new ErrorStrategy(code, true);
     } catch (std::exception &e) {
         throw e; // OPTI: think about a default 500 to reply because here recovery did not work.
         // WARN: check not to loop in recovery there.

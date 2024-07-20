@@ -9,14 +9,13 @@
 ############################################################################# */
 
 #include "CGIStrategy.hpp"
-#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "StringUtils.hpp"
 #include <cstddef>
 #include <string>
 
-CGIStrategy::CGIStrategy(ResponseBuildState &state):
-    ResponseBuildingStrategy(state) {}
+CGIStrategy::CGIStrategy():
+    ResponseBuildingStrategy() {}
 
 CGIStrategy::~CGIStrategy() {}
 

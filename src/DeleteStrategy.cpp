@@ -12,7 +12,6 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
-#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "StringUtils.hpp"
 #include <cerrno>
@@ -20,8 +19,8 @@
 #include <ostream>
 #include <string>
 
-DeleteStrategy::DeleteStrategy(const std::string &location, ResponseBuildState &state):
-    ResponseBuildingStrategy(state),
+DeleteStrategy::DeleteStrategy(const std::string &location):
+    ResponseBuildingStrategy(),
     _location               (location) {}
 
 DeleteStrategy::~DeleteStrategy() {}
@@ -30,6 +29,10 @@ DeleteStrategy::~DeleteStrategy() {}
   Where the deletion really happens.
   */
 bool DeleteStrategy::build_response() {
+    if (_built) {
+        warn.log() << "DeleteStrategy : trying to build response, but is already built." << std::endl;
+        return _built;
+    }
     if (std::remove(_location.c_str())) {
         if (errno == ENOENT)
             throw HttpError(NotFound);

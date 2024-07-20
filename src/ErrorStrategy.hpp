@@ -12,7 +12,6 @@
 #define INCLUDE_SRC_ERRORSTRATEGY_HPP_
 
 #include "HttpStatusCodes.hpp"
-#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include <cstddef>
@@ -25,7 +24,7 @@
   */
 class ErrorStrategy: public ResponseBuildingStrategy {
     public:
-        ErrorStrategy(ResponseBuildState &state, HttpCode code = InternalServerError, bool recovery = true);
+        ErrorStrategy(HttpCode code = InternalServerError, bool recovery = true);
 
         // TODO:trouver comment recuperer la map des fichiers d'erreurs.
         ~ErrorStrategy();

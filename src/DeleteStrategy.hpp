@@ -11,7 +11,6 @@
 #ifndef INCLUDE_SRC_DELETESTRATEGY_HPP_
 #define INCLUDE_SRC_DELETESTRATEGY_HPP_
 
-#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include <cstddef>
@@ -22,7 +21,7 @@
   */
 class DeleteStrategy: public ResponseBuildingStrategy {
     public:
-        DeleteStrategy(const std::string &location, ResponseBuildState &state);
+        DeleteStrategy(const std::string &location);
         ~DeleteStrategy();
 
         bool        build_response();

@@ -14,14 +14,12 @@
 #include "StringUtils.hpp"
 #include <cstddef>
 
-ResponseBuildingStrategy::ResponseBuildingStrategy(ResponseBuildState &state):
-    _state          (&state),
+ResponseBuildingStrategy::ResponseBuildingStrategy():
     _response       (),
     _built          (false),
     _done           (false),
     _estimated_size (0) {
 }
-    // (void) _state; // OPTI:delete this
 
 ResponseBuildingStrategy::~ResponseBuildingStrategy() {}
 

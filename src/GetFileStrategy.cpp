@@ -14,7 +14,6 @@
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "MimeTypes.hpp"
-#include "ResponseBuildState.hpp"
 #include "StringUtils.hpp"
 #include "todo.hpp"
 #include <cerrno>
@@ -25,8 +24,8 @@
 #include <string>
 #include <sys/stat.h>
 
-GetFileStrategy::GetFileStrategy(const MimeTypes &mime, const std::string &location, ResponseBuildState &state):
-    ResponseBuildingStrategy(state),
+GetFileStrategy::GetFileStrategy(const MimeTypes &mime, const std::string &location):
+    ResponseBuildingStrategy(),
     _mime                   (mime),
     _location               (location) {}
 
@@ -36,13 +35,17 @@ GetFileStrategy::~GetFileStrategy() {
 }
 
 bool GetFileStrategy::build_response() {
+    if (_built) {
+        warn.log() << "GetFileStrategy : trying to build response, but is already built." << std::endl;
+        return _built;
+    }
+    if (_file.is_open()) {
+        warn.log() << "File " << _location << " was already opened. Closing and reopening." << std::endl;
+        _file.close();
+    }
     {
         struct stat buf;
 
-        if (_file.is_open()) {
-            warn.log() << "File " << _location << " was already opened. Closing and reopening." << std::endl;
-            _file.close();
-        }
         if (stat(_location.c_str(), &buf)) {
             if (errno == ENOENT)
                 throw HttpError(NotFound);
@@ -66,7 +69,9 @@ bool GetFileStrategy::build_response() {
         throw HttpError(InternalServerError);
     }
     _response.set_body(*this);
+
     std::string extension = extract_extension(_location);
+
     _response.add_header("Content-Type", _mime.get_type(extension));
     if (!_mime.has_type(extension))
         _response.add_header("Content-Disposition", "attachment; filename=\"" + extract_basename(_location) + "\"");
