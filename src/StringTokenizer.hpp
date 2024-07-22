@@ -11,6 +11,8 @@ class StringTokenizer{
 
         bool        hasMoreTokens();
         std::string remainingString();
+    	std::string delimValue();
+    	std::size_t delimLen();
         std::size_t countTokens();
         std::size_t countTokens(const std::string &separator);
         std::string peakToken();
