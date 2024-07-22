@@ -26,6 +26,7 @@ Diagnostics:
 CompileFlags:
   Add:
     - "-std=c++20"
+    - "-D TESTING"
 
 ---
 If:
@@ -37,6 +38,7 @@ Diagnostics:
 CompileFlags:
   Add:
     - "-std=c++20"
+    - "-D TESTING"
 
 ---
 If:
@@ -48,5 +50,42 @@ Diagnostics:
 CompileFlags:
   Add:
     - "-std=c++20"
+    - "-D TESTING"
+
+---
+If:
+  PathMatch: .*_test\.hpp
+
+Diagnostics:
+  Suppress: access
+
+CompileFlags:
+  Add:
+    - "-std=c++20"
+    - "-D TESTING"
+
+---
+If:
+  PathMatch: .*Test\.hpp
+
+Diagnostics:
+  Suppress: access
+
+CompileFlags:
+  Add:
+    - "-std=c++20"
+    - "-D TESTING"
+
+---
+If:
+  PathMatch: .*test/.*\.hpp
+
+Diagnostics:
+  Suppress: access
+
+CompileFlags:
+  Add:
+    - "-std=c++20"
+    - "-D TESTING"
 EOF
 echo Clangd correctly configured

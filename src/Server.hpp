@@ -19,7 +19,7 @@ class Server{
 
                 virtual ~RouteNotFoundWarn() throw () {}
 
-                const char  *what() const throw () {
+                const char *what() const throw () {
                     return _message.c_str();
                 }
 
@@ -29,50 +29,52 @@ class Server{
         Server(const std::string&);
         ~Server();
 
-        bool                            hasServeName(const std::string &serverName) const;
-        std::vector<std::string>        getServerName() const;
+        bool hasServeName(const std::string &serverName) const;
+        std::vector<std::string> getServerName() const;
 
-        unsigned int                    getPort() const;
+        unsigned int    getPort() const;
 
-        bool                            getAutoindex() const;
-        std::vector<HttpMethod>         getMethods() const;
-        std::string                     getRootDir() const;
-        std::vector<std::string>        getIndexPage() const;
+        bool            getAutoindex() const;
+        std::vector<HttpMethod> getMethods() const;
+        std::string     getRootDir() const;
+        std::vector<std::string> getIndexPage() const;
+
         const std::map<HttpCode, std::string> &getErrorPages() const;
-        bool                            hasRoute(const std::string &path) const;
-        Route                           &getRoute(const std::string &path);
 
-        void                            setServerName(const ValueList&);
-        void                            setPort(const ValueList&);
-        void                            setRootDir(const ValueList&);
-        void                            setIndexPage(const ValueList&);
-        void                            setAutoindex(const ValueList&);
-        void                            setMethods(const ValueList&);
-        void                            setMaxBodySize(const ValueList&);
-        void                            addRoute(const Field&);
-        void                            addErrorPage(const ValueList&);
+        bool    hasRoute(const std::string &path) const;
+        Route   &getRoute(const std::string &path);
+
+        void    setServerName(const ValueList&);
+        void    setPort(const ValueList&);
+        void    setRootDir(const ValueList&);
+        void    setIndexPage(const ValueList&);
+        void    setAutoindex(const ValueList&);
+        void    setMethods(const ValueList&);
+        void    setMaxBodySize(const ValueList&);
+        void    addRoute(const Field&);
+        void    addErrorPage(const ValueList&);
 
     private:
-        std::vector<std::string>        _serverName;
-        unsigned int                    _port;
-        int                             _maxBodySize;
+        std::vector<std::string> _serverName;
+        unsigned int _port;
+        int         _maxBodySize;
 
-        bool                            _autoindex;
-        std::vector<HttpMethod>         _methods;
-        std::string                     _rootDir;
+        bool        _autoindex;
+        std::vector<HttpMethod> _methods;
+        std::string _rootDir;
         std::vector<std::string>        _indexPage;
 
         std::map<std::string, Route>    _routes;
         std::map<HttpCode, std::string> _errorPages;
 
-        bool                            _serverNameSet;
-        bool                            _portSet;
-        bool                            _maxBodySizeSet;
+        bool    _serverNameSet;
+        bool    _portSet;
+        bool    _maxBodySizeSet;
 
-        bool                            _autoindexSet;
-        bool                            _indexPageSet;
-        bool                            _methodsSet;
-        bool                            _rootDirSet;
+        bool    _autoindexSet;
+        bool    _indexPageSet;
+        bool    _methodsSet;
+        bool    _rootDirSet;
 };
 
 #endif // INCLUDE_SRC_SERVER_HPP_

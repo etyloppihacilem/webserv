@@ -110,7 +110,10 @@ bool Location::find_index(const Route &route, struct stat &buf) {
   */
 void Location::build_path(const std::string &target, const Route &route) {
     _path = target;
-    _path.replace(0, route.getLocation().length(), route.getRootDir());
+    _path_info = target;
+    _route_path = route.getRootDir();
+    _path.replace(0, route.getLocation().length(), _route_path);
+    _path_info.replace(0, route.getLocation().length(), "");
 }
 
 /**

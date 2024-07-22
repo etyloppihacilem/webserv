@@ -51,9 +51,8 @@ bool CGIStrategy::build_response() {
         st >> env["CONTENT_LENGTH"];
     }
     env["GATEWAY_INTERFACE"]    = "CGI/1.1";
-    env["PATH_INFO"]            = ""; // TODO: trouver PATH_INFO /test/cgi.bin/monscript.cgi/path_info
-    //                                                                                      ^^^^^^^^^^
-    env["PATH_TRANSLATED"]      = ""; // TODO: apres la conversion en physique
+    env["PATH_INFO"]            = ""; // trailing things after script name in target
+    env["PATH_TRANSLATED"]      = _location; // physical path after translation
     env["QUERY_STRING"]         = _request->get_query_string();
     env["REMOTE_ADDR"]          = "";
     env["REQUEST_METHOD"]       = method_string(_request->get_method());

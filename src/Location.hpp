@@ -54,6 +54,14 @@ class Location {
         HttpCode    _status_code;
         std::string _cgi_path;
         std::string _path;
+        std::string _route_path;
+        std::string _path_info; ///< Everyting that is after the route path.
+        /**<
+          ```
+          /test/cgi.bin/monscript.cgi/path_info
+                                     ^^^^^^^^^^
+          ```
+          */
 };
 
 #endif  // INCLUDE_SRC_LOCATION_HPP_
