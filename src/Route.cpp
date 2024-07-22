@@ -23,7 +23,7 @@ Route::Route(Server &server):
     _indexPage      (server.getIndexPage()),
     _autoindex      (server.getAutoindex()),
     _uploadPath     (""),
-    _redirCode      (""),
+    _redirCode      (OK),
     _redirPage      (""),
     _cgiPath        (""),
     _cgiExtension   (""),
@@ -43,7 +43,7 @@ Route::Route(const std::string &location, const std::string &locationContent, Se
     _indexPage      (server.getIndexPage()),
     _autoindex      (server.getAutoindex()),
     _uploadPath     (server.getRootDir()),
-    _redirCode      (""),
+    _redirCode      (OK),
     _redirPage      (""),
     _cgiPath        (""),
     _cgiExtension   (""),
@@ -185,7 +185,7 @@ std::string Route::getUploadPath() const{
     return _uploadPath;
 }
 
-std::string Route::getRedirCode() const{
+HttpCode Route::getRedirCode() const{
     return _redirCode;
 }
 
@@ -354,7 +354,17 @@ void Route::setRedirection(const ValueList &valueContent) {
                     << " is not a valid path." << std::endl;
         throw ServerConfWarn();
     }
-    _redirCode  = redirCode;
+    if (redirCode == 310) {
+        warn.log()  << TooManyRedirects << " cannot redirect, " << TemporaryRedirect << " is used instead."
+                    << std::endl;
+        redirCode = 307; // temporary redirect by default if redirection is not a usable http code.
+    }
+    else if (redirCode == 306 || redirCode > 308) {
+        warn.log()  << redirCode << " is not recognized by server, " << TemporaryRedirect << " is used instead."
+                    << std::endl;
+        redirCode = 307; // temporary redirect by default if redirection is not an existing http code.
+    }
+    _redirCode  = static_cast<HttpCode>(redirCode);
     _redirPage  = valueContent[1];
 }
 

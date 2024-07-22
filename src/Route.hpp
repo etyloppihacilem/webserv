@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "HttpMethods.hpp"
+#include "HttpStatusCodes.hpp"
 #include "ServerConfFields.hpp"
 
 class Server;
@@ -20,7 +21,7 @@ class Route {
         std::string                 getRootDir() const;
         std::vector<std::string>    getIndexPage() const;
         bool                        getAutoindex() const;
-        std::string                 getRedirCode() const;
+        HttpCode                    getRedirCode() const;
         std::string                 getRedirPage() const;
         std::string                 getUploadPath() const;
         std::string                 getCgiPath() const;
@@ -53,7 +54,7 @@ class Route {
         std::vector<std::string>    _indexPage;
         bool                        _autoindex;
         std::string                 _uploadPath;
-        std::string                 _redirCode;
+        HttpCode                    _redirCode;
         std::string                 _redirPage;
         std::string                 _cgiPath;
         std::string                 _cgiExtension;

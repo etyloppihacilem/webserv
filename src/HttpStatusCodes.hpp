@@ -36,6 +36,7 @@ enum HttpCode {
     UseProxy                        = 305,
     TemporaryRedirect               = 307,
     PermanentRedirect               = 308,
+    TooManyRedirects                = 310,
     BadRequest                      = 400,
     Unauthorized                    = 401,
     PaymentRequired                 = 402,
@@ -151,6 +152,8 @@ inline std::string status_string(const int &code)
             return "Temporary Redirect";
         case 308:
             return "Permanent Redirect";
+        case 310:
+            return "Too Many Redirects";
         case 400:
             return "Bad Request";
         case 401:
