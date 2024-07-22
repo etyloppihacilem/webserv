@@ -258,7 +258,7 @@ void Server::addErrorPage(const ValueList &valueContent)
         info.log()  << "error_page: " << valueContent[0] << ": this error code is not standard because above 599."
                     << std::endl;
     }
-    if (!isValidPath(valueContent[1], _rootDir)) {
+    if (!isValidUrl(valueContent[1])) {
         warn.log()  << "error_page: " << valueContent[0] << " " << valueContent[1] << "is not a valid path."
                     << std::endl;
         throw ServerConfWarn();
@@ -317,7 +317,7 @@ void Server::setRootDir(const ValueList &valueContent)
         warn.log() << ", fail to parse field, it accept only one value." << std::endl;
         throw ServerConfWarn();
     }
-    if (!isValidRoot(valueContent[0])) {
+    if (!isValidRelativePath(valueContent[0])) {
         warn.log() << "root: " << valueContent[0] << ": is not a valid root." << std::endl;
         throw ServerConfWarn();
     }
@@ -328,7 +328,7 @@ void Server::setIndexPage(const ValueList &valueContent)
 {
     _indexPageSet = true;
     for (ValueList::const_iterator it = valueContent.begin(); it < valueContent.end(); ++it) {
-        if (!isValidIndex(*it, _rootDir)) {
+        if (!isValidIndexFile(*it)) {
             warn.log() << "index: " << *it << ": is not a valid index page." << std::endl;
             continue;
         }

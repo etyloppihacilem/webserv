@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-bool isValidConfigFile(const std::string &configFile)
+bool isValidConfFile(const std::string &configFile)
 {
     if (configFile.size() == 0) {
         return false;
@@ -17,7 +17,8 @@ bool isValidConfigFile(const std::string &configFile)
 
     std::string CONF = ".conf";
 
-    if (configFile.find(CONF, 0) == configFile.size() - CONF.size()) {
+    if (isalnum(configFile[0]) && configFile.find(".", 0) != std::string::npos && configFile.find(CONF,
+            0) == configFile.size() - CONF.size()) {
         return true;
     }
     return false;
@@ -33,7 +34,7 @@ bool isValidFieldName(const std::string &name)
     return false;
 }
 
-bool isValidHttp(const std::string &value)
+bool isValidHttp(const std::string &value) // TO DELETE
 {
     if (value.size() == 0) {
         return false;
@@ -44,7 +45,7 @@ bool isValidHttp(const std::string &value)
     return false;
 }
 
-bool isValidServer(const std::string &value)
+bool isValidServer(const std::string &value) // TO DELETE
 {
     if (value.size() == 0) {
         return false;
@@ -57,7 +58,7 @@ bool isValidServer(const std::string &value)
     return false;
 }
 
-bool isValidLocation(const std::string &value)
+bool isValidLocation(const std::string &value) // TO DELETE
 {
     if (value.size() == 0) {
         return false;
@@ -71,17 +72,29 @@ bool isValidLocation(const std::string &value)
 
 bool isValidHostname(const std::string &value)
 {
-    if (value.size() == 0) {
+    if (value.size() == 0 || *value.begin() == '-' || *value.rbegin() == '-') {
         return false;
     }
+
+    bool hasOneAplha = false;
+
     for (std::string::const_iterator it = value.begin(); it < value.end(); ++it) {
+        if (hasOneAplha == false && isalpha(*it)) {
+            hasOneAplha = true;
+        }
         if (isalnum(*it)) {
             continue;
         } else if (*it == '.' || *it == '-') {
+            if (*(it + 1) == *it) {
+                return false;
+            }
             continue;
         } else {
             return false;
         }
+    }
+    if (hasOneAplha == false) {
+        return false;
     }
     return true;
 }
@@ -100,12 +113,9 @@ bool isValidIPAddress(const std::string &value)
     std::vector<std::string>    IPoctets;
     unsigned long int           pos = IPstring.find(".", 0);
 
-    if (pos == std::string::npos) {
-        return false;
-    }
     while (pos != std::string::npos) {
         IPoctets.push_back(IPstring.substr(0, pos));
-        IPstring    = IPstring.substr(pos + 1, IPstring.size() - pos);
+        IPstring    = IPstring.substr(pos + 1, IPstring.size());
         pos         = IPstring.find(".", 0);
     }
     if (IPoctets.size() != 4) {
@@ -114,9 +124,6 @@ bool isValidIPAddress(const std::string &value)
     for (int i = 0; i < 4; ++i) {
         int octet = atoi(IPoctets[i].c_str());
 
-        if (i == 0 && octet != 127) {
-            return false;
-        }
         if (octet < 0 || octet > 255) {
             return false;
         }
@@ -154,45 +161,11 @@ bool isValidMethods(const std::string &value)
     return false;
 }
 
-bool isValidRoot(const std::string &value)
-{
-    if (value.size() == 0) {
-        return false;
-    }
-
-    struct stat root;
-
-    if (value[0] != '/' && stat(value.c_str(), &root) == 0 && root.st_mode && S_ISDIR(root.st_mode)) {
-        return true;
-    }
-    return false;
-}
-
-bool isValidPath(const std::string &value, const std::string &root)
-{
-    if (value.size() == 0 || value[0] != '/') {
-        return false;
-    }
-
-    std::string pathString(root + value);
-    struct stat path;
-
-    if (value[0] == '/' && stat(pathString.c_str(), &path) == 0 && path.st_mode && S_ISREG(path.st_mode)) {
-        return true;
-    }
-    return false;
-}
-
-bool isValidUrl(const std::string &value)
-{
-    if (value.size() == 0 || value[0] != '/') {
-        return false;
-    }
+bool isValidPath(const std::string& value) {
     for (std::string::const_iterator it = value.begin(); it < value.end(); ++it) {
         if (isalnum(*it)) {
             continue;
-        } else if (*it == '/' || *it == '-' || *it == '_' || *it == '.' || *it == '#' || *it == ':' || *it == '%'
-                   || *it == '?' || *it == '&' || *it == '=') {
+        } else if (*it == '/' || *it == '-' || *it == '_' || *it == '.') {
             continue;
         } else {
             return false;
@@ -201,7 +174,31 @@ bool isValidUrl(const std::string &value)
     return true;
 }
 
-bool isValidIndex(const std::string &value, const std::string &root)
+bool isValidRelativePath(const std::string &value)
+{
+    if (value.size() == 0 || value[0] == '/' || !isValidPath(value)) {
+        return false;
+    }
+    return true;
+}
+
+bool isValidAbsolutePath(const std::string &value)
+{
+    if (value.size() == 0 || value[0] != '/' || !isValidPath(value)) {
+        return false;
+    }
+    return true;
+}
+
+bool isValidUrl(const std::string &value)
+{
+    if (value.size() == 0 || value[0] != '/' || !isValidPath(value)) {
+        return false;
+    }
+    return true;
+}
+
+bool isValidIndexFile(const std::string &value)
 {
     if (value.size() == 0) {
         return false;
@@ -209,8 +206,8 @@ bool isValidIndex(const std::string &value, const std::string &root)
 
     std::string HTML = ".html";
 
-    if (value.find(HTML, 0) == value.size() - HTML.size()
-        && isValidPath(value, root)) {
+    if (isalnum(value[0]) && value.find(".", 0) != std::string::npos &&
+    	value.find(HTML, 0) == value.size() - HTML.size()) {
         return true;
     }
     return false;

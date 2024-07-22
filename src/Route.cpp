@@ -42,7 +42,7 @@ Route::Route(const std::string &location, const std::string &locationContent, Se
     _rootDir        (server.getRootDir()),
     _indexPage      (server.getIndexPage()),
     _autoindex      (server.getAutoindex()),
-    _uploadPath     (""),
+    _uploadPath     (server.getRootDir()),
     _redirCode      (""),
     _redirPage      (""),
     _cgiPath        (""),
@@ -244,7 +244,7 @@ void Route::setRootDir(const ValueList &valueContent)
         warn.log() << ", fail to parse field, it accept only one value." << std::endl;
         throw ServerConfWarn();
     }
-    if (!isValidRoot(valueContent[0])) {
+    if (!isValidRelativePath(valueContent[0])) {
         warn.log() << "root: " << valueContent[0] << " is not a valid root." << std::endl;
         throw ServerConfWarn();
     }
@@ -255,7 +255,7 @@ void Route::setIndexPage(const ValueList &valueContent)
 {
     _indexPageSet = true;
     for (ValueList::const_iterator it = valueContent.begin(); it < valueContent.end(); ++it) {
-        if (!isValidIndex(*it, _rootDir)) {
+        if (!isValidIndexFile(*it)) {
             warn.log() << "index: " << *it << " is not a valid index page." << std::endl;
             continue;
         }
@@ -316,12 +316,8 @@ void Route::setUpload(const ValueList &valueContent) {
         warn.log() << ", fail to parse field, it accept only one value." << std::endl;
         throw ServerConfWarn();
     }
-    if (!isValidPath(valueContent[0], _rootDir)) {
+    if (!isValidRelativePath(valueContent[0])) {
         warn.log() << "upload_path: " << valueContent[0] << " is not a valid path." << std::endl;
-        throw ServerConfWarn();
-    }
-    if (std::find(_methods.begin(), _methods.end(), POST) == _methods.end()) {
-        warn.log() << "upload_path: " << valueContent[0] << " can not be set as POST method is missing." << std::endl;
         throw ServerConfWarn();
     }
     _uploadPath = valueContent[0];
@@ -374,7 +370,7 @@ void Route::setCgiPath(const ValueList &valueContent) {
         warn.log() << ", fail to parse field, it accept only one value." << std::endl;
         throw ServerConfWarn();
     }
-    if (!isValidPath(valueContent[0], _rootDir)) {
+    if (!isValidAbsolutePath(valueContent[0])) {
         warn.log() << "cgi_path: " << valueContent[0] << " is not a valid path." << std::endl;
         throw ServerConfWarn();
     }

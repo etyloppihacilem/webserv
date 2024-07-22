@@ -17,11 +17,10 @@
 #define OUTPUT_TIMEOUT 180      //second
 #define CGI_TIMEOUT 180         //second
 
-#define COUNT_CONF_FIELD 15
-
 typedef std::vector<std::string>            ValueList;
 typedef std::pair<std::string, std::string> Field;
 
+#define COUNT_CONF_FIELD 15
 enum ConfField{
     // none = -1,
     http                    = 0,

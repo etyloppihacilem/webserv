@@ -54,7 +54,7 @@ std::string readConfFile(std::ifstream &configStream)
 
 ServerManager::ServerManager(const std::string &configFile) {
     try {
-        if (!isValidConfigFile(configFile)) {
+        if (!isValidConfFile(configFile)) {
             error.log() << configFile + ": file is not in the expected format [ *.conf ]." << std::endl;
             throw ServerConfError();
         }

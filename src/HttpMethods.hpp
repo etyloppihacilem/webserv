@@ -24,6 +24,8 @@ enum HttpMethod {
     PUT, // just in case
 };
 
+#define COUNT_METHOD 4
+
 inline std::string method_string(const int &code) {
     switch (code) {
         case GET:
