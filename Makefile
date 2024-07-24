@@ -13,12 +13,11 @@
 ###################
 
 # .ONESHELL:
-# oneshell does not permit error checking using current reciepes syntax
 .DELETE_ON_ERROR:
 SHELL			:= sh
 MAKEFLAGS		+= --no-builtin-rules
 MAKEFLAGS		+= --no-print-directory
-MAKEFLAGS		+= -j4
+MAKEFLAGS		+= -j
 # .RECIPEPREFIX	=
 # same as default RECIPEPREFIX prefix used here
 
@@ -51,10 +50,10 @@ CC				= c++
 CFLAGS			= -MMD -Wall -Werror -Wextra -std=c++98
 CTESTFLAGS		= -MMD -Wall -Werror -Wextra -std=c++20 -g3 -pthread
 DEBUG_FLAG		= -g3
-TEST_FLAG		= -DTESTING
+TEST_FLAG		= -DTESTING -I${shell realpath googletest/googletest/include} -I${shell realpath googletest/googlemock/include}
 SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
-HEADER_DIR		= header src ${shell realpath googletest/googletest/include} ${shell realpath googletest/googlemock/include}
+HEADER_DIR		= header src
 SRCS_DIR		= src
 OBJS_DIR		= obj
 TEST_DIR		= ${OBJS_DIR}/test
@@ -139,7 +138,8 @@ fclean: clean # Clean executable file
 	@${RM} ${NAME} ${NAME_TEST}
 	@printf "${BLUE}%-44s${RESET} ${GREEN}%s${RESET}\n" "File cleaning" "done"
 
-re: fclean all # Execute fclean & all rules
+re: fclean # Execute fclean & all rules
+	@${MAKE} all
 
 debug: fclean all
 
@@ -154,13 +154,14 @@ sanitize: fclean al
 	git submodule update
 	cd googletest && mkdir build
 
-./googletest/build/lib/libgtest.a:
+./googletest/build/lib/libgtest.a: ./googletest/build
 	cd googletest/build && cmake .. && make
 
-test: ${NAME_TEST}
-	./${NAME_TEST}
+test: ./googletest/build/lib/libgtest.a # Compile tests.
+	@${MAKE} ${NAME_TEST}
+	@printf "${GREEN}Success${RESET}  :)\n"
 
-${NAME_TEST}: ./googletest/build ./googletest/build/lib/libgtest.a ${TEST_DIR} ${TEST_OBJ}# to run tests
+${NAME_TEST}: ${TEST_DIR} ${TEST_OBJ}
 	@printf "${DELETE}${YELLOW}...Building${RESET} %-33s" "${NAME_TEST}"
 	@${CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} ./googletest/build/lib/libgtest.a ./googletest/build/lib/libgmock.a
 	@printf "${GREEN}done${RESET}\n"
@@ -168,13 +169,15 @@ ${NAME_TEST}: ./googletest/build ./googletest/build/lib/libgtest.a ${TEST_DIR} $
 clangd: # configure clangd for tests
 	bash ./script/clangd_generator.sh
 
-# supprime les fichiers dupliqués sur mac
-mac_clean:
+
+mac_clean:# supprime les fichiers dupliqués sur mac
 	@find . -type f -name "* [2-9]*" -print -delete
 
 file: # Print list of source and object files
-	@printf "${MAGENTA}.cpp:		${GRAY}${SOURCES}${RESET}\n"
-	@printf "${MAGENTA}.o:		${GRAY}${OBJECTS}${RESET}\n"
+	@printf "${MAGENTA}.cpp:		${GRAY}${SRCS}${RESET}\n"
+	@printf "${MAGENTA}.o:		${GRAY}${SRCS}${RESET}\n"
+	@printf "${BLUE}Test files:\n"
+	@printf "  ${MAGENTA}.cpp:		${GRAY}${TESTS_FILES}${RESET}\n"
 
 help:
 	@egrep -h '\s#\s' ${MAKEFILE_LIST} | sort | awk 'BEGIN {FS = ":.*?# "}; {printf "${MAGENTA}%-15s${GRAY} %s${RESET}\n", $$1, $$2}'
