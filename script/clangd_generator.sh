@@ -87,5 +87,29 @@ CompileFlags:
   Add:
     - "-std=c++20"
     - "-D TESTING"
+
+---
+If:
+  PathMatch: .*/gtest/.*
+
+Diagnostics:
+  Suppress: access
+
+CompileFlags:
+  Add:
+    - "-std=c++20"
+    - "-D TESTING"
+
+---
+If:
+  PathMatch: .*/gmock/.*
+
+Diagnostics:
+  Suppress: access
+
+CompileFlags:
+  Add:
+    - "-std=c++20"
+    - "-D TESTING"
 EOF
 echo Clangd correctly configured
