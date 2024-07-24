@@ -23,11 +23,11 @@ class HttpError: public std::exception {
 
         virtual ~HttpError() throw () {}
 
-        const char  *what() const throw () {
+        const char *what() const throw () {
             return _message.c_str();
         }
 
-        HttpCode    get_code() const {
+        HttpCode get_code() const {
             return _code;
         }
 

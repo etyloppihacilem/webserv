@@ -23,7 +23,7 @@
   */
 class MemoryHandler {
     public:
-        MemoryHandler(size_t size = 1024 /** Size of heap to allocate */);
+        MemoryHandler(size_t size = 1024 /** Size of heap to allocate */ );
         ~MemoryHandler();
 
         bool    allocate();

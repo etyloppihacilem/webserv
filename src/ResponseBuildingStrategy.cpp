@@ -10,7 +10,6 @@
 
 #include "ResponseBuildingStrategy.hpp"
 #include "Response.hpp"
-#include "ResponseBuildState.hpp"
 #include "StringUtils.hpp"
 #include <cstddef>
 
@@ -18,8 +17,7 @@ ResponseBuildingStrategy::ResponseBuildingStrategy():
     _response       (),
     _built          (false),
     _done           (false),
-    _estimated_size (0) {
-}
+    _estimated_size (0) {}
 
 ResponseBuildingStrategy::~ResponseBuildingStrategy() {}
 

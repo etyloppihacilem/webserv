@@ -78,8 +78,8 @@ Location::~Location() {}
   Function used to find index in a repository.
   */
 bool Location::find_index(const Route &route, struct stat &buf) {
-    const std::vector<std::string>  &indexs     = route.getIndexPage();
-    const std::string               trailing    = (*_path.rbegin() == '/' ? "" : "/");
+    const std::vector<std::string> &indexs = route.getIndexPage();
+    const std::string trailing = (*_path.rbegin() == '/' ? "" : "/");
 
     for (std::vector<std::string>::const_iterator it = indexs.begin(); it != indexs.end(); it++) {
         std::string index_path = _path + trailing + *it;
@@ -109,8 +109,8 @@ bool Location::find_index(const Route &route, struct stat &buf) {
   Used to build path of resource
   */
 void Location::build_path(const std::string &target, const Route &route) {
-    _path = target;
-    _path_info = target;
+    _path       = target;
+    _path_info  = target;
     _route_path = route.getRootDir();
     _path.replace(0, route.getLocation().length(), _route_path);
     _path_info.replace(0, route.getLocation().length(), "");

@@ -28,9 +28,9 @@ class RedirectStrategy : public ResponseBuildingStrategy {
             );
         ~RedirectStrategy();
 
-        bool        build_response();
-        bool        fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void        save_mem();
+        bool    build_response();
+        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void    save_mem();
 
     private:
         std::string _location;

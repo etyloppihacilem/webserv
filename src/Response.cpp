@@ -138,14 +138,14 @@ void Response::clean_body() {
 void Response::set_body(ResponseBuildingStrategy &strategy) {
     clean_body();
     if (strategy.get_estimated_size() > MAX_BODY_BUFFER) {
-        _body                           = new BodyWriterChunk(strategy);
-        _header["Transfer-Encoding"]    = "chunk";
+        _body = new BodyWriterChunk(strategy);
+        _header["Transfer-Encoding"] = "chunk";
     } else {
         try {
             _body = new BodyWriterLength(strategy);
         } catch (std::bad_alloc &e) {
-            _body                           = new BodyWriterChunk(strategy);
-            _header["Transfer-Encoding"]    = "chunk";
+            _body = new BodyWriterChunk(strategy);
+            _header["Transfer-Encoding"] = "chunk";
             return;
         }
 

@@ -42,12 +42,12 @@ class BodyChunk: public Body {
         void        clean();
 
     private:
-        size_t      _bytes_remaining;   ///< Number of bytes left to read in current chunk
-        bool        _trailing;          ///< Tells if body is read but trailing info is left to read and discard
+        size_t  _bytes_remaining;       ///< Number of bytes left to read in current chunk
+        bool    _trailing;              ///< Tells if body is read but trailing info is left to read and discard
 
-        size_t      read_body();
-        bool        init_chunk();
-        bool        is_hex(int c);
+        size_t  read_body();
+        bool    init_chunk();
+        bool    is_hex(int c);
 #ifdef TESTING
         FRIEND_TEST(BodyChunkTestSuite, is_hex);
         FRIEND_TEST(BodyChunkTestSuite, init_chunk);

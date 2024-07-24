@@ -17,11 +17,11 @@ class ProcessState {
         virtual ~ProcessState() = 0;
 
         // process returns true when done
-        virtual bool    process() = 0;
+        virtual bool process() = 0;
 
     protected:
         // TODO:handler manifestement mais osef
-        int             _fd;
+        int _fd;
 };
 
 #endif  // INCLUDE_SRC_PROCESSSTATE_HPP_

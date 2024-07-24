@@ -27,19 +27,19 @@ class ResponseBuildState : public ProcessState {
         ResponseBuildState(int fd, HttpCode code); // equivalent of calling recovery on ErrorBuildingStrategy
         ~ResponseBuildState();
 
-        bool                        process();
-        ClientRequest               *get_request();
-        ResponseBuildingStrategy    *get_response_strategy();
+        bool process();
+        ClientRequest *get_request();
+        ResponseBuildingStrategy *get_response_strategy();
 
     private:
-        void                        init_strategy();
-        void                        init_strategy(HttpCode code);
+        void    init_strategy();
+        void    init_strategy(HttpCode code);
 
-        ClientRequest               *_request;
-        Server                      _server;
-        ResponseBuildingStrategy    *_strategy;
-        bool                        _recovery;
-        HttpCode                    _code;
+        ClientRequest   *_request;
+        Server          _server;
+        ResponseBuildingStrategy *_strategy;
+        bool        _recovery;
+        HttpCode    _code;
 };
 
 #endif  // INCLUDE_SRC_RESPONSEBUILDSTATE_HPP_

@@ -44,7 +44,7 @@ BodyWriterLength::~BodyWriterLength() {}
 /**
   Return whole body.
   */
-std::string BodyWriterLength::generate(size_t size /** is discarded because not needed in BodyWriterLength */) {
+std::string BodyWriterLength::generate(size_t size /** is discarded because not needed in BodyWriterLength */ ) {
     (void) size;
     if (_recovered)
         warn.log()  << "Body already recovered. Risk of loosing body data if save_mem procedures are initiated."

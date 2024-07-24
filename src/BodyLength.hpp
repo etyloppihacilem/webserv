@@ -27,7 +27,7 @@
   */
 class BodyLength : public Body {
     public:
-        BodyLength(int fd, std::string &buffer, std::string length /** is a string representing a decimal. */);
+        BodyLength(int fd, std::string &buffer, std::string length /** is a string representing a decimal. */ );
         ~BodyLength();
 
         std::string &get();
@@ -36,8 +36,8 @@ class BodyLength : public Body {
         size_t      read_body();
 
     private:
-        size_t      _length;        ///< Length to read
-        size_t      _read_length;   ///< Length read from socket.
+        size_t  _length;            ///< Length to read
+        size_t  _read_length;       ///< Length read from socket.
 
 #ifdef TESTING
         FRIEND_TEST(BodyLengthTestSuite,    Constructor);

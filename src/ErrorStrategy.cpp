@@ -11,6 +11,7 @@
 #include "ErrorStrategy.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include "MemoryHandler.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include <cstddef>
 #include <new>
@@ -56,9 +57,12 @@ void ErrorStrategy::generateErrorPage(std::string &buffer) {
             << "automatically generated.</div></body>";
         buffer += st.str();
     } catch (std::bad_alloc &e) { // in case of heap going missing.
-        error.log() << "bad_alloc during recovery, running basic error generation." << std::endl;
-        buffer += status_string(_code);
-    }
+        mem.deallocate();
+        error.log() << "bad_alloc during recovery, running basic error generation in low memory consumption mode."
+                    << std::endl;
+        buffer = status_string(_code);
+    } // TODO: check if memory needs to be reallocated after using this strategy.
+      //         check this after response is sent.
 }
 
 void ErrorStrategy::save_mem() {

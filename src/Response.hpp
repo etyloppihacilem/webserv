@@ -30,23 +30,23 @@ class Response {
         Response();
         ~Response();
 
-        void                                set_body(ResponseBuildingStrategy &strategy);
-        void                                add_header(const std::string &field, const std::string &value);
-        void                                set_code(const HttpCode &code);
-        HttpCode                            get_code() const;
-        std::string                         build_response();
-        void                                save_mem();
-        BodyWriter                          *get_body();
-        bool                                have_body();
+        void        set_body(ResponseBuildingStrategy &strategy);
+        void        add_header(const std::string &field, const std::string &value);
+        void        set_code(const HttpCode &code);
+        HttpCode    get_code() const;
+        std::string build_response();
+        void        save_mem();
+        BodyWriter  *get_body();
+        bool        have_body();
 
     private:
-        std::string                         generate_status_line() const;
-        std::string                         generate_header() const;
-        void                                clean_body();
+        std::string generate_status_line() const;
+        std::string generate_header() const;
+        void        clean_body();
 
-        HttpCode                            _code;      ///< HttpStatusCodes of response
-        std::map<std::string, std::string>  _header;    ///< Header map
-        BodyWriter                          *_body;     ///< Body of response (if any)
+        HttpCode    _code;                              ///< HttpStatusCodes of response
+        std::map<std::string, std::string> _header;     ///< Header map
+        BodyWriter  *_body;                             ///< Body of response (if any)
 #ifdef TESTING
         FRIEND_TEST(ResponseTestSuite, generate_status_line);
 #endif
