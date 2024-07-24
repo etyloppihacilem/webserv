@@ -15,6 +15,7 @@
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include <cstddef>
+#include <map>
 #include <string>
 
 class CGIStrategy: public ResponseBuildingStrategy {
@@ -27,6 +28,8 @@ class CGIStrategy: public ResponseBuildingStrategy {
         void    save_mem();
 
     private:
+        char            **generate_env(const std::map<std::string, std::string> &env) const;
+
         std::string     _location;
         ClientRequest   *_request;
 };
