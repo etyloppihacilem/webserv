@@ -33,3 +33,21 @@ TEST(StringUtilsTestSuite, extract_extension) {
     a = "eh/.coucou.je";
     EXPECT_EQ("je", extract_extension(a));
 }
+
+TEST(StringUtilsTestSuite, extract_basename) {
+    std::string a;
+    a = "";
+    EXPECT_EQ("", extract_basename(a));
+    a = "super";
+    EXPECT_EQ("super", extract_basename(a));
+    a = "/super";
+    EXPECT_EQ("super", extract_basename(a));
+    a = "/coucou/je/suis/heureux";
+    EXPECT_EQ("heureux", extract_basename(a));
+    a = "/coucou/je/suis/heureux.cpp";
+    EXPECT_EQ("heureux.cpp", extract_basename(a));
+    a = "/coucou/je/suis/heureux.cpp/";
+    EXPECT_EQ("", extract_basename(a));
+    a = "/";
+    EXPECT_EQ("", extract_basename(a));
+}

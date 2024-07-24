@@ -23,7 +23,7 @@ void shrink_to_fit(std::string &str) {
 /**
   Extract extension from path.
   */
-std::string extract_extension(std::string &s) {
+std::string extract_extension(const std::string &s) {
     size_t  slash       = s.find_last_of("/");
     size_t  extension   = s.find_last_of(".");
 
@@ -34,10 +34,12 @@ std::string extract_extension(std::string &s) {
     return s.substr(extension + 1, s.length() - (extension + 1));
 }
 
-std::string extract_basename(std::string &s) {
+std::string extract_basename(const std::string &s) {
     size_t  slash       = s.find_last_of("/");
 
     if (slash == s.npos)
         slash = 0;
-    return s.substr(slash + 1, s.length() - (slash + 1));
+    else
+        slash += 1;
+    return s.substr(slash, s.length() - slash);
 }
