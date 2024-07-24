@@ -125,6 +125,9 @@ debug: ${NAME_DEBUG} # Compile tests.
 sanitize: ${NAME_SANITIZE} # Compile tests.
 	@printf "${MAGENTA}Sanitize build ${GREEN}Success${RESET}  :)\n"
 
+run_tests: test
+	./${NAME_TEST}
+
 clangd: # configure clangd for tests
 	bash ./script/clangd_generator.sh
 
