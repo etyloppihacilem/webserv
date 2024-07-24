@@ -206,7 +206,7 @@ ${DEBUG_DIR}:
 	@${MKDIR} -p ${DEBUG_DIR}
 
 ${SANITIZE_DIR}:
-	@printf "${YELLOW}...Creating${RESET} ${SANITIZE_DIR} directory\n"
+	@printf "${YELLOW}...Creating${RESET} ${SANITIZE_DIR}\n"
 	@${MKDIR} -p ${SANITIZE_DIR}
 
 ###########
