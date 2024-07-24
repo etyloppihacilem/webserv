@@ -245,7 +245,6 @@ void ClientRequest::decode_target() {
         _target.replace(percent, 3, 1, c);
     }
 }
-
 /**
   This function will init _parameters depending on _target value. It will update and clean _target too.
 
@@ -255,6 +254,8 @@ void ClientRequest::decode_target() {
   ```
   If there is no value, the value of parameter will be an empty string.
   */
+/*
+   All of this is not used because no one needs a parsed query string.
 void ClientRequest::parse_parameters() {
     size_t  first;
     size_t  begin;
@@ -288,6 +289,20 @@ std::string ClientRequest::get_query_string() const {
             ret += "&";
     }
     return ret;
+} */
+
+void ClientRequest::parse_parameters() {
+    size_t  mark;
+
+    mark   = _target.find('?');
+    if (mark == _target.npos)
+        return;
+    _query_string = _target.substr(mark + 1, _target.length() - (mark + 1));
+    _target.resize(mark);
+}
+
+std::string ClientRequest::get_query_string() const {
+    return _query_string;
 }
 
 /**

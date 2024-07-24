@@ -285,7 +285,7 @@ TEST(ClientRequestTestSuite, decode_target) {
     EXPECT_EQ(test._target, "Coucou je suis heureux");
 }
 
-TEST(ClientRequestTestSuite, parse_parameters) {
+/* TEST(ClientRequestTestSuite, parse_parameters) {
     ClientRequest test(0);
 
     // with nothing
@@ -321,6 +321,36 @@ TEST(ClientRequestTestSuite, parse_parameters) {
     test.parse_parameters();
     ASSERT_EQ(test._parameters.size(), (size_t) 0);
     EXPECT_EQ(test._target, "/coucou");
+} */
+
+TEST(ClientRequestTestSuite, parse_parameters) {
+    ClientRequest test(0);
+    std::string param;
+
+    // with nothing
+    param = "";
+    test._target = "/coucou" + param;
+    test.parse_parameters();
+    EXPECT_EQ(test._target, "/coucou");
+    EXPECT_EQ(test._query_string, param);
+    // with something
+    param = "je=suis";
+    test._target = "/coucou?" + param;
+    test.parse_parameters();
+    EXPECT_EQ(test._target, "/coucou");
+    EXPECT_EQ(test._query_string, param);
+    // with more something
+    param = "je=suis&heureux=coucou";
+    test._target = "/coucou?" + param;
+    test.parse_parameters();
+    EXPECT_EQ(test._target, "/coucou");
+    EXPECT_EQ(test._query_string, param);
+    // with nothing empty
+    test._parameters.clear();
+    test._target = "/coucou?";
+    test.parse_parameters();
+    EXPECT_EQ(test._target, "/coucou");
+    EXPECT_EQ(test._query_string, "");
 }
 
 TEST(ClientRequestTestSuite, parse_port) {

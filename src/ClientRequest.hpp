@@ -63,6 +63,7 @@ class ClientRequest {
         HttpCode    _status;                                ///< Status of request (not 200 if error)
         bool        _absolute_form;                         ///< True if request is in absolute form.
         int         _port;                                  ///< Port of the request.
+        std::string _query_string;
         /**< Absolute form means having the Host value in the request line and having no 'Host' header.
              Any 'Host' headers found while in absolute form is discarded.
         */
