@@ -43,20 +43,24 @@ GO_UP		= \033[1A\r
 
 NAME			= webserv
 NAME_TEST		= ${NAME}_test
+NAME_DEBUG		= ${NAME}_debug
+NAME_SANITIZE	= ${NAME}_sanitize
 
 LIBRARIES		= -lreadline
 
 CC				= c++
 CFLAGS			= -MMD -Wall -Werror -Wextra -std=c++98
 CTESTFLAGS		= -MMD -Wall -Werror -Wextra -std=c++20 -g3 -pthread
+CTESTFLAGS		+= -DTESTING -Igoogletest/googletest/include -Igoogletest/googlemock/include
 DEBUG_FLAG		= -g3
-TEST_FLAG		= -DTESTING -I${shell realpath googletest/googletest/include} -I${shell realpath googletest/googlemock/include}
 SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
 HEADER_DIR		= header src
 SRCS_DIR		= src
 OBJS_DIR		= obj
 TEST_DIR		= ${OBJS_DIR}/test
+DEBUG_DIR		= ${OBJS_DIR}/debug
+SANITIZE_DIR	= ${OBJS_DIR}/sanitize
 
 ########################
 ##  AUTO-EDIT ON VAR  ##
@@ -70,21 +74,17 @@ TESTS		+= $(shell find src -type f -name "*Test.cpp")
 
 TESTS_FILES	= $(shell find test -type f -name "*.cpp")
 
-OBJS		= $(patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.o,${SRCS})
-TEST_OBJ	= $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.o,${TESTS})
-TEST_OBJ	+= $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.o,$(filter-out ${SRCS_DIR}/main.cpp, ${SRCS}))
-TEST_OBJ	+= $(patsubst test%.cpp,${TEST_DIR}%.o,${TESTS_FILES})
+OBJS			= $(patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.o,${SRCS})
+TEST_OBJ		= $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.o,${TESTS})
+TEST_OBJ		+= $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.o,$(filter-out ${SRCS_DIR}/main.cpp, ${SRCS}))
+TEST_OBJ		+= $(patsubst test%.cpp,${TEST_DIR}%.o,${TESTS_FILES})
+DEBUG_OBJ		= $(patsubst ${SRCS_DIR}%.cpp,${DEBUG_DIR}%.o,${SRCS})
+SANITIZE_OBJ	= $(patsubst ${SRCS_DIR}%.cpp,${SANITIZE_DIR}%.o,${SRCS})
+
 DEPS		= $(patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.d,${SRCS})
 DEPS		+= $(patsubst %.o,%.d,${TEST_OBJ})
-
-CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, sanitize),${SANITIZE_FLAG},)
-CFLAGS			:= ${CFLAGS} $(if $(filter ${MAKECMDGOALS}, debug test),${DEBUG_FLAG},)
-CTESTFLAGS		+= ${TEST_FLAG}
-DEBUG_PROMPT		= ${MAGENTA}debug mode${RESET}
-SANITIZE_PROMPT		= ${YELLOW} sanitize mode${RESET}
-OK_PROMPT			= ${GREEN}done ${RESET}
-OK_PROMPT			+= $(if $(filter $(MAKECMDGOALS) none, debug), $(DEBUG_PROMPT), )
-OK_PROMPT			+= $(if $(filter $(MAKECMDGOALS) none, sanitize), $(SANITIZE_PROMPT), )
+DEPS		+= $(patsubst %.o,%.d,${DEBUG_OBJ})
+DEPS		+= $(patsubst %.o,%.d,${SANITIZE_OBJ})
 
 #######################
 ##  USUAL FUNCTIONS  ##
@@ -94,81 +94,39 @@ RM		= rm -f
 RMDIR	= rm -df
 MKDIR	= mkdir
 
-all: ${NAME} # Default rule
+###################
+## GENERAL RULES ##
+###################
+
+release: ${NAME} # Default rule
 	@printf "${GREEN}Success${RESET}  :)\n"
 
--include ${DEPS}
-
-${NAME}: ${OBJS_DIR} ${OBJS} # Compile ${NAME} program
-	@printf "${DELETE}${YELLOW}...Building${RESET} %-33s" "${NAME}"
-	@${CC} ${CFLAGS} ${HEADERS} -o ${NAME} ${OBJS} ${LIBRARIES}
-	@printf "${OK_PROMPT}\n"
-
-${OBJS_DIR}:
-	@printf "${BLUE}...Creating${RESET} %-33s" "${OBJS_DIR} directory"
-	@${MKDIR} ${OBJS_DIR}
-	@printf "${GREEN}done${RESET}\n"
-
-${OBJS_DIR}/%.o: ${SRCS_DIR}/%.cpp
-	@printf "${DELETE}${BLUE}Compiling${RESET} %-35s" $<
-	@${CC} ${CFLAGS} ${HEADERS} -c $< -o $@
-	@printf "${OK_PROMPT}\n${GO_UP}"
-
-${TEST_DIR}:
-	@printf "${BLUE}...Creating${RESET} %-33s" "${TEST_DIR} directory"
-	@${MKDIR} -p ${TEST_DIR}
-	@printf "${GREEN}done${RESET}\n"
-
-${TEST_DIR}/%.o: ${SRCS_DIR}/%.cpp
-	@printf "${DELETE}${BLUE}Compiling${RESET} %-35s" $<
-	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
-	@printf "${OK_PROMPT}\n${GO_UP}"
-
-${TEST_DIR}/%.o: test/%.cpp
-	@printf "${DELETE}${BLUE}Compiling${RESET} %-35s" $<
-	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
-	@printf "${OK_PROMPT}\n${GO_UP}"
+all: ${NAME} ${NAME_TEST} ${NAME_DEBUG} ${NAME_SANITIZE}
+	@printf "${GREEN}Success${RESET}  :)\n"
 
 clean: # Clean object files
-	@${RM} ${TEST_OBJ} ${OBJS} ${DEPS}
-	@${RMDIR} ${TEST_DIR} ${OBJS_DIR}
-	@printf "${BLUE}%-44s${RESET} ${GREEN}%s${RESET}\n" "Cleaning" "done"
+	@${RM} ${OBJS} ${DEPS} ${TEST_OBJ} ${DEBUG_OBJ} ${SANITIZE_OBJ}
+	@${RMDIR} ${TEST_DIR} ${DEBUG_DIR} ${SANITIZE_DIR} ${OBJS_DIR}
+	@printf "${BLUE}%-44s${RESET}\n" "Cleaning"
 
 fclean: clean # Clean executable file
-	@${RM} ${NAME} ${NAME_TEST}
-	@printf "${BLUE}%-44s${RESET} ${GREEN}%s${RESET}\n" "File cleaning" "done"
+	@${RM} ${NAME} ${NAME_TEST} ${NAME_DEBUG} ${NAME_SANITIZE}
+	@printf "${BLUE}%-44s${RESET}\n" "File cleaning"
 
 re: fclean # Execute fclean & all rules
-	@${MAKE} all
+	@${MAKE}
 
-debug: fclean all
+test: ${NAME_TEST} # Compile tests.
+	@printf "${CYAN}Test build ${GREEN}success${RESET}  :)\n"
 
-sanitize: fclean al
+debug: ${NAME_DEBUG} # Compile tests.
+	@printf "${MAGENTA}Debug build ${GREEN}Success${RESET}  :)\n"
 
-./header:
-	mkdir header
-
-./googletest/build:
-	git submodule init
-	git submodule sync
-	git submodule update
-	cd googletest && mkdir build
-
-./googletest/build/lib/libgtest.a: ./googletest/build
-	cd googletest/build && cmake .. && make
-
-test: ./googletest/build/lib/libgtest.a # Compile tests.
-	@${MAKE} ${NAME_TEST}
-	@printf "${GREEN}Success${RESET}  :)\n"
-
-${NAME_TEST}: ${TEST_DIR} ${TEST_OBJ}
-	@printf "${DELETE}${YELLOW}...Building${RESET} %-33s" "${NAME_TEST}"
-	@${CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} ./googletest/build/lib/libgtest.a ./googletest/build/lib/libgmock.a
-	@printf "${GREEN}done${RESET}\n"
+sanitize: ${NAME_SANITIZE} # Compile tests.
+	@printf "${MAGENTA}Sanitize build ${GREEN}Success${RESET}  :)\n"
 
 clangd: # configure clangd for tests
 	bash ./script/clangd_generator.sh
-
 
 mac_clean:# supprime les fichiers dupliqués sur mac
 	@find . -type f -name "* [2-9]*" -print -delete
@@ -180,7 +138,90 @@ file: # Print list of source and object files
 	@printf "  ${MAGENTA}.cpp:		${GRAY}${TESTS_FILES}${RESET}\n"
 
 help:
-	@egrep -h '\s#\s' ${MAKEFILE_LIST} | sort | awk 'BEGIN {FS = ":.*?# "}; {printf "${MAGENTA}%-15s${GRAY} %s${RESET}\n", $$1, $$2}'
+	@egrep -h '\s#\s' ${MAKEFILE_LIST} | sort | awk 'BEGIN {FS = ":.*?# "}; {printf "${MAGENTA}%-15s${GRAY} %s${RESET}\
+		\n", $$1, $$2}'
+
+###################
+## TARGETS RULES ##
+###################
+
+${NAME}: ${OBJS_DIR} ${OBJS} # Compile ${NAME} program
+	@printf "${YELLOW}...Building${RESET} ${NAME}\n"
+	@${CC} ${CFLAGS} ${HEADERS} -o ${NAME} ${OBJS} ${LIBRARIES}
+
+${NAME_TEST}: ${TEST_OBJ}
+	@printf "${YELLOW}...Building${RESET} %s\n" "${NAME_TEST}"
+	@${CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} \
+		./googletest/build/lib/libgtest.a ./googletest/build/lib/libgmock.a
+
+${NAME_DEBUG}: ${DEBUG_OBJ}
+	@printf "${YELLOW}...Building${RESET} ${NAME_DEBUG}\n"
+	@${CC} ${CFLAGS} ${DEBUG_FLAG} ${HEADERS} -o ${NAME_DEBUG} ${DEBUG_OBJ} ${LIBRARIES}
+
+${NAME_SANITIZE}: ${SANITIZE_OBJ}
+	@printf "${YELLOW}...Building${RESET} ${NAME_SANITIZE}\n"
+	@${CC} ${CFLAGS} ${SANITIZE_FLAG} ${HEADERS} -o ${NAME_SANITIZE} ${SANITIZE_OBJ} ${LIBRARIES}
+
+#######################
+## COMPILATION RULES ##
+#######################
+
+${OBJS_DIR}/%.o: ${SRCS_DIR}/%.cpp
+	@printf "${BLUE}..Compiling${RESET} (${YELLOW}release${RESET})%s %s\n" "" $<
+	@${CC} ${CFLAGS} ${HEADERS} -c $< -o $@
+
+${TEST_DIR}/%.o: ${SRCS_DIR}/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_DIR}
+	@printf "${BLUE}..Compiling${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
+	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
+
+${TEST_DIR}/%.o: test/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_DIR}
+	@printf "${BLUE}..Compiling${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
+	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
+
+${DEBUG_DIR}/%.o: ${SRCS_DIR}/%.cpp | ${DEBUG_DIR}
+	@printf "${BLUE}..Compiling${RESET} (${MAGENTA}debug${RESET})%s %s\n" "" $<
+	@${CC} ${CFLAGS} ${DEBUG_FLAG} ${HEADERS} -c $< -o $@
+
+${SANITIZE_DIR}/%.o: ${SRCS_DIR}/%.cpp | ${SANITIZE_DIR}
+	@printf "${BLUE}..Compiling${RESET} (${MAGENTA}sanitize${RESET})%s %s\n" "" $<
+	@${CC} ${CFLAGS} ${SANITIZE_FLAG} ${HEADERS} -c $< -o $@
+
+./header:
+	mkdir header
+
+#####################
+## DIRECTORY RULES ##
+#####################
+
+${OBJS_DIR}:
+	@printf "${YELLOW}...Creating${RESET} ${OBJS_DIR}\n"
+	@${MKDIR} ${OBJS_DIR}
+
+${TEST_DIR}:
+	@printf "${YELLOW}...Creating${RESET} ${TEST_DIR}\n"
+	@${MKDIR} -p ${TEST_DIR}
+
+${DEBUG_DIR}:
+	@printf "${YELLOW}...Creating${RESET} ${DEBUG_DIR}\n"
+	@${MKDIR} -p ${DEBUG_DIR}
+
+${SANITIZE_DIR}:
+	@printf "${YELLOW}...Creating${RESET} ${SANITIZE_DIR} directory\n"
+	@${MKDIR} -p ${SANITIZE_DIR}
+
+###########
+## OTHER ##
+###########
+
+-include ${DEPS}
+
+./googletest/build:
+	git submodule init
+	git submodule sync
+	git submodule update
+	cd googletest && mkdir build
+
+./googletest/build/lib/libgtest.a: ./googletest/build
+	cd googletest/build && cmake .. && make
 
 .PHONY: all clean fclean re debug sanitize tags file help mac_clean test
-# .NOTPARALLEL	: clean fclean
