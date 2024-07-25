@@ -386,7 +386,7 @@ TEST(ClientRequestTestSuite, parse_port) {
             throw;
         }
     }, HttpError);
-    EXPECT_EQ(host, "coucou:eheh");
+    EXPECT_EQ(host, "coucou");
     host = "coucou:";
     EXPECT_THROW({
         try {
@@ -398,5 +398,5 @@ TEST(ClientRequestTestSuite, parse_port) {
             throw;
         }
     }, HttpError);
-    EXPECT_EQ(host, "coucou:");
+    EXPECT_EQ(host, "coucou");
 }
