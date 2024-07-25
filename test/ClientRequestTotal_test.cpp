@@ -87,19 +87,29 @@ std::vector<TotalRequest> TotalRequestData = {
             }
         }, BadRequest, 80, "hihi=ahah"
     },      {
-        "No_Headers", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n", "", none, false, "",
-        {                                                                                                                                },
-        BadRequest,     80, ""
+        "No_Headers", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n", "", none, false, "",{                                                                                  }, BadRequest,
+        80, ""
     },      {
-        "No_Headers2", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n\r\n", "", none, false, "",
-        {                                                                                                                                },
-        BadRequest,     80, ""
+        "No_Headers2", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n\r\n", "", none, false, "",{                                                                                  }, BadRequest,
+        80, ""
     },      {
         "Wrong_Method", "PET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
-        "", none, false, "",
-        {                                                                                                                                },
-        NotImplemented,
-        80, ""
+        "", none, false, "",{                                                                                  },
+        NotImplemented                                              ,     80, ""
+    },      {
+        "PostLength",
+        "POST /process.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n"
+        "Content-Length: 97\r\n\r\nCoucou je suis heureux et c'est le premier body que nous allons pouvoir trouver"
+        " dans ces tests...NOTBODY", "/process.html", POST, true,
+        "Coucou je suis heureux et c'est le premier body que nous allons pouvoir trouver"" dans ces tests...",{
+            {
+                "Host", "127.0.0.1"
+            },{
+                "Name", "fireTesting/1.0"
+            },{
+                "Content-Length", "97"
+            }
+        }, OK, 80, "hihi=ahah"
     },
 };
 
@@ -118,13 +128,16 @@ class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
 
             const std::string &raw = std::get<tdata>(GetParam());
 
-            if (write(_fd[1], raw.c_str(), raw.length()) < 0)
+            size_t i = 0;
+            if ((i = write(_fd[1], raw.c_str(), raw.length())) < 0)
                 GTEST_FATAL_FAILURE_("Write in pipe failure");
+            if (i != raw.length())
+                GTEST_FATAL_FAILURE_("Partial write in pipe");
             close(_fd[1]);
             _test       = new ReadState(_fd[0]);
             _fd_check   = _fd[0];
 
-            size_t i = 0;
+            i = 0;
 
             while ((_test->process() == waiting) && (i < 5000))
                 i++;
@@ -181,6 +194,8 @@ TEST_P(TotalRequestFixture, MethodTest) {
 }
 
 TEST_P(TotalRequestFixture, BodyTest) {
+    typedef std::map<std::string, std::string> map;
+
     const std::string &correct = std::get<tbody>(GetParam());
 
     if (!std::get<thavebody>(GetParam())) {
@@ -188,8 +203,29 @@ TEST_P(TotalRequestFixture, BodyTest) {
         EXPECT_EQ(_request->get_body(), (void *) 0);
         return;
     }
-    (void) correct;
-    // TODO: tester quand on aura vraiment un body.
+    ASSERT_TRUE(_request->have_body());
+
+    const map &headers = _request->get_header();
+
+    if (headers.find("Content-Length") != headers.end()) {
+        SUCCEED();
+    } else if (headers.find("Transfer-Encoding") != headers.end()) {
+        SUCCEED();
+    } else {
+        FAIL() << "All body headers are missing.";
+    }
+
+    auto    body    = _request->get_body();
+    size_t  i       = 0;
+
+    while (!body->is_done() && i++ < 5000)
+        body->get();
+    if (i >= 5000)
+        FAIL() << "Infinite loop in body getter, Body tests should fail too.";
+    info.log() << "i: " << i << std::endl;
+    auto body_content = body->get();
+
+    EXPECT_EQ(body_content, correct);
 }
 
 TEST_P(TotalRequestFixture, HeadersTest) {
@@ -199,9 +235,8 @@ TEST_P(TotalRequestFixture, HeadersTest) {
     const map   &test_headers   = _request->get_header();
 
     if (isRedirection(std::get<tstatus>(GetParam()))) {
-        ASSERT_NE(correct.find("Location"), correct.end()); // pas de location pour vérifier la redirection dans le
-
-        // test.
+        ASSERT_NE(correct.find("Location"),
+                correct.end()) << "pas de location pour vérifier la redirection dans le test.";
 
         map::const_iterator loc = test_headers.find("Location");
 
