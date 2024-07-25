@@ -25,6 +25,7 @@
 class ClientRequest {
     public:
         ClientRequest(int fd);
+        ClientRequest(int fd, HttpCode code, int port);
         ~ClientRequest();
 
         bool        parse_header(const std::string &in);

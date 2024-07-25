@@ -16,37 +16,27 @@
 #include <cstddef>
 #include <string>
 
-typedef enum e_state {
-    s_error = -1, ///< if there is an error
-    waiting,    ///< waiting for header to exist or to end
-    ready,      ///< done
-    ready_body, ///< done but body exists
-    // OPTI:/check if used
-    // update it is used but is it useful ??
-} t_state;
-
 class ReadState : public ProcessState {
     public:
         ReadState(int fd);
         ~ReadState();
 
-        bool            process();
+        t_state         process();
         t_state         process_buffer(char *buffer);
         ClientRequest   *get_client_request();
-        void            done_client_request();
-        void            save_mem();
+        void    done_client_request();
+        void    save_mem();
 
     private:
         size_t          find_method();
 
-        t_state         _state;         ///< State of the object
-        std::string     _buffer;        ///< Buffer for parsing on fd
+        std::string     _buffer;           ///< Buffer for parsing on fd
         /**< buffer is supposed clean at the end of a successful parsing on it. */
         ClientRequest   *_in_progress;  ///< ClientRequest that is built
 
 #ifdef TESTING
-        FRIEND_TEST(ReadStateSuite, FindMethod);
-        FRIEND_TEST(TotalRequestFixture, FdStateTest);
+        FRIEND_TEST(ReadStateSuite,         FindMethod);
+        FRIEND_TEST(TotalRequestFixture,    FdStateTest);
 #endif
 };
 

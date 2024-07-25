@@ -27,7 +27,7 @@
 
 ClientRequest::ClientRequest(int fd):
     _fd             (fd),
-    _method         (),
+    _method         (none),
     _target         (),
     _header         (),
     _body_exists    (),
@@ -35,6 +35,21 @@ ClientRequest::ClientRequest(int fd):
     _status         (OK),
     _absolute_form  (false),
     _port           (80) {}
+
+ClientRequest::ClientRequest(int fd, HttpCode code, int port):
+    _fd             (fd),
+    _method         (none),
+    _target         (),
+    _header         (),
+    _body_exists    (),
+    _body           (0),
+    _status         (code),
+    _absolute_form  (false),
+    _port           (port) {
+    if (!isError(_status))
+        _status = BadRequest;
+    }
+
 
 ClientRequest::~ClientRequest() {
     if (_body)

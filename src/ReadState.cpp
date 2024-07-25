@@ -10,6 +10,7 @@
 
 #include "ReadState.hpp"
 #include "ClientRequest.hpp"
+#include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "ProcessState.hpp"
 #include "StringUtils.hpp"
@@ -23,7 +24,6 @@
 
 ReadState::ReadState(int fd):
     ProcessState(fd),
-    _state      (waiting),
     _buffer     (),
     _in_progress(0) {}
 
@@ -47,9 +47,9 @@ size_t ReadState::find_method() {
 /**
   Function that read from fd and processes the buffer.
   */
-bool ReadState::process() {
-    if (_state == ready || _state == ready_body || _state == s_error)
-        return true;
+t_state ReadState::process() {
+    if (_state == ready || _state == s_error)
+        return _state;
 
     char buffer[BUFFER_SIZE + 1] = {
         0
@@ -60,11 +60,15 @@ bool ReadState::process() {
 
         if ((a = read(_fd, buffer, BUFFER_SIZE)) < 0)
             error.log() << "Reading into socket " << _fd << " resulted in error: " << strerror(errno) << std::endl;
-        else if (a == 0)
-            warn.log() << "Reading nothing into socket " << _fd << std::endl;
+        else if (a == 0) {
+            warn.log() << "Reading nothing into socket " << _fd << ", closing connection with " << BadRequest << std::endl;
+            if (_in_progress)
+                delete _in_progress;
+            _in_progress    = new ClientRequest(_fd, BadRequest, 80); // TODO: trouver si le port est necessaire et
+            return _state   = ready;                                    // mettre le bon le cas echeant.
+        }
     }
-    process_buffer(buffer);
-    return _state == ready || _state == ready_body || _state == s_error;
+    return process_buffer(buffer);
 }
 
 /**
@@ -83,30 +87,26 @@ t_state ReadState::process_buffer(char *buffer) {
             _in_progress = 0;
         }
 
-        size_t begin = find_method();
-
-        if (begin == _buffer.npos) {
-            _buffer = "";
-            return _state;
-        }
-
-        // verifier la longueur du buffer
-        size_t end = _buffer.find("\r\n\r\n", 0);
+        // TODO: verifier la longueur du buffer ?
+        size_t  end = _buffer.find("\r\n\r\n", 0);
+        size_t  eol = _buffer.find("\r\n");
 
         if (end == _buffer.npos)
             return _state;
-        if (begin != 0)
-            _buffer = _buffer.substr(begin, _buffer.length() - begin);
-        // if (end - begin > MAX_HEADER) // TODO:est-ce que le max header existe ??
-        // _buffer = "" et il faut repondre par une erreur
+        if (eol >= end) {
+            _buffer = _buffer.substr(end + 4, _buffer.length() - (end + 4));
+            return _state;
+        }
+        // if (end > MAX_HEADER) // TODO:est-ce que le max header existe ??
+        //                          _buffer = "" et il faut repondre par une erreur
         _in_progress = new ClientRequest(_fd);
         if (!_in_progress->parse_header(_buffer))
-            return _state = s_error; // TODO:close connection after error response is sent.
-        _buffer = _buffer.substr(0, end);
-        if (_in_progress->init_body(_buffer))
-            _state = ready_body;
-        else
-            _state = ready;
+            return _state = ready; // TODO:close connection after error response is sent.
+
+        //_buffer = _buffer.substr(0, end);  // wtf is this what about the body ????
+        _buffer = _buffer.substr(end + 4, _buffer.length() - (end + 4));
+        _in_progress->init_body(_buffer);
+        _state  = ready;
     }
     return _state;
 }

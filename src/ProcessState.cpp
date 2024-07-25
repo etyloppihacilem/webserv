@@ -11,6 +11,12 @@
 #include "ProcessState.hpp"
 
 ProcessState::ProcessState(int fd):
-    _fd(fd) {}
+    _fd     (fd),
+    _state  (waiting) ///< State of the object
+{}
 
 ProcessState::~ProcessState() {}
+
+t_state ProcessState::get_state() const {
+    return _state;
+}

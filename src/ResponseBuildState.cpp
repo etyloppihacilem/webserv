@@ -51,7 +51,7 @@ ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request, Server &s
 
 ResponseBuildState::~ResponseBuildState() {}
 
-bool ResponseBuildState::process() {
+t_state ResponseBuildState::process() {
     if (!_recovery) {
         if (!_strategy)
             init_strategy();
@@ -61,7 +61,7 @@ bool ResponseBuildState::process() {
         init_strategy(_code);   // recovery
         _recovery = false;      // because it is init so just normal operation now
     }
-    return _strategy->build_response();
+    return _strategy->build_response() ? (_state = ready) : (_state = waiting);
 }
 
 ClientRequest *ResponseBuildState::get_request() {

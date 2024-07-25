@@ -27,7 +27,7 @@ class ResponseBuildState : public ProcessState {
         ResponseBuildState(int fd, HttpCode code); // equivalent of calling recovery on ErrorBuildingStrategy
         ~ResponseBuildState();
 
-        bool process();
+        t_state process();
         ClientRequest *get_request();
         ResponseBuildingStrategy *get_response_strategy();
 
