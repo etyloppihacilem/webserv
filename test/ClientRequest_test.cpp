@@ -346,7 +346,6 @@ TEST(ClientRequestTestSuite, parse_parameters) {
     EXPECT_EQ(test._target, "/coucou");
     EXPECT_EQ(test._query_string, param);
     // with nothing empty
-    test._parameters.clear();
     test._target = "/coucou?";
     test.parse_parameters();
     EXPECT_EQ(test._target, "/coucou");

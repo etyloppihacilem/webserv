@@ -34,8 +34,9 @@ class ClientRequest {
         HttpMethod  get_method();
         Body        *get_body();
 
-        std::map<std::string, std::string>  &get_header();
-        std::map<std::string, std::string>  &get_parameters();
+        std::map<std::string, std::string> &get_header();
+
+        // std::map<std::string, std::string>  &get_parameters();
 
         bool        have_body() const;
         HttpCode    get_status() const;
@@ -55,8 +56,8 @@ class ClientRequest {
         int         _fd;
         HttpMethod  _method;                                ///< Method used for request
         std::string _target;                                ///< Target of request
-        std::map<std::string, std::string>  _header;        ///< Map containing headers
-        std::map<std::string, std::string>  _parameters;    ///< Parameters from request
+        std::map<std::string, std::string> _header;         ///< Map containing headers
+        // std::map<std::string, std::string>  _parameters;    ///< Parameters from request
         bool        _body_exists;                           ///< True if there's a body in this request.
         /**< Determined by the presence of Content-Length or Transfer-Encoding headers in request.*/
         Body        *_body;                                 ///< Pointer on body object if present

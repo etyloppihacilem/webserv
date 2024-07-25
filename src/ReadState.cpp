@@ -10,10 +10,15 @@
 
 #include "ReadState.hpp"
 #include "ClientRequest.hpp"
+#include "Logger.hpp"
 #include "ProcessState.hpp"
 #include "StringUtils.hpp"
 #include "todo.hpp"
+#include <cerrno>
 #include <cstddef>
+#include <cstring>
+#include <ostream>
+#include <ostream>
 #include <unistd.h>
 
 ReadState::ReadState(int fd):
@@ -51,7 +56,12 @@ bool ReadState::process() {
     };
 
     if (_state == waiting) {
-        read(_fd, buffer, BUFFER_SIZE);
+        int a;
+
+        if ((a = read(_fd, buffer, BUFFER_SIZE)) < 0)
+            error.log() << "Reading into socket " << _fd << " resulted in error: " << strerror(errno) << std::endl;
+        else if (a == 0)
+            warn.log() << "Reading nothing into socket " << _fd << std::endl;
     }
     process_buffer(buffer);
     return _state == ready || _state == ready_body;
@@ -91,7 +101,7 @@ t_state ReadState::process_buffer(char *buffer) {
         // _buffer = "" et il faut repondre par une erreur
         _in_progress = new ClientRequest(_fd);
         if (!_in_progress->parse_header(_buffer))
-            return _state = error; // TODO:close connection after error response is sent.
+            return _state = s_error; // TODO:close connection after error response is sent.
         _buffer = _buffer.substr(0, end);
         if (_in_progress->init_body(_buffer))
             _state = ready_body;
@@ -106,7 +116,7 @@ t_state ReadState::process_buffer(char *buffer) {
 
   Message should not be deleted anywhere else.
   */
-void ReadState::done_message() {
+void ReadState::done_client_request() {
     if (_in_progress)
         delete _in_progress;
     _in_progress    = 0;
@@ -116,7 +126,7 @@ void ReadState::done_message() {
 /**
   Returns pointer on generated (or generating message)
   */
-ClientRequest *ReadState::get_message() {
+ClientRequest *ReadState::get_client_request() {
     return _in_progress;
 }
 

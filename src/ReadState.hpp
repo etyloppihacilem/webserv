@@ -17,7 +17,7 @@
 #include <string>
 
 typedef enum e_state {
-    error = -1, ///< if there is an error
+    s_error = -1, ///< if there is an error
     waiting,    ///< waiting for header to exist or to end
     ready,      ///< done
     ready_body, ///< done but body exists
@@ -32,8 +32,8 @@ class ReadState : public ProcessState {
 
         bool            process();
         t_state         process_buffer(char *buffer);
-        ClientRequest   *get_message();
-        void            done_message();
+        ClientRequest   *get_client_request();
+        void            done_client_request();
         void            save_mem();
 
     private:

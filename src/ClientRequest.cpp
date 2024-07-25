@@ -343,9 +343,9 @@ std::map<std::string, std::string> &ClientRequest::get_header() {
     return _header;
 }
 
-std::map<std::string, std::string> &ClientRequest::get_parameters() {
+/* std::map<std::string, std::string> &ClientRequest::get_parameters() {
     return _parameters;
-}
+} */
 
 bool ClientRequest::have_body() const {
     return _body_exists;
