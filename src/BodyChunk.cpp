@@ -44,13 +44,13 @@ size_t BodyChunk::read_body() {
     size_t  size_read;
 
     if (_bytes_remaining && _bytes_remaining >= _buffer.length())
-        size_read = _bytes_remaining - _buffer.length();
+        size_read = (_bytes_remaining - _buffer.length()) + 2;
     else if (_buffer == "") // dark optimisation not to go past end of buffer
         size_read = _trailing ? 2 : (_eoc ? 5 : 3);
     else if (*_buffer.rbegin() != '\r')
-        size_read = 1;
-    else
         size_read = 2;
+    else
+        size_read = 1;
     size_read   = read(_fd, buf, size_read > BUFFER_SIZE ? BUFFER_SIZE : size_read);
     _buffer     += std::string(buf);
     return size_read;
@@ -64,27 +64,37 @@ std::string &BodyChunk::get() {
     if (_done)
         return _body;
 
-    size_t i = 0;
+    read_body();
+    while (_trailing && !_done) {
+        size_t sp;
 
-    while ((!_bytes_remaining && i <= BUFFER_SIZE) || (_trailing && !_done)) {
-        if (_buffer.find("\r\n") == _buffer.npos)
-            read_body();
+        if (_trailing) {
+            sp = _buffer.find("\r\n", 0);
+            if (sp == _buffer.npos)
+                _trailing = true;
+            else {
+                _buffer     = _buffer.substr(sp + 2, _buffer.length() - (sp + 2)); // skipping trailer section
+                _trailing   = false;
+                _done       = true;
+            }
+        }
+        return _body;
+    }
+    if (!_bytes_remaining && _buffer.find("\r\n") != _buffer.npos) {
         init_chunk();
-        i += !_trailing;
         if (_done)
             return _body;
     }
-    if (i > BUFFER_SIZE)
-        error.log() << "Reading body error" << std::endl;
-    if (_bytes_remaining) {
-        read_body();
+    if (_bytes_remaining && _buffer.length() > 0) {
+        // read_body();
 
         size_t to_save = (_bytes_remaining > _buffer.length() ? _buffer.length() : _bytes_remaining);
 
         _body   += _buffer.substr(0, to_save);
         _buffer = _buffer.substr(to_save, _buffer.length() - to_save);
-        _bytes_remaining -= to_save;
-        _total  += to_save;
+        if ((_bytes_remaining -= to_save) == 0)
+            _eoc = true;
+        _total += to_save;
     }
     return _body;
 }
@@ -134,66 +144,61 @@ void BodyChunk::clean() {
   Calling init_chunk() if a chunk is currently being read (aka if _bytes_remaining != 0) will not do anything and
   triggers a warning.
   */
-bool BodyChunk::init_chunk() { // discard until a size line is found
+void BodyChunk::init_chunk() { // discard until a size line is found
     size_t sp;
-    std::string::iterator   it = _buffer.begin();
-    std::string::iterator   i;
+    // std::string::iterator   it = _buffer.begin();
+    std::string::iterator i;
 
-    if (_trailing) {
-        sp = _buffer.find("\r\n", 0);
-        if (sp == _buffer.npos)
-            _trailing = true;
-        else {
-            _buffer     = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));          // skipping trailer section
-            _trailing   = false;
-            _done       = true;
-        }
-    }
     if (_done)
-        return false;
+        return ;
     if (_bytes_remaining > 0) {
         warn.log() << "Trying to initiate a chunk while another is still being read." << std::endl;
-        return false;
+        return ;
     }
-    while (it != _buffer.end()) {
-        for (i = it; i != _buffer.end() && is_hex(*i); i++)
-            ; // nothing
-        if (i == _buffer.end())
-            return false;
-        if (i - it > 0) {
-            sp = _buffer.find("\r\n", 0);
-            if (sp == _buffer.npos)
-                return false;
-            {
-                std::stringstream tmp;
+    // while (it != _buffer.end()) {
+    // for (i = it; i != _buffer.end() && is_hex(*i); i++)
+    //     ; // nothing
+    // if (i == _buffer.end())
+    // return false;
+    // if (1 || i - it > 0) {
+    if (_eoc) {
+        if (_buffer.length() < 2)
+            return ;
+        _buffer = _buffer.substr(2, _buffer.length() - 2);
+        _eoc = false;
+    }
+    sp = _buffer.find("\r\n", 0);
+    if (sp == _buffer.npos)
+        return ;
+    {
+        std::stringstream tmp;
 
-                tmp << std::hex << _buffer.substr(0, std::distance(_buffer.begin(), i));
-                if (!tmp >> _bytes_remaining)
-                    throw HttpError(BadRequest); // invalid chunk
-            }
-            _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));
-            if (!_bytes_remaining) { // if last byte
-                _done   = true;
-                sp      = _buffer.find("\r\n", 0);
-                if (sp == _buffer.npos) {
-                    _trailing   = true;
-                    _done       = false;
-                } else
-                    _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2)); // skipping trailer section
-                return false;
-            }
-            return true;
-        } else {
-            sp = _buffer.find("\r\n", 0);
-            if (sp == _buffer.npos) {
-                _buffer = "";
-                return false;
-            }
-            _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));
-        }
-        it = _buffer.begin();
+        tmp << std::hex << _buffer.substr(0, std::distance(_buffer.begin(), i));
+        if (!(tmp >> _bytes_remaining))
+            throw HttpError(BadRequest);         // invalid chunk
     }
-    return false;
+    _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));
+    if (!_bytes_remaining) {         // if last byte
+        _done   = true;
+        sp      = _buffer.find("\r\n", 0);
+        if (sp == _buffer.npos) {
+            _trailing   = true;
+            _done       = false;
+        } else
+            _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));         // skipping trailer section
+        return ;
+    }
+    // } else {
+    //     sp = _buffer.find("\r\n", 0);
+    //     if (sp == _buffer.npos) {
+    //         _buffer = "";
+    //         return false;
+    //     }
+    //     _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));
+    // }
+    // it = _buffer.begin();
+    // }
+    // return false;
 }
 
 /// Returns true if c is a hex character

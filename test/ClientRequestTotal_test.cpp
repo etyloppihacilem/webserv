@@ -110,7 +110,36 @@ std::vector<TotalRequest> TotalRequestData = {
                 "Content-Length", "97"
             }
         }, OK, 80, "hihi=ahah"
+    },{
+        "PostChunk",
+        "POST /process.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n"
+        "Transfer-Encoding: chunk\r\n\r\na\r\nCoucou je \r\n32\r\nsuis heureux et c'est le premier body que nous all\r\n13\r\nons pouvoir trouver"
+        "\r\n12\r\n dans ces tests...\r\n0\r\n\r\nNOTBODY", "/process.html", POST, true,
+        "Coucou je suis heureux et c'est le premier body que nous allons pouvoir trouver"" dans ces tests...",{
+            {
+                "Host", "127.0.0.1"
+            },{
+                "Name", "fireTesting/1.0"
+            },{
+                "Transfer-Encoding", "chunk"
+            }
+        }, OK, 80, "hihi=ahah"
+    },{
+        "PostChunkTrailing",
+        "POST /process.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n"
+        "Transfer-Encoding: chunk\r\n\r\na\r\nCoucou je \r\n32\r\nsuis heureux et c'est le premier body que nous all\r\n13\r\nons pouvoir trouver"
+        "\r\n12\r\n dans ces tests...\r\n0\r\nTrailingSecretData\r\nNOTBODY", "/process.html", POST, true,
+        "Coucou je suis heureux et c'est le premier body que nous allons pouvoir trouver"" dans ces tests...",{
+            {
+                "Host", "127.0.0.1"
+            },{
+                "Name", "fireTesting/1.0"
+            },{
+                "Transfer-Encoding", "chunk"
+            }
+        }, OK, 80, "hihi=ahah"
     },
+
 };
 
 // TODO: analyser 411 No Length
@@ -139,9 +168,9 @@ class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
 
             i = 0;
 
-            while ((_test->process() == waiting) && (i < 5000))
+            while ((_test->process() == waiting) && (i < 100))
                 i++;
-            if (i >= 5000)
+            if (i >= 100)
                 GTEST_FATAL_FAILURE_("Infinite loop detected.");
             if (_test->get_state() == s_error)
                 GTEST_SKIP() << "Really Bad request successfully ignored";
@@ -218,9 +247,9 @@ TEST_P(TotalRequestFixture, BodyTest) {
     auto    body    = _request->get_body();
     size_t  i       = 0;
 
-    while (!body->is_done() && i++ < 5000)
+    while (!body->is_done() && i++ < 100)
         body->get();
-    if (i >= 5000)
+    if (i >= 100)
         FAIL() << "Infinite loop in body getter, Body tests should fail too.";
     info.log() << "i: " << i << std::endl;
     auto body_content = body->get();

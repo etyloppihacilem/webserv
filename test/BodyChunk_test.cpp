@@ -59,16 +59,16 @@ TEST(BodyChunkTestSuite, init_chunk) {
 
     info.log() << "Warning are normal for this test." << std::endl;
     EXPECT_EQ(test._bytes_remaining, (size_t) 0);
-    test._bytes_remaining = 2;
-    EXPECT_FALSE(test.init_chunk());
-    test._bytes_remaining = 0;
-    EXPECT_TRUE(test.init_chunk());
+    test._bytes_remaining   = 2;
+    test.   init_chunk();
+    test._bytes_remaining   = 0;
+    test.   init_chunk();
     EXPECT_EQ(  test._bytes_remaining, (size_t) 0xca32);
     EXPECT_EQ(  test._buffer, "coucou");
-    EXPECT_FALSE(test.init_chunk());
-    test._bytes_remaining   = 0;
-    buffer                  = "CA32\r\nCOUCOU";
-    EXPECT_TRUE(test.init_chunk());
+    test.   init_chunk();
+    test._bytes_remaining = 0;
+    buffer = "CA32\r\nCOUCOU";
+    test.   init_chunk();
     EXPECT_EQ(  test._bytes_remaining, (size_t) 0xca32);
     EXPECT_EQ(  test._buffer, "COUCOU");
 }
@@ -82,14 +82,14 @@ TEST(BodyChunkTestSuite, init_chunk_end) {
 
     info.log() << "Warning are normal for this test." << std::endl;
     test._bytes_remaining = 0;
-    EXPECT_TRUE(test.init_chunk());
+    test.init_chunk();
     EXPECT_EQ(test._bytes_remaining, (size_t) 0x16);
-    EXPECT_FALSE(   test.init_chunk());
+    test.   init_chunk();
     test._bytes_remaining = 0;
 
     buffer = "0\r\n""trailer section\r\n""\r\n";
 
-    EXPECT_FALSE(   test.init_chunk());
+    test.   init_chunk();
     EXPECT_EQ(test._bytes_remaining, (size_t) 0x0);
     EXPECT_TRUE(test.is_done());
 }
@@ -98,7 +98,7 @@ TEST(BodyChunkTestSuite, init_chunk_bad) {
     std::string buffer = "zxswABC\r\n" "2a\r\n";
     BodyChunk   test(0, buffer);
 
-    EXPECT_TRUE(test.init_chunk());
+    test.init_chunk();
     EXPECT_EQ(test._bytes_remaining, (size_t) 0x2a);
 }
 
@@ -106,7 +106,7 @@ TEST(BodyChunkTestSuite, init_chunk_none) {
     std::string buffer = "zxsw\r\n";
     BodyChunk   test(0, buffer);
 
-    EXPECT_FALSE(test.init_chunk());
+    test.init_chunk();
     EXPECT_EQ(  test._bytes_remaining, (size_t) 0);
     EXPECT_EQ(  test._buffer, "");
 }
@@ -158,9 +158,9 @@ TEST(BodyChunkTestSuite, get) {
     }
     if (!i)
         GTEST_FATAL_FAILURE_("Infinite loop detected.");
-    EXPECT_EQ(  tmp1,   ret);
-    EXPECT_EQ(  &test._body, &test.get());
-    EXPECT_EQ(  tmp1,   test._body);
+    EXPECT_EQ(  tmp1,           ret);
+    EXPECT_EQ(  &test._body,    &test.get());
+    EXPECT_EQ(  tmp1,           test._body);
     EXPECT_TRUE(test.is_done());
 }
 
@@ -186,8 +186,8 @@ TEST(BodyChunkTestSuite, pop) {
     while (!test.is_done() && --i) {
         ret     = test.pop();
         check   = tmp1.find(ret);
-        EXPECT_EQ(  check, (size_t) 0);
-        EXPECT_EQ(  ret, tmp1.substr(0, ret.length()));
+        EXPECT_EQ(  check,  (size_t) 0);
+        EXPECT_EQ(  ret,    tmp1.substr(0, ret.length()));
         tmp1 = tmp1.substr(ret.length(), tmp1.length() - ret.length());
     }
     if (!i)
