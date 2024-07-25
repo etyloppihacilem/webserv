@@ -53,6 +53,7 @@ class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
     public:
         TotalRequestFixture():
             _test   (0),
+            _request(0),
             _fd     {0, 0} {}
 
         void SetUp() override {
@@ -64,12 +65,15 @@ class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
             if (write(_fd[1], raw.c_str(), raw.length()) < 0)
                 GTEST_FATAL_FAILURE_("Write in pipe failure");
             close(_fd[1]);
-            _test = new ReadState(_fd[0]);
+            _test       = new ReadState(_fd[0]);
+            _fd_check   = _fd[0];
         };
 
         void TearDown() override {
             if (_test)
                 delete _test;
+            // if (_request)
+            //     delete _request;
             if (_fd[0] != 0)
                 close(_fd[0]);
         };
@@ -89,6 +93,7 @@ class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
     protected:
         ReadState       *_test;
         ClientRequest   *_request;
+        int _fd_check;
 
     private:
         int         _fd[2];
@@ -135,6 +140,8 @@ TEST_P(TotalRequestFixture, MethodTest) {
 }
 
 TEST_P(TotalRequestFixture, BodyTest) {
+    test_process();
+
     const std::string &correct = std::get<tbody>(GetParam());
 
     if (!std::get<thavebody>(GetParam())) {
@@ -147,6 +154,7 @@ TEST_P(TotalRequestFixture, BodyTest) {
 }
 
 TEST_P(TotalRequestFixture, HeadersTest) {
+    test_process();
     typedef std::map<std::string, std::string> map;
 
     const map   &correct        = std::get<theaders>(GetParam());
@@ -180,4 +188,52 @@ TEST_P(TotalRequestFixture, HeadersTest) {
         if (correct_item != test_headers.end())
             EXPECT_EQ(correct_item->second, test_item->second);
     } // double verification is to display clearly which one is missing.
+}
+
+TEST_P(TotalRequestFixture, HaveBodyTest) {
+    test_process();
+
+    const bool correct = std::get<thavebody>(GetParam());
+
+    EXPECT_EQ(correct, _request->have_body());
+}
+
+TEST_P(TotalRequestFixture, StatusTest) {
+    test_process();
+
+    const HttpCode correct = std::get<tstatus>(GetParam());
+
+    EXPECT_EQ(correct, _request->get_status());
+}
+
+TEST_P(TotalRequestFixture, FdRequestTest) {
+    test_process();
+
+    const int correct = _fd_check;
+
+    EXPECT_EQ(correct, _request->get_fd());
+}
+
+TEST_P(TotalRequestFixture, FdStateTest) {
+    test_process();
+
+    const int correct = _fd_check;
+
+    EXPECT_EQ(correct, _test->_fd);
+}
+
+TEST_P(TotalRequestFixture, PortTest) {
+    test_process();
+
+    const int correct = std::get<tport>(GetParam());
+
+    EXPECT_EQ(correct, _request->get_port());
+}
+
+TEST_P(TotalRequestFixture, QueryStringTest) {
+    test_process();
+
+    const std::string &correct = std::get<tqs>(GetParam());
+
+    EXPECT_EQ(correct, _request->get_query_string());
 }

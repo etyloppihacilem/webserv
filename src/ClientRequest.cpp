@@ -32,7 +32,7 @@ ClientRequest::ClientRequest(int fd):
     _header         (),
     _body_exists    (),
     _body           (0),
-    _status         (unset),
+    _status         (OK),
     _absolute_form  (false),
     _port           (80) {}
 
@@ -245,6 +245,7 @@ void ClientRequest::decode_target() {
         _target.replace(percent, 3, 1, c);
     }
 }
+
 /**
   This function will init _parameters depending on _target value. It will update and clean _target too.
 
@@ -254,6 +255,7 @@ void ClientRequest::decode_target() {
   ```
   If there is no value, the value of parameter will be an empty string.
   */
+
 /*
    All of this is not used because no one needs a parsed query string.
 void ClientRequest::parse_parameters() {
@@ -290,11 +292,10 @@ std::string ClientRequest::get_query_string() const {
     }
     return ret;
 } */
-
 void ClientRequest::parse_parameters() {
-    size_t  mark;
+    size_t mark;
 
-    mark   = _target.find('?');
+    mark = _target.find('?');
     if (mark == _target.npos)
         return;
     _query_string = _target.substr(mark + 1, _target.length() - (mark + 1));
@@ -346,7 +347,6 @@ std::map<std::string, std::string> &ClientRequest::get_header() {
 /* std::map<std::string, std::string> &ClientRequest::get_parameters() {
     return _parameters;
 } */
-
 bool ClientRequest::have_body() const {
     return _body_exists;
 }
