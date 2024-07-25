@@ -63,7 +63,6 @@ std::string &BodyChunk::get() {
     }
     if (_done)
         return _body;
-
     read_body();
     while (_trailing && !_done) {
         size_t sp;
@@ -101,27 +100,38 @@ std::string &BodyChunk::get() {
 
 std::string BodyChunk::pop() {
     if (_done)
-        return _body;
+        return "";
 
     std::string ret = "";
-    size_t      i   = 0;
 
     _uniform = false;
-    while ((!_bytes_remaining && i <= BUFFER_SIZE) || (_trailing && !_done)) {
-        read_body();
-        init_chunk();
-        i += !_trailing;
-        if (_done)
-            return _body;
+    read_body();
+    while (_trailing && !_done) {
+        size_t sp;
+
+        if (_trailing) {
+            sp = _buffer.find("\r\n", 0);
+            if (sp == _buffer.npos)
+                _trailing = true;
+            else {
+                _buffer     = _buffer.substr(sp + 2, _buffer.length() - (sp + 2)); // skipping trailer section
+                _trailing   = false;
+                _done       = true;
+            }
+        }
+        return "";
     }
-    if (i > BUFFER_SIZE)
-        error.log() << "Reading body error" << std::endl;
-    if (_bytes_remaining)
-        read_body();
-    if (_bytes_remaining) {
+    if (!_bytes_remaining && _buffer.find("\r\n") != _buffer.npos) {
+        init_chunk();
+        if (_done)
+            return "";
+    }
+    if (_bytes_remaining && _buffer.length() > 0) {
+        // read_body();
+
         size_t to_save = (_bytes_remaining > _buffer.length() ? _buffer.length() : _bytes_remaining);
 
-        ret     = _buffer.substr(0, to_save);
+        ret   = _buffer.substr(0, to_save);
         _buffer = _buffer.substr(to_save, _buffer.length() - to_save);
         if ((_bytes_remaining -= to_save) == 0)
             _eoc = true;
@@ -150,10 +160,10 @@ void BodyChunk::init_chunk() { // discard until a size line is found
     std::string::iterator i;
 
     if (_done)
-        return ;
+        return;
     if (_bytes_remaining > 0) {
         warn.log() << "Trying to initiate a chunk while another is still being read." << std::endl;
-        return ;
+        return;
     }
     // while (it != _buffer.end()) {
     // for (i = it; i != _buffer.end() && is_hex(*i); i++)
@@ -163,13 +173,13 @@ void BodyChunk::init_chunk() { // discard until a size line is found
     // if (1 || i - it > 0) {
     if (_eoc) {
         if (_buffer.length() < 2)
-            return ;
+            return;
         _buffer = _buffer.substr(2, _buffer.length() - 2);
-        _eoc = false;
+        _eoc    = false;
     }
     sp = _buffer.find("\r\n", 0);
     if (sp == _buffer.npos)
-        return ;
+        return;
     {
         std::stringstream tmp;
 
@@ -186,7 +196,7 @@ void BodyChunk::init_chunk() { // discard until a size line is found
             _done       = false;
         } else
             _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));         // skipping trailer section
-        return ;
+        return;
     }
     // } else {
     //     sp = _buffer.find("\r\n", 0);

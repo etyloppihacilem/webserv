@@ -14,6 +14,7 @@
 #include <ostream>
 #include <string>
 #include <unistd.h>
+#include "HttpError.hpp"
 #include "Logger.hpp"
 
 TEST(BodyChunkTestSuite, is_hex) {
@@ -98,17 +99,14 @@ TEST(BodyChunkTestSuite, init_chunk_bad) {
     std::string buffer = "zxswABC\r\n" "2a\r\n";
     BodyChunk   test(0, buffer);
 
-    test.init_chunk();
-    EXPECT_EQ(test._bytes_remaining, (size_t) 0x2a);
+    EXPECT_THROW(test.init_chunk(), HttpError);
 }
 
 TEST(BodyChunkTestSuite, init_chunk_none) {
     std::string buffer = "zxsw\r\n";
     BodyChunk   test(0, buffer);
 
-    test.init_chunk();
-    EXPECT_EQ(  test._bytes_remaining, (size_t) 0);
-    EXPECT_EQ(  test._buffer, "");
+    EXPECT_THROW(test.init_chunk(), HttpError);
 }
 
 // suspended because of change of approach for reading with chunks

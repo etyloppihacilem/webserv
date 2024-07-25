@@ -9,6 +9,7 @@
 ##################################################################################################################### */
 
 #include "ClientRequest.hpp"
+#include "HttpError.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
@@ -17,6 +18,7 @@
 #include "gtest/gtest.h"
 #include <cassert>
 #include <cstddef>
+#include <exception>
 #include <map>
 #include <ostream>
 #include <string>
@@ -35,6 +37,7 @@ typedef enum e_total_index {
     tstatus,
     tport,
     tqs,
+    tbadbody,
 } t_ti;
 
 typedef std::tuple<std::string,             ///< Name
@@ -46,7 +49,8 @@ typedef std::tuple<std::string,             ///< Name
         std::map<std::string, std::string>, ///< Headers
         HttpCode,                           ///< Status
         int,                                ///< port ???
-        std::string                         ///< QueryString (things after ?)
+        std::string,                        ///< QueryString (things after ?)
+        bool                                ///< Should Body Bad Request ?
         > TotalRequest;
 
 std::vector<TotalRequest> TotalRequestData = {
@@ -58,7 +62,7 @@ std::vector<TotalRequest> TotalRequestData = {
             },{
                 "Name", "fireTesting/1.0"
             }
-        }, OK, 80, "hihi=ahah"
+        }, OK, 80, "hihi=ahah", false
     },      {
         "Port_parsing",
         "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1:42\r\nName: fireTesting/1.0\r\n\r\n",
@@ -68,7 +72,7 @@ std::vector<TotalRequest> TotalRequestData = {
             },{
                 "Name", "fireTesting/1.0"
             }
-        }, OK, 42, "hihi=ahah"
+        }, OK, 42, "hihi=ahah", false
     },      {
         "Wrong_port_parsing",
         "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1:ab\r\nName: fireTesting/1.0\r\n\r\n",
@@ -78,24 +82,26 @@ std::vector<TotalRequest> TotalRequestData = {
             },{
                 "Name", "fireTesting/1.0"
             }
-        }, BadRequest, 0, "hihi=ahah"
+        }, BadRequest, 0, "hihi=ahah", false
     },      {
         "No_Host", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nName: fireTesting/1.0\r\n\r\n", "/helloworld.html", GET,
         false, "",{
             {
                 "Name", "fireTesting/1.0"
             }
-        }, BadRequest, 80, "hihi=ahah"
+        }, BadRequest, 80, "hihi=ahah", false
     },      {
         "No_Headers", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n", "", none, false, "",{                                                                                  }, BadRequest,
-        80, ""
+        80,
+        "", false
     },      {
         "No_Headers2", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n\r\n", "", none, false, "",{                                                                                  }, BadRequest,
-        80, ""
+        80,
+        "", false
     },      {
         "Wrong_Method", "PET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
         "", none, false, "",{                                                                                  },
-        NotImplemented                                              ,     80, ""
+        NotImplemented                                              ,     80,"", false
     },      {
         "PostLength",
         "POST /process.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n"
@@ -109,8 +115,8 @@ std::vector<TotalRequest> TotalRequestData = {
             },{
                 "Content-Length", "97"
             }
-        }, OK, 80, "hihi=ahah"
-    },{
+        }, OK, 80, "hihi=ahah", false
+    },      {
         "PostChunk",
         "POST /process.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n"
         "Transfer-Encoding: chunk\r\n\r\na\r\nCoucou je \r\n32\r\nsuis heureux et c'est le premier body que nous all\r\n13\r\nons pouvoir trouver"
@@ -123,8 +129,8 @@ std::vector<TotalRequest> TotalRequestData = {
             },{
                 "Transfer-Encoding", "chunk"
             }
-        }, OK, 80, "hihi=ahah"
-    },{
+        }, OK, 80, "hihi=ahah", false
+    },      {
         "PostChunkTrailing",
         "POST /process.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n"
         "Transfer-Encoding: chunk\r\n\r\na\r\nCoucou je \r\n32\r\nsuis heureux et c'est le premier body que nous all\r\n13\r\nons pouvoir trouver"
@@ -137,9 +143,8 @@ std::vector<TotalRequest> TotalRequestData = {
             },{
                 "Transfer-Encoding", "chunk"
             }
-        }, OK, 80, "hihi=ahah"
+        }, OK, 80, "hihi=ahah", false
     },
-
 };
 
 // TODO: analyser 411 No Length
@@ -158,6 +163,7 @@ class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
             const std::string &raw = std::get<tdata>(GetParam());
 
             size_t i = 0;
+
             if ((i = write(_fd[1], raw.c_str(), raw.length())) < 0)
                 GTEST_FATAL_FAILURE_("Write in pipe failure");
             if (i != raw.length())
@@ -166,8 +172,7 @@ class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
             _test       = new ReadState(_fd[0]);
             _fd_check   = _fd[0];
 
-            i = 0;
-
+            i           = 0;
             while ((_test->process() == waiting) && (i < 100))
                 i++;
             if (i >= 100)
@@ -247,11 +252,21 @@ TEST_P(TotalRequestFixture, BodyTest) {
     auto    body    = _request->get_body();
     size_t  i       = 0;
 
+    if (std::get<tbadbody>(GetParam())) {
+        EXPECT_THROW({
+            while (!body->is_done() && i++ < 100)
+                body->get();
+        }, HttpError);
+        if (i >= 100)
+            FAIL() << "Infinite loop in body getter, Body tests should fail too.";
+        return;
+    }
     while (!body->is_done() && i++ < 100)
         body->get();
     if (i >= 100)
         FAIL() << "Infinite loop in body getter, Body tests should fail too.";
     info.log() << "i: " << i << std::endl;
+
     auto body_content = body->get();
 
     EXPECT_EQ(body_content, correct);
