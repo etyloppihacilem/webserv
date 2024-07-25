@@ -198,6 +198,7 @@ bool ClientRequest::parse_header(const std::string &in) {
     }
     try {
         init_header(in);
+        parse_port();
     } catch (HttpError &e) {
         _status = e.get_code();
         return false;
@@ -320,9 +321,9 @@ void ClientRequest::parse_port() {
         std::stringstream st;
 
         st << host.substr(sep + 1, host.length() - (sep + 1));
+        host.resize(sep); // removing end of host
         if (!(st >> _port))
             throw HttpError(BadRequest);
-        host.resize(sep); // removing end of host
     }
 }
 

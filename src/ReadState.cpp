@@ -48,7 +48,7 @@ size_t ReadState::find_method() {
   Function that read from fd and processes the buffer.
   */
 bool ReadState::process() {
-    if (_state == ready || _state == ready_body)
+    if (_state == ready || _state == ready_body || _state == s_error)
         return true;
 
     char buffer[BUFFER_SIZE + 1] = {
@@ -64,7 +64,7 @@ bool ReadState::process() {
             warn.log() << "Reading nothing into socket " << _fd << std::endl;
     }
     process_buffer(buffer);
-    return _state == ready || _state == ready_body;
+    return _state == ready || _state == ready_body || _state == s_error;
 }
 
 /**

@@ -49,6 +49,61 @@ typedef std::tuple<std::string,             ///< Name
         std::string                         ///< QueryString (things after ?)
         > TotalRequest;
 
+std::vector<TotalRequest> TotalRequestData = {
+    {
+        "Basic_GET", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/helloworld.html", GET, false, "",{
+            {
+                "Host", "127.0.0.1"
+            },{
+                "Name", "fireTesting/1.0"
+            }
+        }, OK, 80, "hihi=ahah"
+    },      {
+        "Port_parsing",
+        "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1:42\r\nName: fireTesting/1.0\r\n\r\n",
+        "/helloworld.html", GET, false, "",{
+            {
+                "Host", "127.0.0.1"
+            },{
+                "Name", "fireTesting/1.0"
+            }
+        }, OK, 42, "hihi=ahah"
+    },      {
+        "Wrong_port_parsing",
+        "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1:ab\r\nName: fireTesting/1.0\r\n\r\n",
+        "/helloworld.html", GET, false, "",{
+            {
+                "Host", "127.0.0.1"
+            },{
+                "Name", "fireTesting/1.0"
+            }
+        }, BadRequest, 0, "hihi=ahah"
+    },      {
+        "No_Host", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nName: fireTesting/1.0\r\n\r\n", "/helloworld.html", GET,
+        false, "",{
+            {
+                "Name", "fireTesting/1.0"
+            }
+        }, BadRequest, 80, "hihi=ahah"
+    },      {
+        "No_Headers", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n", "/helloworld.html", GET, false, "",{                                                                                                 },
+        BadRequest, 80, "hihi=ahah"
+    },      {
+        "Wrong_Method", "PET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/helloworld.html", GET, false, "",{
+            {
+                "Host", "127.0.0.1"
+            },{
+                "Name", "fireTesting/1.0"
+            }
+        }, NotImplemented, 80, "hihi=ahah"
+    },
+};
+
+// TODO: La detection de requete n'est pas bonne, il ne faut pas se baser sur la presence d'une methode sinon on ne peut
+// pas répondre aux methodes qui ne sont pas supportées par le serveur... Changer toute la detection de requetes........
+
 class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
     public:
         TotalRequestFixture():
@@ -98,19 +153,6 @@ class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
     private:
         int         _fd[2];
         std::string _buffer;
-};
-
-std::vector<TotalRequest> TotalRequestData = {
-    {
-        "Basic_GET", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
-        "/helloworld.html", GET, false, "",{
-            {
-                "Host", "127.0.0.1"
-            },{
-                "Name", "fireTesting/1.0"
-            }
-        }, OK, 80, "hihi=ahah"
-    }
 };
 
 INSTANTIATE_TEST_SUITE_P(TotalRequestSuite,
