@@ -24,6 +24,7 @@ class ReadState : public ProcessState {
         t_state         process();
         t_state         process_buffer(char *buffer);
         ClientRequest   *get_client_request();
+        t_state         return_error();
         void    done_client_request();
         void    save_mem();
 

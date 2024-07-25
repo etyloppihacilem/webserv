@@ -158,8 +158,10 @@ std::vector<TotalRequest> TotalRequestData = {
             }
         }, OK, 80, "hihi=ahah", true
     },      {
-        "Redirect", "GET /helloworld.html?hihi=ahah&super=je suis heureux HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
-        "", GET, false, "",{
+        "Redirect",
+        "GET /helloworld.html?hihi=ahah&super=je suis heureux HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "", GET, false, "",
+        {
             {
                 "Location", "/helloworld.html?hihi=ahah&super=je%20suis%20heureux"
             }
@@ -285,7 +287,6 @@ TEST_P(TotalRequestFixture, BodyTest) {
         body->get();
     if (i >= 100)
         FAIL() << "Infinite loop in body getter, Body tests should fail too.";
-    info.log() << "i: " << i << std::endl;
 
     auto body_content = body->get();
 

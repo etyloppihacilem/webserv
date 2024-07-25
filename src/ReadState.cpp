@@ -61,11 +61,10 @@ t_state ReadState::process() {
         if ((a = read(_fd, buffer, BUFFER_SIZE)) < 0)
             error.log() << "Reading into socket " << _fd << " resulted in error: " << strerror(errno) << std::endl;
         else if (a == 0) {
-            warn.log() << "Reading nothing into socket " << _fd << ", closing connection with " << BadRequest << std::endl;
-            if (_in_progress)
-                delete _in_progress;
-            _in_progress    = new ClientRequest(_fd, BadRequest, 80); // TODO: trouver si le port est necessaire et
-            return _state   = ready;                                    // mettre le bon le cas echeant.
+            // this should not happen.
+            warn.log()  << "Reading nothing into socket " << _fd << ", closing connection with " << BadRequest
+                        << std::endl;
+            return return_error();
         }
     }
     return process_buffer(buffer);
@@ -95,7 +94,7 @@ t_state ReadState::process_buffer(char *buffer) {
             return _state;
         if (eol >= end) {
             _buffer = _buffer.substr(end + 4, _buffer.length() - (end + 4));
-            return _state;
+            return return_error();
         }
         // if (end > MAX_HEADER) // TODO:est-ce que le max header existe ??
         //                          _buffer = "" et il faut repondre par une erreur
@@ -109,6 +108,13 @@ t_state ReadState::process_buffer(char *buffer) {
         _state  = ready;
     }
     return _state;
+}
+
+t_state ReadState::return_error() {
+    if (_in_progress)
+        delete _in_progress;
+    _in_progress    = new ClientRequest(_fd, BadRequest, 80);   // TODO: trouver si le port est necessaire et
+    return _state   = ready;                                    // mettre le bon le cas echeant.
 }
 
 /**
