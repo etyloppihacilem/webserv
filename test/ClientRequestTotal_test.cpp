@@ -18,7 +18,6 @@
 #include "gtest/gtest.h"
 #include <cassert>
 #include <cstddef>
-#include <exception>
 #include <map>
 #include <ostream>
 #include <string>
@@ -144,6 +143,27 @@ std::vector<TotalRequest> TotalRequestData = {
                 "Transfer-Encoding", "chunk"
             }
         }, OK, 80, "hihi=ahah", false
+    },      {
+        "PostChunkBad",
+        "POST /process.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n"
+        "Transfer-Encoding: chunk\r\n\r\na\r\nCoucou je \r\n30\r\nsuis heureux et c'est le premier body que nous all\r\n13\r\nons pouvoir trouver"
+        "\r\n12\r\n dans ces tests...\r\n0\r\nTrailingSecretData\r\nNOTBODY", "/process.html", POST, true,
+        "Coucou je suis heureux et c'est le premier body que nous allons pouvoir trouver"" dans ces tests...",{
+            {
+                "Host", "127.0.0.1"
+            },{
+                "Name", "fireTesting/1.0"
+            },{
+                "Transfer-Encoding", "chunk"
+            }
+        }, OK, 80, "hihi=ahah", true
+    },      {
+        "Redirect", "GET /helloworld.html?hihi=ahah&super=je suis heureux HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "", GET, false, "",{
+            {
+                "Location", "/helloworld.html?hihi=ahah&super=je%20suis%20heureux"
+            }
+        }, MovedPermanently, 80, "", false
     },
 };
 
