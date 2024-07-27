@@ -252,6 +252,63 @@ std::vector<TotalRequest> TotalRequestData = {
         "",
         false
     },
+    {
+        "Absolute_Form",
+        "GET http://coucou.je/suis/heureux?super=hihi HTTP/1.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/suis/heureux",
+        GET,
+        false,
+        "",
+        {
+            {
+                "Host", "coucou.je"
+            },{
+                "Name", "fireTesting/1.0"
+            }
+        },
+        OK,
+        80,
+        "super=hihi",
+        false
+    },
+    {
+        "Absolute_Form_Port",
+        "GET http://coucou.je:543/suis/heureux?super=hihi HTTP/1.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/suis/heureux",
+        GET,
+        false,
+        "",
+        {
+            {
+                "Host", "coucou.je"
+            },{
+                "Name", "fireTesting/1.0"
+            }
+        },
+        OK,
+        543,
+        "super=hihi",
+        false
+    },
+    {
+        "Absolute_Form_Override",
+        "GET http://coucou.je/suis/heureux?super=hihi HTTP/1.1\r\nHost: super.fr\r\nName: fireTesting/1.0\r\n\r\n",
+        "/suis/heureux",
+        GET,
+        false,
+        "",
+        {
+            {
+                "Host", "coucou.je"
+            },{
+                "Name", "fireTesting/1.0"
+            }
+        },
+        OK,
+        80,
+        "super=hihi",
+        false
+    },
 
 };
 
