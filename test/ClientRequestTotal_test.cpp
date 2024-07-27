@@ -75,32 +75,30 @@ std::vector<TotalRequest> TotalRequestData = {
     },      {
         "Wrong_port_parsing",
         "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1:ab\r\nName: fireTesting/1.0\r\n\r\n",
-        "/helloworld.html", GET, false, "",{
-            {
-                "Host", "127.0.0.1"
-            },{
-                "Name", "fireTesting/1.0"
-            }
-        }, BadRequest, 0, "hihi=ahah", false
+        "", GET, false, "",{
+        }, BadRequest, 0, "", false
     },      {
         "No_Host", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nName: fireTesting/1.0\r\n\r\n", "/helloworld.html", GET,
         false, "",{
             {
-                "Name", "fireTesting/1.0"
             }
         }, BadRequest, 80, "hihi=ahah", false
     },      {
-        "No_Headers", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n", "", none, false, "",{                                                                                  }, BadRequest,
-        80,
-        "", false
+        "No_Headers", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n", "", none, false, "",
+        {                                                                                                                                      },
+        BadRequest,
+        80, "",          false
     },      {
-        "No_Headers2", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n\r\n", "", none, false, "",{                                                                                  }, BadRequest,
-        80,
-        "", false
+        "No_Headers2", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n\r\n", "", none, false, "",
+        {                                                                                                                                      },
+        BadRequest,
+        80, "",          false
     },      {
         "Wrong_Method", "PET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
-        "", none, false, "",{                                                                                  },
-        NotImplemented                                              ,     80,"", false
+        "", none, false, "",
+        {                                                                                                                                      },
+        NotImplemented                                              ,
+        80, "",          false
     },      {
         "PostLength",
         "POST /process.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n"
@@ -167,16 +165,92 @@ std::vector<TotalRequest> TotalRequestData = {
             }
         }, MovedPermanently, 80, "", false,
     },      {
-        "Post_no_body",
-        "POST /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
-        "/helloworld.html", POST, false, "",
-        {
+        "Post_no_body", "POST /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/helloworld.html", POST, false, "",{
             {
                 "Host", "127.0.0.1"
             },{
                 "Name", "fireTesting/1.0"
             }
         }, OK, 80, "hihi=ahah", false,
+    },      {
+        "Invalid_Header", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost\r\nName: fireTesting/1.0\r\n\r\n",
+        "", GET, false, "",
+        {                                                                                                                                      },
+        BadRequest                                                    ,
+        80, "", false,
+    },      {
+        "Invalid_RequestLine", "GET /helloworld.html?hihi=ahah HTTP/1.1\r\r\r\nName: fireTesting/1.0\r\n\r\n", "", GET,
+        false, "",
+        {                                                                                                                                      },
+        BadRequest,
+        80, "",          false,
+    },      {
+        "InvalidHTTPVersion",
+        "GET /helloworld.html?hihi=ahah HTTP/1.2\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n", "", GET, false,
+        "",
+        {                                                                                                                                      },
+        HTTPVersionNotSupported,
+        80, "", false,
+    },      {
+        "InvalidHTTPVersion2",
+        "GET /helloworld.html?hihi=ahah HTTP/3.0\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n", "", GET, false,
+        "",
+        {                                                                                                                                      },
+        HTTPVersionNotSupported,
+        80, "", false,
+    },
+    {
+        "Percent_encoding",
+        "GET /hello%20world.html?hihi=ahah&phrase=coucou%20je%20suis%20heureux%21 HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/hello world.html",
+        GET,
+        false,
+        "",
+        {
+            {
+                "Host", "127.0.0.1"
+            },{
+                "Name", "fireTesting/1.0"
+            }
+        },
+        OK,
+        80,
+        "hihi=ahah&phrase=coucou%20je%20suis%20heureux%21",
+        false
+    },
+    {
+        "Percent_encodinginjection",
+        "GET /hello%20world.html%3f%3F?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/hello world.html??",
+        GET,
+        false,
+        "",
+        {
+            {
+                "Host", "127.0.0.1"
+            },{
+                "Name", "fireTesting/1.0"
+            }
+        },
+        OK,
+        80,
+        "hihi=ahah",
+        false
+    },
+    {
+        "NoTarget",
+        "GET ?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "",
+        GET,
+        false,
+        "",
+        {
+        },
+        BadRequest,
+        0,
+        "",
+        false
     },
 
 };
@@ -250,12 +324,16 @@ INSTANTIATE_TEST_SUITE_P(TotalRequestSuite,
 TEST_P(TotalRequestFixture, TargetTest) {
     const std::string &correct = std::get<ttarget>(GetParam());
 
+    if (_request->get_status() != OK)
+        return;
     EXPECT_EQ(_request->get_target(), correct);
 }
 
 TEST_P(TotalRequestFixture, MethodTest) {
     HttpMethod correct = std::get<tmethod>(GetParam());
 
+    if (_request->get_status() != OK)
+        return;
     EXPECT_EQ(_request->get_method(), correct);
 }
 
@@ -264,6 +342,8 @@ TEST_P(TotalRequestFixture, BodyTest) {
 
     const std::string &correct = std::get<tbody>(GetParam());
 
+    if (_request->get_status() != OK)
+        return;
     if (!std::get<thavebody>(GetParam())) {
         info.log() << "If this message is displayed, warning is normal for this test." << std::endl;
         EXPECT_EQ(_request->get_body(), (void *) 0);
@@ -319,6 +399,8 @@ TEST_P(TotalRequestFixture, HeadersTest) {
         EXPECT_EQ(correct.find("Location")->second, loc->second);
         return;
     }
+    if (_request->get_status() != OK)
+        return;
 
     map::const_iterator test_item;
     map::const_iterator correct_item;
@@ -341,6 +423,8 @@ TEST_P(TotalRequestFixture, HeadersTest) {
 TEST_P(TotalRequestFixture, HaveBodyTest) {
     const bool correct = std::get<thavebody>(GetParam());
 
+    if (_request->get_status() != OK)
+        return;
     EXPECT_EQ(correct, _request->have_body());
 }
 
@@ -365,11 +449,15 @@ TEST_P(TotalRequestFixture, FdStateTest) {
 TEST_P(TotalRequestFixture, PortTest) {
     const int correct = std::get<tport>(GetParam());
 
+    if (_request->get_status() != OK)
+        return;
     EXPECT_EQ(correct, _request->get_port());
 }
 
 TEST_P(TotalRequestFixture, QueryStringTest) {
     const std::string &correct = std::get<tqs>(GetParam());
 
+    if (_request->get_status() != OK)
+        return;
     EXPECT_EQ(correct, _request->get_query_string());
 }

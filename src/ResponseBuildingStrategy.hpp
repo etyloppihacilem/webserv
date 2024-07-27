@@ -18,6 +18,11 @@
 
 /**
   This is the abstract class to create object in charge of handling ClientRequest and generating an appropriate Response.
+
+  All ResponseBuildingStrategy objects should run build_response() at least once (without read event, no read operation
+  will be performed on first build_response() call)
+
+  This allows a call to check _built value and go to next State immediatly in case no reading is needed.
   */
 class ResponseBuildingStrategy {
     public:

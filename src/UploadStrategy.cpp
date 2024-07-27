@@ -29,7 +29,7 @@ UploadStrategy::UploadStrategy(ClientRequest &request, const std::string &locati
     _target                 (request.get_target()),
     _location               (location),
     _replace                (replace) {
-    if (request.have_body()) 
+    if (request.have_body())
         _body = request.get_body();
 }
 
@@ -61,6 +61,10 @@ bool UploadStrategy::build_response() {
 }
 
 void UploadStrategy::init() {
+    if (_init) {
+        warn.log() << "Init is already done and does not need to be done again." << std::endl;
+        return;
+    }
     _file.open(_location.c_str(), std::fstream::in);
     _response.add_header("Location", _target);
     if (!_file.is_open() || _replace) // check difference of status code if file does not exists yet

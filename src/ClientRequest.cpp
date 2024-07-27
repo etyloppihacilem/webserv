@@ -88,15 +88,14 @@ void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
 
         sp_protocol = in.find_first_of(" \t", pos + 1);
         protocol    = in.find("HTTP", pos);
-        if (protocol == std::string::npos || sp_protocol == std::string::npos)
+        if (protocol == std::string::npos || sp_protocol == std::string::npos || protocol + 8 != in.find("\r\n", pos))
             throw HttpError(BadRequest);
-        if (in.substr(protocol, 7) != "HTTP/1." || (in[8] != '0' && in[8] == '1'))
+        if (in.substr(protocol, 7) != "HTTP/1." || (in[protocol + 7] != '0' && in[protocol + 7] != '1'))
             throw HttpError(HTTPVersionNotSupported);
         if ((protocol - 1) - (pos + 1) > MAX_URI)
             throw HttpError(URITooLong);
         if (sp_protocol != protocol - 1) {  // there are SP remaining in URI, that is wrong, going for
                                             // 301 MovedPermanently.
-            // WARN:IF NOT IN ORIGIN FORM, ADD HOST TO LOCATION !!! im definitly not sure
             std::string redirect = in.substr(pos + 1, (protocol - 1) - (pos + 1));
 
             replace_all(redirect,   " ",    "%20");
@@ -203,6 +202,7 @@ bool ClientRequest::parse_header(const std::string &in) {
         try {
             parse_target(in, sp);
             parse_parameters();
+            decode_target();
         } catch (HttpError &e) {
             _status = e.get_code();
             if (_status == MovedPermanently)
