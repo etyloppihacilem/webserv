@@ -13,7 +13,6 @@
 
 #include "ClientRequest.hpp"
 #include "ProcessState.hpp"
-#include <cstddef>
 #include <string>
 
 class ReadState : public ProcessState {
@@ -22,14 +21,14 @@ class ReadState : public ProcessState {
         ~ReadState();
 
         t_state         process();
-        t_state         process_buffer(char *buffer);
+        void            save_mem();
+
         ClientRequest   *get_client_request();
-        t_state         return_error();
-        void    done_client_request();
-        void    save_mem();
+        void            done_client_request();
 
     private:
-        size_t          find_method();
+        t_state         process_buffer(char *buffer);
+        t_state         return_error();
 
         std::string     _buffer;           ///< Buffer for parsing on fd
         /**< buffer is supposed clean at the end of a successful parsing on it. */

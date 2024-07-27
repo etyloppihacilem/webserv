@@ -32,18 +32,6 @@ ReadState::~ReadState() {
         delete _in_progress;
 }
 
-size_t ReadState::find_method() {
-    size_t  ret     = _buffer.find("GET", 0);
-    size_t  found   = _buffer.find("POST", 0);
-
-    if (found < ret)
-        ret = found;
-    found = _buffer.find("DELETE", 0);
-    if (found < ret)
-        return found;
-    return ret;
-}
-
 /**
   Function that read from fd and processes the buffer.
   */

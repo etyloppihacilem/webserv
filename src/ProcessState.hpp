@@ -23,8 +23,8 @@ class ProcessState {
         virtual ~ProcessState() = 0;
 
         // process returns true when done
-        virtual t_state process() = 0;
-
+        virtual t_state process()   = 0;
+        virtual void    save_mem()  = 0;
         t_state         get_state() const;
 
     protected:

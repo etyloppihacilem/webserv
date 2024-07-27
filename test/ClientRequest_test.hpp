@@ -35,15 +35,15 @@ typedef struct s_test_messages {
 
 static const t_test_target ClientRequestTargetSuiteValues[] {
     {
-        "normal", "/dev HTTP/1.1", "/dev", ""
+        "normal", "/dev HTTP/1.1\r\n", "/dev", ""
     }, {
-        "no_slash", "dev HTTP/1.1", "BadRequest", ""
+        "no_slash", "dev HTTP/1.1\r\n", "BadRequest", ""
     }, {
-        "empty", " HTTP/1.1", "BadRequest", ""
+        "empty", " HTTP/1.1\r\n", "BadRequest", ""
     }, {
         "empty_2", "", "BadRequest", ""
     }, {
-        "spaces", "/dev?using spaces is really\twrong HTTP/1.1", "MovedPermanently",
+        "spaces", "/dev?using spaces is really\twrong HTTP/1.1\r\n", "MovedPermanently",
         "/dev?using%20spaces%20is%20really%09wrong"
     }, {
         "URI_too_long",
@@ -125,22 +125,22 @@ static const t_test_target ClientRequestTargetSuiteValues[] {
         "ool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/c"
         "ool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/c"
         "ool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/c"
-        "ool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool HTTP/1.1", "URITooLong", ""
+        "ool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool HTTP/1.1\r\n", "URITooLong", ""
     }, {
-        "no_protocol", "/dev?using AHAH/1.0", "BadRequest", ""
+        "no_protocol", "/dev?using AHAH/1.0\r\n", "BadRequest", ""
     }, {
-        "no_more_spaces", "/dev?usingAHAH/1.0", "BadRequest", ""
+        "no_more_spaces", "/dev?usingAHAH/1.0\r\n", "BadRequest", ""
     }, {
-        "absolute_form", "http://host.com/dev?using HTTP/1.1", "/dev?using", "host.com"
+        "absolute_form", "http://host.com/dev?using HTTP/1.1\r\n", "/dev?using", "host.com"
     }, {
-        "absolute_broken", "http:///dev?using HTTP/1.1", "BadRequest", ""
+        "absolute_broken", "http:///dev?using HTTP/1.1\r\n", "BadRequest", ""
     }, {
-        "https_absolute_form", "https://host.com/dev?using HTTP/1.1", "BadRequest", ""
+        "https_absolute_form", "https://host.com/dev?using HTTP/1.1\r\n", "BadRequest", ""
     }, {
-        "spaces_absolute_form", "http://host.com/dev?wrong using HTTP/1.1", "MovedPermanently",
+        "spaces_absolute_form", "http://host.com/dev?wrong using HTTP/1.1\r\n", "MovedPermanently",
         "http://host.com/dev?wrong%20using"
     }, {
-        "root", "/ HTTP/1.1", "/", ""
+        "root", "/ HTTP/1.1\r\n", "/", ""
     },
 };
 
