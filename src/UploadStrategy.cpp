@@ -29,16 +29,21 @@ UploadStrategy::UploadStrategy(ClientRequest &request, const std::string &locati
     _target                 (request.get_target()),
     _location               (location),
     _replace                (replace) {
-    if (!request.have_body()) {
-        error.log() << "Upload strategy but request have no body. Sending " << InternalServerError << std::endl;
-        throw HttpError(InternalServerError);
-    }
-    _body = request.get_body();
+    if (request.have_body()) 
+        _body = request.get_body();
 }
 
-UploadStrategy::~UploadStrategy() {}
+UploadStrategy::~UploadStrategy() {
+    if (_file.is_open())
+        _file.close();
+}
 
 bool UploadStrategy::build_response() {
+    if (!_body && !_init) {
+        init(); // creating file if not already there and init of headers and stuff
+        _file.close();
+        return _built = true; // no body
+    }
     if (_built) {
         warn.log() << "UploadStrategy : trying to build response, but is already built." << std::endl;
         return _built;

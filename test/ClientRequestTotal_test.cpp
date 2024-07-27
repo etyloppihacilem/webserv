@@ -165,11 +165,21 @@ std::vector<TotalRequest> TotalRequestData = {
             {
                 "Location", "/helloworld.html?hihi=ahah&super=je%20suis%20heureux"
             }
-        }, MovedPermanently, 80, "", false
+        }, MovedPermanently, 80, "", false,
+    },      {
+        "Post_no_body",
+        "POST /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/helloworld.html", POST, false, "",
+        {
+            {
+                "Host", "127.0.0.1"
+            },{
+                "Name", "fireTesting/1.0"
+            }
+        }, OK, 80, "hihi=ahah", false,
     },
-};
 
-// TODO: analyser 411 No Length
+};
 
 class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
     public:
