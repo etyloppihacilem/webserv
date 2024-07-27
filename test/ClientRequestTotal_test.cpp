@@ -309,6 +309,39 @@ std::vector<TotalRequest> TotalRequestData = {
         "super=hihi",
         false
     },
+    {
+        "Multiple_headers",
+        "GET /coucou HTTP/1.1\r\ntest: hihi\r\nHost: super.fr\r\ntest: eheh\r\n\r\n",
+        "/coucou",
+        GET,
+        false,
+        "",
+        {
+            {
+                "Host", "super.fr"
+            },{
+                "test", "hihi, eheh"
+            }
+        },
+        OK,
+        80,
+        "",
+        false
+    },
+    {
+        "wrong_headers",
+        "GET /coucou HTTP/1.1\r\ntest: hihi\r\nHost: super.fr\r\ntest eheh\r\n\r\n",
+        "",
+        GET,
+        false,
+        "",
+        {
+        },
+        BadRequest,
+        80,
+        "",
+        false
+    },
 
 };
 
