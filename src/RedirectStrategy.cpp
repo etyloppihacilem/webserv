@@ -50,6 +50,5 @@ bool RedirectStrategy::fill_buffer(std::string &buffer, size_t size) {
 
 void RedirectStrategy::save_mem() {
     shrink_to_fit(  _location);
-    shrink_to_fit(  _buffer);
     _response.save_mem();
 }

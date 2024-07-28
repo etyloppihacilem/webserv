@@ -55,6 +55,5 @@ size_t ResponseBuildingStrategy::get_estimated_size() const {
   because of performances issues in normal operations.
   */
 void ResponseBuildingStrategy::save_mem() {
-    shrink_to_fit(_buffer);
     _response.save_mem();
 }

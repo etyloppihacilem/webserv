@@ -127,7 +127,7 @@ void ResponseBuildState::init_strategy(HttpCode code) {
     try {
         _strategy = new ErrorStrategy(code);
     } catch (std::exception &e) {
-        throw e; // OPTI: think about a default 500 to reply because here recovery did not work.
+        throw e; // do not try to send response after this, only close connection.
         // WARN: check not to loop in recovery there.
     }
 }

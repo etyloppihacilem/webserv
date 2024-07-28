@@ -41,7 +41,7 @@ bool CGIStrategy::build_response() {
     if (_request->have_body()) { // WARN: check for infinite loop risk. Test with both body types.
         body = _request->get_body();
         if (dynamic_cast<BodyChunk *>(body)) {  // if body is chunk
-            while (body->is_done())             // retrieving whole body.
+            while (body->is_done())             // retrieving whole body. TODO: body cannot be read without a epoll
                 body->get();
         }
         size = body->length();
@@ -103,6 +103,5 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) {
 }
 
 void CGIStrategy::save_mem() {
-    shrink_to_fit(_buffer);
     _response.save_mem();
 }

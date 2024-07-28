@@ -225,9 +225,12 @@ bool ClientRequest::parse_header(const std::string &in) {
 
   It returns true if a body is found, false if not and sets _body_exists accordingly.
   _body_exists should be checked before any action is performed on a supposed _body.
-  TODO:check if there is no better way to protect this (in getter for example).
   */
 bool ClientRequest::init_body(std::string &buffer) {
+    if (_body) {
+        warn.log() << "Trying to init_body() when a body is already there." << std::endl;
+        delete _body;
+    }
     if (_header.find("Transfer-Encoding") != _header.end()) {
         _body_exists    = true;
         _body           = new BodyChunk(_fd, buffer);

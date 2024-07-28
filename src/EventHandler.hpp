@@ -11,8 +11,6 @@
 #ifndef INCLUDE_SRC_EVENTHANDLER_HPP_
 #define INCLUDE_SRC_EVENTHANDLER_HPP_
 
-// TODO: securiser tous les read et les send (write)...
-
 /**
   Base class to handlers (ProcessHandler and AcceptHandler)
   */

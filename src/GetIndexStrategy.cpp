@@ -156,7 +156,6 @@ bool GetIndexStrategy::build_response() {
 }
 
 void GetIndexStrategy::save_mem() {
-    shrink_to_fit(  _buffer);
     shrink_to_fit(  _location);
     _response.save_mem();
 }

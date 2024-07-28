@@ -12,7 +12,6 @@
 ##  MAKE CONFIG  ##
 ###################
 
-.ONESHELL:
 .DELETE_ON_ERROR:
 SHELL			:= sh
 MAKEFLAGS		+= --no-builtin-rules
