@@ -12,7 +12,7 @@
 ##  MAKE CONFIG  ##
 ###################
 
-# .ONESHELL:
+.ONESHELL:
 .DELETE_ON_ERROR:
 SHELL			:= sh
 MAKEFLAGS		+= --no-builtin-rules
@@ -117,7 +117,7 @@ fclean: clean # Clean executable file
 	@${RM} ${NAME} ${NAME_TEST} ${NAME_DEBUG} ${NAME_SANITIZE}
 	@printf "${BLUE}%-44s${RESET}\n" "File cleaning"
 
-re: fclean # Execute fclean & all rules
+re: fclean # Execute fclean & release rules
 	@${MAKE}
 
 test: ${NAME_TEST} # Compile tests.
