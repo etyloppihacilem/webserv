@@ -17,7 +17,7 @@
 SHELL			:= sh
 MAKEFLAGS		+= --no-builtin-rules
 MAKEFLAGS		+= --no-print-directory
-MAKEFLAGS		+= -j
+MAKEFLAGS		+= -j$(nproc)
 # .RECIPEPREFIX	=
 # same as default RECIPEPREFIX prefix used here
 
