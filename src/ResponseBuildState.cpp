@@ -32,11 +32,13 @@
 #include <ostream>
 #include <pthread.h>
 #include <string>
+#include <sys/wait.h>
 
 /**
  This class is in charge of choosing the right strategy depending on the request.
  */
-ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request, Server &server):
+template <class ServerClass, class RouteClass>
+ResponseBuildState<ServerClass, RouteClass>::ResponseBuildState(int fd, ClientRequest *request, ServerClass &server):
     ProcessState(fd),
     _request    (request),
     _server     (server),
@@ -49,9 +51,11 @@ ResponseBuildState::ResponseBuildState(int fd, ClientRequest *request, Server &s
     }
 }           // TODO:check where to free this once it is allocated
 
-ResponseBuildState::~ResponseBuildState() {}
+template <class ServerClass, class RouteClass>
+ResponseBuildState<ServerClass, RouteClass>::~ResponseBuildState() {}
 
-t_state ResponseBuildState::process() {
+template <class ServerClass, class RouteClass>
+t_state ResponseBuildState<ServerClass, RouteClass>::process() {
     if (!_recovery) {
         if (!_strategy)
             init_strategy();
@@ -64,18 +68,21 @@ t_state ResponseBuildState::process() {
     return _strategy->build_response() ? (_state = ready) : (_state = waiting);
 }
 
-ClientRequest *ResponseBuildState::get_request() {
+template <class ServerClass, class RouteClass>
+ClientRequest *ResponseBuildState<ServerClass, RouteClass>::get_request() {
     return _request;
 }
 
-ResponseBuildingStrategy *ResponseBuildState::get_response_strategy() {
+template <class ServerClass, class RouteClass>
+ResponseBuildingStrategy *ResponseBuildState<ServerClass, RouteClass>::get_response_strategy() {
     return _strategy;
 }
 
 /**
   This function build the right strategy for a given ClientRequest.
   */
-void ResponseBuildState::init_strategy() {
+template <class ServerClass, class RouteClass>
+void ResponseBuildState<ServerClass, RouteClass>::init_strategy() {
     if (isError(_request->get_status())) {
         const std::map<HttpCode, std::string> error_pages   = _server.getErrorPages();
 
@@ -88,7 +95,7 @@ void ResponseBuildState::init_strategy() {
         return;
     }
 
-    Location location(*_request, _server);
+    Location<ServerClass, RouteClass> location(*_request, _server);
 
     if (location.is_redirect())
         _strategy = new RedirectStrategy(location.get_path(), location.get_status_code());
@@ -121,7 +128,8 @@ void ResponseBuildState::init_strategy() {
 /**
   Build error strategy for a given http code.
   */
-void ResponseBuildState::init_strategy(HttpCode code) {
+template <class ServerClass, class RouteClass>
+void ResponseBuildState<ServerClass, RouteClass>::init_strategy(HttpCode code) {
     if (!isError(code))
         warn.log() << "Generating error for non error code " << code << std::endl;
     try {

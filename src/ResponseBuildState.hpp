@@ -15,20 +15,22 @@
 #include "ClientRequest.hpp"
 #include "HttpStatusCodes.hpp"
 #include "ProcessState.hpp"
+#include "Route.hpp"
 #include "Server.hpp"
 
 /**
   This class is in charge of initiating the right strategy for the given ClientRequest and generating the response.
   It will be done when the response will be built.
   */
+template <class ServerClass = Server, class RouteClass = Route> // template is there for testing purposes
 class ResponseBuildState : public ProcessState {
     public:
-        ResponseBuildState(int fd, ClientRequest *request, Server &server);
+        ResponseBuildState(int fd, ClientRequest *request, ServerClass &server);
         ResponseBuildState(int fd, HttpCode code); // equivalent of calling recovery on ErrorBuildingStrategy
         ~ResponseBuildState();
 
-        t_state process();
-        ClientRequest *get_request();
+        t_state         process();
+        ClientRequest   *get_request();
         ResponseBuildingStrategy *get_response_strategy();
 
     private:
@@ -36,7 +38,7 @@ class ResponseBuildState : public ProcessState {
         void    init_strategy(HttpCode code);
 
         ClientRequest   *_request;
-        Server          _server;
+        ServerClass     _server;
         ResponseBuildingStrategy *_strategy;
         bool        _recovery;
         HttpCode    _code;

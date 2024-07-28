@@ -21,9 +21,10 @@
 #include "Server.hpp"
 #include <string>
 
+template <class ServerClass = Server, class RouteClass = Route> // template is there for testing purposes
 class Location {
     public:
-        Location(ClientRequest &request, Server &server);
+        Location(ClientRequest &request, ServerClass &server);
         ~Location();
 
         bool        is_get() const;
@@ -38,10 +39,10 @@ class Location {
         std::string get_path() const;
 
     private:
-        void        build_path(const std::string &target, const Route &route);
-        void        build_path(const std::string &target, const Route &route, const std::string &redirect);
-        void        setup_cgi(const Route &route);
-        bool        find_index(const Route &route, struct stat &buf);
+        void        build_path(const std::string &target, const RouteClass &route);
+        void        build_path(const std::string &target, const RouteClass &route, const std::string &redirect);
+        void        setup_cgi(const RouteClass &route);
+        bool        find_index(const RouteClass &route, struct stat &buf);
 
         bool        _is_get;
         bool        _is_post;

@@ -47,6 +47,7 @@ class ResponseBuildingStrategy {
         bool        _built;                     ///< If response is built yet
         bool        _done;                      ///< State of the current object
         size_t      _estimated_size;            ///< Estimated size of response body if needed
+// TODO: check for estimated size.
 };
 
 #endif  // INCLUDE_SRC_RESPONDEBUILDINGSTRATEGY_CPP_

@@ -25,9 +25,10 @@
 #include <sys/stat.h>
 #include <vector>
 
-Location::Location(ClientRequest &request, Server &server):
+template <class ServerClass, class RouteClass>
+Location<ServerClass, RouteClass>::Location(ClientRequest &request, ServerClass &server):
     _status_code(OK) {
-    Route       *route; // this is to get the reference out of try scope
+    RouteClass       *route; // this is to get the reference out of try scope
     std::string target = request.get_target();
     struct stat buf;
 
@@ -72,12 +73,14 @@ Location::Location(ClientRequest &request, Server &server):
     }
 } // 44 lines its a bit better
 
-Location::~Location() {}
+template <class ServerClass, class RouteClass>
+Location<ServerClass, RouteClass>::~Location() {}
 
 /**
   Function used to find index in a repository.
   */
-bool Location::find_index(const Route &route, struct stat &buf) {
+template <class ServerClass, class RouteClass>
+bool Location<ServerClass, RouteClass>::find_index(const RouteClass &route, struct stat &buf) {
     const std::vector<std::string> &indexs = route.getIndexPage();
     const std::string trailing = (*_path.rbegin() == '/' ? "" : "/");
 
@@ -108,7 +111,8 @@ bool Location::find_index(const Route &route, struct stat &buf) {
 /**
   Used to build path of resource
   */
-void Location::build_path(const std::string &target, const Route &route) {
+template <class ServerClass, class RouteClass>
+void Location<ServerClass, RouteClass>::build_path(const std::string &target, const RouteClass &route) {
     _path       = target;
     _path_info  = target;
     _route_path = route.getRootDir();
@@ -121,7 +125,8 @@ void Location::build_path(const std::string &target, const Route &route) {
   if redirect last chat is a '/', route's location is replaced by the redirection location.
   if not, redirection is considered to redirect on a file and the whole target is replaced by the new location.
   */
-void Location::build_path(const std::string &target, const Route &route, const std::string &redirect) {
+template <class ServerClass, class RouteClass>
+void Location<ServerClass, RouteClass>::build_path(const std::string &target, const RouteClass &route, const std::string &redirect) {
     if (*redirect.rbegin() != '/') {
         _path = redirect;
         return;
@@ -134,49 +139,60 @@ void Location::build_path(const std::string &target, const Route &route, const s
 /**
   Setup cgi location info for a given route.
   */
-void Location::setup_cgi(const Route &route) {
+template <class ServerClass, class RouteClass>
+void Location<ServerClass, RouteClass>::setup_cgi(const RouteClass &route) {
     if (!route.hasCgiPath() || !route.hasCgiExtension())
         return;  // nothing to configure because cgi is incomplete
     _is_cgi     = true;
     _cgi_path   = route.getCgiPath();
 }
 
-bool Location::is_get() const {
+template <class ServerClass, class RouteClass>
+bool Location<ServerClass, RouteClass>::is_get() const {
     return _is_get;
 }
 
-bool Location::is_post() const {
+template <class ServerClass, class RouteClass>
+bool Location<ServerClass, RouteClass>::is_post() const {
     return _is_post;
 }
 
-bool Location::is_delete() const {
+template <class ServerClass, class RouteClass>
+bool Location<ServerClass, RouteClass>::is_delete() const {
     return _is_delete;
 }
 
-// bool Location::is_put() const {
+//template <class ServerClass, class RouteClass>
+//bool Location<ServerClass, RouteClass>::is_put() const {
 //     return _is_put;
 // }
 
-bool Location::has_autoindex() const {
+template <class ServerClass, class RouteClass>
+bool Location<ServerClass, RouteClass>::has_autoindex() const {
     return _autoindex;
 }
 
-bool Location::is_file() const {
+template <class ServerClass, class RouteClass>
+bool Location<ServerClass, RouteClass>::is_file() const {
     return _is_file;
 }
 
-bool Location::is_cgi() const {
+template <class ServerClass, class RouteClass>
+bool Location<ServerClass, RouteClass>::is_cgi() const {
     return _is_cgi;
 }
 
-bool Location::is_redirect() const {
+template <class ServerClass, class RouteClass>
+bool Location<ServerClass, RouteClass>::is_redirect() const {
     return _is_redirect;
 }
 
-HttpCode Location::get_status_code() const {
+template <class ServerClass, class RouteClass>
+HttpCode Location<ServerClass, RouteClass>::get_status_code() const {
     return _status_code;
 }
 
-std::string Location::get_path() const {
+template <class ServerClass, class RouteClass>
+std::string Location<ServerClass, RouteClass>::get_path() const {
     return _path;
 }
