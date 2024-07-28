@@ -17,7 +17,7 @@
 SHELL			:= sh
 MAKEFLAGS		+= --no-builtin-rules
 MAKEFLAGS		+= --no-print-directory
-MAKEFLAGS		+= -j$(nproc || echo 4)
+MAKEFLAGS		+= -j$(shell nproc || echo 4)
 # .RECIPEPREFIX	=
 # same as default RECIPEPREFIX prefix used here
 
