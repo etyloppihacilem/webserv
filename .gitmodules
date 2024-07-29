@@ -4,3 +4,6 @@
 [submodule "www"]
 	path = www
 	url = git@github.com:etyloppihacilem/basic_server_pages.git
+[submodule "cgi-bin"]
+	path = cgi-bin
+	url = git@github.com:etyloppihacilem/webserv-cgi-bin.git
