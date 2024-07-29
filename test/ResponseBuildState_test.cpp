@@ -8,10 +8,10 @@
 
 ##################################################################################################################### */
 
+#include "ResponseBuildState_test.hpp"
 #include "FakeRoute.hpp"
 #include "FakeServer.hpp"
 #include "HttpStatusCodes.hpp"
-#include "ResponseBuildState_test.hpp"
 #include "gtest/gtest.h"
 #include <string>
 #include <vector>
@@ -26,16 +26,13 @@ TEST_P(ResponseBuildStateFixture, CorrectStrategyTest) {
 }
 
 std::vector<d_rbs> ResponseBuildData = {
-    {
-        "Test1", "Request", aucune, OK,{                                    }, false, ""
-    },
+    { "Test1", "Request", aucune, OK, {}, false, "" },
 };
 
-INSTANTIATE_TEST_SUITE_P(ResponseBuildStateSuite,
-        ResponseBuildStateFixture,
-        ::testing::ValuesIn(ResponseBuildData),
-        [](const testing::TestParamInfo<d_rbs> &info)
-{
-    std::string name = std::get<tname>(info.param);
-    return name;
-});
+INSTANTIATE_TEST_SUITE_P(
+    ResponseBuildStateSuite, ResponseBuildStateFixture, ::testing::ValuesIn(ResponseBuildData),
+    [](const testing::TestParamInfo<d_rbs> &info) {
+        std::string name = std::get<tname>(info.param);
+        return name;
+    }
+);
