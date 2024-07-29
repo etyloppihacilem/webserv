@@ -81,6 +81,10 @@ TEST_OBJ		+= $(patsubst test%.cpp,${TEST_DIR}%.o,${TESTS_FILES})
 DEBUG_OBJ		= $(patsubst ${SRCS_DIR}%.cpp,${DEBUG_DIR}%.o,${SRCS})
 SANITIZE_OBJ	= $(patsubst ${SRCS_DIR}%.cpp,${SANITIZE_DIR}%.o,${SRCS})
 
+ALL_FILES		= $(shell find src -type f -regex ".*\.[ch]pp")
+ALL_FILES		+= $(shell find test -type f -regex ".*\.[ch]pp")
+ALL_FILES		+= $(shell find header -type f -regex ".*\.[ch]pp")
+
 DEPS		= $(patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.d,${SRCS})
 DEPS		+= $(patsubst %.o,%.d,${TEST_OBJ})
 DEPS		+= $(patsubst %.o,%.d,${DEBUG_OBJ})
@@ -127,6 +131,12 @@ sanitize: ${NAME_SANITIZE} # Compile tests.
 
 run_tests: test
 	./${NAME_TEST}
+
+format:
+	@which clang-format; if [ $$? -ne 0 ]; then echo \
+		'clang-format is not in path. If installed with mason, please run\n\n    echo "export PATH=\$$PATH:$$(echo' \
+		'~/.local/share/nvim/mason/bin)" >> ~/.zshrc\n\nand re-open your terminal or run\n\n    export' \
+		'PATH=$$PATH:$$(echo ~/.local/share/nvim/mason/bin)'; else clang-format -i --verbose ${ALL_FILES}; fi
 
 clangd: # configure clangd for tests
 	bash ./script/clangd_generator.sh
@@ -225,6 +235,6 @@ ${SANITIZE_DIR}:
 	cd googletest && mkdir build
 
 ./googletest/build/lib/libgtest.a: ./googletest/build
-	cd googletest/build && cmake .. && make
+	cd googletest/build && cmake .. && ${MAKE}
 
-.PHONY: all clean fclean re debug sanitize tags file help mac_clean test
+.PHONY: all clean fclean re debug sanitize tags file help mac_clean test release format
