@@ -48,8 +48,7 @@ ClientRequest::ClientRequest(int fd, HttpCode code, int port):
     _port           (port) {
     if (!isError(_status))
         _status = BadRequest;
-    }
-
+}
 
 ClientRequest::~ClientRequest() {
     if (_body)
@@ -343,16 +342,22 @@ void ClientRequest::parse_port() {
 }
 
 std::string ClientRequest::get_target() const {
+    if (_status != OK)
+        warn.log() << "Getting target of a request with non " << OK << " status code: " << _status << std::endl;
     return _target;
 }
 
 HttpMethod ClientRequest::get_method() {
+    if (_status != OK)
+        warn.log() << "Getting method of a request with non " << OK << " status code: " << _status << std::endl;
     return _method;
 }
 
 Body *ClientRequest::get_body() {
     if (!_body_exists)
         warn.log() << "Getting a request body that does not exists." << std::endl;
+    if (_status != OK)
+        warn.log() << "Getting body of a request with non " << OK << " status code: " << _status << std::endl;
     return _body;
 }
 
@@ -376,6 +381,8 @@ int ClientRequest::get_fd() const {
 }
 
 int ClientRequest::get_port() const {
+    if (_status != OK)
+        warn.log() << "Getting port of a request with non " << OK << " status code: " << _status << std::endl;
     return _port;
 }
 

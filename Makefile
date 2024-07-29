@@ -159,20 +159,20 @@ help:
 ###################
 
 ${NAME}: ${OBJS_DIR} ${OBJS} # Compile ${NAME} program
-	@printf "${YELLOW}...Building${RESET} ${NAME}\n"
+	@printf "${YELLOW}Building...${RESET} ${NAME}\n"
 	@${CC} ${CFLAGS} ${HEADERS} -o ${NAME} ${OBJS} ${LIBRARIES}
 
 ${NAME_TEST}: ${TEST_OBJ}
-	@printf "${YELLOW}...Building${RESET} %s\n" "${NAME_TEST}"
+	@printf "${YELLOW}Building...${RESET} %s\n" "${NAME_TEST}"
 	@${CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} \
 		./googletest/build/lib/libgtest.a ./googletest/build/lib/libgmock.a
 
 ${NAME_DEBUG}: ${DEBUG_OBJ}
-	@printf "${YELLOW}...Building${RESET} ${NAME_DEBUG}\n"
+	@printf "${YELLOW}Building...${RESET} ${NAME_DEBUG}\n"
 	@${CC} ${CFLAGS} ${DEBUG_FLAG} ${HEADERS} -o ${NAME_DEBUG} ${DEBUG_OBJ} ${LIBRARIES}
 
 ${NAME_SANITIZE}: ${SANITIZE_OBJ}
-	@printf "${YELLOW}...Building${RESET} ${NAME_SANITIZE}\n"
+	@printf "${YELLOW}Building...${RESET} ${NAME_SANITIZE}\n"
 	@${CC} ${CFLAGS} ${SANITIZE_FLAG} ${HEADERS} -o ${NAME_SANITIZE} ${SANITIZE_OBJ} ${LIBRARIES}
 
 #######################
@@ -180,24 +180,29 @@ ${NAME_SANITIZE}: ${SANITIZE_OBJ}
 #######################
 
 ${OBJS_DIR}/%.o: ${SRCS_DIR}/%.cpp
-	@printf "${BLUE}..Compiling${RESET} (${YELLOW}release${RESET})%s %s\n" "" $<
+	@printf "${BLUE}Compiling..${RESET} (${YELLOW}release${RESET})%s %s\n" "" $<
 	@${CC} ${CFLAGS} ${HEADERS} -c $< -o $@
+	@printf "${GREEN}.......Done${RESET} (${YELLOW}release${RESET})%s %s\n" "" $<
 
 ${TEST_DIR}/%.o: ${SRCS_DIR}/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_DIR}
-	@printf "${BLUE}..Compiling${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
+	@printf "${BLUE}Compiling..${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
 	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
+	@printf "${GREEN}.......Done${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
 
 ${TEST_DIR}/%.o: test/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_DIR}
-	@printf "${BLUE}..Compiling${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
+	@printf "${BLUE}Compiling..${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
 	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
+	@printf "${GREEN}.......Done${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
 
 ${DEBUG_DIR}/%.o: ${SRCS_DIR}/%.cpp | ${DEBUG_DIR}
-	@printf "${BLUE}..Compiling${RESET} (${MAGENTA}debug${RESET})%s %s\n" "" $<
+	@printf "${BLUE}Compiling..${RESET} (${MAGENTA}debug${RESET})%s %s\n" "" $<
 	@${CC} ${CFLAGS} ${DEBUG_FLAG} ${HEADERS} -c $< -o $@
+	@printf "${GREEN}.......Done${RESET} (${MAGENTA}debug${RESET})%s %s\n" "" $<
 
 ${SANITIZE_DIR}/%.o: ${SRCS_DIR}/%.cpp | ${SANITIZE_DIR}
-	@printf "${BLUE}..Compiling${RESET} (${MAGENTA}sanitize${RESET})%s %s\n" "" $<
+	@printf "${BLUE}Compiling..${RESET} (${MAGENTA}sanitize${RESET})%s %s\n" "" $<
 	@${CC} ${CFLAGS} ${SANITIZE_FLAG} ${HEADERS} -c $< -o $@
+	@printf "${GREEN}.......Done${RESET} (${MAGENTA}sanitize${RESET})%s %s\n" "" $<
 
 ./header:
 	mkdir header
