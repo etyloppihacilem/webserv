@@ -95,7 +95,7 @@ void ResponseBuildState<ServerClass, RouteClass>::init_strategy() {
         return;
     }
 
-    Location<ServerClass, RouteClass> location(*_request, _server);
+    Location<ServerClass,RouteClass> location(*_request, _server);
 
     if (location.is_redirect())
         _strategy = new RedirectStrategy(location.get_path(), location.get_status_code());

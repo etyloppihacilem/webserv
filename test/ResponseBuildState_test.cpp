@@ -22,18 +22,12 @@
 FakeServer ResponseBuildStateFixture::_server;
 
 TEST_P(ResponseBuildStateFixture, CorrectStrategyTest) {
-    return ;
+    return;
 }
 
 std::vector<d_rbs> ResponseBuildData = {
     {
-        "Test1",
-        "Request",
-        aucune,
-        OK,
-        {},
-        false,
-        ""
+        "Test1", "Request", aucune, OK,{                                    }, false, ""
     },
 };
 
@@ -41,7 +35,7 @@ INSTANTIATE_TEST_SUITE_P(ResponseBuildStateSuite,
         ResponseBuildStateFixture,
         ::testing::ValuesIn(ResponseBuildData),
         [](const testing::TestParamInfo<d_rbs> &info)
-        {
+{
     std::string name = std::get<tname>(info.param);
     return name;
-        });
+});

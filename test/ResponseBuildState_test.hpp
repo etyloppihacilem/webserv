@@ -38,12 +38,12 @@ typedef enum e_strategies {
     GetFileStrategy,
     GetIndexStrategy,
     RedirectStrategy,
-    UploadStrategy
+    UploadStrategy,
 } strategies;
 
 typedef std::tuple<std::string,             ///< Name for tests
         std::string,                        ///< Data to build request (it should be tested in TotalRequest)
-        strategies,         ///< Type of ResponseBuildingStrategy
+        strategies,                         ///< Type of ResponseBuildingStrategy
         HttpCode,                           ///< Status of ResponseBuildingStrategy
         std::map<std::string, std::string>, ///< Headers
         bool,                               ///< Have body
@@ -266,6 +266,5 @@ class ResponseBuildStateFixture: public ::testing::TestWithParam<d_rbs> {
     protected:
         static FakeServer _server;
 };
-
 
 #endif  // INCLUDE_TEST_RESPONSEBUILDSTATE_TEST_HPP_

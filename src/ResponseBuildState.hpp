@@ -23,25 +23,25 @@
   It will be done when the response will be built.
   */
 template <class ServerClass = Server, class RouteClass = Route> // template is there for testing purposes
-class ResponseBuildState : public ProcessState {
+class ResponseBuildState: public ProcessState {
     public:
         ResponseBuildState(int fd, ClientRequest *request, ServerClass &server);
         ResponseBuildState(int fd, HttpCode code); // equivalent of calling recovery on ErrorBuildingStrategy
         ~ResponseBuildState();
 
-        t_state         process();
-        ClientRequest   *get_request();
+        t_state                   process();
+        ClientRequest            *get_request();
         ResponseBuildingStrategy *get_response_strategy();
 
     private:
-        void    init_strategy();
-        void    init_strategy(HttpCode code);
+        void init_strategy();
+        void init_strategy(HttpCode code);
 
-        ClientRequest   *_request;
-        ServerClass     _server;
+        ClientRequest            *_request;
+        ServerClass               _server;
         ResponseBuildingStrategy *_strategy;
-        bool        _recovery;
-        HttpCode    _code;
+        bool                      _recovery;
+        HttpCode                  _code;
 };
 
-#endif  // INCLUDE_SRC_RESPONSEBUILDSTATE_HPP_
+#endif // INCLUDE_SRC_RESPONSEBUILDSTATE_HPP_

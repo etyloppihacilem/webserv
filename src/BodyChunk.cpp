@@ -13,6 +13,7 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include "todo.hpp"
 #include <cctype>
 #include <cstddef>
 #include <ios>
@@ -21,13 +22,12 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
-#include "todo.hpp"
 
-BodyChunk::BodyChunk(int fd, std::string &buffer):
-    Body            (fd, buffer),
-    _bytes_remaining(0),
-    _eoc            (false),
-    _trailing       (false) {}
+BodyChunk::BodyChunk( int fd, std::string &buffer ):
+    Body( fd, buffer ),
+    _bytes_remaining( 0 ),
+    _eoc( false ),
+    _trailing( false ) {}
 
 BodyChunk::~BodyChunk() {}
 
@@ -35,63 +35,61 @@ BodyChunk::~BodyChunk() {}
   This function will read from the socket and happen the result to _buffer to be processed.
   */
 size_t BodyChunk::read_body() {
-    if (_done)
+    if ( _done )
         return 0;
 
-    char    buf[BUFFER_SIZE + 1] = {
-        0
-    }; // whole buffer is set to 0
-    size_t  size_read;
+    char   buf[BUFFER_SIZE + 1] = { 0 }; // whole buffer is set to 0
+    size_t size_read;
 
-    if (_bytes_remaining && _bytes_remaining >= _buffer.length())
-        size_read = (_bytes_remaining - _buffer.length()) + 2;
-    else if (_buffer == "") // dark optimisation not to go past end of buffer
-        size_read = _trailing ? 2 : (_eoc ? 5 : 3);
-    else if (*_buffer.rbegin() != '\r')
+    if ( _bytes_remaining && _bytes_remaining >= _buffer.length() )
+        size_read = ( _bytes_remaining - _buffer.length() ) + 2;
+    else if ( _buffer == "" ) // dark optimisation not to go past end of buffer
+        size_read = _trailing ? 2 : ( _eoc ? 5 : 3 );
+    else if ( *_buffer.rbegin() != '\r' )
         size_read = 2;
     else
         size_read = 1;
-    size_read   = read(_fd, buf, size_read > BUFFER_SIZE ? BUFFER_SIZE : size_read);
-    _buffer     += std::string(buf);
+    size_read = read( _fd, buf, size_read > BUFFER_SIZE ? BUFFER_SIZE : size_read );
+    _buffer  += std::string( buf );
     return size_read;
 }
 
 std::string &BodyChunk::get() {
-    if (!_uniform) {
+    if ( !_uniform ) {
         error.log() << "Trying to .get() body after calling .pop()." << std::endl;
         return _body;
     }
-    if (_done)
+    if ( _done )
         return _body;
     read_body();
-    while (_trailing && !_done) {
+    while ( _trailing && !_done ) {
         size_t sp;
 
-        if (_trailing) {
-            sp = _buffer.find("\r\n", 0);
-            if (sp == _buffer.npos)
+        if ( _trailing ) {
+            sp = _buffer.find( "\r\n", 0 );
+            if ( sp == _buffer.npos )
                 _trailing = true;
             else {
-                _buffer     = _buffer.substr(sp + 2, _buffer.length() - (sp + 2)); // skipping trailer section
-                _trailing   = false;
-                _done       = true;
+                _buffer   = _buffer.substr( sp + 2, _buffer.length() - ( sp + 2 ) ); // skipping trailer section
+                _trailing = false;
+                _done     = true;
             }
         }
         return _body;
     }
-    if (!_bytes_remaining && _buffer.find("\r\n") != _buffer.npos) {
+    if ( !_bytes_remaining && _buffer.find( "\r\n" ) != _buffer.npos ) {
         init_chunk();
-        if (_done)
+        if ( _done )
             return _body;
     }
-    if (_bytes_remaining && _buffer.length() > 0) {
+    if ( _bytes_remaining && _buffer.length() > 0 ) {
         // read_body();
 
-        size_t to_save = (_bytes_remaining > _buffer.length() ? _buffer.length() : _bytes_remaining);
+        size_t to_save = ( _bytes_remaining > _buffer.length() ? _buffer.length() : _bytes_remaining );
 
-        _body   += _buffer.substr(0, to_save);
-        _buffer = _buffer.substr(to_save, _buffer.length() - to_save);
-        if ((_bytes_remaining -= to_save) == 0)
+        _body  += _buffer.substr( 0, to_save );
+        _buffer = _buffer.substr( to_save, _buffer.length() - to_save );
+        if ( ( _bytes_remaining -= to_save ) == 0 )
             _eoc = true;
         _total += to_save;
     }
@@ -99,41 +97,41 @@ std::string &BodyChunk::get() {
 }
 
 std::string BodyChunk::pop() {
-    if (_done)
+    if ( _done )
         return "";
 
     std::string ret = "";
 
     _uniform = false;
     read_body();
-    while (_trailing && !_done) {
+    while ( _trailing && !_done ) {
         size_t sp;
 
-        if (_trailing) {
-            sp = _buffer.find("\r\n", 0);
-            if (sp == _buffer.npos)
+        if ( _trailing ) {
+            sp = _buffer.find( "\r\n", 0 );
+            if ( sp == _buffer.npos )
                 _trailing = true;
             else {
-                _buffer     = _buffer.substr(sp + 2, _buffer.length() - (sp + 2)); // skipping trailer section
-                _trailing   = false;
-                _done       = true;
+                _buffer   = _buffer.substr( sp + 2, _buffer.length() - ( sp + 2 ) ); // skipping trailer section
+                _trailing = false;
+                _done     = true;
             }
         }
         return "";
     }
-    if (!_bytes_remaining && _buffer.find("\r\n") != _buffer.npos) {
+    if ( !_bytes_remaining && _buffer.find( "\r\n" ) != _buffer.npos ) {
         init_chunk();
-        if (_done)
+        if ( _done )
             return "";
     }
-    if (_bytes_remaining && _buffer.length() > 0) {
+    if ( _bytes_remaining && _buffer.length() > 0 ) {
         // read_body();
 
-        size_t to_save = (_bytes_remaining > _buffer.length() ? _buffer.length() : _bytes_remaining);
+        size_t to_save = ( _bytes_remaining > _buffer.length() ? _buffer.length() : _bytes_remaining );
 
-        ret   = _buffer.substr(0, to_save);
-        _buffer = _buffer.substr(to_save, _buffer.length() - to_save);
-        if ((_bytes_remaining -= to_save) == 0)
+        ret     = _buffer.substr( 0, to_save );
+        _buffer = _buffer.substr( to_save, _buffer.length() - to_save );
+        if ( ( _bytes_remaining -= to_save ) == 0 )
             _eoc = true;
         _total += to_save;
     }
@@ -141,7 +139,7 @@ std::string BodyChunk::pop() {
 }
 
 void BodyChunk::clean() {
-    while (!_done)
+    while ( !_done )
         pop();
     save_mem();
 }
@@ -155,13 +153,13 @@ void BodyChunk::clean() {
   triggers a warning.
   */
 void BodyChunk::init_chunk() { // discard until a size line is found
-    size_t sp;
+    size_t                sp;
     // std::string::iterator   it = _buffer.begin();
     std::string::iterator i;
 
-    if (_done)
+    if ( _done )
         return;
-    if (_bytes_remaining > 0) {
+    if ( _bytes_remaining > 0 ) {
         warn.log() << "Trying to initiate a chunk while another is still being read." << std::endl;
         return;
     }
@@ -171,31 +169,31 @@ void BodyChunk::init_chunk() { // discard until a size line is found
     // if (i == _buffer.end())
     // return false;
     // if (1 || i - it > 0) {
-    if (_eoc) {
-        if (_buffer.length() < 2)
+    if ( _eoc ) {
+        if ( _buffer.length() < 2 )
             return;
-        _buffer = _buffer.substr(2, _buffer.length() - 2);
+        _buffer = _buffer.substr( 2, _buffer.length() - 2 );
         _eoc    = false;
     }
-    sp = _buffer.find("\r\n", 0);
-    if (sp == _buffer.npos)
+    sp = _buffer.find( "\r\n", 0 );
+    if ( sp == _buffer.npos )
         return;
     {
         std::stringstream tmp;
 
-        tmp << std::hex << _buffer.substr(0, std::distance(_buffer.begin(), i));
-        if (!(tmp >> _bytes_remaining))
-            throw HttpError(BadRequest);         // invalid chunk
+        tmp << std::hex << _buffer.substr( 0, std::distance( _buffer.begin(), i ) );
+        if ( !( tmp >> _bytes_remaining ) )
+            throw HttpError( BadRequest ); // invalid chunk
     }
-    _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));
-    if (!_bytes_remaining) {         // if last byte
-        _done   = true;
-        sp      = _buffer.find("\r\n", 0);
-        if (sp == _buffer.npos) {
-            _trailing   = true;
-            _done       = false;
+    _buffer = _buffer.substr( sp + 2, _buffer.length() - ( sp + 2 ) );
+    if ( !_bytes_remaining ) { // if last byte
+        _done = true;
+        sp    = _buffer.find( "\r\n", 0 );
+        if ( sp == _buffer.npos ) {
+            _trailing = true;
+            _done     = false;
         } else
-            _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));         // skipping trailer section
+            _buffer = _buffer.substr( sp + 2, _buffer.length() - ( sp + 2 ) ); // skipping trailer section
         return;
     }
     // } else {
@@ -212,10 +210,10 @@ void BodyChunk::init_chunk() { // discard until a size line is found
 }
 
 /// Returns true if c is a hex character
-bool BodyChunk::is_hex(int c) {
-    if (std::isdigit(c))
+bool BodyChunk::is_hex( int c ) {
+    if ( std::isdigit( c ) )
         return true;
-    if (('a' <= c && c <= 'f') || ('A' <= c && c <= 'F'))
+    if ( ( 'a' <= c && c <= 'f' ) || ( 'A' <= c && c <= 'F' ) )
         return true;
     return false;
 }

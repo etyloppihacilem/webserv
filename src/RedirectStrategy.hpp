@@ -20,21 +20,21 @@
 /**
   Strategy to handle a redirect (3xx code).
   */
-class RedirectStrategy : public ResponseBuildingStrategy {
+class RedirectStrategy: public ResponseBuildingStrategy {
     public:
         RedirectStrategy(
-            const std::string   &location,              ///< Location to redirect to
-            HttpCode            code = MovedPermanently ///< Code to redirect (MovedPermanently 301 as default)
-            );
+            const std::string &location,               ///< Location to redirect to
+            HttpCode           code = MovedPermanently ///< Code to redirect (MovedPermanently 301 as default)
+        );
         ~RedirectStrategy();
 
-        bool    build_response();
-        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void    save_mem();
+        bool build_response();
+        bool fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void save_mem();
 
     private:
         std::string _location;
         HttpCode    _code;
 };
 
-#endif  // INCLUDE_SRC_REDIRECTSTRATEGY_HPP_
+#endif // INCLUDE_SRC_REDIRECTSTRATEGY_HPP_

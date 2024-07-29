@@ -17,9 +17,7 @@
 #include <ostream>
 #include <string>
 
-MimeTypes::MimeTypes(std::string path):
-    _done   (false),
-    _types  () {
+MimeTypes::MimeTypes(std::string path): _done(false), _types() {
     std::fstream file;
 
     file.open(path.c_str());
@@ -51,22 +49,19 @@ MimeTypes::MimeTypes(std::string path):
             if (coma != word.npos) {
                 if (coma != word.length() - 1)
                     break;
-                word            = word.substr(0, coma);
-                _types[word]    = type;
-                type            = "";
+                word         = word.substr(0, coma);
+                _types[word] = type;
+                type         = "";
             } else
                 _types[word] = type;
         }
     }
-    if (!_done) {
+    if (!_done)
         error.log() << path << ": MimeTypes parsing unsuccessful." << std::endl;
-    }
     file.close();
 }
 
-MimeTypes::MimeTypes(MimeTypes &other):
-    _done   (),
-    _types  () {
+MimeTypes::MimeTypes(MimeTypes &other): _done(), _types() {
     (void) other;
     error.log() << "FATAL you should not duplicate any MimeTypes object." << std::endl;
 }
