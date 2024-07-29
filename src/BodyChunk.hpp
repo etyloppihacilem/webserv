@@ -16,7 +16,7 @@
 #include <string>
 
 #ifdef TESTING
-#include "gtest/gtest.h"
+# include "gtest/gtest.h"
 #endif
 
 /**
@@ -38,17 +38,17 @@ class BodyChunk: public Body {
         ~BodyChunk();
 
         std::string &get();
-        std::string pop();
-        void        clean();
+        std::string  pop();
+        void         clean();
+        size_t       read_body();
 
     private:
-        size_t  _bytes_remaining;   ///< Number of bytes left to read in current chunk
-        bool    _eoc;               ///< tells if end of chunk to remove \r\n
-        bool    _trailing;          ///< Tells if body is read but trailing info is left to read and discard
+        void init_chunk();
+        bool is_hex(int c);
 
-        size_t  read_body();
-        void    init_chunk();
-        bool    is_hex(int c);
+        size_t _bytes_remaining; ///< Number of bytes left to read in current chunk
+        bool   _eoc;             ///< tells if end of chunk to remove \r\n
+        bool   _trailing;        ///< Tells if body is read but trailing info is left to read and discard
 #ifdef TESTING
         FRIEND_TEST(BodyChunkTestSuite, is_hex);
         FRIEND_TEST(BodyChunkTestSuite, init_chunk);
@@ -60,4 +60,4 @@ class BodyChunk: public Body {
 #endif
 };
 
-#endif  // INCLUDE_SRC_BODYCHUNK_HPP_
+#endif // INCLUDE_SRC_BODYCHUNK_HPP_

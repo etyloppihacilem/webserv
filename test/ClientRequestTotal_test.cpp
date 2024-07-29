@@ -40,21 +40,21 @@ typedef enum e_total_index {
 } t_ti;
 
 typedef std::tuple<
-    std::string,                          ///< Name
-    std::string,                          ///< Request data (including body and all stuff)
-    std::string,                          ///< Target
-    HttpMethod,                           ///< Method
-    bool,                                 ///< HaveBody
-    std::string,                          ///< Body after parsing (will be used to test Body objects)
-    std::map< std::string, std::string >, ///< Headers
-    HttpCode,                             ///< Status
-    int,                                  ///< port ???
-    std::string,                          ///< QueryString (things after ?)
-    bool                                  ///< Should Body Bad Request ?
+    std::string,                        ///< Name
+    std::string,                        ///< Request data (including body and all stuff)
+    std::string,                        ///< Target
+    HttpMethod,                         ///< Method
+    bool,                               ///< HaveBody
+    std::string,                        ///< Body after parsing (will be used to test Body objects)
+    std::map<std::string, std::string>, ///< Headers
+    HttpCode,                           ///< Status
+    int,                                ///< port ???
+    std::string,                        ///< QueryString (things after ?)
+    bool                                ///< Should Body Bad Request ?
     >
     TotalRequest;
 
-std::vector< TotalRequest > TotalRequestData = {
+std::vector<TotalRequest> TotalRequestData = {
     { "Basic_GET",
       "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
       "/helloworld.html",
@@ -362,47 +362,47 @@ std::vector< TotalRequest > TotalRequestData = {
 
 };
 
-class TotalRequestFixture: public ::testing::TestWithParam< TotalRequest > {
+class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
     public:
-        TotalRequestFixture(): _test( 0 ), _request( 0 ), _fd{ 0, 0 } {}
+        TotalRequestFixture(): _test(0), _request(0), _fd{ 0, 0 } {}
 
         void SetUp() override {
-            if ( pipe( _fd ) )
-                GTEST_FATAL_FAILURE_( "Pipe error" );
+            if (pipe(_fd))
+                GTEST_FATAL_FAILURE_("Pipe error");
 
-            std::string const &raw = std::get< tdata >( GetParam() );
+            const std::string &raw = std::get<tdata>(GetParam());
 
             size_t i = 0;
 
-            if ( ( i = write( _fd[1], raw.c_str(), raw.length() ) ) < 0 )
-                GTEST_FATAL_FAILURE_( "Write in pipe failure" );
-            if ( i != raw.length() )
-                GTEST_FATAL_FAILURE_( "Partial write in pipe" );
-            close( _fd[1] );
-            _test     = new ReadState( _fd[0] );
+            if ((i = write(_fd[1], raw.c_str(), raw.length())) < 0)
+                GTEST_FATAL_FAILURE_("Write in pipe failure");
+            if (i != raw.length())
+                GTEST_FATAL_FAILURE_("Partial write in pipe");
+            close(_fd[1]);
+            _test     = new ReadState(_fd[0]);
             _fd_check = _fd[0];
 
             i = 0;
-            while ( ( _test->process() == waiting ) && ( i < 100 ) )
+            while ((_test->process() == waiting) && (i < 100))
                 i++;
-            if ( i >= 100 )
-                GTEST_FATAL_FAILURE_( "Infinite loop detected." );
-            if ( _test->get_state() == s_error )
+            if (i >= 100)
+                GTEST_FATAL_FAILURE_("Infinite loop detected.");
+            if (_test->get_state() == s_error)
                 GTEST_SKIP() << "Really Bad request successfully ignored";
             // ASSERT_TRUE(_test->process());
             _request = _test->get_client_request();
-            ASSERT_NE( _request, (void *) 0 );
+            ASSERT_NE(_request, (void *) 0);
         }
 
         void TearDown() override {
-            if ( _test ) {
+            if (_test) {
                 _test->done_client_request();
                 delete _test;
             }
             // if (_request)
             //     delete _request;
-            if ( _fd[0] != 0 )
-                close( _fd[0] );
+            if (_fd[0] != 0)
+                close(_fd[0]);
         }
 
     protected:
@@ -416,49 +416,49 @@ class TotalRequestFixture: public ::testing::TestWithParam< TotalRequest > {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    TotalRequestSuite, TotalRequestFixture, ::testing::ValuesIn( TotalRequestData ),
-    []( testing::TestParamInfo< TotalRequest > const &info ) {
+    TotalRequestSuite, TotalRequestFixture, ::testing::ValuesIn(TotalRequestData),
+    [](const testing::TestParamInfo<TotalRequest> &info) {
         // Can use info.param here to generate the test suffix
-        std::string name = std::get< tname >( info.param );
+        std::string name = std::get<tname>(info.param);
         return name;
     }
 );
 
-TEST_P( TotalRequestFixture, TargetTest ) {
-    std::string const &correct = std::get< ttarget >( GetParam() );
+TEST_P(TotalRequestFixture, TargetTest) {
+    const std::string &correct = std::get<ttarget>(GetParam());
 
-    if ( _request->get_status() != OK )
+    if (_request->get_status() != OK)
         return;
-    EXPECT_EQ( _request->get_target(), correct );
+    EXPECT_EQ(_request->get_target(), correct);
 }
 
-TEST_P( TotalRequestFixture, MethodTest ) {
-    HttpMethod correct = std::get< tmethod >( GetParam() );
+TEST_P(TotalRequestFixture, MethodTest) {
+    HttpMethod correct = std::get<tmethod>(GetParam());
 
-    if ( _request->get_status() != OK )
+    if (_request->get_status() != OK)
         return;
-    EXPECT_EQ( _request->get_method(), correct );
+    EXPECT_EQ(_request->get_method(), correct);
 }
 
-TEST_P( TotalRequestFixture, BodyTest ) {
-    typedef std::map< std::string, std::string > map;
+TEST_P(TotalRequestFixture, BodyTest) {
+    typedef std::map<std::string, std::string> map;
 
-    std::string const &correct = std::get< tbody >( GetParam() );
+    const std::string &correct = std::get<tbody>(GetParam());
 
-    if ( _request->get_status() != OK )
+    if (_request->get_status() != OK)
         return;
-    if ( !std::get< thavebody >( GetParam() ) ) {
+    if (!std::get<thavebody>(GetParam())) {
         info.log() << "If this message is displayed, warning is normal for this test." << std::endl;
-        EXPECT_EQ( _request->get_body(), (void *) 0 );
+        EXPECT_EQ(_request->get_body(), (void *) 0);
         return;
     }
-    ASSERT_TRUE( _request->have_body() );
+    ASSERT_TRUE(_request->have_body());
 
-    map const &headers = _request->get_header();
+    const map &headers = _request->get_header();
 
-    if ( headers.find( "Content-Length" ) != headers.end() )
+    if (headers.find("Content-Length") != headers.end())
         SUCCEED();
-    else if ( headers.find( "Transfer-Encoding" ) != headers.end() )
+    else if (headers.find("Transfer-Encoding") != headers.end())
         SUCCEED();
     else
         FAIL() << "All body headers are missing.";
@@ -466,103 +466,107 @@ TEST_P( TotalRequestFixture, BodyTest ) {
     auto   body = _request->get_body();
     size_t i    = 0;
 
-    if ( std::get< tbadbody >( GetParam() ) ) {
+    if (std::get<tbadbody>(GetParam())) {
         EXPECT_THROW(
             {
-                while ( !body->is_done() && i++ < 100 )
+                while (!body->is_done() && i++ < 100) {
+                    body->read_body();
                     body->get();
+                }
             },
             HttpError
         );
-        if ( i >= 100 )
+        if (i >= 100)
             FAIL() << "Infinite loop in body getter, Body tests should fail too.";
         return;
     }
-    while ( !body->is_done() && i++ < 100 )
+    while (!body->is_done() && i++ < 100) {
+        body->read_body();
         body->get();
-    if ( i >= 100 )
+    }
+    if (i >= 100)
         FAIL() << "Infinite loop in body getter, Body tests should fail too.";
 
     auto body_content = body->get();
 
-    EXPECT_EQ( body_content, correct );
+    EXPECT_EQ(body_content, correct);
 }
 
-TEST_P( TotalRequestFixture, HeadersTest ) {
-    typedef std::map< std::string, std::string > map;
+TEST_P(TotalRequestFixture, HeadersTest) {
+    typedef std::map<std::string, std::string> map;
 
-    map const &correct      = std::get< theaders >( GetParam() );
-    map const &test_headers = _request->get_header();
+    const map &correct      = std::get<theaders>(GetParam());
+    const map &test_headers = _request->get_header();
 
-    if ( isRedirection( std::get< tstatus >( GetParam() ) ) ) {
-        ASSERT_NE( correct.find( "Location" ), correct.end() )
+    if (isRedirection(std::get<tstatus>(GetParam()))) {
+        ASSERT_NE(correct.find("Location"), correct.end())
             << "pas de location pour vérifier la redirection dans le test.";
 
-        map::const_iterator loc = test_headers.find( "Location" );
+        map::const_iterator loc = test_headers.find("Location");
 
-        ASSERT_NE( loc, test_headers.end() );
-        EXPECT_EQ( correct.find( "Location" )->second, loc->second );
+        ASSERT_NE(loc, test_headers.end());
+        EXPECT_EQ(correct.find("Location")->second, loc->second);
         return;
     }
-    if ( _request->get_status() != OK )
+    if (_request->get_status() != OK)
         return;
 
     map::const_iterator test_item;
     map::const_iterator correct_item;
 
-    EXPECT_EQ( correct.size(), test_headers.size() );
-    for ( correct_item = correct.begin(); correct_item != correct.end(); correct_item++ ) {
-        test_item = test_headers.find( correct_item->first );
-        EXPECT_NE( test_item, test_headers.end() );
-        if ( test_item != test_headers.end() )
-            EXPECT_EQ( test_item->second, correct_item->second );
+    EXPECT_EQ(correct.size(), test_headers.size());
+    for (correct_item = correct.begin(); correct_item != correct.end(); correct_item++) {
+        test_item = test_headers.find(correct_item->first);
+        EXPECT_NE(test_item, test_headers.end());
+        if (test_item != test_headers.end())
+            EXPECT_EQ(test_item->second, correct_item->second);
     }
-    for ( test_item = correct.begin(); test_item != correct.end(); test_item++ ) {
-        correct_item = correct.find( test_item->first );
-        EXPECT_NE( correct_item, correct.end() );
-        if ( correct_item != test_headers.end() )
-            EXPECT_EQ( correct_item->second, test_item->second );
+    for (test_item = correct.begin(); test_item != correct.end(); test_item++) {
+        correct_item = correct.find(test_item->first);
+        EXPECT_NE(correct_item, correct.end());
+        if (correct_item != test_headers.end())
+            EXPECT_EQ(correct_item->second, test_item->second);
     } // double verification is to display clearly which one is missing.
 }
 
-TEST_P( TotalRequestFixture, HaveBodyTest ) {
-    bool const correct = std::get< thavebody >( GetParam() );
+TEST_P(TotalRequestFixture, HaveBodyTest) {
+    const bool correct = std::get<thavebody>(GetParam());
 
-    if ( _request->get_status() != OK )
+    if (_request->get_status() != OK)
         return;
-    EXPECT_EQ( correct, _request->have_body() );
+    EXPECT_EQ(correct, _request->have_body());
 }
 
-TEST_P( TotalRequestFixture, StatusTest ) {
-    HttpCode const correct = std::get< tstatus >( GetParam() );
+TEST_P(TotalRequestFixture, StatusTest) {
+    const HttpCode correct = std::get<tstatus>(GetParam());
 
-    EXPECT_EQ( correct, _request->get_status() );
+    EXPECT_EQ(correct, _request->get_status());
 }
 
-TEST_P( TotalRequestFixture, FdRequestTest ) {
-    int const correct = _fd_check;
+TEST_P(TotalRequestFixture, FdRequestTest) {
+    const int correct = _fd_check;
 
-    EXPECT_EQ( correct, _request->get_fd() );
+    EXPECT_EQ(correct, _request->get_fd());
 }
 
-TEST_P( TotalRequestFixture, FdStateTest ) {
-    int const correct = _fd_check;
+TEST_P(TotalRequestFixture, FdStateTest) {
+    const int correct = _fd_check;
 
-    EXPECT_EQ( correct, _test->_fd );
+    EXPECT_EQ(correct, _test->_fd);
 }
 
-TEST_P( TotalRequestFixture, PortTest ) {
-    int const correct = std::get< tport >( GetParam() );
+TEST_P(TotalRequestFixture, PortTest) {
+    const int correct = std::get<tport>(GetParam());
 
-    if ( _request->get_status() != OK )
+    if (_request->get_status() != OK)
         return;
-    EXPECT_EQ( correct, _request->get_port() );
+    EXPECT_EQ(correct, _request->get_port());
 }
 
-TEST_P( TotalRequestFixture, QueryStringTest ) {
-    std::string const &correct = std::get< tqs >( GetParam() );
+TEST_P(TotalRequestFixture, QueryStringTest) {
+    const std::string &correct = std::get<tqs>(GetParam());
 
-    if ( _request->get_status() != OK )
+    if (_request->get_status() != OK)
         return;
-    EXPECT_EQ( correct, _request->get_query_string() );
+    EXPECT_EQ(correct, _request->get_query_string());
 }

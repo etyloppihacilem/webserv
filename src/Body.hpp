@@ -28,22 +28,23 @@ class Body {
         Body(int fd, std::string &buffer);
         virtual ~Body() = 0;
 
-        virtual std::string &get()  = 0;        ///< Is used to read the body as a whole and saves it in the _body
-                                                ///< string.
-        virtual std::string pop()   = 0;        ///< Is used to save memory and read the body chunk by chunk.
-        virtual void        clean() = 0;        ///< Used to empty _body. Do dealocate memory
-        bool    is_done() const;                ///< Returns true if body was read completely
-        size_t  length() const;                 ///< Returns length read by object
-        void    save_mem();                     ///< Used to save memory in case of heap going missing
+        virtual std::string &get()       = 0; ///< Is used to read the body as a whole and saves it in the _body
+                                              ///< string.
+        virtual std::string  pop()       = 0; ///< Is used to save memory and read the body chunk by chunk.
+        virtual void         clean()     = 0; ///< Used to empty _body. Do dealocate memory
+        virtual size_t       read_body() = 0; ///< ReadBody (call after an epoll event)
+        bool                 is_done() const; ///< Returns true if body was read completely
+        size_t               length() const;  ///< Returns length read by object
+        void                 save_mem();      ///< Used to save memory in case of heap going missing
 
     protected:
-        int         _fd;                        ///< File descriptor of the incoming socket
-        std::string &_buffer;                   ///< Buffer of ClientRequest object
-        bool        _done;                      ///< Is true if body is done being read
-        bool        _uniform;                   ///< Used to protect get() usage if pop() or clean() are used
-        std::string _body;                      ///< Whole body if get() is used, always empty if pop() is in use.
-        size_t      _total;                     ///< Size read or to be read (in case BodyLength)
-        // TODO:check max_body_length implementation
+        int          _fd;      ///< File descriptor of the incoming socket
+        std::string &_buffer;  ///< Buffer of ClientRequest object
+        bool         _done;    ///< Is true if body is done being read
+        bool         _uniform; ///< Used to protect get() usage if pop() or clean() are used
+        std::string  _body;    ///< Whole body if get() is used, always empty if pop() is in use.
+        size_t       _total;   ///< Size read or to be read (in case BodyLength)
+                               // TODO:check max_body_length implementation
 };
 
-#endif  // INCLUDE_SRC_BODY_HPP_
+#endif // INCLUDE_SRC_BODY_HPP_

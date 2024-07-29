@@ -17,7 +17,8 @@
 #include <string>
 
 /**
-  This is the abstract class to create object in charge of handling ClientRequest and generating an appropriate Response.
+  This is the abstract class to create object in charge of handling ClientRequest and generating an appropriate
+  Response.
 
   All ResponseBuildingStrategy objects should run build_response() at least once (without read event, no read operation
   will be performed on first build_response() call)
@@ -29,25 +30,25 @@ class ResponseBuildingStrategy {
         ResponseBuildingStrategy();
         virtual ~ResponseBuildingStrategy() = 0;
 
-        virtual bool    build_response()    = 0;
-        Response        &get_response();
-        bool            is_done() const;
-        bool            is_built() const;
+        virtual bool build_response() = 0;
+        Response    &get_response();
+        bool         is_done() const;
+        bool         is_built() const;
         /**
           fill_buffer() is meant to be use by a BodyWriter object to build or read body.
 
           This is meant to save memory by not having the whole body in memory all at once.
           */
-        virtual bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER) = 0;
-        size_t          get_estimated_size() const;
-        virtual void    save_mem();
+        virtual bool fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER) = 0;
+        size_t       get_estimated_size() const;
+        virtual void save_mem();
 
     protected:
-        Response    _response;                  ///< The response object
-        bool        _built;                     ///< If response is built yet
-        bool        _done;                      ///< State of the current object
-        size_t      _estimated_size;            ///< Estimated size of response body if needed
-// TODO: check for estimated size.
+        Response _response;       ///< The response object
+        bool     _built;          ///< If response is built yet
+        bool     _done;           ///< State of the current object
+        size_t   _estimated_size; ///< Estimated size of response body if needed
+        // TODO: check for estimated size.
 };
 
-#endif  // INCLUDE_SRC_RESPONDEBUILDINGSTRATEGY_CPP_
+#endif // INCLUDE_SRC_RESPONDEBUILDINGSTRATEGY_CPP_

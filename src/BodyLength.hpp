@@ -15,7 +15,7 @@
 #include <string>
 
 #ifdef TESTING
-#include "gtest/gtest.h"
+# include "gtest/gtest.h"
 #endif
 
 #include "Body.hpp"
@@ -25,27 +25,27 @@
 
   There is no particular body structure.
   */
-class BodyLength : public Body {
+class BodyLength: public Body {
     public:
-        BodyLength(int fd, std::string &buffer, std::string length /** is a string representing a decimal. */ );
+        BodyLength(int fd, std::string &buffer, std::string length /** is a string representing a decimal. */);
         ~BodyLength();
 
         std::string &get();
-        std::string pop();
-        void        clean();
-        size_t      read_body();
+        std::string  pop();
+        void         clean();
+        size_t       read_body();
 
     private:
-        size_t  _length;            ///< Length to read
-        size_t  _read_length;       ///< Length read from socket.
+        size_t _length;      ///< Length to read
+        size_t _read_length; ///< Length read from socket.
 
 #ifdef TESTING
-        FRIEND_TEST(BodyLengthTestSuite,    Constructor);
-        FRIEND_TEST(BodyLengthTestSuite,    BadConstructor);
-        FRIEND_TEST(BodyLengthTestSuite,    read_body);
-        FRIEND_TEST(BodyLengthTestSuite,    get);
-        FRIEND_TEST(BodyLengthTestSuite,    pop);
+        FRIEND_TEST(BodyLengthTestSuite, Constructor);
+        FRIEND_TEST(BodyLengthTestSuite, BadConstructor);
+        FRIEND_TEST(BodyLengthTestSuite, read_body);
+        FRIEND_TEST(BodyLengthTestSuite, get);
+        FRIEND_TEST(BodyLengthTestSuite, pop);
 #endif
 };
 
-#endif  // INCLUDE_SRC_BODYLENGTH_HPP_
+#endif // INCLUDE_SRC_BODYLENGTH_HPP_

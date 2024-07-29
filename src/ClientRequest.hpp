@@ -24,18 +24,18 @@
 
 class ClientRequest {
     public:
-        ClientRequest( int fd );
-        ClientRequest( int fd, HttpCode code, int port );
+        ClientRequest(int fd);
+        ClientRequest(int fd, HttpCode code, int port);
         ~ClientRequest();
 
-        bool        parse_header( std::string const &in );
-        bool        init_body( std::string &buffer );
+        bool        parse_header(const std::string &in);
+        bool        init_body(std::string &buffer);
         void        save_mem();
         std::string get_target() const;
         HttpMethod  get_method();
         Body       *get_body();
 
-        std::map< std::string, std::string > &get_header();
+        std::map<std::string, std::string> &get_header();
 
         // std::map<std::string, std::string>  &get_parameters();
 
@@ -46,40 +46,40 @@ class ClientRequest {
         std::string get_query_string() const;
 
     private:
-        HttpMethod parse_method( std::string const &method, size_t const &end );
-        void       parse_target( std::string const &in, size_t const &pos );
+        HttpMethod parse_method(const std::string &method, const size_t &end);
+        void       parse_target(const std::string &in, const size_t &pos);
         void       decode_target();
         void       parse_parameters();
-        void       init_header( std::string const &in );
-        void       parse_header_line( std::string const &in, size_t begin, size_t end );
+        void       init_header(const std::string &in);
+        void       parse_header_line(const std::string &in, size_t begin, size_t end);
         void       parse_port();
 
-        int                                  _fd;
-        HttpMethod                           _method; ///< Method used for request
-        std::string                          _target; ///< Target of request
-        std::map< std::string, std::string > _header; ///< Map containing headers
+        int                                _fd;
+        HttpMethod                         _method; ///< Method used for request
+        std::string                        _target; ///< Target of request
+        std::map<std::string, std::string> _header; ///< Map containing headers
         // std::map<std::string, std::string>  _parameters;    ///< Parameters from request
-        bool                                 _body_exists; ///< True if there's a body in this request.
+        bool                               _body_exists; ///< True if there's a body in this request.
         /**< Determined by the presence of Content-Length or Transfer-Encoding headers in request.*/
-        Body                                *_body;          ///< Pointer on body object if present
-        HttpCode                             _status;        ///< Status of request (not 200 if error)
-        bool                                 _absolute_form; ///< True if request is in absolute form.
-        int                                  _port;          ///< Port of the request.
-        std::string                          _query_string;
+        Body                              *_body;          ///< Pointer on body object if present
+        HttpCode                           _status;        ///< Status of request (not 200 if error)
+        bool                               _absolute_form; ///< True if request is in absolute form.
+        int                                _port;          ///< Port of the request.
+        std::string                        _query_string;
         /**< Absolute form means having the Host value in the request line and having no 'Host' header.
              Any 'Host' headers found while in absolute form is discarded.
         */
 
 #ifdef TESTING
-        FRIEND_TEST( ClientRequestTestSuite, ParseMethodTestExpectedOK );
-        FRIEND_TEST( ClientRequestTestSuite, ParseMethodTestExpectedFail );
-        FRIEND_TEST( ClientRequestTestTarget, ParseTargetTest );
-        FRIEND_TEST( ClientRequestTestSuite, ParseHeaderLineTestHost );
-        FRIEND_TEST( ClientRequestTestParseHeader, ParseHeaderLineTest );
-        FRIEND_TEST( ClientRequestTestInitHeader, InitHeaderTest );
-        FRIEND_TEST( ClientRequestTestSuite, decode_target );
-        FRIEND_TEST( ClientRequestTestSuite, parse_parameters );
-        FRIEND_TEST( ClientRequestTestSuite, parse_port );
+        FRIEND_TEST(ClientRequestTestSuite, ParseMethodTestExpectedOK);
+        FRIEND_TEST(ClientRequestTestSuite, ParseMethodTestExpectedFail);
+        FRIEND_TEST(ClientRequestTestTarget, ParseTargetTest);
+        FRIEND_TEST(ClientRequestTestSuite, ParseHeaderLineTestHost);
+        FRIEND_TEST(ClientRequestTestParseHeader, ParseHeaderLineTest);
+        FRIEND_TEST(ClientRequestTestInitHeader, InitHeaderTest);
+        FRIEND_TEST(ClientRequestTestSuite, decode_target);
+        FRIEND_TEST(ClientRequestTestSuite, parse_parameters);
+        FRIEND_TEST(ClientRequestTestSuite, parse_port);
 #endif
 };
 

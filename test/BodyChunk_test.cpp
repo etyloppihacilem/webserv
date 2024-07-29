@@ -9,13 +9,13 @@
 ############################################################################# */
 
 #include "BodyChunk.hpp"
+#include "HttpError.hpp"
+#include "Logger.hpp"
 #include "gtest/gtest.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
 #include <unistd.h>
-#include "HttpError.hpp"
-#include "Logger.hpp"
 
 TEST(BodyChunkTestSuite, is_hex) {
     std::string buffer = "ca32\r\n";
@@ -43,15 +43,15 @@ TEST(BodyChunkTestSuite, is_hex) {
     EXPECT_TRUE(test.is_hex('D'));
     EXPECT_TRUE(test.is_hex('E'));
     EXPECT_TRUE(test.is_hex('F'));
-    EXPECT_FALSE(   test.is_hex(' '));
-    EXPECT_FALSE(   test.is_hex('\n'));
-    EXPECT_FALSE(   test.is_hex('\r'));
-    EXPECT_FALSE(   test.is_hex('\t'));
-    EXPECT_FALSE(   test.is_hex('g'));
-    EXPECT_FALSE(   test.is_hex('G'));
-    EXPECT_FALSE(   test.is_hex('@'));
-    EXPECT_FALSE(   test.is_hex('`'));
-    EXPECT_FALSE(   test.is_hex('/'));
+    EXPECT_FALSE(test.is_hex(' '));
+    EXPECT_FALSE(test.is_hex('\n'));
+    EXPECT_FALSE(test.is_hex('\r'));
+    EXPECT_FALSE(test.is_hex('\t'));
+    EXPECT_FALSE(test.is_hex('g'));
+    EXPECT_FALSE(test.is_hex('G'));
+    EXPECT_FALSE(test.is_hex('@'));
+    EXPECT_FALSE(test.is_hex('`'));
+    EXPECT_FALSE(test.is_hex('/'));
 }
 
 TEST(BodyChunkTestSuite, init_chunk) {
@@ -60,18 +60,18 @@ TEST(BodyChunkTestSuite, init_chunk) {
 
     info.log() << "Warning are normal for this test." << std::endl;
     EXPECT_EQ(test._bytes_remaining, (size_t) 0);
-    test._bytes_remaining   = 2;
-    test.   init_chunk();
-    test._bytes_remaining   = 0;
-    test.   init_chunk();
-    EXPECT_EQ(  test._bytes_remaining, (size_t) 0xca32);
-    EXPECT_EQ(  test._buffer, "coucou");
-    test.   init_chunk();
+    test._bytes_remaining = 2;
+    test.init_chunk();
     test._bytes_remaining = 0;
-    buffer = "CA32\r\nCOUCOU";
-    test.   init_chunk();
-    EXPECT_EQ(  test._bytes_remaining, (size_t) 0xca32);
-    EXPECT_EQ(  test._buffer, "COUCOU");
+    test.init_chunk();
+    EXPECT_EQ(test._bytes_remaining, (size_t) 0xca32);
+    EXPECT_EQ(test._buffer, "coucou");
+    test.init_chunk();
+    test._bytes_remaining = 0;
+    buffer                = "CA32\r\nCOUCOU";
+    test.init_chunk();
+    EXPECT_EQ(test._bytes_remaining, (size_t) 0xca32);
+    EXPECT_EQ(test._buffer, "COUCOU");
 }
 
 TEST(BodyChunkTestSuite, init_chunk_end) {
@@ -85,19 +85,24 @@ TEST(BodyChunkTestSuite, init_chunk_end) {
     test._bytes_remaining = 0;
     test.init_chunk();
     EXPECT_EQ(test._bytes_remaining, (size_t) 0x16);
-    test.   init_chunk();
+    test.init_chunk();
     test._bytes_remaining = 0;
 
-    buffer = "0\r\n""trailer section\r\n""\r\n";
+    buffer
+        = "0\r\n"
+          "trailer section\r\n"
+          "\r\n";
 
-    test.   init_chunk();
+    test.init_chunk();
     EXPECT_EQ(test._bytes_remaining, (size_t) 0x0);
     EXPECT_TRUE(test.is_done());
 }
 
 TEST(BodyChunkTestSuite, init_chunk_bad) {
-    std::string buffer = "zxswABC\r\n" "2a\r\n";
-    BodyChunk   test(0, buffer);
+    std::string buffer
+        = "zxswABC\r\n"
+          "2a\r\n";
+    BodyChunk test(0, buffer);
 
     EXPECT_THROW(test.init_chunk(), HttpError);
 }
@@ -135,8 +140,8 @@ TEST(BodyChunkTestSuite, init_chunk_none) {
 
 TEST(BodyChunkTestSuite, get) {
     static const char buf[]
-        =
-            "16\r\nCoucou je suis heureux\r\n41\r\n de pouvoir tester le comportement d'un body_length et de compren\r\n2b\r\ndre comment pouvoir lire de facon certaine.\r\n0\r\ntrailing\r\n\r\n";
+        = "16\r\nCoucou je suis heureux\r\n41\r\n de pouvoir tester le comportement d'un body_length et de "
+          "compren\r\n2b\r\ndre comment pouvoir lire de facon certaine.\r\n0\r\ntrailing\r\n\r\n";
     int fd[2];
 
     if (pipe(fd) < 0)
@@ -145,27 +150,28 @@ TEST(BodyChunkTestSuite, get) {
     std::string buffer = "";
     BodyChunk   test(fd[0], buffer);
     std::string tmp1
-        =
-            "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir lire de facon certaine.";
+        = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir "
+          "lire de facon certaine.";
     std::string ret = "not good";
     size_t      i   = 1000;
 
     write(fd[1], buf, sizeof(buf) - 1);
     while (!test.is_done() && --i) {
+        test.read_body();
         ret = test.get();
     }
     if (!i)
         GTEST_FATAL_FAILURE_("Infinite loop detected.");
-    EXPECT_EQ(  tmp1,           ret);
-    EXPECT_EQ(  &test._body,    &test.get());
-    EXPECT_EQ(  tmp1,           test._body);
+    EXPECT_EQ(tmp1, ret);
+    EXPECT_EQ(&test._body, &test.get());
+    EXPECT_EQ(tmp1, test._body);
     EXPECT_TRUE(test.is_done());
 }
 
 TEST(BodyChunkTestSuite, pop) {
     static const char buf[]
-        =
-            "16\r\nCoucou je suis heureux\r\n41\r\n de pouvoir tester le comportement d'un body_length et de compren\r\n2b\r\ndre comment pouvoir lire de facon certaine.\r\n0\r\ntrailing\r\n\r\n";
+        = "16\r\nCoucou je suis heureux\r\n41\r\n de pouvoir tester le comportement d'un body_length et de "
+          "compren\r\n2b\r\ndre comment pouvoir lire de facon certaine.\r\n0\r\ntrailing\r\n\r\n";
     int fd[2];
 
     if (pipe(fd) < 0)
@@ -174,18 +180,19 @@ TEST(BodyChunkTestSuite, pop) {
     std::string buffer = "";
     BodyChunk   test(fd[0], buffer);
     std::string tmp1
-        =
-            "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir lire de facon certaine.";
+        = "Coucou je suis heureux de pouvoir tester le comportement d'un body_length et de comprendre comment pouvoir "
+          "lire de facon certaine.";
     std::string ret = "not good";
     size_t      i   = 1000;
     size_t      check;
 
     write(fd[1], buf, sizeof(buf) - 1);
     while (!test.is_done() && --i) {
-        ret     = test.pop();
-        check   = tmp1.find(ret);
-        EXPECT_EQ(  check,  (size_t) 0);
-        EXPECT_EQ(  ret,    tmp1.substr(0, ret.length()));
+        test.read_body();
+        ret   = test.pop();
+        check = tmp1.find(ret);
+        EXPECT_EQ(check, (size_t) 0);
+        EXPECT_EQ(ret, tmp1.substr(0, ret.length()));
         tmp1 = tmp1.substr(ret.length(), tmp1.length() - ret.length());
     }
     if (!i)

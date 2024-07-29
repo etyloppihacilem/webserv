@@ -61,7 +61,7 @@ std::string &BodyChunk::get() {
     }
     if ( _done )
         return _body;
-    read_body();
+    // read_body(); // is now public to call only in an event
     while ( _trailing && !_done ) {
         size_t sp;
 
