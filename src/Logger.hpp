@@ -17,7 +17,7 @@
 #include <ostream>
 #include <string>
 
-#define LOG_MAX_SIZE 1024
+// #define LOG_MAX_SIZE 1024
 
 /**
   Object used to log to terminal or file (any std::ostream) log messages with timestamp.
@@ -36,12 +36,12 @@ class Logger : public std::ostream {
         );
         ~Logger();
 
-        void               log(const char *format, ...);
+        // void               log(const char *format, ...);
         static std::string endl(bool crlf = false);
         std::ofstream     &log();
         void               enable(); ///< Function use to enable or disable test output
         void               disable();
-        bool               is_enabled() const;
+        bool               is_enabled();
         static void        force();     ///< Function to force log output even if disabled
         static void        unforce();   ///< Remove force
         static bool        is_forced(); ///< Remove force
