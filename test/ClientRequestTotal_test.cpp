@@ -448,8 +448,9 @@ TEST_P(TotalRequestFixture, BodyTest) {
     if (_request->get_status() != OK)
         return;
     if (!std::get<thavebody>(GetParam())) {
-        info.log() << "If this message is displayed, warning is normal for this test." << std::endl;
+        warn.disable();
         EXPECT_EQ(_request->get_body(), (void *) 0);
+        warn.enable();
         return;
     }
     ASSERT_TRUE(_request->have_body());

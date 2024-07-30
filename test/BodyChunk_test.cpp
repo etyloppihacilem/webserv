@@ -58,7 +58,7 @@ TEST(BodyChunkTestSuite, init_chunk) {
     std::string buffer = "ca32\r\ncoucou";
     BodyChunk   test(0, buffer);
 
-    info.log() << "Warning are normal for this test." << std::endl;
+    warn.disable();
     EXPECT_EQ(test._bytes_remaining, (size_t) 0);
     test._bytes_remaining = 2;
     test.init_chunk();
@@ -70,6 +70,7 @@ TEST(BodyChunkTestSuite, init_chunk) {
     test._bytes_remaining = 0;
     buffer                = "CA32\r\nCOUCOU";
     test.init_chunk();
+    warn.enable();
     EXPECT_EQ(test._bytes_remaining, (size_t) 0xca32);
     EXPECT_EQ(test._buffer, "COUCOU");
 }
@@ -81,11 +82,12 @@ TEST(BodyChunkTestSuite, init_chunk_end) {
           "dre comment pouvoir lire de facon certaine.\r\n\r\n";
     BodyChunk test(0, buffer);
 
-    info.log() << "Warning are normal for this test." << std::endl;
+    warn.disable();
     test._bytes_remaining = 0;
     test.init_chunk();
     EXPECT_EQ(test._bytes_remaining, (size_t) 0x16);
     test.init_chunk();
+    warn.enable();
     test._bytes_remaining = 0;
 
     buffer

@@ -9,6 +9,8 @@
 ############################################################################# */
 
 #include "Logger.hpp"
+#include "HttpStatusCodes.hpp"
+#include "colors.hpp"
 #include <cstdarg>
 #include <cstdio>
 #include <ctime>
@@ -17,15 +19,14 @@
 #include <iostream>
 #include <ostream>
 #include <string>
-#include "HttpStatusCodes.hpp"
-#include "colors.hpp"
 
-Logger::Logger(std::ostream &os, std::string level, std::string color, size_t width) {
-    width   += 3;
-    _level  = "[" + level + "]";
-    _width  = (width <= _level.length()) ? _level.length() : width;
+Logger::Logger(std::ostream &os, std::string level, std::string color, size_t width) : _enabled(true) {
+    _dev_null.setstate(std::ios_base::badbit); // set /dev/null to be /dev/null
+    width += 3;
+    _level = "[" + level + "]";
+    _width = (width <= _level.length()) ? _level.length() : width;
     if (os.rdbuf() == std::cout.rdbuf() || os.rdbuf() == std::cerr.rdbuf()) {
-        _width  += color.length() + sizeof(_RESET) - 1;// if log to stdout or stderr enable color
+        _width += color.length() + sizeof(_RESET) - 1; // if log to stdout or stderr enable color
         _level  = "[" + color + level + _RESET "]";
     }
     _os.copyfmt(os);
@@ -40,9 +41,11 @@ Logger::~Logger() {}
 
   Any message have a maximal length of LOG_MAX_SIZE.
   */
-Logger &Logger::log(const char *format, ...) {
-    time_t  now     = time(0);
-    tm      *ltm    = localtime(&now);
+void Logger::log(const char *format, ...) {
+    if (!_enabled && !_force)
+        return;
+    time_t  now = time(0);
+    tm     *ltm = localtime(&now);
     char    buffer[LOG_MAX_SIZE];
     va_list args;
 
@@ -51,10 +54,9 @@ Logger &Logger::log(const char *format, ...) {
     va_end(args);
     _os << std::dec << std::setw(_width) << std::setfill(' ') << std::left << _level << std::right << std::setw(2)
         << std::setfill('0') << ltm->tm_hour << ":" << std::setw(2) << std::setfill('0') << ltm->tm_min << ":"
-        << std::setw(2) << std::setfill('0') << ltm->tm_sec << " " << std::setw(2) << std::setfill('0')
-        << ltm->tm_mday << "/" << std::setw(2) << std::setfill('0') << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year
-        << ": " << buffer << std::endl;
-    return *this;
+        << std::setw(2) << std::setfill('0') << ltm->tm_sec << " " << std::setw(2) << std::setfill('0') << ltm->tm_mday
+        << "/" << std::setw(2) << std::setfill('0') << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year << ": " << buffer
+        << std::endl;
 }
 
 std::ostream &operator<<(std::ostream &os, const HttpCode code) {
@@ -63,17 +65,45 @@ std::ostream &operator<<(std::ostream &os, const HttpCode code) {
 }
 
 std::ofstream &Logger::log() {
-    time_t  now     = time(0);
-    tm      *ltm    = localtime(&now);
+    if (!_enabled && !_force)
+        return _dev_null;
+    time_t now = time(0);
+    tm    *ltm = localtime(&now);
 
     _os << std::dec << std::setw(_width) << std::setfill(' ') << std::left << _level << std::right << std::setw(2)
         << std::setfill('0') << ltm->tm_hour << ":" << std::setw(2) << std::setfill('0') << ltm->tm_min << ":"
-        << std::setw(2) << std::setfill('0') << ltm->tm_sec << " " << std::setw(2) << std::setfill('0')
-        << ltm->tm_mday << "/" << std::setw(2) << std::setfill('0') << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year
-        << ": ";
+        << std::setw(2) << std::setfill('0') << ltm->tm_sec << " " << std::setw(2) << std::setfill('0') << ltm->tm_mday
+        << "/" << std::setw(2) << std::setfill('0') << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year << ": ";
     return _os;
 }
 
-Logger  info(std::cerr, "INFO", _BLUE, 5);
-Logger  warn(std::cerr, "WARN", _YELLOW, 5);
-Logger  error(std::cerr, "ERROR", _RED, 5);
+void Logger::enable() {
+    _enabled = true;
+}
+
+void Logger::disable() {
+    _enabled = false;
+}
+
+bool Logger::is_enabled() const {
+    return _enabled;
+}
+
+void Logger::force() {
+    _force = true;
+}
+
+void Logger::unforce() {
+    _force = false;
+}
+
+bool Logger::is_forced() {
+    return _force;
+}
+
+std::ofstream Logger::_dev_null;
+bool          Logger::_force = false;
+
+Logger info(std::cerr, "INFO", _BLUE, 5);
+Logger warn(std::cerr, "WARN", _YELLOW, 5);
+Logger error(std::cerr, "ERROR", _RED, 5);

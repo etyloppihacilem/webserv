@@ -29,27 +29,36 @@
 class Logger : public std::ostream {
     public:
         Logger(
-            std::ostream    &os,                ///< Out stream
-            std::string     level   = "INFO",   ///< Level to display
-            std::string     color   = "",       ///< Color ANSI code (no reset, but including ESC)
-            size_t          width   = 0         ///< Width to align level
-            );
+            std::ostream &os,             ///< Out stream
+            std::string   level = "INFO", ///< Level to display
+            std::string   color = "",     ///< Color ANSI code (no reset, but including ESC)
+            size_t        width = 0       ///< Width to align level
+        );
         ~Logger();
 
-        Logger              &log(const char *format, ...);
-        static std::string  endl(bool crlf = false);
-        std::ofstream       &log();
+        void               log(const char *format, ...);
+        static std::string endl(bool crlf = false);
+        std::ofstream     &log();
+        void               enable(); ///< Function use to enable or disable test output
+        void               disable();
+        bool               is_enabled() const;
+        static void        force();     ///< Function to force log output even if disabled
+        static void        unforce();   ///< Remove force
+        static bool        is_forced(); ///< Remove force
 
     private:
-        std::string     _level;     ///< Log level
-        std::ofstream   _os;        ///< Out stream
-        int _width;                 ///< Width to align level
+        static std::ofstream _dev_null; ///< dev_null for disable
+        static bool          _force;    ///< force log even if disabled
+        std::string          _level;    ///< Log level
+        std::ofstream        _os;       ///< Out stream
+        int                  _width;    ///< Width to align level
+        bool                 _enabled;  ///< Tells if test is enabled
 };
 
-std::ostream    &operator<<(std::ostream &os, const HttpCode code);
+std::ostream &operator<<(std::ostream &os, const HttpCode code);
 
-extern Logger   info;
-extern Logger   warn;
-extern Logger   error;
+extern Logger info;
+extern Logger warn;
+extern Logger error;
 
-#endif  // INCLUDE_SRC_LOGGER_HPP_
+#endif // INCLUDE_SRC_LOGGER_HPP_
