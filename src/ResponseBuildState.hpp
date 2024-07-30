@@ -32,6 +32,7 @@ class ResponseBuildState: public ProcessState {
         t_state                   process();
         ClientRequest            *get_request();
         ResponseBuildingStrategy *get_response_strategy();
+        void save_mem();
 
     private:
         void init_strategy();

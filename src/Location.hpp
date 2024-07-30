@@ -15,34 +15,39 @@
   This class is meant to interpret a target and convert it to a location, giving what is allowed to do or not.
   */
 
-#include "ClientRequest.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Route.hpp"
 #include "Server.hpp"
 #include <string>
+#ifdef TESTING
+# include "gtest/gtest.h"
+#endif
 
 template <class ServerClass = Server, class RouteClass = Route> // template is there for testing purposes
 class Location {
     public:
-        Location(ClientRequest &request, ServerClass &server);
+        Location(const std::string &target, ServerClass &server);
         ~Location();
 
         bool        is_get() const;
         bool        is_post() const;
         bool        is_delete() const;
-        bool        is_put() const;
+        // bool        is_put() const;
         bool        has_autoindex() const;
         bool        is_file() const;
         bool        is_cgi() const;
         bool        is_redirect() const;
         HttpCode    get_status_code() const;
         std::string get_path() const;
+        std::string get_route_path() const;
+        std::string get_path_info() const;
 
     private:
-        void        build_path(const std::string &target, const RouteClass &route);
-        void        build_path(const std::string &target, const RouteClass &route, const std::string &redirect);
-        void        setup_cgi(const RouteClass &route);
-        bool        find_index(const RouteClass &route, struct stat &buf);
+        Location(); // for testing purposes only
+        void build_path(const std::string &target, const RouteClass &route);
+        void build_path(const std::string &target, const RouteClass &route, const std::string &redirect);
+        void setup_cgi(const RouteClass &route);
+        bool find_index(const RouteClass &route, struct stat &buf);
 
         bool        _is_get;
         bool        _is_post;
@@ -57,12 +62,16 @@ class Location {
         std::string _path;
         std::string _route_path;
         std::string _path_info; ///< Everyting that is after the route path.
-        /**<
-          ```
-          /test/cgi.bin/monscript.cgi/path_info
-                                     ^^^^^^^^^^
-          ```
-          */
+                                /**<
+                                  ```
+                                  /test/cgi.bin/monscript.cgi/path_info
+                                                             ^^^^^^^^^^
+                                  ```
+                                  */
+#ifdef TESTING
+        FRIEND_TEST(LocationTestSuite, BuildPathTest);
+        FRIEND_TEST(LocationTestSuite, BuildPathRedirectTest);
+#endif
 };
 
-#endif  // INCLUDE_SRC_LOCATION_HPP_
+#endif // INCLUDE_SRC_LOCATION_HPP_

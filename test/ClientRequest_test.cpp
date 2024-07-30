@@ -8,16 +8,16 @@
 
 ############################################################################# */
 
+#include "ClientRequest_test.hpp"
+#include "ClientRequest.hpp"
+#include "ClientRequestTest.hpp"
+#include "HttpError.hpp"
+#include "HttpMethods.hpp"
+#include "HttpStatusCodes.hpp"
 #include "gtest/gtest.h"
 #include <cstddef>
 #include <exception>
 #include <string>
-#include "HttpError.hpp"
-#include "HttpMethods.hpp"
-#include "HttpStatusCodes.hpp"
-#include "ClientRequestTest.hpp"
-#include "ClientRequest.hpp"
-#include "ClientRequest_test.hpp"
 
 /*
  * Can access private elements of ClientRequest.
@@ -26,134 +26,164 @@
 TEST(ClientRequestTestSuite, ParseMethodTestExpectedOK) {
     ClientRequest test(0);
 
-    EXPECT_EQ(  test.parse_method("GET", 3),    GET);
-    EXPECT_EQ(  test.parse_method("POST", 4),   POST);
-    EXPECT_EQ(  test.parse_method("DELETE", 6), DELETE);
-    EXPECT_EQ(  test.parse_method("GET /var/srcs HTTP/1.1", 3),     GET);
-    EXPECT_EQ(  test.parse_method("POST /var/srcs HTTP/1.1", 4),    POST);
-    EXPECT_EQ(  test.parse_method("DELETE /var/srcs HTTP/1.1", 6), DELETE);
+    EXPECT_EQ(test.parse_method("GET", 3), GET);
+    EXPECT_EQ(test.parse_method("POST", 4), POST);
+    EXPECT_EQ(test.parse_method("DELETE", 6), DELETE);
+    EXPECT_EQ(test.parse_method("GET /var/srcs HTTP/1.1", 3), GET);
+    EXPECT_EQ(test.parse_method("POST /var/srcs HTTP/1.1", 4), POST);
+    EXPECT_EQ(test.parse_method("DELETE /var/srcs HTTP/1.1", 6), DELETE);
 }
 
 TEST(ClientRequestTestSuite, ParseMethodTestExpectedFail) {
     ClientRequest test(0);
 
-    EXPECT_THROW({
-        try {
-            test.parse_method("(&)", 3);
-        } catch (HttpError &e) {
-            EXPECT_EQ(e.get_code(), NotImplemented);
-            throw;
-        } catch (std::exception &e) {
-            throw;
-        }
-    }, HttpError);
-    EXPECT_THROW({
-        try {
-            test.parse_method("DELETED", 7);
-        } catch (HttpError &e) {
-            EXPECT_EQ(e.get_code(), NotImplemented);
-            throw;
-        } catch (std::exception &e) {
-            throw;
-        }
-    }, HttpError);
-    EXPECT_THROW({
-        try {
-            test.parse_method("G", 3);
-        } catch (HttpError &e) {
-            EXPECT_EQ(e.get_code(), NotImplemented);
-            throw;
-        } catch (std::exception &e) {
-            throw;
-        }
-    }, HttpError);
-    EXPECT_THROW({
-        try {
-            test.parse_method("", 0);
-        } catch (HttpError &e) {
-            EXPECT_EQ(e.get_code(), NotImplemented);
-            throw;
-        } catch (std::exception &e) {
-            throw;
-        }
-    }, HttpError);
-    EXPECT_THROW({
-        try {
-            test.parse_method("GET /var/srcs HTTP/1.1", 4);
-        } catch (HttpError &e) {
-            EXPECT_EQ(e.get_code(), NotImplemented);
-            throw;
-        } catch (std::exception &e) {
-            throw;
-        }
-    }, HttpError);
-    EXPECT_THROW({
-        try {
-            test.parse_method("DELETE /var/srcs HTTP/1.1", 2);
-        } catch (HttpError &e) {
-            EXPECT_EQ(e.get_code(), NotImplemented);
-            throw;
-        } catch (std::exception &e) {
-            throw;
-        }
-    }, HttpError);
-    EXPECT_THROW({
-        try {
-            test.parse_method("thismethodiswaytoolong", 22);
-        } catch (HttpError &e) {
-            EXPECT_EQ(e.get_code(), NotImplemented);
-            throw;
-        } catch (std::exception &e) {
-            throw;
-        }
-    }, HttpError);
+    EXPECT_THROW(
+        {
+            try {
+                test.parse_method("(&)", 3);
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), NotImplemented);
+                throw;
+            } catch (std::exception &e) {
+                throw;
+            }
+        },
+        HttpError
+    );
+    EXPECT_THROW(
+        {
+            try {
+                test.parse_method("DELETED", 7);
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), NotImplemented);
+                throw;
+            } catch (std::exception &e) {
+                throw;
+            }
+        },
+        HttpError
+    );
+    EXPECT_THROW(
+        {
+            try {
+                test.parse_method("G", 3);
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), NotImplemented);
+                throw;
+            } catch (std::exception &e) {
+                throw;
+            }
+        },
+        HttpError
+    );
+    EXPECT_THROW(
+        {
+            try {
+                test.parse_method("", 0);
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), NotImplemented);
+                throw;
+            } catch (std::exception &e) {
+                throw;
+            }
+        },
+        HttpError
+    );
+    EXPECT_THROW(
+        {
+            try {
+                test.parse_method("GET /var/srcs HTTP/1.1", 4);
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), NotImplemented);
+                throw;
+            } catch (std::exception &e) {
+                throw;
+            }
+        },
+        HttpError
+    );
+    EXPECT_THROW(
+        {
+            try {
+                test.parse_method("DELETE /var/srcs HTTP/1.1", 2);
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), NotImplemented);
+                throw;
+            } catch (std::exception &e) {
+                throw;
+            }
+        },
+        HttpError
+    );
+    EXPECT_THROW(
+        {
+            try {
+                test.parse_method("thismethodiswaytoolong", 22);
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), NotImplemented);
+                throw;
+            } catch (std::exception &e) {
+                throw;
+            }
+        },
+        HttpError
+    );
 }
 
 TEST_P(ClientRequestTestTarget, ParseTargetTest) {
-    std::string line    = "METHOD ";
-    size_t      pos     = 6;
+    std::string line = "METHOD ";
+    size_t      pos  = 6;
     std::string params[3];
 
     t_test_target tmp = GetParam();
 
-    params[0]   = tmp.c1;
-    params[1]   = tmp.c2;
-    params[2]   = tmp.c3;
-    line        += params[0];
+    params[0] = tmp.c1;
+    params[1] = tmp.c2;
+    params[2] = tmp.c3;
+    line     += params[0];
     if (params[1] == "BadRequest") {
-        EXPECT_THROW({
-            try {
-                test.parse_target(line, pos);
-            } catch (HttpError &e) {
-                EXPECT_EQ(e.get_code(), BadRequest);
-                throw;
-            } catch (std::exception &e) {
-                throw;
-            }
-        }, HttpError);
+        EXPECT_THROW(
+            {
+                try {
+                    test.parse_target(line, pos);
+                } catch (HttpError &e) {
+                    EXPECT_EQ(e.get_code(), BadRequest);
+                    throw;
+                } catch (std::exception &e) {
+                    throw;
+                }
+            },
+            HttpError
+        );
     } else if (params[1] == "URITooLong") {
-        EXPECT_THROW({
-            try {
-                test.parse_target(line, pos);
-            } catch (HttpError &e) {
-                EXPECT_EQ(e.get_code(), URITooLong);
-                throw;
-            } catch (std::exception &e) {
-                throw;
-            }
-        }, HttpError);
+        EXPECT_THROW(
+            {
+                try {
+                    test.parse_target(line, pos);
+                } catch (HttpError &e) {
+                    EXPECT_EQ(e.get_code(), URITooLong);
+                    throw;
+                } catch (std::exception &e) {
+                    throw;
+                }
+            },
+            HttpError
+        );
     } else if (params[1] == "MovedPermanently") {
-        EXPECT_THROW({
-            try {
-                test.parse_target(line, pos);
-            } catch (HttpError &e) {
-                EXPECT_EQ(  e.get_code(), MovedPermanently);
-                EXPECT_EQ(  e.what(), params[2]);
-                throw;
-            } catch (std::exception &e) {
-                throw;
-            }
-        }, HttpError);
+        EXPECT_THROW(
+            {
+                try {
+                    test.parse_target(line, pos);
+                } catch (HttpError &e) {
+                    EXPECT_EQ(e.get_code(), MovedPermanently);
+                    EXPECT_EQ(e.what(), params[2]);
+                    throw;
+                } catch (std::exception &e) {
+                    throw;
+                }
+            },
+            HttpError
+        );
     } else {
         EXPECT_NO_THROW(test.parse_target(line, pos));
         EXPECT_EQ(test._target, params[1]);
@@ -164,52 +194,57 @@ TEST_P(ClientRequestTestTarget, ParseTargetTest) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(ClientRequestTargetSuite,
-        ClientRequestTestTarget,
-        ::testing::ValuesIn(ClientRequestTargetSuiteValues),
-        [](const testing::TestParamInfo<t_test_target> &info)
-{
-    // Can use info.param here to generate the test suffix
-    std::string name = info.param.name;
-    return name;
-});
+INSTANTIATE_TEST_SUITE_P(
+    ClientRequestTargetSuite, ClientRequestTestTarget, ::testing::ValuesIn(ClientRequestTargetSuiteValues),
+    [](const testing::TestParamInfo<t_test_target> &info) {
+        // Can use info.param here to generate the test suffix
+        std::string name = info.param.name;
+        return name;
+    }
+);
 
 TEST(ClientRequestTestSuite, ParseHeaderLineTestHost) {
-    std::string     header      = "Host: www.example.com";
-    std::string     header_2    = "Host: www.coucou.com";
-    ClientRequest   test(0);
+    std::string   header   = "Host: www.example.com";
+    std::string   header_2 = "Host: www.coucou.com";
+    ClientRequest test(0);
 
     EXPECT_NO_THROW(test.parse_header_line(header, 0, header.length()));
     EXPECT_EQ(test._header["Host"], "www.example.com");
-    EXPECT_THROW({
-        try {
-            test.parse_header_line(header_2, 0, header_2.length());
-        } catch (HttpError &e) {
-            EXPECT_EQ(e.get_code(), BadRequest);
-            throw;
-        } catch (std::exception &e) {
-            throw;
-        }
-    }, HttpError);
-    EXPECT_EQ(test._header["Host"], "www.example.com");
-}
-
-TEST_P(ClientRequestTestParseHeader, ParseHeaderLineTest) {
-    t_test_target   tmp     = GetParam();
-    size_t          begin   = 0;
-    size_t          end     = tmp.c1.length();
-
-    if (tmp.c3 == "BadRequest") {
-        ASSERT_THROW({
+    EXPECT_THROW(
+        {
             try {
-                test.parse_header_line(tmp.c1, begin, end);
+                test.parse_header_line(header_2, 0, header_2.length());
             } catch (HttpError &e) {
                 EXPECT_EQ(e.get_code(), BadRequest);
                 throw;
             } catch (std::exception &e) {
                 throw;
             }
-        }, HttpError);
+        },
+        HttpError
+    );
+    EXPECT_EQ(test._header["Host"], "www.example.com");
+}
+
+TEST_P(ClientRequestTestParseHeader, ParseHeaderLineTest) {
+    t_test_target tmp   = GetParam();
+    size_t        begin = 0;
+    size_t        end   = tmp.c1.length();
+
+    if (tmp.c3 == "BadRequest") {
+        ASSERT_THROW(
+            {
+                try {
+                    test.parse_header_line(tmp.c1, begin, end);
+                } catch (HttpError &e) {
+                    EXPECT_EQ(e.get_code(), BadRequest);
+                    throw;
+                } catch (std::exception &e) {
+                    throw;
+                }
+            },
+            HttpError
+        );
         EXPECT_EQ(test._header.find(tmp.c2), test._header.end());
     } else {
         ASSERT_NO_THROW(test.parse_header_line(tmp.c1, begin, end));
@@ -218,32 +253,35 @@ TEST_P(ClientRequestTestParseHeader, ParseHeaderLineTest) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(ClientRequestParseHeaderLineSuite,
-        ClientRequestTestParseHeader,
-        ::testing::ValuesIn(ClientRequestParseHeaderLineSuiteValues),
-        [](const testing::TestParamInfo<t_test_target> &info)
-{
-    // Can use info.param here to generate the test suffix
-    std::string name = info.param.name;
-    return name;
-});
+INSTANTIATE_TEST_SUITE_P(
+    ClientRequestParseHeaderLineSuite, ClientRequestTestParseHeader,
+    ::testing::ValuesIn(ClientRequestParseHeaderLineSuiteValues),
+    [](const testing::TestParamInfo<t_test_target> &info) {
+        // Can use info.param here to generate the test suffix
+        std::string name = info.param.name;
+        return name;
+    }
+);
 
 TEST_P(ClientRequestTestInitHeader, InitHeaderTest) {
     t_test_messages tmp = GetParam();
 
     if (tmp.name == "no_headers_absolute")
-        return;  // test is skipped
+        return; // test is skipped
     if (tmp.error == BadRequest) {
-        ASSERT_THROW({
-            try {
-                test.init_header(tmp.request);
-            } catch (HttpError &e) {
-                EXPECT_EQ(e.get_code(), BadRequest);
-                throw;
-            } catch (std::exception &e) {
-                throw;
-            }
-        }, HttpError);
+        ASSERT_THROW(
+            {
+                try {
+                    test.init_header(tmp.request);
+                } catch (HttpError &e) {
+                    EXPECT_EQ(e.get_code(), BadRequest);
+                    throw;
+                } catch (std::exception &e) {
+                    throw;
+                }
+            },
+            HttpError
+        );
     } else {
         ASSERT_NO_THROW(test.init_header(tmp.request));
         for (auto it = tmp.headers.begin(); it != tmp.headers.end(); it++) {
@@ -254,15 +292,14 @@ TEST_P(ClientRequestTestInitHeader, InitHeaderTest) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(ClientRequestTestInitHeaderSuite,
-        ClientRequestTestInitHeader,
-        ::testing::ValuesIn(ClientRequestTestData),
-        [](const testing::TestParamInfo<t_test_messages> &info)
-{
-    // Can use info.param here to generate the test suffix
-    std::string name = info.param.name;
-    return name;
-});
+INSTANTIATE_TEST_SUITE_P(
+    ClientRequestTestInitHeaderSuite, ClientRequestTestInitHeader, ::testing::ValuesIn(ClientRequestTestData),
+    [](const testing::TestParamInfo<t_test_messages> &info) {
+        // Can use info.param here to generate the test suffix
+        std::string name = info.param.name;
+        return name;
+    }
+);
 
 TEST(ClientRequestTestSuite, decode_target) {
     ClientRequest test(0);
@@ -325,22 +362,22 @@ TEST(ClientRequestTestSuite, decode_target) {
 
 TEST(ClientRequestTestSuite, parse_parameters) {
     ClientRequest test(0);
-    std::string param;
+    std::string   param;
 
     // with nothing
-    param = "";
+    param        = "";
     test._target = "/coucou" + param;
     test.parse_parameters();
     EXPECT_EQ(test._target, "/coucou");
     EXPECT_EQ(test._query_string, param);
     // with something
-    param = "je=suis";
+    param        = "je=suis";
     test._target = "/coucou?" + param;
     test.parse_parameters();
     EXPECT_EQ(test._target, "/coucou");
     EXPECT_EQ(test._query_string, param);
     // with more something
-    param = "je=suis&heureux=coucou";
+    param        = "je=suis&heureux=coucou";
     test._target = "/coucou?" + param;
     test.parse_parameters();
     EXPECT_EQ(test._target, "/coucou");
@@ -355,19 +392,22 @@ TEST(ClientRequestTestSuite, parse_parameters) {
 TEST(ClientRequestTestSuite, parse_port) {
     ClientRequest test(0);
 
-    EXPECT_THROW({
-        try {
-            test.parse_port();
-        } catch (HttpError &e) {
-            EXPECT_EQ(e.get_code(), BadRequest);
-            throw;
-        } catch (std::exception &e) {
-            throw;
-        }
-    }, HttpError);
+    EXPECT_THROW(
+        {
+            try {
+                test.parse_port();
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), BadRequest);
+                throw;
+            } catch (std::exception &e) {
+                throw;
+            }
+        },
+        HttpError
+    );
     test._header["Host"] = "";
-    std::string &host = test._header["Host"];
-    host = "coucou";
+    std::string &host    = test._header["Host"];
+    host                 = "coucou";
     test.parse_port();
     EXPECT_EQ(test._port, 80);
     EXPECT_EQ(host, "coucou");
@@ -376,27 +416,33 @@ TEST(ClientRequestTestSuite, parse_port) {
     EXPECT_EQ(test._port, 42);
     EXPECT_EQ(host, "coucou");
     host = "coucou:eheh";
-    EXPECT_THROW({
-        try {
-            test.parse_port();
-        } catch (HttpError &e) {
-            EXPECT_EQ(e.get_code(), BadRequest);
-            throw;
-        } catch (std::exception &e) {
-            throw;
-        }
-    }, HttpError);
+    EXPECT_THROW(
+        {
+            try {
+                test.parse_port();
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), BadRequest);
+                throw;
+            } catch (std::exception &e) {
+                throw;
+            }
+        },
+        HttpError
+    );
     EXPECT_EQ(host, "coucou");
     host = "coucou:";
-    EXPECT_THROW({
-        try {
-            test.parse_port();
-        } catch (HttpError &e) {
-            EXPECT_EQ(e.get_code(), BadRequest);
-            throw;
-        } catch (std::exception &e) {
-            throw;
-        }
-    }, HttpError);
+    EXPECT_THROW(
+        {
+            try {
+                test.parse_port();
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), BadRequest);
+                throw;
+            } catch (std::exception &e) {
+                throw;
+            }
+        },
+        HttpError
+    );
     EXPECT_EQ(host, "coucou");
 }

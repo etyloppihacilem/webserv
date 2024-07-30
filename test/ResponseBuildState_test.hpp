@@ -16,6 +16,7 @@
 #include "FakeServer.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
+#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "gtest/gtest.h"
 #include <exception>
@@ -56,7 +57,10 @@ typedef std::tuple<
     >
     d_rbs;
 
-class ResponseBuildStateFixture: public ::testing::TestWithParam<d_rbs> {
+// TODO: in progress but check that everything that does not need a read is done in one call of every
+// epoll protected function.
+
+class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
     public:
         ResponseBuildStateFixture() {}
 
@@ -68,24 +72,22 @@ class ResponseBuildStateFixture: public ::testing::TestWithParam<d_rbs> {
             } catch (std::exception &e) {
                 FAIL() << "Could not build request." << e.what() << std::endl;
             }
-            // HERE:
-            // TODO: in progress but check that everything that does not need a read is done in one call of every
-            // epoll protected function.
+            _state = new ResponseBuildState<FakeServer, FakeRoute>(0, _request, _server);
         }
 
         void TearDown() override {}
 
         static void SetUpTestSuite() {
             _server._routes["/"] = FakeRoute(
-                OK, true, false, false, false, true, "", "", "/", "", "www", "/uploads", { GET, POST },
+                OK, true, false, false, false, true, "", "", "/", "", "www", "www/uploads", { GET, POST },
                 { "index.html" }
             );
             _server._routes["/images"] = FakeRoute(
                 OK, false, false, false, false, false, "", "", "/images", "", "www", "", { GET }, { "index.html" }
             );
             _server._routes["/images/png/delete"] = FakeRoute(
-                OK, false, false, false, false, false, "", "", "/images/png/delete", "", "www", "",
-                { GET, DELETE }, { "index.html" }
+                OK, false, false, false, false, false, "", "", "/images/png/delete", "", "www", "", { GET, DELETE },
+                { "index.html" }
             );
             _server._routes["/forms"] = FakeRoute(
                 OK, true, false, false, false, false, "", "", "/forms", "", "www", "", { GET }, { "index.html" }
@@ -95,7 +97,7 @@ class ResponseBuildStateFixture: public ::testing::TestWithParam<d_rbs> {
                 "/star_wars/milky_way.html", "/var/www", "", { GET }, { "index.html" }
             );
             _server._routes["/forms/upload_form"] = FakeRoute(
-                OK, false, false, false, false, true, "", "", "/forms/upload_form", "", "www", "/uploads",
+                OK, false, false, false, false, true, "", "", "/forms/upload_form", "", "www", "www/uploads",
                 { GET, POST }, { "index.html" }
             );
             _server._routes["/forms/kill_form"] = FakeRoute(
@@ -121,9 +123,10 @@ class ResponseBuildStateFixture: public ::testing::TestWithParam<d_rbs> {
         }
 
     protected:
-        static FakeServer         _server;
-        ResponseBuildingStrategy *_strategy;
-        ClientRequest            *_request;
+        static FakeServer                          _server;
+        ResponseBuildState<FakeServer, FakeRoute> *_state;
+        ResponseBuildingStrategy                  *_strategy;
+        ClientRequest                             *_request;
 };
 
 #endif // INCLUDE_TEST_RESPONSEBUILDSTATE_TEST_HPP_

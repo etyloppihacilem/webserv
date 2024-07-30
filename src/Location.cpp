@@ -10,7 +10,6 @@
 
 #include "Location.hpp"
 #include "ClientRequest.hpp"
-#include "ClientRequest.hpp"
 #include "HttpError.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
@@ -26,10 +25,11 @@
 #include <vector>
 
 template <class ServerClass, class RouteClass>
-Location<ServerClass, RouteClass>::Location(ClientRequest &request, ServerClass &server):
-    _status_code(OK) {
-    RouteClass       *route; // this is to get the reference out of try scope
-    std::string target = request.get_target();
+Location<ServerClass, RouteClass>::Location() {}
+
+template <class ServerClass, class RouteClass>
+Location<ServerClass, RouteClass>::Location(const std::string &target, ServerClass &server) : _status_code(OK) {
+    RouteClass *route; // this is to get the reference out of try scope
     struct stat buf;
 
     try {
@@ -38,8 +38,8 @@ Location<ServerClass, RouteClass>::Location(ClientRequest &request, ServerClass 
         throw HttpError(InternalServerError); // this is to prevent use of route out of scope if not defined
     }
     if (route->hasRedir()) {
-        _status_code    = route->getRedirCode();
-        _is_redirect    = true;
+        _status_code = route->getRedirCode();
+        _is_redirect = true;
         build_path(target, *route, route->getRedirPage());
         return;
     }
@@ -58,12 +58,12 @@ Location<ServerClass, RouteClass>::Location(ClientRequest &request, ServerClass 
 
     const std::vector<HttpMethod> &methods = route->getMethods();
 
-    _is_get     = std::find(methods.begin(), methods.end(), GET) != methods.end();
-    _is_post    = std::find(methods.begin(), methods.end(), POST) != methods.end();
-    _is_delete  = std::find(methods.begin(), methods.end(), DELETE) != methods.end();
+    _is_get    = std::find(methods.begin(), methods.end(), GET) != methods.end();
+    _is_post   = std::find(methods.begin(), methods.end(), POST) != methods.end();
+    _is_delete = std::find(methods.begin(), methods.end(), DELETE) != methods.end();
     // _is_put  = std::find(methods.begin(), methods.end(), PUT) != methods.end(); // not implemented yet
-    if (S_ISDIR(buf.st_mode)) {         // in case target is a directory
-        if (find_index(*route, buf))    // if index file is found
+    if (S_ISDIR(buf.st_mode)) {      // in case target is a directory
+        if (find_index(*route, buf)) // if index file is found
             return;
         _autoindex = route->hasAutoindex(); // if nothing else found
     } else {                                // in case target is anything but a directory
@@ -81,29 +81,29 @@ Location<ServerClass, RouteClass>::~Location() {}
   */
 template <class ServerClass, class RouteClass>
 bool Location<ServerClass, RouteClass>::find_index(const RouteClass &route, struct stat &buf) {
-    const std::vector<std::string> &indexs = route.getIndexPage();
-    const std::string trailing = (*_path.rbegin() == '/' ? "" : "/");
+    const std::vector<std::string> &indexs   = route.getIndexPage();
+    const std::string               trailing = (*_path.rbegin() == '/' ? "" : "/");
 
     for (std::vector<std::string>::const_iterator it = indexs.begin(); it != indexs.end(); it++) {
         std::string index_path = _path + trailing + *it;
 
         if (stat(_path.c_str(), &buf) == 0) {
-            if (!S_ISREG(buf.st_mode)) {     // if index.html or so is not a file.
+            if (!S_ISREG(buf.st_mode)) { // if index.html or so is not a file.
                 warn.log() << *it << " is not a file, so cannot be an index. Continuing." << std::endl;
                 continue;
             }
-            _path       = index_path;
-            _is_file    = true;
+            _path    = index_path;
+            _is_file = true;
             if (route.hasCgiExtension() && extract_extension(_path) == route.getCgiExtension())
                 setup_cgi(route);
-            return true;     // index file found and telling to read it
+            return true; // index file found and telling to read it
         }
         if (errno == ENOENT)
-            continue;     // file not found so searching forward
+            continue; // file not found so searching forward
         if (errno == EACCES)
-            throw HttpError(Forbidden);     // file found but won't open
+            throw HttpError(Forbidden); // file found but won't open
         error.log() << "Cannot stat index file at " << index_path << "and unknown error occured." << std::endl;
-        throw HttpError(InternalServerError);     // anything else is sus
+        throw HttpError(InternalServerError); // anything else is sus
     }
     return false;
 }
@@ -122,17 +122,21 @@ void Location<ServerClass, RouteClass>::build_path(const std::string &target, co
 
 /**
   Used to build redirect target (stored in path)
-  if redirect last chat is a '/', route's location is replaced by the redirection location.
+  if redirect last char is a '/', route's location is replaced by the redirection location.
   if not, redirection is considered to redirect on a file and the whole target is replaced by the new location.
   */
 template <class ServerClass, class RouteClass>
-void Location<ServerClass, RouteClass>::build_path(const std::string &target, const RouteClass &route, const std::string &redirect) {
+void Location<ServerClass, RouteClass>::build_path(
+    const std::string &target,
+    const RouteClass  &route,
+    const std::string &redirect
+) {
     if (*redirect.rbegin() != '/') {
         _path = redirect;
         return;
     } else {
         _path = target;
-        _path.replace(0, route.getLocation().length(), redirect);
+        _path.replace(0, route.getLocation().length() + 1, redirect);
     }
 }
 
@@ -142,9 +146,9 @@ void Location<ServerClass, RouteClass>::build_path(const std::string &target, co
 template <class ServerClass, class RouteClass>
 void Location<ServerClass, RouteClass>::setup_cgi(const RouteClass &route) {
     if (!route.hasCgiPath() || !route.hasCgiExtension())
-        return;  // nothing to configure because cgi is incomplete
-    _is_cgi     = true;
-    _cgi_path   = route.getCgiPath();
+        return; // nothing to configure because cgi is incomplete
+    _is_cgi   = true;
+    _cgi_path = route.getCgiPath();
 }
 
 template <class ServerClass, class RouteClass>
@@ -162,10 +166,10 @@ bool Location<ServerClass, RouteClass>::is_delete() const {
     return _is_delete;
 }
 
-//template <class ServerClass, class RouteClass>
-//bool Location<ServerClass, RouteClass>::is_put() const {
-//     return _is_put;
-// }
+// template <class ServerClass, class RouteClass>
+// bool Location<ServerClass, RouteClass>::is_put() const {
+//      return _is_put;
+//  }
 
 template <class ServerClass, class RouteClass>
 bool Location<ServerClass, RouteClass>::has_autoindex() const {
@@ -196,3 +200,20 @@ template <class ServerClass, class RouteClass>
 std::string Location<ServerClass, RouteClass>::get_path() const {
     return _path;
 }
+
+template <class ServerClass, class RouteClass>
+std::string Location<ServerClass, RouteClass>::get_route_path() const {
+    return _route_path;
+}
+
+template <class ServerClass, class RouteClass>
+std::string Location<ServerClass, RouteClass>::get_path_info() const {
+    return _path_info;
+}
+
+#ifdef TESTING
+# include "FakeRoute.hpp"
+# include "FakeServer.hpp"
+template class Location<FakeServer, FakeRoute>;
+#endif
+

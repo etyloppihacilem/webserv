@@ -8,6 +8,7 @@
 
 ############################################################################# */
 
+#include "ResponseBuildState.hpp"
 #include "BodyWriter.hpp"
 #include "CGIStrategy.hpp"
 #include "ClientRequest.hpp"
@@ -23,9 +24,7 @@
 #include "MimeTypes.hpp"
 #include "ProcessState.hpp"
 #include "RedirectStrategy.hpp"
-#include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
-#include "Server.hpp"
 #include "UploadStrategy.hpp"
 #include <exception>
 #include <map>
@@ -38,18 +37,18 @@
  This class is in charge of choosing the right strategy depending on the request.
  */
 template <class ServerClass, class RouteClass>
-ResponseBuildState<ServerClass, RouteClass>::ResponseBuildState(int fd, ClientRequest *request, ServerClass &server):
+ResponseBuildState<ServerClass, RouteClass>::ResponseBuildState(int fd, ClientRequest *request, ServerClass &server) :
     ProcessState(fd),
-    _request    (request),
-    _server     (server),
-    _strategy   (0),
-    _recovery   (false),
-    _code       (OK) {
+    _request(request),
+    _server(server),
+    _strategy(0),
+    _recovery(false),
+    _code(OK) {
     if (!_request) {
         error.log() << "Trying to build response without request." << std::endl;
         throw HttpError(InternalServerError);
     }
-}           // TODO:check where to free this once it is allocated
+} // TODO:check where to free this once it is allocated
 
 template <class ServerClass, class RouteClass>
 ResponseBuildState<ServerClass, RouteClass>::~ResponseBuildState() {}
@@ -62,8 +61,8 @@ t_state ResponseBuildState<ServerClass, RouteClass>::process() {
     } else {
         if (_strategy)
             delete _strategy;
-        init_strategy(_code);   // recovery
-        _recovery = false;      // because it is init so just normal operation now
+        init_strategy(_code); // recovery
+        _recovery = false;    // because it is init so just normal operation now
     }
     return _strategy->build_response() ? (_state = ready) : (_state = waiting);
 }
@@ -84,18 +83,18 @@ ResponseBuildingStrategy *ResponseBuildState<ServerClass, RouteClass>::get_respo
 template <class ServerClass, class RouteClass>
 void ResponseBuildState<ServerClass, RouteClass>::init_strategy() {
     if (isError(_request->get_status())) {
-        const std::map<HttpCode, std::string> error_pages   = _server.getErrorPages();
+        const std::map<HttpCode, std::string> &error_pages = _server.getErrorPages();
 
-        std::map<HttpCode, std::string>::const_iterator it  = error_pages.find(_request->get_status());
+        std::map<HttpCode, std::string>::const_iterator it = error_pages.find(_request->get_status());
 
         if (it == error_pages.end())
-            _strategy = new ErrorStrategy(_request->get_status());  // page not found
-        else                                                        // page found
+            _strategy = new ErrorStrategy(_request->get_status()); // page not found
+        else                                                       // page found
             _strategy = new GetFileStrategy(mime_types, it->second, _request->get_status());
         return;
     }
 
-    Location<ServerClass,RouteClass> location(*_request, _server);
+    Location<ServerClass, RouteClass> location(_request->get_target(), _server);
 
     if (location.is_redirect())
         _strategy = new RedirectStrategy(location.get_path(), location.get_status_code());
@@ -139,3 +138,17 @@ void ResponseBuildState<ServerClass, RouteClass>::init_strategy(HttpCode code) {
         // WARN: check not to loop in recovery there.
     }
 }
+
+template <class ServerClass, class RouteClass>
+void ResponseBuildState<ServerClass, RouteClass>::save_mem() {
+    if (_request)
+        _request->save_mem();
+    if (_strategy)
+        _strategy->save_mem();
+}
+
+#ifdef TESTING
+# include "FakeRoute.hpp"
+# include "FakeServer.hpp"
+template class ResponseBuildState<FakeServer, FakeRoute>;
+#endif

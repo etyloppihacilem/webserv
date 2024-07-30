@@ -11,8 +11,11 @@
 #include "ResponseBuildState_test.hpp"
 #include "FakeRoute.hpp"
 #include "FakeServer.hpp"
+#include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
+#include "ResponseBuildState.hpp"
 #include "gtest/gtest.h"
+#include <exception>
 #include <string>
 #include <vector>
 
@@ -21,12 +24,8 @@
 
 FakeServer ResponseBuildStateFixture::_server;
 
-TEST_P(ResponseBuildStateFixture, CorrectStrategyTest) {
-    return;
-}
-
 std::vector<d_rbs> ResponseBuildData = {
-    { "Test1", "Request", aucune, OK, {}, false, "" },
+    { "Test1", "Request", CGIStrategy, OK, {}, false, "" },
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -36,3 +35,25 @@ INSTANTIATE_TEST_SUITE_P(
         return name;
     }
 );
+
+TEST_P(ResponseBuildStateFixture, CorrectStrategyTest) {
+    return;
+}
+
+TEST(ResponseBuildStateSuite, NoRequest) {
+    typedef ResponseBuildState<FakeServer, FakeRoute> template_test;
+    FakeServer                                        server;
+    EXPECT_THROW(
+        {
+            try {
+                template_test test(0, 0, server);
+            } catch (HttpError &e) {
+                EXPECT_EQ(e.get_code(), InternalServerError);
+                throw;
+            } catch (std::exception &e) {
+                throw;
+            }
+        },
+        HttpError
+    );
+}
