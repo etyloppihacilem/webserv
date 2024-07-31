@@ -55,7 +55,7 @@ Route::Route(const std::string &location, const std::string &locationContent, Se
     _uploadSet      (false),
     _cgiPathSet     (false),
     _cgiExtensionSet(false) {
-    StringTokenizer tokenizedLocation(locationContent, "|");
+    StringTokenizer tokenizedLocation(locationContent, '|');
     ValueList       tokenizedUpload;
     ValueList       tokenizedRedirection;
     ValueList       tokenizedCgiPath;

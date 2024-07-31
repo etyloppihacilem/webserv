@@ -4,28 +4,29 @@
 #include <cstddef>
 #include <string>
 
-class StringTokenizer{
+class StringTokenizer {
     public:
-        StringTokenizer(const std::string &str, const std::string &delim);
+        StringTokenizer(const std::string &str, const char delim);
         ~StringTokenizer();
 
-        bool        hasMoreTokens();
         std::string remainingString();
-    	std::string delimValue();
-    	std::size_t delimLen();
+        char        delimiter();
+
+        bool        hasMoreTokens();
         std::size_t countTokens();
-        std::size_t countTokens(const std::string &separator);
+        std::size_t countTokens(const char separator);
+
         std::string peakToken();
         std::string nextToken();
-        std::string nextToken(const std::string &separator); // unused so far
-        std::string nextToken(std::size_t separatorPosition, const std::string &separator);
-        std::string filterNextToken(const std::string &filterString);
+        std::string nextToken(const char separator);
+        std::string nextToken(std::size_t separatorPosition);
 
     private:
-
         std::string _tokenString;
-        std::string _delimiter;
-        std::size_t _delimiterLen;
+        char        _delimiter;
+
+        std::string extractToken(std::size_t postion);
+        void        removeTrailingDelimiter(std::string &token);
 };
 
 #endif // INCLUDE_SRC_STRINGTOKENIZER_HPP_

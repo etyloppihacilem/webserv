@@ -5,51 +5,47 @@
 #include <tuple>
 
 typedef std::string Name;
-typedef std::string String;
-typedef std::string Delim;
-typedef std::size_t DelimSize;
+typedef std::string Input;
+typedef char        Delim;
+typedef std::string TokenizedString;
+typedef std::string Token;
+typedef std::size_t Count;
 
-struct test_tokenizer {
-std::string name;
-std::string tokenString;
-std::string delimiter;
-std::size_t delimSize;
+typedef std::tuple<Name, Input, Delim, TokenizedString> InitTest;
+
+static const InitTest ListOfParam[]{
+    { "OK", "----ffgsd skdf-dd-dd-/fsh--- - /df---", '-', "ffgsd skdf-dd-dd-/fsh- - /df" },
+    { "OK_NoDelimInInput", "----ffgsd skdf-dd-dd-/fsh--- - /df---", 'x', "----ffgsd skdf-dd-dd-/fsh--- - /df---" },
+    { "KO_EmptyInput", "", '-', "" },
 };
 
-class StringTokenizerParamTestFixture : public ::testing::TestWithParam<test_tokenizer> {
+class StringTokenizerParamInitTestFixture: public ::testing::TestWithParam<InitTest> {
     public:
-        StringTokenizerParamTestFixture():
-            tokenizedTest("---sfdl-- toto- - 123/--", "-") {}
+        StringTokenizerParamInitTestFixture(): tokenizedTest(std::get<1>(GetParam()), std::get<2>(GetParam())) {}
 
-        struct PrintToStringParamName{
-            template <class ParamType>
-            std::string operator()(const testing::TestParamInfo<ParamType> &info) const{
-                auto test_case = static_cast<test_tokenizer>(info.param);
-                return test_case.name;
-            }
+        struct PrintToStringTestName {
+                std::string operator()(const testing::TestParamInfo<InitTest> &info) const {
+                    auto test_case = static_cast<InitTest>(info.param);
+                    return std::get<0>(test_case);
+                }
         };
 
     protected:
         StringTokenizer tokenizedTest;
 };
 
-TEST_P(StringTokenizerParamTestFixture, ObjectInstanciationTest) {
-    auto [name, string, delimiter, delimSize] = GetParam();
-    ASSERT_EQ(  string, tokenizedTest.remainingString());
-    ASSERT_EQ(  delimiter,  tokenizedTest.delimValue());
-    ASSERT_EQ(  delimSize,  tokenizedTest.delimLen());
+TEST_P(StringTokenizerParamInitTestFixture, ObjectInstanciationTest) {
+    auto [name, input, delim, tokenizedString] = GetParam();
+    ASSERT_EQ(tokenizedString, tokenizedTest.remainingString());
+    if (tokenizedTest.remainingString().empty()) {
+        ASSERT_TRUE(name.find("KO") == 0);
+        ASSERT_TRUE(name.find("OK") == std::string::npos);
+        return;
+    }
+    ASSERT_EQ(delim, tokenizedTest.delimiter());
 }
 
-INSTANTIATE_TEST_SUITE_P(StringTokenizerTests, StringTokenizerParamTestFixture, ::testing::Values(
-	test_tokenizer("IsValidObject", "sfdl- toto- - 123/", "-", 1)
-	),
-	StringTokenizerParamTestFixture::PrintToStringParamName());
-
-
-// TEST(   StringTokeninzerTestSuite,  CountToken) {}
-//
-// TEST(   StringTokeninzerTestSuite,  PeakToken) {}
-//
-// TEST(   StringTokeninzerTestSuite,  nextToken) {}
-//
-// TEST(   StringTokeninzerTestSuite,  filterToken) {}
+INSTANTIATE_TEST_SUITE_P(
+    StringTokenizerTests, StringTokenizerParamInitTestFixture, ::testing::ValuesIn(ListOfParam),
+    StringTokenizerParamInitTestFixture::PrintToStringTestName()
+);

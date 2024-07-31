@@ -17,7 +17,7 @@ std::string tokenizeFile(const std::string &input)
     std::   replace(tokenString.begin(),    tokenString.end(),  ' ',    delim);
     std::   replace(tokenString.begin(),    tokenString.end(),  '\t',   delim);
 
-    StringTokenizer tokenizedFile(tokenString, "|");
+    StringTokenizer tokenizedFile(tokenString, '|');
     std::string     errorString = tokenizedFile.remainingString().substr(0, 30);
 
     std::   replace(errorString.begin(),    errorString.end(),  '|',    ' ');
@@ -42,7 +42,7 @@ std::string tokenizeFile(const std::string &input)
                     << std::endl;
         throw ServerConfError();
     }
-    return tokenizedFile.nextToken(closingBracePos, "}");
+    return tokenizedFile.nextToken(closingBracePos);
 }
 
 std::string tokenizeServer(StringTokenizer &tokenizedFile)
@@ -72,7 +72,7 @@ std::string tokenizeServer(StringTokenizer &tokenizedFile)
                     << std::endl;
         throw ServerConfError();
     }
-    return tokenizedFile.nextToken(closingBracePos, "}");
+    return tokenizedFile.nextToken(closingBracePos);
 }
 
 Field tokenizeLocation(StringTokenizer &tokenizedServer)
@@ -104,7 +104,7 @@ Field tokenizeLocation(StringTokenizer &tokenizedServer)
                     << std::endl;
         throw ServerConfError();
     }
-    locationInfo.second = tokenizedServer.nextToken(closingBracePos, "}");
+    locationInfo.second = tokenizedServer.nextToken(closingBracePos);
     return locationInfo;
 }
 
@@ -114,11 +114,11 @@ Field tokenizeField(StringTokenizer &tokenizedServer)
 
     fieldInfo.first = tokenizedServer.nextToken();      // remove Server
     if (isValidFieldName(fieldInfo.first)) {
-        tokenizedServer.nextToken(";");
+        tokenizedServer.nextToken(';');
         warn.log() << fieldInfo.first << ": field name is not listed in server conf." << std::endl;
         throw ServerConfWarn();
     }
-    fieldInfo.second = tokenizedServer.nextToken(";");  // remove open bracket
+    fieldInfo.second = tokenizedServer.nextToken(';');  // remove open bracket
     if (fieldInfo.second.empty()) {
         warn.log() << fieldInfo.first << ": field value is empty." << std::endl;
         throw ServerConfWarn();
@@ -129,7 +129,7 @@ Field tokenizeField(StringTokenizer &tokenizedServer)
 ValueList tokenizeValue(const std::string &value)
 {
     ValueList       valueList;
-    StringTokenizer tokenizedValue(value, "|");
+    StringTokenizer tokenizedValue(value, '|');
 
     while (tokenizedValue.hasMoreTokens()) {
         valueList.push_back(tokenizedValue.nextToken());

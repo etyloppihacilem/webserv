@@ -67,7 +67,7 @@ ServerManager::ServerManager(const std::string &configFile) {
         }
 
         std::string     fileContent = tokenizeFile(readConfFile(configStream));
-        StringTokenizer tokenizedFile(fileContent, "|");
+        StringTokenizer tokenizedFile(fileContent, '|');
 
         while (tokenizedFile.hasMoreTokens()) {
             std::string serverContent = tokenizeServer(tokenizedFile);

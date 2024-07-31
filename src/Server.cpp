@@ -32,7 +32,7 @@ Server::Server(const std::string &serverContent):
     _indexPageSet   (false),
     _methodsSet     (false),
     _rootDirSet     (false) {
-    StringTokenizer         tokenizedServer(serverContent, "|");
+    StringTokenizer         tokenizedServer(serverContent, '|');
     std::vector<Field>      tokenizedLocations;
     std::vector<ValueList>  tokenizedErrorPages;
 
