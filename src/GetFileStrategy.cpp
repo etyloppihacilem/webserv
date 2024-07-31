@@ -19,6 +19,7 @@
 #include <cerrno>
 #include <cstddef>
 #include <fstream>
+#include <ios>
 #include <new>
 #include <ostream>
 #include <string>
@@ -63,7 +64,7 @@ bool GetFileStrategy::build_response() {
         }
         _estimated_size = buf.st_size;
     } // saving stack
-    _file.open(_location.c_str(), std::fstream::binary);
+    _file.open(_location.c_str(), std::fstream::binary | std::ios_base::in);
     if (!_file.is_open()) {
         error.log() << "Undetected error opening file " << _location << ". Sending " << InternalServerError
                     << std::endl;

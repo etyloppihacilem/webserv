@@ -16,6 +16,7 @@
 #include "FakeServer.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
+#include "ProcessState.hpp"
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "gtest/gtest.h"
@@ -27,13 +28,13 @@
 
 typedef enum e_strategies {
     aucune = 0,
-    CGIStrategy,
-    DeleteStrategy,
-    ErrorStrategy,
-    GetFileStrategy,
-    GetIndexStrategy,
-    RedirectStrategy,
-    UploadStrategy,
+    tCGIStrategy,
+    tDeleteStrategy,
+    tErrorStrategy,
+    tGetFileStrategy,
+    tGetIndexStrategy,
+    tRedirectStrategy,
+    tUploadStrategy,
 } strategies;
 
 typedef enum e_rbs {
@@ -70,9 +71,18 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
                 _request = new ClientRequest(0);
                 _request->parse_header(buf); // as everything is in buff, no call to read_body() is ever needed
             } catch (std::exception &e) {
-                FAIL() << "Could not build request." << e.what() << std::endl;
+                FAIL() << "Could not build request." << e.what();
             }
-            _state = new ResponseBuildState<FakeServer, FakeRoute>(0, _request, _server);
+            if (_request->get_status() != OK)
+                FAIL() << "_request has error !";
+            try {
+                _state = new ResponseBuildState<FakeServer, FakeRoute>(0, _request, _server);
+            } catch (std::exception &e) {
+                FAIL() << "Could not build state." << e.what();
+            }
+            ASSERT_EQ(_state->process(), ready);
+            _strategy = _state->get_response_strategy();
+            ASSERT_NE(_strategy, (void *) 0);
         }
 
         void TearDown() override {}

@@ -44,7 +44,7 @@ Location<ServerClass, RouteClass>::Location(const std::string &target, ServerCla
         return;
     }
     build_path(target, *route);
-    if (stat(target.c_str(), &buf) != 0) {
+    if (stat(_path.c_str(), &buf) != 0) {
         if (errno == ENOENT || errno == ENOTDIR)
             throw HttpError(NotFound); // there's nothing to be found
         if (errno == EACCES)
@@ -116,7 +116,12 @@ void Location<ServerClass, RouteClass>::build_path(const std::string &target, co
     _path       = target;
     _path_info  = target;
     _route_path = route.getRootDir();
-    _path.replace(0, route.getLocation().length(), _route_path);
+    if (*_route_path.rbegin() == '/')
+        _route_path.resize(_route_path.length() - 1);
+    if (_path[route.getLocation().length()] != '/')
+        _path.replace(0, route.getLocation().length() - 1, _route_path);
+    else
+        _path.replace(0, route.getLocation().length(), _route_path);
     _path_info.replace(0, route.getLocation().length(), "");
 }
 
@@ -216,4 +221,3 @@ std::string Location<ServerClass, RouteClass>::get_path_info() const {
 # include "FakeServer.hpp"
 template class Location<FakeServer, FakeRoute>;
 #endif
-
