@@ -22,7 +22,6 @@
 #include "gtest/gtest.h"
 #include <exception>
 #include <map>
-#include <ostream>
 #include <string>
 #include <tuple>
 

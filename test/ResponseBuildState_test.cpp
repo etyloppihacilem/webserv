@@ -32,6 +32,7 @@
 
 FakeServer ResponseBuildStateFixture::_server;
 
+// Do not include default server header in header verification list.
 std::vector<d_rbs> ResponseBuildData = {
     { "Test1",
       "GET /index.html HTTP/1.1\r\nHost: coucou\r\n\r\n",
@@ -71,6 +72,15 @@ TEST_P(ResponseBuildStateFixture, CorrectStrategyTest) {
         EXPECT_EQ(strat, tUploadStrategy);
     else
         FAIL() << "Strategy was not found.";
+}
+
+TEST_P(ResponseBuildStateFixture, CorrectStatus) {
+    HttpCode code = std::get<tstatus>(GetParam());
+    EXPECT_EQ(code, _strategy->get_response().get_code());
+}
+
+TEST_P(ResponseBuildStateFixture, CorrectHeaders) {
+    ; // HERE: do check for headers. This could be the opportunity to put then correctly (server name for example...)
 }
 
 TEST(ResponseBuildStateSuite, NoRequest) {
