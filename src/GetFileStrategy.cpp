@@ -23,6 +23,7 @@
 #include <new>
 #include <ostream>
 #include <string>
+#include <strings.h>
 #include <sys/stat.h>
 
 GetFileStrategy::GetFileStrategy(const MimeTypes &mime, const std::string &location, HttpCode code) :
@@ -83,7 +84,7 @@ bool GetFileStrategy::build_response() {
 }
 
 bool GetFileStrategy::fill_buffer(std::string &buffer, size_t size) {
-    char buf[BUFFER_SIZE];
+    char buf[BUFFER_SIZE + 1] = {0}; // init with 0
 
     if (!_file.is_open()) {
         error.log() << "File " << _location << " is read but not open." << std::endl;

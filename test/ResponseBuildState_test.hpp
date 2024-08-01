@@ -84,7 +84,14 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
             ASSERT_NE(_strategy, (void *) 0);
         }
 
-        void TearDown() override {}
+        void TearDown() override {
+            if (_state)
+                delete _state;
+            if (_request)
+                delete _request;
+            if (_strategy)
+                delete _strategy;
+        }
 
         static void SetUpTestSuite() {
             _server._routes["/"] = FakeRoute(

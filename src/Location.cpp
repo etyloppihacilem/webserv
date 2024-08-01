@@ -19,16 +19,33 @@
 #include "StringUtils.hpp"
 #include <algorithm>
 #include <cerrno>
+#include <features.h>
 #include <ostream>
 #include <string>
 #include <sys/stat.h>
 #include <vector>
 
 template <class ServerClass, class RouteClass>
-Location<ServerClass, RouteClass>::Location() {}
+Location<ServerClass, RouteClass>::Location() :
+    _is_get(false),
+    _is_post(false),
+    _is_delete(false),
+    _autoindex(false),
+    _is_file(false),
+    _is_cgi(false),
+    _is_redirect(false),
+    _status_code(OK) {}
 
 template <class ServerClass, class RouteClass>
-Location<ServerClass, RouteClass>::Location(const std::string &target, ServerClass &server) : _status_code(OK) {
+Location<ServerClass, RouteClass>::Location(const std::string &target, ServerClass &server) :
+    _is_get(false),
+    _is_post(false),
+    _is_delete(false),
+    _autoindex(false),
+    _is_file(false),
+    _is_cgi(false),
+    _is_redirect(false),
+    _status_code(OK) {
     RouteClass *route; // this is to get the reference out of try scope
     struct stat buf;
 

@@ -49,6 +49,7 @@ class Response {
         BodyWriter                        *_body;   ///< Body of response (if any)
 #ifdef TESTING
         FRIEND_TEST(ResponseTestSuite, generate_status_line);
+        FRIEND_TEST(ResponseBuildStateFixture, CorrectHeaders);
 #endif
 };
 

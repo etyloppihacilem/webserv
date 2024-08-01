@@ -23,9 +23,9 @@
 BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state) : BodyWriter(state), _body(), _recovered(false) {
     uint16_t i = 0;
 
-    while (!(_done = _strategy->fill_buffer(_body)) && ++i && length() < MAX_BODY_BUFFER)
+    while (!(_done = _strategy->fill_buffer(_body)) && ++i && length() <= MAX_BODY_BUFFER)
         ; // i is to prevent infinite loop in case buffer is not filling
-    if (length() < MAX_BODY_BUFFER) {
+    if (length() > MAX_BODY_BUFFER) {
         _body = "";
         shrink_to_fit(_body); // wiping body;
         throw std::bad_alloc();

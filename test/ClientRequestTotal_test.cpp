@@ -520,14 +520,17 @@ TEST_P(TotalRequestFixture, HeadersTest) {
     EXPECT_EQ(correct.size(), test_headers.size());
     for (correct_item = correct.begin(); correct_item != correct.end(); correct_item++) {
         test_item = test_headers.find(correct_item->first);
-        EXPECT_NE(test_item, test_headers.end());
+        EXPECT_NE(test_item, test_headers.end())
+            << "This header was expected :\n"
+            << correct_item->first << ": " << correct_item->second << "\n...not found.";
         if (test_item != test_headers.end())
             EXPECT_EQ(test_item->second, correct_item->second);
     }
-    for (test_item = correct.begin(); test_item != correct.end(); test_item++) {
+    for (test_item = test_headers.begin(); test_item != test_headers.end(); test_item++) {
         correct_item = correct.find(test_item->first);
-        EXPECT_NE(correct_item, correct.end());
-        if (correct_item != test_headers.end())
+        EXPECT_NE(correct_item, correct.end()) << "This header was found :\n"
+                                               << test_item->first << ": " << test_item->second << "\n...not expected.";
+        if (correct_item != correct.end())
             EXPECT_EQ(correct_item->second, test_item->second);
     } // double verification is to display clearly which one is missing.
 }

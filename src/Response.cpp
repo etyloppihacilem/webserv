@@ -22,7 +22,7 @@
 #include <string>
 
 Response::Response() : _code(OK), _header(), _body(0) {
-    add_header("Server", "webserv"); // adding server name
+    add_header("Server", SERVER_SOFTWARE); // adding server name, this is not MUST but SHOULD in RFC
 }
 
 // TODO:connection header is not there yet !!!!
