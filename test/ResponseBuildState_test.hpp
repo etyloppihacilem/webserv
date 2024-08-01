@@ -45,6 +45,7 @@ typedef enum e_rbs {
     theaders,  ///< Headers
     thavebody, ///< Have body
     tbody,     ///< Body content
+    tclean,
 } t_rbs;
 
 typedef std::tuple<
@@ -54,7 +55,8 @@ typedef std::tuple<
     HttpCode,                           ///< Status of ResponseBuildingStrategy
     std::map<std::string, std::string>, ///< Headers
     bool,                               ///< Have body
-    std::string                         ///< Body content
+    std::string,                        ///< Body content
+    bool                                ///< clean testing content
     >
     d_rbs;
 
@@ -66,7 +68,8 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
         ResponseBuildStateFixture() : _state(0), _strategy(0), _request(0) {}
 
         void SetUp() override {
-            std::remove("www/test/upload.txt");
+            if (std::get<tclean>(GetParam()))
+                clean();
             std::string buf = std::get<tdata>(GetParam());
             try {
                 _request = new ClientRequest(0);
@@ -87,6 +90,8 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
             ASSERT_NE(_strategy, (void *) 0);
         }
 
+        static void clean() { std::remove("www/test/upload.txt"); }
+
         void TearDown() override {
             if (_state)
                 delete _state;
@@ -94,8 +99,9 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
                 delete _request;
             if (_strategy)
                 delete _strategy;
-            std::remove("www/test/upload.txt");
         }
+
+        static void TearDownTestSuite() { clean(); }
 
         static void SetUpTestSuite() {
             _server._routes["/"] = FakeRoute(
