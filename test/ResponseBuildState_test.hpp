@@ -94,6 +94,7 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
                 delete _request;
             if (_strategy)
                 delete _strategy;
+            std::remove("www/test/upload.txt");
         }
 
         static void SetUpTestSuite() {
