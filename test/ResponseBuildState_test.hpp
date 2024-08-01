@@ -20,6 +20,7 @@
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "gtest/gtest.h"
+#include <cstdio>
 #include <exception>
 #include <map>
 #include <string>
@@ -62,9 +63,10 @@ typedef std::tuple<
 
 class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
     public:
-        ResponseBuildStateFixture() {}
+        ResponseBuildStateFixture() : _state(0), _strategy(0), _request(0) {}
 
         void SetUp() override {
+            std::remove("www/test/upload.txt");
             std::string buf = std::get<tdata>(GetParam());
             try {
                 _request = new ClientRequest(0);
@@ -81,6 +83,7 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
             }
             ASSERT_EQ(_state->process(), ready);
             _strategy = _state->get_response_strategy();
+            // _strategy->build_response(); // at least once without read worry
             ASSERT_NE(_strategy, (void *) 0);
         }
 

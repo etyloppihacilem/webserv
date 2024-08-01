@@ -34,7 +34,8 @@ Location<ServerClass, RouteClass>::Location() :
     _is_file(false),
     _is_cgi(false),
     _is_redirect(false),
-    _status_code(OK) {}
+    _status_code(OK),
+    _default_error(Forbidden) {}
 
 template <class ServerClass, class RouteClass>
 Location<ServerClass, RouteClass>::Location(const std::string &target, ServerClass &server) :
@@ -45,7 +46,8 @@ Location<ServerClass, RouteClass>::Location(const std::string &target, ServerCla
     _is_file(false),
     _is_cgi(false),
     _is_redirect(false),
-    _status_code(OK) {
+    _status_code(OK),
+    _default_error(Forbidden) {
     RouteClass *route; // this is to get the reference out of try scope
     struct stat buf;
 
@@ -61,9 +63,20 @@ Location<ServerClass, RouteClass>::Location(const std::string &target, ServerCla
         return;
     }
     build_path(target, *route);
+
+    const std::vector<HttpMethod> &methods = route->getMethods();
+
+    _is_get    = std::find(methods.begin(), methods.end(), GET) != methods.end();
+    _is_post   = std::find(methods.begin(), methods.end(), POST) != methods.end();
+    _is_delete = std::find(methods.begin(), methods.end(), DELETE) != methods.end();
+    // _is_put  = std::find(methods.begin(), methods.end(), PUT) != methods.end(); // not implemented yet
     if (stat(_path.c_str(), &buf) != 0) {
-        if (errno == ENOENT || errno == ENOTDIR)
-            throw HttpError(NotFound); // there's nothing to be found
+        if (errno == ENOENT || errno == ENOTDIR) {
+            if (!_is_post)                      // post could create a non existing resource.
+                throw HttpError(NotFound);      // there's nothing to be found
+            _autoindex = route->hasAutoindex(); // if nothing else found
+            return;                             // we do not know if it is a dir
+        }
         if (errno == EACCES)
             throw HttpError(Forbidden);
         if (errno == ENAMETOOLONG)
@@ -72,13 +85,6 @@ Location<ServerClass, RouteClass>::Location(const std::string &target, ServerCla
                     << "' at location (path) '" << _path << "'." << std::endl;
         throw HttpError(InternalServerError);
     }
-
-    const std::vector<HttpMethod> &methods = route->getMethods();
-
-    _is_get    = std::find(methods.begin(), methods.end(), GET) != methods.end();
-    _is_post   = std::find(methods.begin(), methods.end(), POST) != methods.end();
-    _is_delete = std::find(methods.begin(), methods.end(), DELETE) != methods.end();
-    // _is_put  = std::find(methods.begin(), methods.end(), PUT) != methods.end(); // not implemented yet
     if (S_ISDIR(buf.st_mode)) {      // in case target is a directory
         if (find_index(*route, buf)) // if index file is found
             return;

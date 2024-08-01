@@ -211,7 +211,7 @@ bool ClientRequest::parse_header(const std::string &in) {
         }
     }
     try {
-        init_header(in);
+        init_header(in); // TODO: COMMENTS AND QUOTED HEADERS PROBLEM THERE
         parse_port();
     } catch (HttpError &e) {
         _status = e.get_code();

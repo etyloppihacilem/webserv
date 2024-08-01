@@ -38,6 +38,7 @@ class Location {
         bool        is_cgi() const;
         bool        is_redirect() const;
         HttpCode    get_status_code() const;
+        HttpCode    get_default_error() const;
         std::string get_path() const;
         std::string get_route_path() const;
         std::string get_path_info() const;
@@ -58,6 +59,7 @@ class Location {
         bool        _is_cgi;
         bool        _is_redirect;
         HttpCode    _status_code;
+        HttpCode _default_error;
         std::string _cgi_path;
         std::string _path;
         std::string _route_path;

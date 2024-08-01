@@ -40,14 +40,22 @@
 FakeServer ResponseBuildStateFixture::_server;
 
 // Do not include default server header in header verification list.
+// WARN: Do not test for CGI yet !! not implemented !!
 std::vector<d_rbs> ResponseBuildData = {
-    { "Test1",
+    { "Default",
       "GET /index.html HTTP/1.1\r\nHost: coucou\r\n\r\n",
       tGetFileStrategy,
       OK,
       { { "Content-Type", "text/html" }, { "Content-Length", "102" } },
       true,
       "<body><h1>Coucou je suis heureux</h1><div>This file is there for test and demo purposes.</div></body>\n" },
+    { "POST",
+      "POST /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+      tUploadStrategy,
+      Created,
+      { { "Location", "/test/upload.txt" } },
+      false,
+      "" },
 };
 
 INSTANTIATE_TEST_SUITE_P(
