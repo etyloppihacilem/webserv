@@ -50,6 +50,7 @@ class Response {
 #ifdef TESTING
         FRIEND_TEST(ResponseTestSuite, generate_status_line);
         FRIEND_TEST(ResponseBuildStateFixture, CorrectHeaders);
+        FRIEND_TEST(ResponseBuildStateFixture, BodyValue);
 #endif
 };
 

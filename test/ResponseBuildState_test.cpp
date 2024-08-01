@@ -9,6 +9,9 @@
 ##################################################################################################################### */
 
 #include "ResponseBuildState_test.hpp"
+#include "BodyWriter.hpp"
+#include "BodyWriterChunk.hpp"
+#include "BodyWriterLength.hpp"
 #include "CGIStrategy.hpp"
 #include "DeleteStrategy.hpp"
 #include "ErrorStrategy.hpp"
@@ -24,8 +27,10 @@
 #include "UploadStrategy.hpp"
 #include "todo.hpp"
 #include "gtest/gtest.h"
+#include <cstddef>
 #include <exception>
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -42,7 +47,7 @@ std::vector<d_rbs> ResponseBuildData = {
       OK,
       { { "Content-Type", "text/html" }, { "Content-Length", "102" } },
       true,
-      "<body><h1>Coucou je suis heureux</h1><div>This file is there for test and demo purposes.</div></body>" },
+      "<body><h1>Coucou je suis heureux</h1><div>This file is there for test and demo purposes.</div></body>\n" },
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -107,6 +112,39 @@ TEST_P(ResponseBuildStateFixture, CorrectHeaders) {
         if (correct_item != correct.end())
             EXPECT_EQ(correct_item->second, test_item->second);
     } // double verification is to display clearly which one is missing.
+}
+
+TEST_P(ResponseBuildStateFixture, HaveBody) {
+    bool correct = std::get<thavebody>(GetParam());
+
+    EXPECT_EQ(_strategy->get_response().have_body(), correct);
+}
+
+TEST_P(ResponseBuildStateFixture, BodyValue) {
+    typedef std::map<std::string, std::string> map;
+    if (!_strategy->get_response().have_body())
+        return;
+    BodyWriter *bodywriter = _strategy->get_response().get_body();
+    std::string body;
+    if (dynamic_cast<BodyWriterChunk *>(bodywriter) != 0) {
+        while (!bodywriter->is_done())
+            body += bodywriter->generate();
+    } else if (dynamic_cast<BodyWriterLength *>(bodywriter) != 0) {
+        body = bodywriter->generate();
+    } else {
+        FAIL() << "Unknown body type.";
+        return;
+    }
+    const map &test_headers = _strategy->get_response()._header;
+    if (test_headers.find("Content-Length") != test_headers.end()) {
+        std::stringstream st;
+        st << test_headers.find("Content-Length")->second;
+        size_t len;
+        st >> len;
+        EXPECT_EQ(bodywriter->length(), len);
+    }
+    const std::string &correct = std::get<tbody>(GetParam());
+    EXPECT_EQ(body, correct);
 }
 
 TEST(ResponseBuildStateSuite, NoRequest) {
