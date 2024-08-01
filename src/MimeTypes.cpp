@@ -17,7 +17,7 @@
 #include <ostream>
 #include <string>
 
-MimeTypes::MimeTypes(std::string path): _done(false), _types() {
+MimeTypes::MimeTypes(std::string path) : _done(false), _types() {
     std::fstream file;
 
     file.open(path.c_str());
@@ -61,7 +61,7 @@ MimeTypes::MimeTypes(std::string path): _done(false), _types() {
     file.close();
 }
 
-MimeTypes::MimeTypes(MimeTypes &other): _done(), _types() {
+MimeTypes::MimeTypes(MimeTypes &other) : _done(), _types() {
     (void) other;
     error.log() << "FATAL you should not duplicate any MimeTypes object." << std::endl;
 }

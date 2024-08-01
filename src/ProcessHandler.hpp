@@ -16,7 +16,7 @@
 /**
   This class is handling all ProcessStates.
   */
-class ProcessHandler: public EventHandler {
+class ProcessHandler : public EventHandler {
     public:
         ProcessHandler(int fd);
         ~ProcessHandler();
@@ -24,4 +24,4 @@ class ProcessHandler: public EventHandler {
     private:
 };
 
-#endif  // INCLUDE_SRC_PROCESSHANDLER_HPP_
+#endif // INCLUDE_SRC_PROCESSHANDLER_HPP_

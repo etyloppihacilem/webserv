@@ -19,17 +19,17 @@
 /**
   Strategy to delete a file.
   */
-class DeleteStrategy: public ResponseBuildingStrategy {
+class DeleteStrategy : public ResponseBuildingStrategy {
     public:
         DeleteStrategy(const std::string &location);
         ~DeleteStrategy();
 
-        bool    build_response();
-        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void    save_mem();
+        bool build_response();
+        bool fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void save_mem();
 
     private:
         std::string _location;
 };
 
-#endif  // INCLUDE_SRC_DELETESTRATEGY_HPP_
+#endif // INCLUDE_SRC_DELETESTRATEGY_HPP_

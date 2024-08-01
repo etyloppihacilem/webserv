@@ -8,8 +8,8 @@
 
 ############################################################################# */
 
-#include "BodyWriter.hpp"
 #include "GetFileStrategy.hpp"
+#include "BodyWriter.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
@@ -25,11 +25,11 @@
 #include <string>
 #include <sys/stat.h>
 
-GetFileStrategy::GetFileStrategy(const MimeTypes &mime, const std::string &location, HttpCode code):
+GetFileStrategy::GetFileStrategy(const MimeTypes &mime, const std::string &location, HttpCode code) :
     ResponseBuildingStrategy(),
-    _mime                   (mime),
-    _location               (location),
-    _code                   (code) {}
+    _mime(mime),
+    _location(location),
+    _code(code) {}
 
 GetFileStrategy::~GetFileStrategy() {
     if (_file.is_open())
@@ -56,8 +56,8 @@ bool GetFileStrategy::build_response() {
             if (errno == ENOMEM)
                 throw std::bad_alloc();
             if (errno == ENOTDIR)
-                throw HttpError(Forbidden, "DIR");  // this is to tell the difference between directory forbidden and no
-                                                    // directory forbidden
+                throw HttpError(Forbidden, "DIR"); // this is to tell the difference between directory forbidden and no
+                                                   // directory forbidden
             if (errno == ENAMETOOLONG)
                 throw HttpError(URITooLong);
             throw HttpError(InternalServerError);

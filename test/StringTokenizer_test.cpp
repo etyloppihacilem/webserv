@@ -19,9 +19,9 @@ static const InitTest ListOfParam[]{
     { "KO_EmptyInput", "", '-', "" },
 };
 
-class StringTokenizerParamInitTestFixture: public ::testing::TestWithParam<InitTest> {
+class StringTokenizerParamInitTestFixture : public ::testing::TestWithParam<InitTest> {
     public:
-        StringTokenizerParamInitTestFixture(): tokenizedTest(std::get<1>(GetParam()), std::get<2>(GetParam())) {}
+        StringTokenizerParamInitTestFixture() : tokenizedTest(std::get<1>(GetParam()), std::get<2>(GetParam())) {}
 
         struct PrintToStringTestName {
                 std::string operator()(const testing::TestParamInfo<InitTest> &info) const {
@@ -46,6 +46,8 @@ TEST_P(StringTokenizerParamInitTestFixture, ObjectInstanciationTest) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    StringTokenizerTests, StringTokenizerParamInitTestFixture, ::testing::ValuesIn(ListOfParam),
+    StringTokenizerTests,
+    StringTokenizerParamInitTestFixture,
+    ::testing::ValuesIn(ListOfParam),
     StringTokenizerParamInitTestFixture::PrintToStringTestName()
 );

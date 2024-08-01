@@ -8,8 +8,8 @@
 
 ############################################################################# */
 
-#include "BodyWriter.hpp"
 #include "BodyWriterLength.hpp"
+#include "BodyWriter.hpp"
 #include "Logger.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "StringUtils.hpp"
@@ -20,17 +20,14 @@
 #include <stdint.h>
 #include <string>
 
-BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state):
-    BodyWriter  (state),
-    _body       (),
-    _recovered  (false) {
+BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state) : BodyWriter(state), _body(), _recovered(false) {
     uint16_t i = 0;
 
     while (!(_done = _strategy->fill_buffer(_body)) && ++i && length() < MAX_BODY_BUFFER)
-        ;                       // i is to prevent infinite loop in case buffer is not filling
+        ; // i is to prevent infinite loop in case buffer is not filling
     if (length() < MAX_BODY_BUFFER) {
         _body = "";
-        shrink_to_fit(_body);   // wiping body;
+        shrink_to_fit(_body); // wiping body;
         throw std::bad_alloc();
     }
     if (i == 0)
@@ -44,11 +41,11 @@ BodyWriterLength::~BodyWriterLength() {}
 /**
   Return whole body.
   */
-std::string BodyWriterLength::generate(size_t size /** is discarded because not needed in BodyWriterLength */ ) {
+std::string BodyWriterLength::generate(size_t size /** is discarded because not needed in BodyWriterLength */) {
     (void) size;
     if (_recovered)
-        warn.log()  << "Body already recovered. Risk of loosing body data if save_mem procedures are initiated."
-                    << std::endl;
+        warn.log() << "Body already recovered. Risk of loosing body data if save_mem procedures are initiated."
+                   << std::endl;
     _recovered = true;
     return _body;
 }

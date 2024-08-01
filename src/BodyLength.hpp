@@ -25,7 +25,7 @@
 
   There is no particular body structure.
   */
-class BodyLength: public Body {
+class BodyLength : public Body {
     public:
         BodyLength(int fd, std::string &buffer, std::string length /** is a string representing a decimal. */);
         ~BodyLength();

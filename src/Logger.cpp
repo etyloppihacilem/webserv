@@ -20,7 +20,7 @@
 #include <ostream>
 #include <string>
 
-Logger::Logger(std::ostream &os, std::string level, std::string color, size_t width): _enabled(true) {
+Logger::Logger(std::ostream &os, std::string level, std::string color, size_t width) : _enabled(true) {
     _dev_null.setstate(std::ios_base::badbit); // set /dev/null to be /dev/null
     width += 3;
     _level = "[" + level + "]";

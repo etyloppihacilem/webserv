@@ -17,7 +17,7 @@
 #include <cstddef>
 #include <string>
 
-class BodyWriterLength: public BodyWriter {
+class BodyWriterLength : public BodyWriter {
     public:
         BodyWriterLength(ResponseBuildingStrategy &state);
         ~BodyWriterLength();
@@ -32,4 +32,4 @@ class BodyWriterLength: public BodyWriter {
                                 ///< and body is already read.
 };
 
-#endif  // INCLUDE_SRC_BODYWRITERLENGTH_HPP_
+#endif // INCLUDE_SRC_BODYWRITERLENGTH_HPP_

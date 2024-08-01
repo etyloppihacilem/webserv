@@ -30,15 +30,15 @@ class BodyWriter {
         BodyWriter(ResponseBuildingStrategy &state);
         virtual ~BodyWriter() = 0;
 
-        virtual std::string generate(size_t size    = BUFFER_SIZE) = 0;
-        virtual size_t      length() const          = 0;            ///< Returns length of body sent or to be sent,
-                                                                    ///< depending on BodyWriter type.
-        bool            is_done() const;                            ///< Returns if BodyWriter is done sending.
-        virtual void    save_mem() = 0;                             ///< Save allocated heap.
+        virtual std::string generate(size_t size = BUFFER_SIZE) = 0;
+        virtual size_t      length() const                      = 0; ///< Returns length of body sent or to be sent,
+                                                                     ///< depending on BodyWriter type.
+        bool                is_done() const;                         ///< Returns if BodyWriter is done sending.
+        virtual void        save_mem() = 0;                          ///< Save allocated heap.
 
     protected:
-        bool _done;                                                 ///< True if body is sent.
-        ResponseBuildingStrategy *_strategy;                        ///< Strategy is needed to generate content of body
+        bool                      _done;     ///< True if body is sent.
+        ResponseBuildingStrategy *_strategy; ///< Strategy is needed to generate content of body
 };
 
-#endif  // INCLUDE_SRC_BODYWRITER_HPP_
+#endif // INCLUDE_SRC_BODYWRITER_HPP_

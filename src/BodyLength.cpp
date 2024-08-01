@@ -19,7 +19,7 @@
 #include <string>
 #include <unistd.h>
 
-BodyLength::BodyLength(int fd, std::string &buffer, std::string length):
+BodyLength::BodyLength(int fd, std::string &buffer, std::string length) :
     Body(fd, buffer),
     _length(0),
     _read_length(_buffer.length()) {
@@ -67,8 +67,8 @@ std::string BodyLength::pop() {
     _uniform = false;
     _body    = "";
     // read_body();
-    tmp    += _buffer;
-    _buffer = "";
+    tmp     += _buffer;
+    _buffer  = "";
     return tmp;
 }
 

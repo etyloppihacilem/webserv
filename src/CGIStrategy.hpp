@@ -18,20 +18,20 @@
 #include <map>
 #include <string>
 
-class CGIStrategy: public ResponseBuildingStrategy {
+class CGIStrategy : public ResponseBuildingStrategy {
     public:
         CGIStrategy(const std::string &location, ClientRequest *_request);
         ~CGIStrategy();
 
-        bool    build_response();
-        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void    save_mem();
+        bool build_response();
+        bool fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void save_mem();
 
     private:
-        char            **generate_env(const std::map<std::string, std::string> &env) const;
+        char **generate_env(const std::map<std::string, std::string> &env) const;
 
-        std::string     _location;
-        ClientRequest   *_request;
+        std::string    _location;
+        ClientRequest *_request;
 };
 
-#endif  // INCLUDE_SRC_CGISTRATEGY_HPP_
+#endif // INCLUDE_SRC_CGISTRATEGY_HPP_

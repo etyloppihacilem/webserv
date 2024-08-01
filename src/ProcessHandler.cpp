@@ -11,7 +11,6 @@
 #include "ProcessHandler.hpp"
 #include "EventHandler.hpp"
 
-ProcessHandler::ProcessHandler(int fd):
-    EventHandler(fd) {}
+ProcessHandler::ProcessHandler(int fd) : EventHandler(fd) {}
 
 ProcessHandler::~ProcessHandler() {}

@@ -94,12 +94,11 @@ bool isValidIPAddress(const std::string &value) {
     if (value.size() == 0)
         return false;
 
-    StringTokenizer IPString(value, '.');
+    StringTokenizer          IPString(value, '.');
     std::vector<std::string> IPoctets;
 
-    while (IPString.hasMoreTokens()) {
+    while (IPString.hasMoreTokens())
         IPoctets.push_back(IPString.nextToken());
-    }
     if (IPoctets.size() != 4)
         return false;
     for (int i = 0; i < 4; ++i) {

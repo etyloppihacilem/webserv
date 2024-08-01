@@ -27,23 +27,22 @@
 #include <string>
 #include <strings.h>
 
-CGIStrategy::CGIStrategy(const std::string &location, ClientRequest *request):
+CGIStrategy::CGIStrategy(const std::string &location, ClientRequest *request) :
     ResponseBuildingStrategy(),
-    _location               (location),
-    _request                (request) {}
+    _location(location),
+    _request(request) {}
 
 CGIStrategy::~CGIStrategy() {}
 
 bool CGIStrategy::build_response() {
-    Body    *body   = 0;
-    size_t  size    = 0;
+    Body  *body = 0;
+    size_t size = 0;
 
     if (_request->have_body()) { // WARN: check for infinite loop risk. Test with both body types.
         body = _request->get_body();
-        if (dynamic_cast<BodyChunk *>(body)) {  // if body is chunk
-            while (body->is_done())             // retrieving whole body. TODO: body cannot be read without a epoll
+        if (dynamic_cast<BodyChunk *>(body)) // if body is chunk
+            while (body->is_done())          // retrieving whole body. TODO: body cannot be read without a epoll
                 body->get();
-        }
         size = body->length();
     }
 
@@ -56,17 +55,17 @@ bool CGIStrategy::build_response() {
         st << size;
         st >> env["CONTENT_LENGTH"];
     }
-    env["GATEWAY_INTERFACE"]    = "CGI/1.1";
-    env["PATH_INFO"]            = "";           // trailing things after script name in target
-    env["PATH_TRANSLATED"]      = _location;    // physical path after translation
-    env["QUERY_STRING"]         = _request->get_query_string();
-    env["REMOTE_ADDR"]          = "";
-    env["REQUEST_METHOD"]       = method_string(_request->get_method());
-    env["SCRIPT_NAME"]          = "";
-    env["SERVER_NAME"]          = "";   // TODO: trouver le server name
-    env["SERVER_PORT"]          = "";   // TODO: trouver le port
-    env["SERVER_PROTOCOL"]      = "HTTP/1.1";
-    env["SERVER_SOFTWAR"]       = SERVER_SOFTWARE;
+    env["GATEWAY_INTERFACE"] = "CGI/1.1";
+    env["PATH_INFO"]         = "";        // trailing things after script name in target
+    env["PATH_TRANSLATED"]   = _location; // physical path after translation
+    env["QUERY_STRING"]      = _request->get_query_string();
+    env["REMOTE_ADDR"]       = "";
+    env["REQUEST_METHOD"]    = method_string(_request->get_method());
+    env["SCRIPT_NAME"]       = "";
+    env["SERVER_NAME"]       = ""; // TODO: trouver le server name
+    env["SERVER_PORT"]       = ""; // TODO: trouver le port
+    env["SERVER_PROTOCOL"]   = "HTTP/1.1";
+    env["SERVER_SOFTWAR"]    = SERVER_SOFTWARE;
     return _built;
 }
 
@@ -88,8 +87,8 @@ char **CGIStrategy::generate_env(const std::map<std::string, std::string> &env) 
             error.log() << "Env alloc partially failed. CGI env will not be generated." << std::endl;
             for (size_t j = 0; j <= env.size(); j++)
                 if (ret[j])
-                    delete [] ret[j];
-            delete [] ret;
+                    delete[] ret[j];
+            delete[] ret;
             return 0;
         }
     }

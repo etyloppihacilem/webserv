@@ -12,13 +12,13 @@
 #define INCLUDE_HEADER_TODO_HPP_
 
 #ifdef TESTING
-# define BUFFER_SIZE 13         // arbitrary for testing
+# define BUFFER_SIZE 13 // arbitrary for testing
 #else
-# define BUFFER_SIZE 1024       // 1 KiB arbitrary too but bigger
+# define BUFFER_SIZE 1024 // 1 KiB arbitrary too but bigger
 #endif
 
 #define SERVER_SOFTWARE "webserve/0.1"
 
 #define MAX_BODY_BUFFER 1048576 // 1MiB
 
-#endif  // INCLUDE_HEADER_TODO_HPP_
+#endif // INCLUDE_HEADER_TODO_HPP_

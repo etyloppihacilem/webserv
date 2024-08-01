@@ -15,7 +15,6 @@
 #include "MimeTypes.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
-#include "todo.hpp"
 #include <cstddef>
 #include <fstream>
 #include <string>
@@ -25,15 +24,15 @@ class GetFileStrategy : public ResponseBuildingStrategy {
         GetFileStrategy(const MimeTypes &mime, const std::string &location, HttpCode code = OK);
         ~GetFileStrategy();
 
-        bool    build_response();
-        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void    save_mem();
+        bool build_response();
+        bool fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void save_mem();
 
     private:
         const MimeTypes &_mime;
-        std::string     _location;
-        HttpCode        _code;
-        std::fstream    _file;
+        std::string      _location;
+        HttpCode         _code;
+        std::fstream     _file;
 };
 
-#endif  // INCLUDE_SRC_GETFILESTRATEGY_HPP_
+#endif // INCLUDE_SRC_GETFILESTRATEGY_HPP_

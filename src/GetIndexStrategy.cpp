@@ -8,8 +8,8 @@
 
 ############################################################################# */
 
-#include "BodyWriter.hpp"
 #include "GetIndexStrategy.hpp"
+#include "BodyWriter.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
@@ -28,12 +28,12 @@
 #include <sys/types.h>
 
 // location ending in /
-GetIndexStrategy::GetIndexStrategy(const std::string &location):
+GetIndexStrategy::GetIndexStrategy(const std::string &location) :
     ResponseBuildingStrategy(),
-    _location               (location),
-    _dir                    (0),
-    _init_done              (false),
-    _deinit_done            (false) {}
+    _location(location),
+    _dir(0),
+    _init_done(false),
+    _deinit_done(false) {}
 
 GetIndexStrategy::~GetIndexStrategy() {
     if (_dir)
@@ -90,27 +90,27 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     if (_done || !_dir)
         return _done;
     if (!_init_done)
-        buffer += "<head></head><body><h1>" + _location
-                  + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
+        buffer
+            += "<head></head><body><h1>" + _location + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
 
-    dir_item            *item;
-    std::stringstream   stream;
-    std::string         name;
-    struct stat         st;
+    dir_item         *item;
+    std::stringstream stream;
+    std::string       name;
+    struct stat       st;
 
     while ((item = readdir(_dir)) && buffer.length() < size) {
         name = generateLine(item->d_name, &st);
-        stream  << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _location << item->d_name << "\">"
-                << name << "</a></td><td>" << (S_ISREG(st.st_mode) ? st.st_size : 0) << "</td></tr>";
+        stream << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _location << item->d_name << "\">"
+               << name << "</a></td><td>" << (S_ISREG(st.st_mode) ? st.st_size : 0) << "</td></tr>";
         stream >> buffer;
     }
     if (errno == EBADF)
         throw HttpError(InternalServerError);
     if (buffer.length() < size && !_deinit_done) {
-        buffer  += "</table></body>";
+        buffer += "</table></body>";
         closedir(_dir);
-        _dir    = 0;
-        _done   = true;
+        _dir  = 0;
+        _done = true;
     }
     return _done;
 }
@@ -120,7 +120,7 @@ bool GetIndexStrategy::build_response() {
         warn.log() << "GetIndexStrategy : trying to build response, but is already built." << std::endl;
         return _built;
     }
-    {                                                                       // different scope to free stack at the end
+    { // different scope to free stack at the end
         int size_temp = 0;
         {
             DIR *dirp;
@@ -133,8 +133,8 @@ bool GetIndexStrategy::build_response() {
         }
 
         if (size_temp < 0)
-            _estimated_size = MAX_BODY_BUFFER + 1;          // if an error occur, it is mostly because of
-                                                            // memory, so using least buffer stuff
+            _estimated_size = MAX_BODY_BUFFER + 1; // if an error occur, it is mostly because of
+                                                   // memory, so using least buffer stuff
         else
             _estimated_size = 148 + (133 * size_temp);
     }
@@ -156,6 +156,6 @@ bool GetIndexStrategy::build_response() {
 }
 
 void GetIndexStrategy::save_mem() {
-    shrink_to_fit(  _location);
+    shrink_to_fit(_location);
     _response.save_mem();
 }

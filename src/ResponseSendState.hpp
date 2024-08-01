@@ -19,4 +19,4 @@ class ResponseSendState {
     private:
 };
 
-#endif  // INCLUDE_SRC_RESPONSESENDSTATE_HPP_
+#endif // INCLUDE_SRC_RESPONSESENDSTATE_HPP_

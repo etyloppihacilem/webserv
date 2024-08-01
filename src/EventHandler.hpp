@@ -23,4 +23,4 @@ class EventHandler {
         int _fd;
 };
 
-#endif  // INCLUDE_SRC_EVENTHANDLER_HPP_
+#endif // INCLUDE_SRC_EVENTHANDLER_HPP_

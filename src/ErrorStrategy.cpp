@@ -19,9 +19,7 @@
 #include <sstream>
 #include <string>
 
-ErrorStrategy::ErrorStrategy(HttpCode code):
-    ResponseBuildingStrategy(),
-    _code                   (code) {}
+ErrorStrategy::ErrorStrategy(HttpCode code) : ResponseBuildingStrategy(), _code(code) {}
 
 ErrorStrategy::~ErrorStrategy() {}
 
@@ -33,7 +31,7 @@ bool ErrorStrategy::build_response() {
     _response.add_header("Content-Type", "text/html; charset=utf-8");
     _estimated_size = 0; // choose BodyWriterLength
     _response.set_code(_code);
-    return _built   = true;
+    return _built = true;
 }
 
 bool ErrorStrategy::fill_buffer(std::string &buffer, size_t size) {
@@ -52,9 +50,10 @@ void ErrorStrategy::generateErrorPage(std::string &buffer) {
     try {
         std::stringstream st;
 
-        st  << "<head><title>" << static_cast<int>(_code) << " Error</title></head><body><h1>Error: "
-            << static_cast<int>(_code) << " " << status_string(_code) << "</h1><div>This error page was "
-            << "automatically generated.</div></body>";
+        st << "<head><title>" << static_cast<int>(_code)
+           << " Error</title></head><body><h1>Error: " << static_cast<int>(_code) << " " << status_string(_code)
+           << "</h1><div>This error page was "
+           << "automatically generated.</div></body>";
         buffer += st.str();
     } catch (std::bad_alloc &e) { // in case of heap going missing.
         mem.deallocate();

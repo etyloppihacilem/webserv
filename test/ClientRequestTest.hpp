@@ -12,28 +12,31 @@
 #define INCLUDE_SRC_MESSAGETEST_HPP_
 
 #include "ClientRequest.hpp"
-#include "gtest/gtest.h"
 #include "ClientRequest_test.hpp"
+#include "gtest/gtest.h"
 
-class ClientRequestTestTarget: public testing::TestWithParam<t_test_target> {
+class ClientRequestTestTarget : public testing::TestWithParam<t_test_target> {
     public:
         ClientRequestTestTarget() : test(0) {}
+
     protected:
         ClientRequest test;
 };
 
-class ClientRequestTestParseHeader: public testing::TestWithParam<t_test_target> {
+class ClientRequestTestParseHeader : public testing::TestWithParam<t_test_target> {
     public:
         ClientRequestTestParseHeader() : test(0) {}
+
     protected:
         ClientRequest test;
 };
 
-class ClientRequestTestInitHeader: public testing::TestWithParam<s_test_messages> {
+class ClientRequestTestInitHeader : public testing::TestWithParam<s_test_messages> {
     public:
         ClientRequestTestInitHeader() : test(0) {}
+
     protected:
         ClientRequest test;
 };
 
-#endif  // INCLUDE_SRC_MESSAGETEST_HPP_
+#endif // INCLUDE_SRC_MESSAGETEST_HPP_

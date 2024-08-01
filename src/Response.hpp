@@ -17,7 +17,7 @@
 #include <string>
 
 #ifdef TESTING
-#include "gtest/gtest.h"
+# include "gtest/gtest.h"
 #endif
 
 typedef std::map<std::string, std::string>::const_iterator mapit;
@@ -36,7 +36,7 @@ class Response {
         HttpCode    get_code() const;
         std::string build_response();
         void        save_mem();
-        BodyWriter  *get_body();
+        BodyWriter *get_body();
         bool        have_body();
 
     private:
@@ -44,12 +44,12 @@ class Response {
         std::string generate_header() const;
         void        clean_body();
 
-        HttpCode    _code;                              ///< HttpStatusCodes of response
-        std::map<std::string, std::string> _header;     ///< Header map
-        BodyWriter  *_body;                             ///< Body of response (if any)
+        HttpCode                           _code;   ///< HttpStatusCodes of response
+        std::map<std::string, std::string> _header; ///< Header map
+        BodyWriter                        *_body;   ///< Body of response (if any)
 #ifdef TESTING
         FRIEND_TEST(ResponseTestSuite, generate_status_line);
 #endif
 };
 
-#endif  // INCLUDE_SRC_RESPONSE_HPP_
+#endif // INCLUDE_SRC_RESPONSE_HPP_

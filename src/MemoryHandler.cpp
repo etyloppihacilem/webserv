@@ -14,14 +14,11 @@
 #include <new>
 #include <ostream>
 
-MemoryHandler::MemoryHandler(size_t size):
-    _storage    (0),
-    _size       (size),
-    _allocated  (false) {}
+MemoryHandler::MemoryHandler(size_t size) : _storage(0), _size(size), _allocated(false) {}
 
 MemoryHandler::~MemoryHandler() {
     if (_allocated)
-        delete [] _storage;
+        delete[] _storage;
 }
 
 bool MemoryHandler::allocate() {
@@ -45,7 +42,7 @@ bool MemoryHandler::deallocate() {
         warn.log() << "Memory handler is not allocated." << std::endl;
         return _allocated;
     }
-    delete [] _storage;
+    delete[] _storage;
     info.log() << "Memory handler succesfully deallocated." << std::endl;
     _allocated = false;
     return _allocated;

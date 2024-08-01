@@ -362,9 +362,9 @@ std::vector<TotalRequest> TotalRequestData = {
 
 };
 
-class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
+class TotalRequestFixture : public ::testing::TestWithParam<TotalRequest> {
     public:
-        TotalRequestFixture(): _test(0), _request(0), _fd{ 0, 0 } {}
+        TotalRequestFixture() : _test(0), _request(0), _fd{ 0, 0 } {}
 
         void SetUp() override {
             if (pipe(_fd))
@@ -416,7 +416,9 @@ class TotalRequestFixture: public ::testing::TestWithParam<TotalRequest> {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    TotalRequestSuite, TotalRequestFixture, ::testing::ValuesIn(TotalRequestData),
+    TotalRequestSuite,
+    TotalRequestFixture,
+    ::testing::ValuesIn(TotalRequestData),
     [](const testing::TestParamInfo<TotalRequest> &info) {
         // Can use info.param here to generate the test suffix
         std::string name = std::get<tname>(info.param);

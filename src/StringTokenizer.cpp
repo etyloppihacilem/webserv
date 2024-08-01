@@ -5,7 +5,7 @@
 #include <ostream>
 #include <string>
 
-StringTokenizer::StringTokenizer(const std::string &str, const char delim): _tokenString(""), _delimiter(delim) {
+StringTokenizer::StringTokenizer(const std::string &str, const char delim) : _tokenString(""), _delimiter(delim) {
     if (str.empty()) {
         _tokenString = "";
         return;
@@ -119,9 +119,8 @@ std::string StringTokenizer::extractToken(std::size_t position) {
 }
 
 void StringTokenizer::removeTrailingDelimiter(std::string &token) {
-    if (token.rfind(_delimiter) == token.size() - 1) {
+    if (token.rfind(_delimiter) == token.size() - 1)
         token = token.substr(0, token.size() - 1);
-    }
 }
 
 std::string StringTokenizer::nextToken() {

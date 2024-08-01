@@ -32,7 +32,7 @@
   ```
   with SIZE being the hex number of bytes.
   */
-class BodyChunk: public Body {
+class BodyChunk : public Body {
     public:
         BodyChunk(int fd, std::string &buffer);
         ~BodyChunk();

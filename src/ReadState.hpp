@@ -20,24 +20,24 @@ class ReadState : public ProcessState {
         ReadState(int fd);
         ~ReadState();
 
-        t_state         process();
-        void            save_mem();
+        t_state process();
+        void    save_mem();
 
-        ClientRequest   *get_client_request();
-        void            done_client_request();
+        ClientRequest *get_client_request();
+        void           done_client_request();
 
     private:
-        t_state         process_buffer(char *buffer);
-        t_state         return_error();
+        t_state process_buffer(char *buffer);
+        t_state return_error();
 
-        std::string     _buffer;           ///< Buffer for parsing on fd
+        std::string    _buffer; ///< Buffer for parsing on fd
         /**< buffer is supposed clean at the end of a successful parsing on it. */
-        ClientRequest   *_in_progress;  ///< ClientRequest that is built
+        ClientRequest *_in_progress; ///< ClientRequest that is built
 
 #ifdef TESTING
-        FRIEND_TEST(ReadStateSuite,         FindMethod);
-        FRIEND_TEST(TotalRequestFixture,    FdStateTest);
+        FRIEND_TEST(ReadStateSuite, FindMethod);
+        FRIEND_TEST(TotalRequestFixture, FdStateTest);
 #endif
 };
 
-#endif  // INCLUDE_SRC_READSTATE_HPP_
+#endif // INCLUDE_SRC_READSTATE_HPP_

@@ -19,9 +19,7 @@
 #include <ostream>
 #include <string>
 
-DeleteStrategy::DeleteStrategy(const std::string &location):
-    ResponseBuildingStrategy(),
-    _location               (location) {}
+DeleteStrategy::DeleteStrategy(const std::string &location) : ResponseBuildingStrategy(), _location(location) {}
 
 DeleteStrategy::~DeleteStrategy() {}
 
@@ -43,8 +41,8 @@ bool DeleteStrategy::build_response() {
         throw HttpError(InternalServerError);
     }
     _response.set_code(NoContent); // 204, everything is done and there's no content
-    _done           = true;
-    return _built   = true;
+    _done         = true;
+    return _built = true;
 }
 
 bool DeleteStrategy::fill_buffer(std::string &buffer, size_t size) {
@@ -55,6 +53,6 @@ bool DeleteStrategy::fill_buffer(std::string &buffer, size_t size) {
 }
 
 void DeleteStrategy::save_mem() {
-    shrink_to_fit(  _location);
+    shrink_to_fit(_location);
     _response.save_mem();
 }

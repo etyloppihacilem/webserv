@@ -23,18 +23,18 @@
   */
 class MemoryHandler {
     public:
-        MemoryHandler(size_t size = 1024 /** Size of heap to allocate */ );
+        MemoryHandler(size_t size = 1024 /** Size of heap to allocate */);
         ~MemoryHandler();
 
-        bool    allocate();
-        bool    deallocate();
+        bool allocate();
+        bool deallocate();
 
     private:
-        char    *_storage;  ///< Place where the storage happends
-        size_t  _size;      ///< Size of storage
-        bool    _allocated; ///< Tells if memory is allocated
+        char  *_storage;   ///< Place where the storage happends
+        size_t _size;      ///< Size of storage
+        bool   _allocated; ///< Tells if memory is allocated
 };
 
 extern MemoryHandler mem;
 
-#endif  // INCLUDE_SRC_MEMORYHANDLER_HPP_
+#endif // INCLUDE_SRC_MEMORYHANDLER_HPP_

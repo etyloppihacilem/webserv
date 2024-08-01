@@ -60,7 +60,7 @@ class FakeServer {
 
     private:
         std::map<std::string, FakeRoute> _routes;
-        std::map<HttpCode, std::string>    _error_pages;
+        std::map<HttpCode, std::string>  _error_pages;
 
         friend ResponseBuildStateFixture;
         friend LocationTestFixture;

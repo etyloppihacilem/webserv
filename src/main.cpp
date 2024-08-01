@@ -18,8 +18,8 @@ int main(int ac, char **av) {
     (void) ac;
     (void) av;
     Logger::force(); // Forcing all output in normal operations.
-    info.log() << "info message -> " << 1024 <<     std::endl;
-    warn.log() << "warn message -> " << "hihi " <<  ImATeapot << std::endl;
+    info.log() << "info message -> " << 1024 << std::endl;
+    warn.log() << "warn message -> " << "hihi " << ImATeapot << std::endl;
     error.log() << "error message -> " << (void *) "mais" << std::endl;
     mem.allocate(); // allocating memory
     info.log() << std::hex << 42 << std::endl;

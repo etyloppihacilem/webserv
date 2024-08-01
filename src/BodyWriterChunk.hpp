@@ -30,4 +30,4 @@ class BodyWriterChunk : public BodyWriter {
         size_t _length;
 };
 
-#endif  // INCLUDE_SRC_BODYWRITERCHUNK_HPP_
+#endif // INCLUDE_SRC_BODYWRITERCHUNK_HPP_

@@ -8,9 +8,9 @@
 
 ############################################################################# */
 
+#include "StringUtils.hpp"
 #include "gtest/gtest.h"
 #include <string>
-#include "StringUtils.hpp"
 
 TEST(StringUtilsTestSuite, extract_extension) {
     std::string a;

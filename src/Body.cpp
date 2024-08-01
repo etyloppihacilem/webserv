@@ -13,13 +13,7 @@
 #include <cstddef>
 #include <string>
 
-Body::Body(int fd, std::string &buffer):
-    _fd     (fd),
-    _buffer (buffer),
-    _done   (false),
-    _uniform(true),
-    _body   (),
-    _total  (0) {}
+Body::Body(int fd, std::string &buffer) : _fd(fd), _buffer(buffer), _done(false), _uniform(true), _body(), _total(0) {}
 
 Body::~Body() {}
 
@@ -34,6 +28,6 @@ size_t Body::length() const {
 void Body::save_mem() {
     if (_uniform)
         _body = "";
-    shrink_to_fit(  _buffer);
-    shrink_to_fit(  _body);
+    shrink_to_fit(_buffer);
+    shrink_to_fit(_body);
 }

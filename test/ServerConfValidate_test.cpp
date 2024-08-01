@@ -71,9 +71,8 @@ TEST(ServerConfValidateTestSuite, notValidPort) {
 }
 
 TEST(ServerConfValidateTestSuite, isValidMethods) {
-    for (int i = 0; i < COUNT_METHOD; ++i) {
+    for (int i = 0; i < COUNT_METHOD; ++i)
         EXPECT_TRUE(isValidMethods(method_string(i)));
-    }
 }
 
 TEST(ServerConfValidateTestSuite, notValidMethods) {

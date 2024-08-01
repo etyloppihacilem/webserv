@@ -25,7 +25,7 @@
 #include <sstream>
 #include <string>
 
-ClientRequest::ClientRequest(int fd):
+ClientRequest::ClientRequest(int fd) :
     _fd(fd),
     _method(none),
     _target(),
@@ -36,7 +36,7 @@ ClientRequest::ClientRequest(int fd):
     _absolute_form(false),
     _port(80) {}
 
-ClientRequest::ClientRequest(int fd, HttpCode code, int port):
+ClientRequest::ClientRequest(int fd, HttpCode code, int port) :
     _fd(fd),
     _method(none),
     _target(),

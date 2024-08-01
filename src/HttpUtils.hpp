@@ -14,4 +14,4 @@
 #define MAX_METHOD 8
 #define MAX_URI 8192
 
-#endif  // INCLUDE_SRC_HTTPUTILS_HPP_
+#endif // INCLUDE_SRC_HTTPUTILS_HPP_

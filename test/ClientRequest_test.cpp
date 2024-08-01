@@ -195,7 +195,9 @@ TEST_P(ClientRequestTestTarget, ParseTargetTest) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    ClientRequestTargetSuite, ClientRequestTestTarget, ::testing::ValuesIn(ClientRequestTargetSuiteValues),
+    ClientRequestTargetSuite,
+    ClientRequestTestTarget,
+    ::testing::ValuesIn(ClientRequestTargetSuiteValues),
     [](const testing::TestParamInfo<t_test_target> &info) {
         // Can use info.param here to generate the test suffix
         std::string name = info.param.name;
@@ -254,7 +256,8 @@ TEST_P(ClientRequestTestParseHeader, ParseHeaderLineTest) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    ClientRequestParseHeaderLineSuite, ClientRequestTestParseHeader,
+    ClientRequestParseHeaderLineSuite,
+    ClientRequestTestParseHeader,
     ::testing::ValuesIn(ClientRequestParseHeaderLineSuiteValues),
     [](const testing::TestParamInfo<t_test_target> &info) {
         // Can use info.param here to generate the test suffix
@@ -293,7 +296,9 @@ TEST_P(ClientRequestTestInitHeader, InitHeaderTest) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    ClientRequestTestInitHeaderSuite, ClientRequestTestInitHeader, ::testing::ValuesIn(ClientRequestTestData),
+    ClientRequestTestInitHeaderSuite,
+    ClientRequestTestInitHeader,
+    ::testing::ValuesIn(ClientRequestTestData),
     [](const testing::TestParamInfo<t_test_messages> &info) {
         // Can use info.param here to generate the test suffix
         std::string name = info.param.name;

@@ -10,7 +10,7 @@
 
 #include "ProcessState.hpp"
 
-ProcessState::ProcessState(int fd):
+ProcessState::ProcessState(int fd) :
     _fd(fd),
     _state(waiting) ///< State of the object
 {}

@@ -19,13 +19,9 @@
 #include <cstddef>
 #include <cstring>
 #include <ostream>
-#include <ostream>
 #include <unistd.h>
 
-ReadState::ReadState(int fd):
-    ProcessState(fd),
-    _buffer     (),
-    _in_progress(0) {}
+ReadState::ReadState(int fd) : ProcessState(fd), _buffer(), _in_progress(0) {}
 
 ReadState::~ReadState() {
     if (_in_progress)
@@ -39,9 +35,7 @@ t_state ReadState::process() {
     if (_state == ready || _state == s_error)
         return _state;
 
-    char buffer[BUFFER_SIZE + 1] = {
-        0
-    };
+    char buffer[BUFFER_SIZE + 1] = { 0 };
 
     if (_state == waiting) {
         int a;
@@ -50,8 +44,8 @@ t_state ReadState::process() {
             error.log() << "Reading into socket " << _fd << " resulted in error: " << strerror(errno) << std::endl;
         else if (a == 0) {
             // this should not happen.
-            warn.log()  << "Reading nothing into socket " << _fd << ", closing connection with " << BadRequest
-                        << std::endl;
+            warn.log() << "Reading nothing into socket " << _fd << ", closing connection with " << BadRequest
+                       << std::endl;
             return return_error();
         }
     }
@@ -75,8 +69,8 @@ t_state ReadState::process_buffer(char *buffer) {
         }
 
         // TODO: verifier la longueur du buffer ?
-        size_t  end = _buffer.find("\r\n\r\n", 0);
-        size_t  eol = _buffer.find("\r\n");
+        size_t end = _buffer.find("\r\n\r\n", 0);
+        size_t eol = _buffer.find("\r\n");
 
         if (end == _buffer.npos)
             return _state;
@@ -91,7 +85,7 @@ t_state ReadState::process_buffer(char *buffer) {
         //_buffer = _buffer.substr(0, end);  // wtf is this what about the body ????
         _buffer = _buffer.substr(end + 4, _buffer.length() - (end + 4));
         _in_progress->init_body(_buffer);
-        _state  = ready;
+        _state = ready;
     }
     return _state;
 }
@@ -99,8 +93,8 @@ t_state ReadState::process_buffer(char *buffer) {
 t_state ReadState::return_error() {
     if (_in_progress)
         delete _in_progress;
-    _in_progress    = new ClientRequest(_fd, BadRequest, 80);   // TODO: trouver si le port est necessaire et
-    return _state   = ready;                                    // mettre le bon le cas echeant.
+    _in_progress  = new ClientRequest(_fd, BadRequest, 80); // TODO: trouver si le port est necessaire et
+    return _state = ready;                                  // mettre le bon le cas echeant.
 }
 
 /**
@@ -111,8 +105,8 @@ t_state ReadState::return_error() {
 void ReadState::done_client_request() {
     if (_in_progress)
         delete _in_progress;
-    _in_progress    = 0;
-    _state          = waiting;
+    _in_progress = 0;
+    _state       = waiting;
 }
 
 /**

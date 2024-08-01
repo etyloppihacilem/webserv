@@ -17,8 +17,8 @@
 #define MAX_METHOD_SIZE 8
 
 enum HttpMethod {
-    none    = -1,
-    GET     = 0,
+    none = -1,
+    GET  = 0,
     POST,
     DELETE,
     // PUT, // just in case
@@ -41,4 +41,4 @@ inline std::string method_string(const int &code) {
     }
 }
 
-#endif  // INCLUDE_SRC_HTTPMETHODS_HPP_
+#endif // INCLUDE_SRC_HTTPMETHODS_HPP_

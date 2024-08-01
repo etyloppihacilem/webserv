@@ -20,7 +20,7 @@
 /**
   Strategy to handle a redirect (3xx code).
   */
-class RedirectStrategy: public ResponseBuildingStrategy {
+class RedirectStrategy : public ResponseBuildingStrategy {
     public:
         RedirectStrategy(
             const std::string &location,               ///< Location to redirect to

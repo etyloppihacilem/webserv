@@ -25,23 +25,23 @@ typedef struct dirent dir_item;
 /**
   Object to generate an index of a repository.
   */
-class GetIndexStrategy: public ResponseBuildingStrategy {
+class GetIndexStrategy : public ResponseBuildingStrategy {
     public:
         GetIndexStrategy(const std::string &location);
         ~GetIndexStrategy();
 
-        bool    build_response();
-        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void    save_mem();
+        bool build_response();
+        bool fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void save_mem();
 
     private:
         std::string generateLine(char *name, struct stat *st);
         std::string getType(mode_t mode);
 
-        std::string _location;      ///< Location of the directory to scan
-        DIR         *_dir;          ///< Pointer on dir
-        bool        _init_done;     ///< Tells if header of response is sent.
-        bool        _deinit_done;   ///< Tells if footer of response is sent.
+        std::string _location;    ///< Location of the directory to scan
+        DIR        *_dir;         ///< Pointer on dir
+        bool        _init_done;   ///< Tells if header of response is sent.
+        bool        _deinit_done; ///< Tells if footer of response is sent.
 };
 
-#endif  // INCLUDE_SRC_GETINDEXSTRATEGY_HPP_
+#endif // INCLUDE_SRC_GETINDEXSTRATEGY_HPP_

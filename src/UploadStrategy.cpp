@@ -21,14 +21,14 @@
 #include <string>
 #include <unistd.h>
 
-UploadStrategy::UploadStrategy(ClientRequest &request, const std::string &location, bool replace):
+UploadStrategy::UploadStrategy(ClientRequest &request, const std::string &location, bool replace) :
     ResponseBuildingStrategy(),
-    _init                   (false),
-    _file                   (),
-    _body                   (0),
-    _target                 (request.get_target()),
-    _location               (location),
-    _replace                (replace) {
+    _init(false),
+    _file(),
+    _body(0),
+    _target(request.get_target()),
+    _location(location),
+    _replace(replace) {
     if (request.have_body())
         _body = request.get_body();
 }
@@ -54,8 +54,8 @@ bool UploadStrategy::build_response() {
         _file << _body->pop();
     else {
         _file.close();
-        _done   = true;
-        _built  = true;
+        _done  = true;
+        _built = true;
     }
     return _built;
 }

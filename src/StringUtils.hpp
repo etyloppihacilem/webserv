@@ -18,4 +18,4 @@ void        shrink_to_fit(std::string &s);
 std::string extract_extension(const std::string &s);
 std::string extract_basename(const std::string &s);
 
-#endif  // INCLUDE_SRC_STRINGUTILS_HPP_
+#endif // INCLUDE_SRC_STRINGUTILS_HPP_

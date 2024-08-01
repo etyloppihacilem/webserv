@@ -1,9 +1,9 @@
+#include "ServerManager.hpp"
 #include "Logger.hpp"
 #include "Server.hpp"
 #include "ServerConfFields.hpp"
 #include "ServerConfTokenize.hpp"
 #include "ServerConfValidate.hpp"
-#include "ServerManager.hpp"
 #include "StringTokenizer.hpp"
 #include <exception>
 #include <fstream>
@@ -14,8 +14,7 @@
 
 ServerManager *ServerManager::_instance = 0;
 
-ServerManager *ServerManager::getInstance(const std::string &configFile)
-{
+ServerManager *ServerManager::getInstance(const std::string &configFile) {
     if (_instance == 0) {
         try {
             _instance = new ServerManager(configFile);
@@ -26,8 +25,7 @@ ServerManager *ServerManager::getInstance(const std::string &configFile)
     return _instance;
 }
 
-void ServerManager::deleteInstance()
-{
+void ServerManager::deleteInstance() {
     if (_instance != 0) {
         delete _instance;
         _instance = 0;
@@ -38,15 +36,13 @@ ServerManager::~ServerManager() {
     this->deleteInstance();
 }
 
-std::string readConfFile(std::ifstream &configStream)
-{
+std::string readConfFile(std::ifstream &configStream) {
     std::string buff;
     std::string fileContent;
 
     while (std::getline(configStream, buff)) {
-        if (buff.empty()) {
+        if (buff.empty())
             continue;
-        }
         fileContent += buff;
     }
     return fileContent;
@@ -83,13 +79,10 @@ ServerManager::ServerManager(const std::string &configFile) {
     // TODO start Reactor from here
 }
 
-Server &ServerManager::getServer(const std::string &serverName, int port)
-{
-    for (std::vector<Server>::iterator it = _servers.begin(); it < _servers.end(); ++it) {
-        if (it->hasServeName(serverName) && it->getPort() == static_cast<unsigned int>(port)) {
+Server &ServerManager::getServer(const std::string &serverName, int port) {
+    for (std::vector<Server>::iterator it = _servers.begin(); it < _servers.end(); ++it)
+        if (it->hasServeName(serverName) && it->getPort() == static_cast<unsigned int>(port))
             return *it;
-        }
-    }
 
     std::stringstream portStr;
 

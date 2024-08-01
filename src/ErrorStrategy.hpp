@@ -22,20 +22,20 @@
 
   Recovery will not use personalized error page but will generate one.
   */
-class ErrorStrategy: public ResponseBuildingStrategy {
+class ErrorStrategy : public ResponseBuildingStrategy {
     public:
         ErrorStrategy(HttpCode code = InternalServerError);
 
         ~ErrorStrategy();
 
-        bool    build_response();
-        bool    fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void    save_mem();
+        bool build_response();
+        bool fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void save_mem();
 
     private:
-        void        generateErrorPage(std::string &buffer);
+        void generateErrorPage(std::string &buffer);
 
-        HttpCode    _code;
+        HttpCode _code;
 };
 
-#endif  // INCLUDE_SRC_ERRORSTRATEGY_HPP_
+#endif // INCLUDE_SRC_ERRORSTRATEGY_HPP_

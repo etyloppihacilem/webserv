@@ -8,12 +8,12 @@
 
 ############################################################################# */
 
+#include "Response.hpp"
 #include "BodyWriter.hpp"
 #include "BodyWriterChunk.hpp"
 #include "BodyWriterLength.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
-#include "Response.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include <new>
@@ -21,10 +21,7 @@
 #include <sstream>
 #include <string>
 
-Response::Response():
-    _code   (OK),
-    _header (),
-    _body   (0) {
+Response::Response() : _code(OK), _header(), _body(0) {
     add_header("Server", "webserv"); // adding server name
 }
 
@@ -87,7 +84,7 @@ bool Response::have_body() {
 std::string Response::build_response() {
     std::string res = "";
 
-    res = generate_status_line();
+    res  = generate_status_line();
     res += generate_header();
     return res;
 }
@@ -115,9 +112,8 @@ std::string Response::generate_status_line() const {
 std::string Response::generate_header() const {
     std::stringstream headers;
 
-    for (mapit i = _header.begin(); i != _header.end(); i++) {
+    for (mapit i = _header.begin(); i != _header.end(); i++)
         headers << i->first << ": " << i->second << "\r\n";
-    }
     return headers.str();
 }
 
@@ -138,13 +134,13 @@ void Response::clean_body() {
 void Response::set_body(ResponseBuildingStrategy &strategy) {
     clean_body();
     if (strategy.get_estimated_size() > MAX_BODY_BUFFER) {
-        _body = new BodyWriterChunk(strategy);
+        _body                        = new BodyWriterChunk(strategy);
         _header["Transfer-Encoding"] = "chunk";
     } else {
         try {
             _body = new BodyWriterLength(strategy);
         } catch (std::bad_alloc &e) {
-            _body = new BodyWriterChunk(strategy);
+            _body                        = new BodyWriterChunk(strategy);
             _header["Transfer-Encoding"] = "chunk";
             return;
         }
