@@ -81,6 +81,9 @@ TEST_OBJ		+= $(patsubst test%.cpp,${TEST_DIR}%.o,${TESTS_FILES})
 DEBUG_OBJ		= $(patsubst ${SRCS_DIR}%.cpp,${DEBUG_DIR}%.o,${SRCS})
 SANITIZE_OBJ	= $(patsubst ${SRCS_DIR}%.cpp,${SANITIZE_DIR}%.o,${SRCS})
 
+GTEST_LIB		= ./googletest/build/lib/libgtest.so
+GTEST_LIB_PATH	= $(shell realpath ./googletest/build/lib)
+
 ALL_FILES		= $(shell find src -type f -regex ".*\.[ch]pp")
 ALL_FILES		+= $(shell find test -type f -regex ".*\.[ch]pp")
 ALL_FILES		+= $(shell find header -type f -regex ".*\.[ch]pp")
@@ -165,7 +168,7 @@ ${NAME}: ${OBJS_DIR} ${OBJS} # Compile ${NAME} program
 ${NAME_TEST}: ${TEST_OBJ}
 	@printf "${YELLOW}Building...${RESET} %s\n" "${NAME_TEST}"
 	@${CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} \
-		./googletest/build/lib/libgtest.a ./googletest/build/lib/libgmock.a
+		${GTEST_LIB} -L$(GTEST_LIB_PATH) -Wl,--disable-new-dtags,-rpath,$(GTEST_LIB_PATH)
 
 ${NAME_DEBUG}: ${DEBUG_OBJ}
 	@printf "${YELLOW}Building...${RESET} ${NAME_DEBUG}\n"
@@ -184,12 +187,12 @@ ${OBJS_DIR}/%.o: ${SRCS_DIR}/%.cpp
 	@${CC} ${CFLAGS} ${HEADERS} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${YELLOW}release${RESET})%s %s\n" "" $<
 
-${TEST_DIR}/%.o: ${SRCS_DIR}/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_DIR}
+${TEST_DIR}/%.o: ${SRCS_DIR}/%.cpp | ${GTEST_LIB} ${TEST_DIR}
 	@printf "${BLUE}Compiling..${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
 	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
 
-${TEST_DIR}/%.o: test/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_DIR}
+${TEST_DIR}/%.o: test/%.cpp | ${GTEST_LIB} ${TEST_DIR}
 	@printf "${BLUE}Compiling..${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
 	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
@@ -239,7 +242,7 @@ ${SANITIZE_DIR}:
 	git submodule update
 	cd googletest && mkdir build
 
-./googletest/build/lib/libgtest.a: ./googletest/build
-	cd googletest/build && cmake .. && ${MAKE}
+${GTEST_LIB}: ./googletest/build
+	cd googletest/build && cmake -DBUILD_SHARED_LIBS=ON .. && ${MAKE}
 
 .PHONY: all clean fclean re debug sanitize tags file help mac_clean test release format
