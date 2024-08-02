@@ -19,9 +19,12 @@
 #include "ProcessState.hpp"
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "global_test.h"
 #include "gtest/gtest.h"
 #include <cstdio>
 #include <exception>
+#include <fstream>
+#include <ios>
 #include <map>
 #include <string>
 #include <tuple>
@@ -90,7 +93,25 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
             ASSERT_NE(_strategy, (void *) 0);
         }
 
-        static void clean() { std::remove("www/test/upload.txt"); }
+        static void clean() {
+            std::remove("www/test/upload.txt");
+            std::remove("www/test/upload_a.md");
+            std::remove("www/test/delete.png");
+            {
+                std::fstream f;
+                f.open("www/test/delete.png", std::ios_base::out | std::ios_base::trunc);
+                if (f.is_open())
+                    f.close();
+            }
+            {
+                std::fstream f;
+                f.open("www/test/upload_a.md", std::ios_base::out | std::ios_base::trunc);
+                if (f.is_open()) {
+                    f << "# Super fichier texte\n\n";
+                    f.close();
+                }
+            }
+        }
 
         void TearDown() override {
             if (_state)
@@ -106,6 +127,8 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
         static void TearDownTestSuite() { clean(); }
 
         static void SetUpTestSuite() {
+            if (!filesystem_tests)
+                GTEST_SKIP();
             _server._routes["/"] = FakeRoute(
                 OK, true, false, false, false, true, "", "", "/", "", "www", "www/uploads", { GET, POST },
                 { "index.html" }

@@ -51,7 +51,7 @@ CC				= c++
 CFLAGS			= -MMD -Wall -Werror -Wextra -std=c++98
 CTESTFLAGS		= -MMD -Wall -Werror -Wextra -std=c++20 -g3 -O3 -pthread
 CTESTFLAGS		+= -DTESTING -Igoogletest/googletest/include -O3 -Igoogletest/googlemock/include -Itest \
-				   -DWORKDIR=${shell realpath .}
+				   -DWORKDIR=\"${shell realpath .}\"
 DEBUG_FLAG		= -g3
 SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
