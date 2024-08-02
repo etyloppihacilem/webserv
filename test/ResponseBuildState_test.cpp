@@ -116,6 +116,23 @@ std::vector<d_rbs> ResponseBuildData = {
       false,
       "",
       false },
+    { "indexStrategy",
+      "GET /test HTTP/1.1\r\nHost: coucou\r\n\r\n",
+      tGetIndexStrategy,
+      OK,
+      { "Content-Length", "21" },
+      true,
+      "",
+      false },
+    { "indexStrategy_not_found",
+      "GET /super/mais/non HTTP/1.1\r\nHost: coucou\r\n\r\n",
+      tErrorStrategy,
+      NotFound,
+      { { "Content-Type", "text/html; charset=utf-8" }, { "Content-Length", "134" } },
+      true,
+      "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was automatically "
+      "generated.</div></body>",
+      false },
 };
 
 INSTANTIATE_TEST_SUITE_P(

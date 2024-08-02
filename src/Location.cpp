@@ -141,7 +141,7 @@ void Location<ServerClass, RouteClass>::build_path(const std::string &target, co
     _route_path = route.getRootDir();
     if (*_route_path.rbegin() == '/')
         _route_path.resize(_route_path.length() - 1);
-    if (_path[route.getLocation().length()] != '/')
+    if (_path[route.getLocation().length()] != '/' && _path != route.getLocation())
         _path.replace(0, route.getLocation().length() - 1, _route_path);
     else
         _path.replace(0, route.getLocation().length(), _route_path);
