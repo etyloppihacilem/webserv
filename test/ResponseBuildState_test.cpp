@@ -56,9 +56,10 @@ std::vector<d_rbs> ResponseBuildData = {
       NotFound,
       { { "Content-Type", "text/html; charset=utf-8" }, { "Content-Length", "134" } },
       true,
-      "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was automatically generated.</div></body>",
+      "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was automatically "
+      "generated.</div></body>",
       false },
-    { "POST",
+    { "POST_create",
       "POST /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
       tUploadStrategy,
       Created,
@@ -66,30 +67,23 @@ std::vector<d_rbs> ResponseBuildData = {
       false,
       "",
       true },
-    // { "POST_not_found",
-    //   "POST /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
-    //   tUploadStrategy,
-    //   Created,
-    //   { { "Location", "/test/upload.txt" } },
-    //   false,
-    //   "",
-    //   true },
-    // { "DELETE",
-    //   "POST /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
-    //   tUploadStrategy,
-    //   Created,
-    //   { { "Location", "/test/upload.txt" } },
-    //   false,
-    //   "",
-    //   true },
-    // { "DELETE_not_found",
-    //   "POST /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
-    //   tUploadStrategy,
-    //   Created,
-    //   { { "Location", "/test/upload.txt" } },
-    //   false,
-    //   "",
-    //   true },
+    { "DELETE",
+      "DELETE /test/delete.png HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+      tDeleteStrategy,
+      NoContent,
+      { },
+      false,
+      "",
+      true },
+    { "DELETE_not_found",
+      "DELETE /test/not_upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+      tErrorStrategy,
+      NotFound,
+      { { "Content-Type", "text/html; charset=utf-8" }, { "Content-Length", "134" } },
+      true,
+      "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was automatically "
+      "generated.</div></body>",
+      false },
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -141,16 +135,17 @@ TEST_P(ResponseBuildStateFixture, CorrectHeaders) {
     EXPECT_EQ(correct.size(), test_headers.size());
     for (correct_item = correct.begin(); correct_item != correct.end(); correct_item++) {
         test_item = test_headers.find(correct_item->first);
-        EXPECT_NE(test_item, test_headers.end())
-            << "This header was expected :\n"
-            << correct_item->first << ": " << correct_item->second << "\n...not found.";
+        if (test_item == test_headers.end())
+            FAIL() << "This header was expected :\n"
+                   << correct_item->first << ": " << correct_item->second << "\n...not found.";
         if (test_item != test_headers.end())
             EXPECT_EQ(test_item->second, correct_item->second);
     }
     for (test_item = test_headers.begin(); test_item != test_headers.end(); test_item++) {
         correct_item = correct.find(test_item->first);
-        EXPECT_NE(correct_item, correct.end()) << "This header was found :\n"
-                                               << test_item->first << ": " << test_item->second << "\n...not expected.";
+        if (correct_item == correct.end())
+            FAIL() << "This header was found :\n"
+                   << test_item->first << ": " << test_item->second << "\n...not expected.";
         if (correct_item != correct.end())
             EXPECT_EQ(correct_item->second, test_item->second);
     } // double verification is to display clearly which one is missing.

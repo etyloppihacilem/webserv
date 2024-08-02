@@ -26,6 +26,7 @@
 #include <fstream>
 #include <ios>
 #include <map>
+#include <ostream>
 #include <string>
 #include <tuple>
 
@@ -102,6 +103,8 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
                 f.open("www/test/delete.png", std::ios_base::out | std::ios_base::trunc);
                 if (f.is_open())
                     f.close();
+                else
+                    GTEST_FAIL() << "Could not create file delete.png" << std::endl;
             }
             {
                 std::fstream f;
@@ -109,7 +112,8 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
                 if (f.is_open()) {
                     f << "# Super fichier texte\n\n";
                     f.close();
-                }
+                } else
+                    GTEST_FAIL() << "Could not create file upload_a.md" << std::endl;
             }
         }
 
@@ -134,42 +138,46 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
                 { "index.html" }
             );
             _server._routes["/images"] = FakeRoute(
-                OK, false, false, false, false, false, "", "", "/images", "", "www", "", { GET }, { "index.html" }
+                OK, false, false, false, false, false, "", "", "/images", "", "www/images", "", { GET }, { "index.html" }
             );
             _server._routes["/images/png/delete"] = FakeRoute(
-                OK, false, false, false, false, false, "", "", "/images/png/delete", "", "www", "", { GET, DELETE },
+                OK, false, false, false, false, false, "", "", "/images/png/delete", "", "www/images/png/delete", "", { GET, DELETE },
                 { "index.html" }
             );
             _server._routes["/forms"] = FakeRoute(
-                OK, true, false, false, false, false, "", "", "/forms", "", "www", "", { GET }, { "index.html" }
+                OK, true, false, false, false, false, "", "", "/forms", "", "www/forms", "", { GET }, { "index.html" }
             );
             _server._routes["/space_travel"] = FakeRoute(
                 MovedPermanently, false, false, false, true, false, "", "", "/space_travel",
-                "/star_wars/milky_way.html", "/var/www", "", { GET }, { "index.html" }
+                "/star_wars/milky_way.html", "www", "", { GET }, { "index.html" }
             );
             _server._routes["/forms/upload_form"] = FakeRoute(
-                OK, false, false, false, false, true, "", "", "/forms/upload_form", "", "www", "www/uploads",
+                OK, false, false, false, false, true, "", "", "/forms/upload_form", "", "www/upload_form", "www/uploads",
                 { GET, POST }, { "index.html" }
             );
             _server._routes["/forms/kill_form"] = FakeRoute(
-                OK, true, false, false, false, false, "", "", "/forms/kill_form", "", "www", "", { GET },
+                OK, true, false, false, false, false, "", "", "/forms/kill_form", "", "www/forms/kill_form", "", { GET },
                 { "index.html" }
             );
             _server._routes["/forms/love_form"] = FakeRoute(
-                OK, true, false, false, false, false, "", "", "/forms/love_form", "", "www", "", { GET },
+                OK, true, false, false, false, false, "", "", "/forms/love_form", "", "www/forms/love_form", "", { GET },
                 { "index.html" }
             );
             _server._routes["/python"] = FakeRoute(
-                OK, false, true, true, false, false, ".py", "/usr/bin/python3", "/python", "", "cgi-bin", "",
+                OK, false, true, true, false, false, ".py", "/usr/bin/python3", "/python", "", "cgi-bin/python", "",
                 { GET, POST }, { "index.html" }
             );
             _server._routes["/perl"] = FakeRoute(
-                OK, false, true, true, false, false, ".pl", "/usr/bin/perl", "/perl", "", "cgi-bin", "", { GET },
+                OK, false, true, true, false, false, ".pl", "/usr/bin/perl", "/perl", "", "cgi-bin/perl", "", { GET },
                 { "index.html" }
             );
             _server._routes["/php"] = FakeRoute(
-                OK, false, true, true, false, false, ".php", "/usr/bin/php", "/php", "", "cgi-bin", "", { GET },
+                OK, false, true, true, false, false, ".php", "/usr/bin/php", "/php", "", "cgi-bin/perl", "", { GET },
                 { "index.html" }
+            );
+            _server._routes["/test"] = FakeRoute(
+                OK, true, false, false, false, false, "", "", "/test", "", "www/test", "", { GET, POST, DELETE },
+                { "lindex.html" }
             );
         }
 

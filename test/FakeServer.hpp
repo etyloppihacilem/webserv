@@ -47,7 +47,7 @@ class FakeServer {
                 i          = path.find('/', i + 1);
                 if (i == path.npos)
                     break;
-                testing = path.substr(0, i + 1);
+                testing = path.substr(0, i);
             }
             return _routes[last_found]; // will return "/" route if default
         }

@@ -25,8 +25,9 @@ TEST(LocationTestSuite, BuildPathTest) {
     FakeRoute                       route;
     std::string                     original_target = "/index.html";
     std::string                     target          = "/target" + original_target;
-    route._getRootDir                               = "routeDirTEST";
-    route._getLocation                              = "/target";
+
+    route._getRootDir  = "routeDirTEST";
+    route._getLocation = "/target";
     loc.build_path(target, route);
     EXPECT_EQ(loc.get_route_path(), "routeDirTEST");
     EXPECT_EQ(loc.get_path(), "routeDirTEST" + original_target);
