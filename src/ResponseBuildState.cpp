@@ -106,7 +106,7 @@ void ResponseBuildState<ServerClass, RouteClass>::init_strategy() {
     Location<ServerClass, RouteClass> location(_request->get_target(), _server);
 
     if (location.is_redirect())
-        _strategy = new RedirectStrategy(location.get_path(), location.get_status_code());
+        _strategy = new RedirectStrategy(location.get_path(), _request->get_query_string(), location.get_status_code());
     else if (location.is_cgi())
         _strategy = new CGIStrategy(location.get_path(), _request);
     else if (_request->get_method() == GET) {

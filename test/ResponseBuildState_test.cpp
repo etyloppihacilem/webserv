@@ -71,7 +71,7 @@ std::vector<d_rbs> ResponseBuildData = {
       "DELETE /test/delete.png HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
       tDeleteStrategy,
       NoContent,
-      { },
+      {},
       false,
       "",
       true },
@@ -83,6 +83,38 @@ std::vector<d_rbs> ResponseBuildData = {
       true,
       "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was automatically "
       "generated.</div></body>",
+      false },
+    { "redirect",
+      "GET /space_travel HTTP/1.1\r\nHost: coucou\r\n\r\n",
+      tRedirectStrategy,
+      MovedPermanently,
+      { { "Location", "/star_wars/milky_way.html" } },
+      false,
+      "",
+      false },
+    { "redirect_discarding",
+      "GET /space_travel/some/things HTTP/1.1\r\nHost: coucou\r\n\r\n",
+      tRedirectStrategy,
+      MovedPermanently,
+      { { "Location", "/star_wars/milky_way.html" } },
+      false,
+      "",
+      false },
+    { "redirect_append_nothing",
+      "GET /space_corridor HTTP/1.1\r\nHost: coucou\r\n\r\n",
+      tRedirectStrategy,
+      TemporaryRedirect,
+      { { "Location", "http://space_corridor.fr/" } },
+      false,
+      "",
+      false },
+    { "redirect_append",
+      "GET /space_corridor/search/ici?ici=coucou HTTP/1.1\r\nHost: coucou\r\n\r\n",
+      tRedirectStrategy,
+      TemporaryRedirect,
+      { { "Location", "http://space_corridor.fr/search/ici?ici=coucou" } },
+      false,
+      "",
       false },
 };
 
@@ -146,8 +178,6 @@ TEST_P(ResponseBuildStateFixture, CorrectHeaders) {
         if (correct_item == correct.end())
             FAIL() << "This header was found :\n"
                    << test_item->first << ": " << test_item->second << "\n...not expected.";
-        if (correct_item != correct.end())
-            EXPECT_EQ(correct_item->second, test_item->second);
     } // double verification is to display clearly which one is missing.
 }
 

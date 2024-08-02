@@ -28,6 +28,19 @@ RedirectStrategy::RedirectStrategy(const std::string &location, HttpCode code) :
     }
 }
 
+RedirectStrategy::RedirectStrategy(const std::string &location, const std::string &query_string, HttpCode code) :
+    ResponseBuildingStrategy(),
+    _location(location),
+    _code(code) {
+    if (!isRedirection(code)) {
+        error.log() << "Trying to redirect with a non redirect code : " << code << std::endl;
+        throw HttpError(InternalServerError);
+    }
+    if (query_string != "") {
+        _location += (*query_string.rbegin() == '?' ? "" : "?") + query_string;
+    }
+}
+
 RedirectStrategy::~RedirectStrategy() {}
 
 bool RedirectStrategy::build_response() {

@@ -185,7 +185,7 @@ ShortNamespaceLines: 0
 SkipMacroDefinitionBody: false
 SortIncludes:    CaseSensitive # change this if counter intuitive
 SortJavaStaticImport: Before
-SortUsingDeclarations: LexicographicNumeric
+SortUsingDeclarations: Lexicographic
 SpaceAfterCStyleCast: true
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: true

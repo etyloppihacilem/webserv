@@ -41,12 +41,17 @@ class FakeServer {
             size_t      i          = path.find('/');
             std::string last_found = "/";
             std::string testing    = path.substr(0, i + 1);
-
+            bool        eos        = false; // end of string
             while (hasRoute(testing)) {
                 last_found = testing;
-                i          = path.find('/', i + 1);
-                if (i == path.npos)
-                    break;
+                if (!eos)
+                    i = path.find('/', i + 1);
+                else
+                  break;
+                if (i == path.npos) {
+                    eos = true;
+                    i = path.length();
+                }
                 testing = path.substr(0, i);
             }
             return _routes[last_found]; // will return "/" route if default

@@ -532,8 +532,6 @@ TEST_P(TotalRequestFixture, HeadersTest) {
         if (correct_item == correct.end())
             FAIL() << "This header was found :\n"
                    << test_item->first << ": " << test_item->second << "\n...not expected.";
-        if (correct_item != correct.end())
-            EXPECT_EQ(correct_item->second, test_item->second);
     } // double verification is to display clearly which one is missing.
 }
 

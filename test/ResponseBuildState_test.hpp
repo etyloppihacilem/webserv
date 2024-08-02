@@ -138,11 +138,12 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
                 { "index.html" }
             );
             _server._routes["/images"] = FakeRoute(
-                OK, false, false, false, false, false, "", "", "/images", "", "www/images", "", { GET }, { "index.html" }
+                OK, false, false, false, false, false, "", "", "/images", "", "www/images", "", { GET },
+                { "index.html" }
             );
             _server._routes["/images/png/delete"] = FakeRoute(
-                OK, false, false, false, false, false, "", "", "/images/png/delete", "", "www/images/png/delete", "", { GET, DELETE },
-                { "index.html" }
+                OK, false, false, false, false, false, "", "", "/images/png/delete", "", "www/images/png/delete", "",
+                { GET, DELETE }, { "index.html" }
             );
             _server._routes["/forms"] = FakeRoute(
                 OK, true, false, false, false, false, "", "", "/forms", "", "www/forms", "", { GET }, { "index.html" }
@@ -152,16 +153,16 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
                 "/star_wars/milky_way.html", "www", "", { GET }, { "index.html" }
             );
             _server._routes["/forms/upload_form"] = FakeRoute(
-                OK, false, false, false, false, true, "", "", "/forms/upload_form", "", "www/upload_form", "www/uploads",
-                { GET, POST }, { "index.html" }
+                OK, false, false, false, false, true, "", "", "/forms/upload_form", "", "www/upload_form",
+                "www/uploads", { GET, POST }, { "index.html" }
             );
             _server._routes["/forms/kill_form"] = FakeRoute(
-                OK, true, false, false, false, false, "", "", "/forms/kill_form", "", "www/forms/kill_form", "", { GET },
-                { "index.html" }
+                OK, true, false, false, false, false, "", "", "/forms/kill_form", "", "www/forms/kill_form", "",
+                { GET }, { "index.html" }
             );
             _server._routes["/forms/love_form"] = FakeRoute(
-                OK, true, false, false, false, false, "", "", "/forms/love_form", "", "www/forms/love_form", "", { GET },
-                { "index.html" }
+                OK, true, false, false, false, false, "", "", "/forms/love_form", "", "www/forms/love_form", "",
+                { GET }, { "index.html" }
             );
             _server._routes["/python"] = FakeRoute(
                 OK, false, true, true, false, false, ".py", "/usr/bin/python3", "/python", "", "cgi-bin/python", "",
@@ -178,6 +179,10 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
             _server._routes["/test"] = FakeRoute(
                 OK, true, false, false, false, false, "", "", "/test", "", "www/test", "", { GET, POST, DELETE },
                 { "lindex.html" }
+            );
+            _server._routes["/space_corridor"] = FakeRoute(
+                TemporaryRedirect, false, false, false, true, false, "", "", "/space_corridor",
+                "http://space_corridor.fr/", "www", "", { GET }, { "index.html" }
             );
         }
 
