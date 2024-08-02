@@ -77,8 +77,9 @@ std::string GetIndexStrategy::getType(mode_t mode) {
   */
 std::string GetIndexStrategy::generateLine(char *name, struct stat *st) {
     std::string path = _location + std::string(name);
+    //+ (*_location.rbegin() != '/' ? "/" : "") // not suppsed to be needed !!!
 
-    if (!stat(name, st))
+    if (!stat(path.c_str(), st))
         return name;
     else {
         bzero(st, sizeof(struct stat));
@@ -89,20 +90,23 @@ std::string GetIndexStrategy::generateLine(char *name, struct stat *st) {
 bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     if (_done || !_dir)
         return _done;
-    if (!_init_done)
+    if (!_init_done) {
+        if (*_location.rbegin() != '/')
+            _location += "/";
         buffer
             += "<head></head><body><h1>" + _location + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
+    }
 
-    dir_item         *item;
-    std::stringstream stream;
-    std::string       name;
-    struct stat       st;
+    dir_item   *item;
+    std::string name;
+    struct stat st;
 
     while ((item = readdir(_dir)) && buffer.length() < size) {
         name = generateLine(item->d_name, &st);
+        std::stringstream stream;
         stream << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _location << item->d_name << "\">"
                << name << "</a></td><td>" << (S_ISREG(st.st_mode) ? st.st_size : 0) << "</td></tr>";
-        stream >> buffer;
+        buffer += stream.str();
     }
     if (errno == EBADF)
         throw HttpError(InternalServerError);

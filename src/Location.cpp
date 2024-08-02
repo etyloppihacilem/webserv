@@ -110,7 +110,7 @@ bool Location<ServerClass, RouteClass>::find_index(const RouteClass &route, stru
     for (std::vector<std::string>::const_iterator it = indexs.begin(); it != indexs.end(); it++) {
         std::string index_path = _path + trailing + *it;
 
-        if (stat(_path.c_str(), &buf) == 0) {
+        if (stat(index_path.c_str(), &buf) == 0) {
             if (!S_ISREG(buf.st_mode)) { // if index.html or so is not a file.
                 warn.log() << *it << " is not a file, so cannot be an index. Continuing." << std::endl;
                 continue;
