@@ -34,16 +34,15 @@ class ClientRequest {
         std::string get_target() const;
         HttpMethod  get_method();
         Body       *get_body();
-
-        std::map<std::string, std::string> &get_header();
-
         // std::map<std::string, std::string>  &get_parameters();
-
         bool        have_body() const;
         HttpCode    get_status() const;
         int         get_fd() const;
         int         get_port() const;
         std::string get_query_string() const;
+        void        set_status(HttpCode code);
+
+        std::map<std::string, std::string> &get_header();
 
     private:
         HttpMethod parse_method(const std::string &method, const size_t &end);

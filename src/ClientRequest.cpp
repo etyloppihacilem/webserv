@@ -393,3 +393,7 @@ void ClientRequest::save_mem() {
     shrink_to_fit(_target);
     _body->save_mem();
 }
+
+void ClientRequest::set_status(HttpCode status) {
+    _status = status;
+}

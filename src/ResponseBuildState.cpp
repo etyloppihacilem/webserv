@@ -55,16 +55,25 @@ ResponseBuildState<ServerClass, RouteClass>::~ResponseBuildState() {}
 
 template <class ServerClass, class RouteClass>
 t_state ResponseBuildState<ServerClass, RouteClass>::process() {
-    if (!_recovery) {
-        if (!_strategy)
+    try { // handling of bad_alloc out of scope
+        try {
+            if (!_strategy)
+                init_strategy();
+            _strategy->build_response();
+        } catch (HttpError &e) {
+            _request->set_status(e.get_code()); // max 3 try
+            if (_strategy) {
+                delete _strategy;
+                _strategy = 0;
+            }
             init_strategy();
-    } else {
-        if (_strategy)
-            delete _strategy;
-        init_strategy(_code); // recovery
-        _recovery = false;    // because it is init so just normal operation now
+            _strategy->build_response();
+        }
+    } catch (HttpError &e) {
+        init_strategy(_code); // Should never happen (or if someone delete an error file while being read)
+        _strategy->build_response();
     }
-    return _strategy->build_response() ? (_state = ready) : (_state = waiting);
+    return _strategy->is_built() ? (_state = ready) : (_state = waiting);
 }
 
 template <class ServerClass, class RouteClass>

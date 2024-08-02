@@ -1,0 +1,84 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:__vfprintf_internal
+   fun:__vsnprintf_internal
+   fun:snprintf
+   fun:_ZN7testing12_GLOBAL__N_126PrintByteSegmentInObjectToEPKhmmPSo
+   fun:_ZN7testing12_GLOBAL__N_124PrintBytesInObjectToImplEPKhmPSo
+   fun:_ZN7testing8internal20PrintBytesInObjectToEPKhmPSo
+   fun:_ZN7testing13PrintToStringI13s_test_targetEENSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEERKT_
+   fun:_ZN7testing8internal26ParameterizedTestSuiteInfoI23ClientRequestTestTargetE13RegisterTestsEv
+   fun:_ZN7testing8internal30ParameterizedTestSuiteRegistry13RegisterTestsEv
+   fun:_ZN7testing8internal12UnitTestImpl26RegisterParameterizedTestsEv
+   fun:_ZN7testing8internal12UnitTestImpl19PostFlagParsingInitEv
+   fun:_ZN7testing8internal18InitGoogleTestImplIcEEvPiPPT_
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_itoa_word
+   fun:__vfprintf_internal
+   fun:__vsnprintf_internal
+   fun:snprintf
+   fun:_ZN7testing12_GLOBAL__N_126PrintByteSegmentInObjectToEPKhmmPSo
+   fun:_ZN7testing12_GLOBAL__N_124PrintBytesInObjectToImplEPKhmPSo
+   fun:_ZN7testing8internal20PrintBytesInObjectToEPKhmPSo
+   fun:_ZN7testing13PrintToStringI13s_test_targetEENSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEERKT_
+   fun:_ZN7testing8internal26ParameterizedTestSuiteInfoI23ClientRequestTestTargetE13RegisterTestsEv
+   fun:_ZN7testing8internal30ParameterizedTestSuiteRegistry13RegisterTestsEv
+   fun:_ZN7testing8internal12UnitTestImpl26RegisterParameterizedTestsEv
+   fun:_ZN7testing8internal12UnitTestImpl19PostFlagParsingInitEv
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:__vfprintf_internal
+   fun:__vsnprintf_internal
+   fun:snprintf
+   fun:_ZN7testing12_GLOBAL__N_126PrintByteSegmentInObjectToEPKhmmPSo
+   fun:_ZN7testing12_GLOBAL__N_124PrintBytesInObjectToImplEPKhmPSo
+   fun:_ZN7testing8internal20PrintBytesInObjectToEPKhmPSo
+   fun:_ZN7testing13PrintToStringI13s_test_targetEENSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEERKT_
+   fun:_ZN7testing8internal26ParameterizedTestSuiteInfoI23ClientRequestTestTargetE13RegisterTestsEv
+   fun:_ZN7testing8internal30ParameterizedTestSuiteRegistry13RegisterTestsEv
+   fun:_ZN7testing8internal12UnitTestImpl26RegisterParameterizedTestsEv
+   fun:_ZN7testing8internal12UnitTestImpl19PostFlagParsingInitEv
+   fun:_ZN7testing8internal18InitGoogleTestImplIcEEvPiPPT_
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:__vfprintf_internal
+   fun:__vsnprintf_internal
+   fun:snprintf
+   fun:_ZN7testing12_GLOBAL__N_126PrintByteSegmentInObjectToEPKhmmPSo
+   fun:_ZN7testing12_GLOBAL__N_124PrintBytesInObjectToImplEPKhmPSo
+   fun:_ZN7testing8internal20PrintBytesInObjectToEPKhmPSo
+   fun:_ZN7testing13PrintToStringI13s_test_targetEENSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEERKT_
+   fun:_ZN7testing8internal26ParameterizedTestSuiteInfoI23ClientRequestTestTargetE13RegisterTestsEv
+   fun:_ZN7testing8internal30ParameterizedTestSuiteRegistry13RegisterTestsEv
+   fun:_ZN7testing8internal12UnitTestImpl26RegisterParameterizedTestsEv
+   fun:_ZN7testing8internal12UnitTestImpl19PostFlagParsingInitEv
+   fun:_ZN7testing8internal18InitGoogleTestImplIcEEvPiPPT_
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:_itoa_word
+   fun:__vfprintf_internal
+   fun:__vsnprintf_internal
+   fun:snprintf
+   fun:_ZN7testing12_GLOBAL__N_126PrintByteSegmentInObjectToEPKhmmPSo
+   fun:_ZN7testing12_GLOBAL__N_124PrintBytesInObjectToImplEPKhmPSo
+   fun:_ZN7testing8internal20PrintBytesInObjectToEPKhmPSo
+   fun:_ZN7testing13PrintToStringI13s_test_targetEENSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEERKT_
+   fun:_ZN7testing8internal26ParameterizedTestSuiteInfoI23ClientRequestTestTargetE13RegisterTestsEv
+   fun:_ZN7testing8internal30ParameterizedTestSuiteRegistry13RegisterTestsEv
+   fun:_ZN7testing8internal12UnitTestImpl26RegisterParameterizedTestsEv
+   fun:_ZN7testing8internal12UnitTestImpl19PostFlagParsingInitEv
+}

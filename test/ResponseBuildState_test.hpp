@@ -99,6 +99,8 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
                 delete _request;
             if (_strategy)
                 delete _strategy;
+            if (std::get<tclean>(GetParam()))
+                clean();
         }
 
         static void TearDownTestSuite() { clean(); }

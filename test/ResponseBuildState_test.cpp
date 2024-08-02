@@ -42,20 +42,54 @@ FakeServer ResponseBuildStateFixture::_server;
 // Do not include default server header in header verification list.
 // WARN: Do not test for CGI yet !! not implemented !!
 std::vector<d_rbs> ResponseBuildData = {
-    { "Default",
+    { "GET",
       "GET /index.html HTTP/1.1\r\nHost: coucou\r\n\r\n",
       tGetFileStrategy,
       OK,
       { { "Content-Type", "text/html" }, { "Content-Length", "102" } },
       true,
-      "<body><h1>Coucou je suis heureux</h1><div>This file is there for test and demo purposes.</div></body>\n", false },
+      "<body><h1>Coucou je suis heureux</h1><div>This file is there for test and demo purposes.</div></body>\n",
+      false },
+    { "GET_not_found",
+      "GET /indox.html HTTP/1.1\r\nHost: coucou\r\n\r\n",
+      tErrorStrategy,
+      NotFound,
+      { { "Content-Type", "text/html; charset=utf-8" }, { "Content-Length", "134" } },
+      true,
+      "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was automatically generated.</div></body>",
+      false },
     { "POST",
       "POST /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
       tUploadStrategy,
       Created,
       { { "Location", "/test/upload.txt" } },
       false,
-      "", true },
+      "",
+      true },
+    // { "POST_not_found",
+    //   "POST /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+    //   tUploadStrategy,
+    //   Created,
+    //   { { "Location", "/test/upload.txt" } },
+    //   false,
+    //   "",
+    //   true },
+    // { "DELETE",
+    //   "POST /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+    //   tUploadStrategy,
+    //   Created,
+    //   { { "Location", "/test/upload.txt" } },
+    //   false,
+    //   "",
+    //   true },
+    // { "DELETE_not_found",
+    //   "POST /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+    //   tUploadStrategy,
+    //   Created,
+    //   { { "Location", "/test/upload.txt" } },
+    //   false,
+    //   "",
+    //   true },
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -174,3 +208,6 @@ TEST(ResponseBuildStateSuite, NoRequest) {
     );
     error.enable();
 }
+
+// TODO: test for upload with create and append
+// TODO: test for error with and without error file
