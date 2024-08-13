@@ -118,6 +118,7 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     }
     return _done;
 }
+// TODO: links are not right yet...
 
 bool GetIndexStrategy::build_response() {
     if (_built) {

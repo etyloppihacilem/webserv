@@ -12,20 +12,25 @@
 #include "Body.hpp"
 #include "BodyChunk.hpp"
 #include "ClientRequest.hpp"
+#include "HttpError.hpp"
 #include "HttpMethods.hpp"
+#include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "StringUtils.hpp"
 #include "todo.hpp"
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
 #include <map>
 #include <new>
 #include <ostream>
+#include <sched.h>
 #include <sstream>
 #include <string.h>
 #include <string>
 #include <strings.h>
+#include <unistd.h>
 
 CGIStrategy::CGIStrategy(const std::string &location, ClientRequest *request) :
     ResponseBuildingStrategy(),
@@ -48,6 +53,45 @@ bool CGIStrategy::build_response() {
 
     std::map<std::string, std::string> env;
 
+    // program separation
+    if (pipe(_pipin) < 0) {
+        error.log() << "Could not open pipe for CGIStrategy. Sending " << InternalServerError << std::endl;
+        throw HttpError(InternalServerError);
+    }
+    if (pipe(_pipout) < 0) {
+        close(_pipin[0]);
+        close(_pipin[1]);
+        error.log() << "Could not open pipe for CGIStrategy. Sending " << InternalServerError << std::endl;
+        throw HttpError(InternalServerError);
+    }
+    pid_t pid = fork();
+    if (pid < 0) {
+        close(_pipin[0]);
+        close(_pipin[1]);
+        close(_pipout[0]);
+        close(_pipout[1]);
+        error.log() << "Could not fork CGIStrategy. Sending " << InternalServerError << std::endl;
+        throw HttpError(InternalServerError);
+    } else if (pid) { // parent
+        close(_pipin[0]);
+        close(_pipout[1]);
+        info.log() << "Child " << pid << " running." << std::endl;
+    } else { // child
+        char **c_env = generate_env(env);
+        close(_pipin[1]);
+        close(_pipout[0]);
+        // execve(c_env);
+        error.log() << "Execve failed to run " << "" << std::endl;
+        close(_pipin[0]);
+        close(_pipout[1]);
+        free(c_env);
+        _exit(1); // _exit with underscore does not flush STDIO
+        // WARN: Check if this is memory safe.
+    }
+    return _built == true;
+}
+
+void CGIStrategy::fill_env(std::map<std::string, std::string> &env, size_t size) {
     env["CONTENT_TYPE"] = "";
     if (size) {
         std::stringstream st;
@@ -66,7 +110,6 @@ bool CGIStrategy::build_response() {
     env["SERVER_PORT"]       = ""; // TODO: trouver le port
     env["SERVER_PROTOCOL"]   = "HTTP/1.1";
     env["SERVER_SOFTWAR"]    = SERVER_SOFTWARE;
-    return _built;
 }
 
 char **CGIStrategy::generate_env(const std::map<std::string, std::string> &env) const {
@@ -95,9 +138,10 @@ char **CGIStrategy::generate_env(const std::map<std::string, std::string> &env) 
     return ret;
 }
 
-bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) {
+bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way to force chunk
     (void) buffer;
     (void) size;
+    // read from pipout and send in chunk
     return _done;
 }
 

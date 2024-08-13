@@ -258,5 +258,4 @@ TEST(ResponseBuildStateSuite, NoRequest) {
     error.enable();
 }
 
-// TODO: test for upload with create and append
-// TODO: test for error with and without error file
+// TODO: test for error with and with error file
