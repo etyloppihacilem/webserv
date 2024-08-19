@@ -13,7 +13,13 @@
 #include <cstddef>
 #include <string>
 
-Body::Body(int fd, std::string &buffer) : _fd(fd), _buffer(buffer), _done(false), _uniform(true), _body(), _total(0) {}
+Body::Body(int socket, std::string &buffer) :
+    _socket(socket),
+    _buffer(buffer),
+    _done(false),
+    _uniform(true),
+    _body(),
+    _total(0) {}
 
 Body::~Body() {}
 

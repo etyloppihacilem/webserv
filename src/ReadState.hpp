@@ -17,7 +17,7 @@
 
 class ReadState : public ProcessState {
     public:
-        ReadState(int fd);
+        ReadState(int socket);
         ~ReadState();
 
         t_state process();
@@ -30,7 +30,7 @@ class ReadState : public ProcessState {
         t_state process_buffer(char *buffer);
         t_state return_error();
 
-        std::string    _buffer; ///< Buffer for parsing on fd
+        std::string    _buffer; ///< Buffer for parsing on socket
         /**< buffer is supposed clean at the end of a successful parsing on it. */
         ClientRequest *_in_progress; ///< ClientRequest that is built
 

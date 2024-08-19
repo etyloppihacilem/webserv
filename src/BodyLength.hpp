@@ -27,7 +27,7 @@
   */
 class BodyLength : public Body {
     public:
-        BodyLength(int fd, std::string &buffer, std::string length /** is a string representing a decimal. */);
+        BodyLength(int socket, std::string &buffer, std::string length /** is a string representing a decimal. */);
         ~BodyLength();
 
         std::string &get();

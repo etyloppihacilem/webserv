@@ -25,7 +25,7 @@
  */
 class Body {
     public:
-        Body(int fd, std::string &buffer);
+        Body(int socket, std::string &buffer);
         virtual ~Body() = 0;
 
         virtual std::string &get()       = 0; ///< Is used to read the body as a whole and saves it in the _body
@@ -38,7 +38,7 @@ class Body {
         void                 save_mem();      ///< Used to save memory in case of heap going missing
 
     protected:
-        int          _fd;      ///< File descriptor of the incoming socket
+        int          _socket;  ///< File descriptor of the incoming socket
         std::string &_buffer;  ///< Buffer of ClientRequest object
         bool         _done;    ///< Is true if body is done being read
         bool         _uniform; ///< Used to protect get() usage if pop() or clean() are used

@@ -37,8 +37,8 @@
  This class is in charge of choosing the right strategy depending on the request.
  */
 template <class ServerClass, class RouteClass>
-ResponseBuildState<ServerClass, RouteClass>::ResponseBuildState(int fd, ClientRequest *request, ServerClass &server) :
-    ProcessState(fd),
+ResponseBuildState<ServerClass, RouteClass>::ResponseBuildState(int socket, ClientRequest *request, ServerClass &server) :
+    ProcessState(socket),
     _request(request),
     _server(server),
     _strategy(0),

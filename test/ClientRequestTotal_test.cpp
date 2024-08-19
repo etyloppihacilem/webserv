@@ -552,13 +552,13 @@ TEST_P(TotalRequestFixture, StatusTest) {
 TEST_P(TotalRequestFixture, FdRequestTest) {
     const int correct = _fd_check;
 
-    EXPECT_EQ(correct, _request->get_fd());
+    EXPECT_EQ(correct, _request->get_socket());
 }
 
 TEST_P(TotalRequestFixture, FdStateTest) {
     const int correct = _fd_check;
 
-    EXPECT_EQ(correct, _test->_fd);
+    EXPECT_EQ(correct, _test->_socket);
 }
 
 TEST_P(TotalRequestFixture, PortTest) {

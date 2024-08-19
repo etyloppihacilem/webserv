@@ -25,8 +25,8 @@
 #include <sstream>
 #include <string>
 
-ClientRequest::ClientRequest(int fd) :
-    _fd(fd),
+ClientRequest::ClientRequest(int socket) :
+    _socket(socket),
     _method(none),
     _target(),
     _header(),
@@ -36,8 +36,8 @@ ClientRequest::ClientRequest(int fd) :
     _absolute_form(false),
     _port(80) {}
 
-ClientRequest::ClientRequest(int fd, HttpCode code, int port) :
-    _fd(fd),
+ClientRequest::ClientRequest(int socket, HttpCode code, int port) :
+    _socket(socket),
     _method(none),
     _target(),
     _header(),
@@ -233,10 +233,10 @@ bool ClientRequest::init_body(std::string &buffer) {
     }
     if (_header.find("Transfer-Encoding") != _header.end()) {
         _body_exists = true;
-        _body        = new BodyChunk(_fd, buffer);
+        _body        = new BodyChunk(_socket, buffer);
     } else if (_header.find("Content-Length") != _header.end()) {
         _body_exists = true;
-        _body        = new BodyLength(_fd, buffer, _header["Content-Length"]);
+        _body        = new BodyLength(_socket, buffer, _header["Content-Length"]);
     } else { // no body
         _body_exists = false;
     }
@@ -379,8 +379,8 @@ HttpCode ClientRequest::get_status() const {
     return _status;
 }
 
-int ClientRequest::get_fd() const {
-    return _fd;
+int ClientRequest::get_socket() const {
+    return _socket;
 }
 
 int ClientRequest::get_port() const {

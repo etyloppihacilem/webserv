@@ -21,7 +21,7 @@
 #include <ostream>
 #include <unistd.h>
 
-ReadState::ReadState(int fd) : ProcessState(fd), _buffer(), _in_progress(0) {}
+ReadState::ReadState(int socket) : ProcessState(socket), _buffer(), _in_progress(0) {}
 
 ReadState::~ReadState() {
     if (_in_progress)
@@ -29,7 +29,7 @@ ReadState::~ReadState() {
 }
 
 /**
-  Function that read from fd and processes the buffer.
+  Function that read from socket and processes the buffer.
   */
 t_state ReadState::process() {
     if (_state == ready || _state == s_error)
@@ -40,11 +40,11 @@ t_state ReadState::process() {
     if (_state == waiting) {
         int a;
 
-        if ((a = read(_fd, buffer, BUFFER_SIZE)) < 0)
-            error.log() << "Reading into socket " << _fd << " resulted in error: " << strerror(errno) << std::endl;
+        if ((a = read(_socket, buffer, BUFFER_SIZE)) < 0)
+            error.log() << "Reading into socket " << _socket << " resulted in error: " << strerror(errno) << std::endl;
         else if (a == 0) {
             // this should not happen.
-            warn.log() << "Reading nothing into socket " << _fd << ", closing connection with " << BadRequest
+            warn.log() << "Reading nothing into socket " << _socket << ", closing connection with " << BadRequest
                        << std::endl;
             return return_error();
         }
@@ -53,7 +53,7 @@ t_state ReadState::process() {
 }
 
 /**
-  Function that processes the buffer without reading from fd.
+  Function that processes the buffer without reading from socket.
 
   Called by process().
   */
@@ -78,7 +78,7 @@ t_state ReadState::process_buffer(char *buffer) {
             _buffer = _buffer.substr(end + 4, _buffer.length() - (end + 4));
             return return_error();
         }
-        _in_progress = new ClientRequest(_fd);
+        _in_progress = new ClientRequest(_socket);
         if (!_in_progress->parse_header(_buffer))
             return _state = ready; // TODO:close connection after error response is sent.
 
@@ -93,8 +93,8 @@ t_state ReadState::process_buffer(char *buffer) {
 t_state ReadState::return_error() {
     if (_in_progress)
         delete _in_progress;
-    _in_progress  = new ClientRequest(_fd, BadRequest, 80); // TODO: trouver si le port est necessaire et
-    return _state = ready;                                  // mettre le bon le cas echeant.
+    _in_progress  = new ClientRequest(_socket, BadRequest, 80); // TODO: trouver si le port est necessaire et
+    return _state = ready;                                      // mettre le bon le cas echeant.
 }
 
 /**

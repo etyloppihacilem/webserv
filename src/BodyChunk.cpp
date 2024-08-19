@@ -23,8 +23,8 @@
 #include <string>
 #include <unistd.h>
 
-BodyChunk::BodyChunk(int fd, std::string &buffer) :
-    Body(fd, buffer),
+BodyChunk::BodyChunk(int socket, std::string &buffer) :
+    Body(socket, buffer),
     _bytes_remaining(0),
     _eoc(false),
     _trailing(false) {}
@@ -49,7 +49,7 @@ size_t BodyChunk::read_body() {
         size_read = 2;
     else
         size_read = 1;
-    size_read = read(_fd, buf, size_read > BUFFER_SIZE ? BUFFER_SIZE : size_read);
+    size_read = read(_socket, buf, size_read > BUFFER_SIZE ? BUFFER_SIZE : size_read);
     _buffer  += std::string(buf);
     return size_read;
 }

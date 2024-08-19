@@ -24,8 +24,8 @@
 
 class ClientRequest {
     public:
-        ClientRequest(int fd);
-        ClientRequest(int fd, HttpCode code, int port);
+        ClientRequest(int socket);
+        ClientRequest(int socket, HttpCode code, int port);
         ~ClientRequest();
 
         bool        parse_header(const std::string &in);
@@ -37,7 +37,7 @@ class ClientRequest {
         // std::map<std::string, std::string>  &get_parameters();
         bool        have_body() const;
         HttpCode    get_status() const;
-        int         get_fd() const;
+        int         get_socket() const;
         int         get_port() const;
         std::string get_query_string() const;
         void        set_status(HttpCode code);
@@ -53,7 +53,7 @@ class ClientRequest {
         void       parse_header_line(const std::string &in, size_t begin, size_t end);
         void       parse_port();
 
-        int                                _fd;
+        int                                _socket;
         HttpMethod                         _method; ///< Method used for request
         std::string                        _target; ///< Target of request
         std::map<std::string, std::string> _header; ///< Map containing headers

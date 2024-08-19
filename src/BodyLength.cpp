@@ -19,8 +19,8 @@
 #include <string>
 #include <unistd.h>
 
-BodyLength::BodyLength(int fd, std::string &buffer, std::string length) :
-    Body(fd, buffer),
+BodyLength::BodyLength(int socket, std::string &buffer, std::string length) :
+    Body(socket, buffer),
     _length(0),
     _read_length(_buffer.length()) {
     for (std::string::iterator i = length.begin(); i != length.end(); i++)
@@ -46,7 +46,7 @@ size_t BodyLength::read_body() {
     char   buf[BUFFER_SIZE + 1] = { 0 }; // the whole buffer is set to 0
     size_t size_read;
 
-    size_read     = read(_fd, buf, (_length - _read_length > BUFFER_SIZE) ? BUFFER_SIZE : _length - _read_length);
+    size_read     = read(_socket, buf, (_length - _read_length > BUFFER_SIZE) ? BUFFER_SIZE : _length - _read_length);
     _buffer      += std::string(buf);
     _read_length += size_read;
     if (_length <= _read_length)

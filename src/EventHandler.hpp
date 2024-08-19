@@ -16,11 +16,11 @@
   */
 class EventHandler {
     public:
-        EventHandler(int fd);
+        EventHandler(int socket);
         virtual ~EventHandler() = 0;
 
     protected:
-        int _fd;
+        int _socket;
 };
 
 #endif // INCLUDE_SRC_EVENTHANDLER_HPP_

@@ -18,7 +18,7 @@
   */
 class ProcessHandler : public EventHandler {
     public:
-        ProcessHandler(int fd);
+        ProcessHandler(int socket);
         ~ProcessHandler();
 
     private:

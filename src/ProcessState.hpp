@@ -11,6 +11,7 @@
 #ifndef INCLUDE_SRC_PROCESSSTATE_HPP_
 #define INCLUDE_SRC_PROCESSSTATE_HPP_
 
+#include "EventHandler.hpp"
 typedef enum e_state {
     s_error = -1, ///< if there is an error (NOT HTTP ERROR !!!!)
     waiting,      ///< waiting for header to exist or to end
@@ -19,7 +20,7 @@ typedef enum e_state {
 
 class ProcessState {
     public:
-        ProcessState(int fd);
+        ProcessState(int socket);
         virtual ~ProcessState() = 0;
 
         // process returns true when done
@@ -29,8 +30,9 @@ class ProcessState {
 
     protected:
         // TODO:handler manifestement mais osef
-        int     _fd;
-        t_state _state;
+        int           _socket;
+        t_state       _state;
+        // EventHandler *_handler;
 };
 
 #endif // INCLUDE_SRC_PROCESSSTATE_HPP_

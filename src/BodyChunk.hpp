@@ -34,7 +34,7 @@
   */
 class BodyChunk : public Body {
     public:
-        BodyChunk(int fd, std::string &buffer);
+        BodyChunk(int socket, std::string &buffer);
         ~BodyChunk();
 
         std::string &get();

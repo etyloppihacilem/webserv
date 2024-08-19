@@ -10,8 +10,8 @@
 
 #include "ProcessState.hpp"
 
-ProcessState::ProcessState(int fd) :
-    _fd(fd),
+ProcessState::ProcessState(int socket) :
+    _socket(socket),
     _state(waiting) ///< State of the object
 {}
 
