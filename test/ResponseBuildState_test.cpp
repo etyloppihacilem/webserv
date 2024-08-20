@@ -140,6 +140,14 @@ std::vector<d_rbs> ResponseBuildData = {
       "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was automatically "
       "generated.</div></body>",
       false },
+    { "python_route_only",
+      "GET /python HTTP/1.1\r\nHost: coucou\r\n\r\n",
+      tGetFileStrategy,
+      OK,
+      { { "Content-Type", "text/html" }, { "Content-Length", "6" } },
+      true,
+      "Hey:)\n",
+      false },
 };
 
 INSTANTIATE_TEST_SUITE_P(

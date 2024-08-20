@@ -19,8 +19,11 @@ class EventHandler {
         EventHandler(int socket);
         virtual ~EventHandler() = 0;
 
+        virtual void handle() = 0; ///< Run this in loop
+
     protected:
-        int _socket;
+        int    _socket;
+        // time_t _last_activity;
 };
 
 #endif // INCLUDE_SRC_EVENTHANDLER_HPP_

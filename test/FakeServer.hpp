@@ -42,15 +42,16 @@ class FakeServer {
             std::string last_found = "/";
             std::string testing    = path.substr(0, i + 1);
             bool        eos        = false; // end of string
+            // THIS IS NOT A REAL FUNCTION, FIX THE REAL ONE
             while (hasRoute(testing)) {
                 last_found = testing;
                 if (!eos)
                     i = path.find('/', i + 1);
                 else
-                  break;
+                    break;
                 if (i == path.npos) {
                     eos = true;
-                    i = path.length();
+                    i   = path.length();
                 }
                 testing = path.substr(0, i);
             }

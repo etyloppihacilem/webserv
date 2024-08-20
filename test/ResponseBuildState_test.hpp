@@ -166,7 +166,7 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
             );
             _server._routes["/python"] = FakeRoute(
                 OK, false, true, true, false, false, ".py", "/usr/bin/python3", "/python", "", "cgi-bin/python", "",
-                { GET, POST }, { "index.html" }
+                { GET, POST }, { "diff.html" }
             );
             _server._routes["/perl"] = FakeRoute(
                 OK, false, true, true, false, false, ".pl", "/usr/bin/perl", "/perl", "", "cgi-bin/perl", "", { GET },
