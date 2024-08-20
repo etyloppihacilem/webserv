@@ -98,22 +98,19 @@ t_state ReadState::return_error() {
 }
 
 /**
-  Function to delete message once the server is done generating response.
-
-  Message should not be deleted anywhere else.
-  */
-void ReadState::done_client_request() {
-    if (_in_progress)
-        delete _in_progress;
-    _in_progress = 0;
-    _state       = waiting;
-}
-
-/**
-  Returns pointer on generated (or generating message)
+  Returns pointer on generated request
   */
 ClientRequest *ReadState::get_client_request() {
-    return _in_progress;
+    ClientRequest *ret = _in_progress;
+    if (_state != ready)
+        error.log() << "ReadState: getting ClientRequest that is not totally generated. As a result, it will not be "
+                       "removed from ReadState object and may be deleted at its destruction."
+                    << std::endl;
+    else {
+        _in_progress = 0;
+        _state       = waiting;
+    }
+    return ret;
 }
 
 void ReadState::save_mem() {

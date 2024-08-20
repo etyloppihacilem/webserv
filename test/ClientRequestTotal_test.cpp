@@ -395,10 +395,10 @@ class TotalRequestFixture : public ::testing::TestWithParam<TotalRequest> {
         }
 
         void TearDown() override {
-            if (_test) {
-                _test->done_client_request();
+            if (_test)
                 delete _test;
-            }
+            if (_request)
+                delete _request;
             // if (_request)
             //     delete _request;
             if (_fd[0] != 0)

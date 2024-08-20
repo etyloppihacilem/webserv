@@ -24,7 +24,6 @@ class ReadState : public ProcessState {
         void    save_mem();
 
         ClientRequest *get_client_request();
-        void           done_client_request();
 
     private:
         t_state process_buffer(char *buffer);
