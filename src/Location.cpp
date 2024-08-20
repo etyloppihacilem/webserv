@@ -239,8 +239,10 @@ std::string Location<ServerClass, RouteClass>::get_path_info() const {
     return _path_info;
 }
 
+template class Location<>; // force compilation for this template (defaults)
+
 #ifdef TESTING
 # include "FakeRoute.hpp"
 # include "FakeServer.hpp"
-template class Location<FakeServer, FakeRoute>;
+template class Location<FakeServer, FakeRoute>; // force compilation for test templates
 #endif

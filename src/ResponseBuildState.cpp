@@ -25,6 +25,8 @@
 #include "ProcessState.hpp"
 #include "RedirectStrategy.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "Route.hpp"
+#include "Server.hpp"
 #include "UploadStrategy.hpp"
 #include <exception>
 #include <map>
@@ -156,8 +158,10 @@ void ResponseBuildState<ServerClass, RouteClass>::save_mem() {
         _strategy->save_mem();
 }
 
+template class ResponseBuildState<>; // force compilation for this template (defaults)
+
 #ifdef TESTING
 # include "FakeRoute.hpp"
 # include "FakeServer.hpp"
-template class ResponseBuildState<FakeServer, FakeRoute>;
+template class ResponseBuildState<FakeServer, FakeRoute>; // force compilation for test templates
 #endif

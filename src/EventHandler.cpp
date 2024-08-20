@@ -9,7 +9,8 @@
 ##################################################################################################################### */
 
 #include "EventHandler.hpp"
+#include "Server.hpp"
 
-EventHandler::EventHandler(int socket) : _socket(socket) {}
+EventHandler::EventHandler(int socket, Server &server) : _socket(socket), _server(server) {}
 
 EventHandler::~EventHandler() {}

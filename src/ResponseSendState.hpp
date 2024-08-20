@@ -11,9 +11,11 @@
 #ifndef INCLUDE_SRC_RESPONSESENDSTATE_HPP_
 #define INCLUDE_SRC_RESPONSESENDSTATE_HPP_
 
-class ResponseSendState {
+#include "ProcessState.hpp"
+
+class ResponseSendState : public ProcessState {
     public:
-        ResponseSendState();
+        ResponseSendState(int socket);
         ~ResponseSendState();
 
     private:

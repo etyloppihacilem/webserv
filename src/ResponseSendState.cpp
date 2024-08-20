@@ -9,7 +9,8 @@
 ##################################################################################################################### */
 
 #include "ResponseSendState.hpp"
+#include "ProcessState.hpp"
 
-ResponseSendState::ResponseSendState() {}
+ResponseSendState::ResponseSendState(int socket) : ProcessState(socket) {}
 
 ResponseSendState::~ResponseSendState() {}
