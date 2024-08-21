@@ -27,7 +27,7 @@ typedef struct dirent dir_item;
   */
 class GetIndexStrategy : public ResponseBuildingStrategy {
     public:
-        GetIndexStrategy(const std::string &location);
+        GetIndexStrategy(const std::string &location, const std::string &target);
         ~GetIndexStrategy();
 
         bool build_response();
@@ -39,6 +39,7 @@ class GetIndexStrategy : public ResponseBuildingStrategy {
         std::string getType(mode_t mode);
 
         std::string _location;    ///< Location of the directory to scan
+        std::string _target;      ///< Target to the directory to scan
         DIR        *_dir;         ///< Pointer on dir
         bool        _init_done;   ///< Tells if header of response is sent.
         bool        _deinit_done; ///< Tells if footer of response is sent.

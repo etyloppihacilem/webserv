@@ -29,19 +29,19 @@ class Location {
         Location(const std::string &target, ServerClass &server);
         ~Location();
 
-        bool        is_get() const;
-        bool        is_post() const;
-        bool        is_delete() const;
+        bool               is_get() const;
+        bool               is_post() const;
+        bool               is_delete() const;
         // bool        is_put() const;
-        bool        has_autoindex() const;
-        bool        is_file() const;
-        bool        is_cgi() const;
-        bool        is_redirect() const;
-        HttpCode    get_status_code() const;
-        HttpCode    get_default_error() const;
-        std::string get_path() const;
-        std::string get_route_path() const;
-        std::string get_path_info() const;
+        bool               has_autoindex() const;
+        bool               is_file() const;
+        bool               is_cgi() const;
+        bool               is_redirect() const;
+        HttpCode           get_status_code() const;
+        HttpCode           get_default_error() const;
+        const std::string &get_path() const;
+        const std::string &get_route_path() const;
+        const std::string &get_path_info() const;
 
     private:
         Location(); // for testing purposes only
@@ -59,7 +59,7 @@ class Location {
         bool        _is_cgi;
         bool        _is_redirect;
         HttpCode    _status_code;
-        HttpCode _default_error;
+        HttpCode    _default_error;
         std::string _cgi_path;
         std::string _path;
         std::string _route_path;

@@ -28,12 +28,16 @@
 #include <sys/types.h>
 
 // location ending in /
-GetIndexStrategy::GetIndexStrategy(const std::string &location) :
+GetIndexStrategy::GetIndexStrategy(const std::string &location, const std::string &target) :
     ResponseBuildingStrategy(),
     _location(location),
+    _target(target),
     _dir(0),
     _init_done(false),
-    _deinit_done(false) {}
+    _deinit_done(false) {
+        if (*_target.rbegin() != '/')
+            _target += "/";
+    }
 
 GetIndexStrategy::~GetIndexStrategy() {
     if (_dir)
@@ -94,7 +98,7 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
         if (*_location.rbegin() != '/')
             _location += "/";
         buffer
-            += "<head></head><body><h1>" + _location + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
+            += "<head></head><body><h1>" + _target + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
     }
 
     dir_item   *item;
@@ -104,7 +108,7 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     while ((item = readdir(_dir)) && buffer.length() < size) {
         name = generateLine(item->d_name, &st);
         std::stringstream stream;
-        stream << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _location << item->d_name << "\">"
+        stream << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _target << item->d_name << "\">"
                << name << "</a></td><td>" << (S_ISREG(st.st_mode) ? st.st_size : 0) << "</td></tr>";
         buffer += stream.str();
     }
@@ -118,7 +122,6 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     }
     return _done;
 }
-// TODO: links are not right yet...
 
 bool GetIndexStrategy::build_response() {
     if (_built) {

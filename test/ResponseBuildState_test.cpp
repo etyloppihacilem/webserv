@@ -120,15 +120,15 @@ std::vector<d_rbs> ResponseBuildData = {
       "GET /test HTTP/1.1\r\nHost: coucou\r\n\r\n",
       tGetIndexStrategy,
       OK,
-      { { "Content-Type", "text/html; charset=utf-8" }, { "Content-Length", "578" } },
+      { { "Content-Type", "text/html; charset=utf-8" }, { "Content-Length", "557" } },
       true,
-      "<head></head><body><h1>www/test/</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr><tr><td>DIR</"
-      "td><td><a href=\"www/test/.\">.</a></td><td>0</td></tr><tr><td>DIR</td><td><a "
-      "href=\"www/test/..\">..</a></td><td>0</td></tr><tr><td>REG</td><td><a "
-      "href=\"www/test/upload_a.md\">upload_a.md</a></td><td>23</td></tr><tr><td>REG</td><td><a "
-      "href=\"www/test/test.txt\">test.txt</a></td><td>33</td></tr><tr><td>REG</td><td><a "
-      "href=\"www/test/delete.png\">delete.png</a></td><td>0</td></tr><tr><td>REG</td><td><a "
-      "href=\"www/test/index.html\">index.html</a></td><td>11</td></tr></table></body>",
+      "<head></head><body><h1>/test/</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr><tr><td>DIR</td><td><a "
+      "href=\"/test/.\">.</a></td><td>0</td></tr><tr><td>DIR</td><td><a "
+      "href=\"/test/..\">..</a></td><td>0</td></tr><tr><td>REG</td><td><a "
+      "href=\"/test/upload_a.md\">upload_a.md</a></td><td>23</td></tr><tr><td>REG</td><td><a "
+      "href=\"/test/test.txt\">test.txt</a></td><td>33</td></tr><tr><td>REG</td><td><a "
+      "href=\"/test/delete.png\">delete.png</a></td><td>0</td></tr><tr><td>REG</td><td><a "
+      "href=\"/test/index.html\">index.html</a></td><td>11</td></tr></table></body>",
 
       false },
     { "indexStrategy_not_found",

@@ -225,17 +225,17 @@ HttpCode Location<ServerClass, RouteClass>::get_status_code() const {
 }
 
 template <class ServerClass, class RouteClass>
-std::string Location<ServerClass, RouteClass>::get_path() const {
+const std::string &Location<ServerClass, RouteClass>::get_path() const {
     return _path;
 }
 
 template <class ServerClass, class RouteClass>
-std::string Location<ServerClass, RouteClass>::get_route_path() const {
+const std::string &Location<ServerClass, RouteClass>::get_route_path() const {
     return _route_path;
 }
 
 template <class ServerClass, class RouteClass>
-std::string Location<ServerClass, RouteClass>::get_path_info() const {
+const std::string &Location<ServerClass, RouteClass>::get_path_info() const {
     return _path_info;
 }
 

@@ -117,7 +117,7 @@ void ResponseBuildState<ServerClass, RouteClass>::init_strategy() {
         if (location.is_file())
             _strategy = new GetFileStrategy(mime_types, location.get_path());
         else if (location.has_autoindex())
-            _strategy = new GetIndexStrategy(location.get_path());
+            _strategy = new GetIndexStrategy(location.get_path(), _request->get_target());
         else
             throw HttpError(Forbidden);
     } else if (_request->get_method() == POST) {
