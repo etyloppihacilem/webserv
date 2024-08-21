@@ -38,8 +38,9 @@ void ProcessHandler::handle() {
 void ProcessHandler::transition_to_rbs() {
     ReadState *read_state; // to cast
     if ((read_state = dynamic_cast<ReadState *>(_state)) == 0) {
-        error.log() << "Transition to ResponseBuildState from a state that is not ReadState. Aborting." << std::endl
-                    << "_state is unchanged. The situation is bad but should be destroyed at timeout." << std::endl;
+        error.log() << "Transition to ResponseBuildState from a state that is not ReadState. Aborting. _state is "
+                       "unchanged. The situation is bad but should be destroyed at timeout."
+                    << std::endl;
         return;
     }
     ClientRequest *request;
@@ -52,9 +53,9 @@ void ProcessHandler::transition_to_rbs() {
 void ProcessHandler::transition_to_rss() {
     ResponseBuildState<> *response_build_state; // to cast
     if ((response_build_state = dynamic_cast<ResponseBuildState<> *>(_state)) == 0) {
-        error.log() << "Transition to ResponseSendState from a state that is not ResponseBuildState. Aborting."
-                    << std::endl
-                    << "_state is unchanged. The situation is bad but should be destroyed at timeout." << std::endl;
+        error.log() << "Transition to ResponseSendState from a state that is not ResponseBuildState. Aborting. _state "
+                       "is unchanged. The situation is bad but should be destroyed at timeout."
+                    << std::endl;
         return;
     }
     // TODO: transition is not done here;
