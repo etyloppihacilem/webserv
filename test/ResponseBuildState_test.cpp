@@ -236,9 +236,8 @@ TEST_P(ResponseBuildStateFixture, BodyValue) {
 TEST_P(ResponseBuildStateFixture, HaveCorrectRoot) {
     const std::string &target = _request->_target;
     std::string correct = std::get< troute >(GetParam());
-    const FakeRoute &route = _server.getRoute(target);
 
-    EXPECT_EQ(route.getLocation(), correct);
+    EXPECT_EQ(_server.getRoute(target).getLocation(), correct);
 }
 
 TEST(ResponseBuildStateSuite, NoRequest) {

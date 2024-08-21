@@ -23,6 +23,7 @@ class ServerGetRoute {
         ~ServerGetRoute();
 
         const RouteClass &getRoute(const std::string &path) const;
+        // const RouteClass &getRoute2(const std::string &path) const;
         bool         hasRoute(const std::string &path) const;
 
         class RouteNotFoundWarn : public std::exception {
