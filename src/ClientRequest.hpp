@@ -42,7 +42,7 @@ class ClientRequest {
         std::string get_query_string() const;
         void        set_status(HttpCode code);
 
-        std::map<std::string, std::string> &get_header();
+        const std::map<std::string, std::string> &get_header();
 
     private:
         HttpMethod parse_method(const std::string &method, const size_t &end);

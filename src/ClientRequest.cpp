@@ -364,7 +364,7 @@ Body *ClientRequest::get_body() {
     return _body;
 }
 
-std::map<std::string, std::string> &ClientRequest::get_header() {
+const std::map<std::string, std::string> &ClientRequest::get_header() {
     return _header;
 }
 

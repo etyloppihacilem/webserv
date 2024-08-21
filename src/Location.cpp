@@ -38,7 +38,7 @@ Location<ServerClass, RouteClass>::Location() :
     _default_error(Forbidden) {}
 
 template <class ServerClass, class RouteClass>
-Location<ServerClass, RouteClass>::Location(const std::string &target, ServerClass &server) :
+Location<ServerClass, RouteClass>::Location(const std::string &target, const ServerClass &server) :
     _is_get(false),
     _is_post(false),
     _is_delete(false),

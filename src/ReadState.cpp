@@ -102,8 +102,10 @@ t_state ReadState::return_error() {
   */
 ClientRequest *ReadState::get_client_request() {
     ClientRequest *ret = _in_progress;
+    if (_in_progress == 0)
+        error.log() << "Getting a non existing ClientRequest." << std::endl;
     if (_state != ready)
-        error.log() << "ReadState: getting ClientRequest that is not totally generated. As a result, it will not be "
+        warn.log() << "ReadState: getting ClientRequest that is not totally generated. As a result, it will not be "
                        "removed from ReadState object and may be deleted at its destruction."
                     << std::endl;
     else {

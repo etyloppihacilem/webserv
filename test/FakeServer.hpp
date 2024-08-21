@@ -26,6 +26,7 @@ class LocationTestFixture;
 class FakeServer {
     public:
         FakeServer() {}
+        FakeServer(int) {};
 
         FakeRoute &getRoute(const std::string &path) {
             if (path[0] != '/') {

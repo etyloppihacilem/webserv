@@ -24,6 +24,7 @@
 #include "MimeTypes.hpp"
 #include "ProcessState.hpp"
 #include "RedirectStrategy.hpp"
+#include "Response.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "Route.hpp"
 #include "Server.hpp"
@@ -39,7 +40,11 @@
  This class is in charge of choosing the right strategy depending on the request.
  */
 template <class ServerClass, class RouteClass>
-ResponseBuildState<ServerClass, RouteClass>::ResponseBuildState(int socket, ClientRequest *request, ServerClass &server) :
+ResponseBuildState<ServerClass, RouteClass>::ResponseBuildState(
+    int            socket,
+    ClientRequest *request,
+    const ServerClass   &server
+) :
     ProcessState(socket),
     _request(request),
     _server(server),
@@ -53,10 +58,33 @@ ResponseBuildState<ServerClass, RouteClass>::ResponseBuildState(int socket, Clie
 } // TODO:check where to free this once it is allocated
 
 template <class ServerClass, class RouteClass>
-ResponseBuildState<ServerClass, RouteClass>::~ResponseBuildState() {}
+ResponseBuildState<ServerClass, RouteClass>::ResponseBuildState(int socket, HttpCode code, const ServerClass &server) :
+    ProcessState(socket),
+    _request(0),
+    _server(server),
+    _strategy(0),
+    _recovery(true),
+    _code(code) {
+    if (!isError(code)) {
+        error.log() << "Trying to build recovery response using '" << code
+                    << "' code, wich is not an error code. Sending " << InternalServerError << "." << std::endl;
+        _code = InternalServerError;
+    }
+} // TODO:check where to free this once it is allocated
+
+template <class ServerClass, class RouteClass>
+ResponseBuildState<ServerClass, RouteClass>::~ResponseBuildState() {
+    if (_strategy)
+        delete _strategy;
+}
 
 template <class ServerClass, class RouteClass>
 t_state ResponseBuildState<ServerClass, RouteClass>::process() {
+    if (_recovery) {
+        init_strategy(_code);
+        _strategy->build_response();
+        return _strategy->is_built() ? (_state = ready) : (_state = waiting);
+    }
     try { // handling of bad_alloc out of scope
         try {
             if (!_strategy)
@@ -72,7 +100,7 @@ t_state ResponseBuildState<ServerClass, RouteClass>::process() {
             _strategy->build_response();
         }
     } catch (HttpError &e) {
-        init_strategy(_code); // Should never happen (or if someone delete an error file while being read)
+        init_strategy(e.get_code()); // Should never happen (or if someone delete an error file while being read)
         _strategy->build_response();
     }
     return _strategy->is_built() ? (_state = ready) : (_state = waiting);
@@ -85,7 +113,16 @@ ClientRequest *ResponseBuildState<ServerClass, RouteClass>::get_request() {
 
 template <class ServerClass, class RouteClass>
 ResponseBuildingStrategy *ResponseBuildState<ServerClass, RouteClass>::get_response_strategy() {
-    return _strategy;
+    ResponseBuildingStrategy *ret = _strategy;
+    if (_strategy == 0)
+        error.log() << "Getting a non existing ResponseBuildingStrategy." << std::endl;
+    if (_state != ready)
+        warn.log() << "ResponseBuildState: getting ResponseBuildingStrategy that is not totally generated. As a result,"
+                      " it will not be removed from ResponseBuildState object and may be deleted at its destruction."
+                   << std::endl;
+    else
+        _strategy = 0;
+    return ret;
 }
 
 /**

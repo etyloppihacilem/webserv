@@ -24,6 +24,10 @@
   will be performed on first build_response() call)
 
   This allows a call to check _built value and go to next State immediatly in case no reading is needed.
+
+  Response object is not detachable from ResponseBuildingStrategy as most of strategy generating body needs to access
+  the fill_buffer() function from its Strategy. That is why a ResponseSendState should be constructed using a
+  ResponeBuildingStrategy and not a response object.
   */
 class ResponseBuildingStrategy {
     public:

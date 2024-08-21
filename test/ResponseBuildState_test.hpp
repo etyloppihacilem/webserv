@@ -122,8 +122,8 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
                 delete _state;
             if (_request)
                 delete _request;
-            if (_strategy)
-                delete _strategy;
+            // if (_strategy)
+                // delete _strategy;
             if (std::get<tclean>(GetParam()))
                 clean();
         }

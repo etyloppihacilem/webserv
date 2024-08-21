@@ -26,7 +26,7 @@
 template <class ServerClass = Server, class RouteClass = Route> // template is there for testing purposes
 class Location {
     public:
-        Location(const std::string &target, ServerClass &server);
+        Location(const std::string &target, const ServerClass &server);
         ~Location();
 
         bool               is_get() const;
