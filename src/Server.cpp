@@ -7,10 +7,10 @@
 #include "ServerConfLogging.hpp"
 #include "ServerConfSetter.hpp"
 #include "ServerConfTokenize.hpp"
+#include "ServerGetRoute.hpp"
 #include "StringTokenizer.hpp"
 #include "StringUtils.hpp"
 #include <algorithm>
-#include <cstddef>
 #include <map>
 #include <ostream>
 #include <set>
@@ -36,6 +36,7 @@ Server::Setter Server::fieldSetterList[COUNT_CONF_FIELD] = { 0,
 HttpMethod Server::initMethod[1] = { GET };
 
 Server::Server() :
+    ServerGetRoute(),
     _serverName(1, "localhost"),
     _port(8080),
     _rootDir("www"),
@@ -44,12 +45,12 @@ Server::Server() :
     _methods(initMethod, initMethod + 1),
     _maxBodySize(1000000),
     _errorPages(),
-    _routes(),
     _isFieldSet(COUNT_CONF_FIELD, false) {
     _routes["/"] = Route(*this);
 }
 
 Server::Server(StringTokenizer &tokenizedServer) :
+    ServerGetRoute(),
     _serverName(1, "localhost"),
     _port(8080),
     _rootDir("www"),
@@ -58,7 +59,6 @@ Server::Server(StringTokenizer &tokenizedServer) :
     _methods(initMethod, initMethod + 1),
     _maxBodySize(1000000),
     _errorPages(),
-    _routes(),
     _isFieldSet(COUNT_CONF_FIELD, false) {
 
     logParsingStarted(server, tokenizedServer.remainingString());
@@ -129,37 +129,6 @@ std::map< HttpCode, std::string > Server::getErrorPages() const {
     return _errorPages;
 }
 
-// TODO: get this in fakeRoute
-const Route &Server::getRoute(const std::string &path) const {
-    if (path[0] != '/') {
-        warn.log() << "target '" << path << "' is not starting with '/', wrong target. Choosing default route '/'."
-                   << std::endl;
-        if (hasRoute("/"))
-            return _routes.at("/");
-        error.log() << "No default route with wrong target (not starting with /): '" << path << "'" << std::endl;
-        throw RouteNotFoundWarn(path);
-    }
-
-    size_t      nextSlash = path.find('/');
-    std::string lastFound = "/";
-    std::string testing   = path.substr(0, nextSlash + 1);
-
-    while (hasRoute(testing)) {
-        lastFound = testing;
-        if (testing.size() == path.size())
-            break ;
-        nextSlash = path.find('/', nextSlash + 1);
-        if (nextSlash == std::string::npos) {
-            testing = path;
-            continue;
-        }
-        testing = path.substr(0, nextSlash + 1);
-    }
-
-    /*StringTokenizer tokenizedPath(path, '|');*/
-    return _routes.at(lastFound); // will return "/" route if default
-}
-
 bool Server::hasServeName(const std::string &serverName) const {
     std::vector< std::string >::const_iterator name = _serverName.end();
 
@@ -168,10 +137,6 @@ bool Server::hasServeName(const std::string &serverName) const {
         return false;
     else
         return true;
-}
-
-inline bool Server::hasRoute(const std::string &path) const {
-    return _routes.find(path) == _routes.end() ? false : true;
 }
 
 bool Server::hasServeNameSet() const {

@@ -79,6 +79,7 @@ class ClientRequest {
         FRIEND_TEST(ClientRequestTestSuite, decode_target);
         FRIEND_TEST(ClientRequestTestSuite, parse_parameters);
         FRIEND_TEST(ClientRequestTestSuite, parse_port);
+        FRIEND_TEST(ResponseBuildStateFixture, HaveCorrectRoot);
 #endif
 };
 

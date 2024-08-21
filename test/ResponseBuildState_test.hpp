@@ -49,32 +49,34 @@ typedef enum e_rbs {
     theaders,  ///< Headers
     thavebody, ///< Have body
     tbody,     ///< Body content
-    tclean,
+    tclean,    ///< if clean is needed
+    troute,    ///< to test detected route
 } t_rbs;
 
 typedef std::tuple<
-    std::string,                        ///< Name for tests
-    std::string,                        ///< Data to build request (it should be tested in TotalRequest)
-    strategies,                         ///< Type of ResponseBuildingStrategy
-    HttpCode,                           ///< Status of ResponseBuildingStrategy
-    std::map<std::string, std::string>, ///< Headers
-    bool,                               ///< Have body
-    std::string,                        ///< Body content
-    bool                                ///< clean testing content
+    std::string,                          ///< Name for tests
+    std::string,                          ///< Data to build request (it should be tested in TotalRequest)
+    strategies,                           ///< Type of ResponseBuildingStrategy
+    HttpCode,                             ///< Status of ResponseBuildingStrategy
+    std::map< std::string, std::string >, ///< Headers
+    bool,                                 ///< Have body
+    std::string,                          ///< Body content
+    bool,                                 ///< clean testing content
+    std::string                           ///< correct Route Location
     >
     d_rbs;
 
 // TODO: in progress but check that everything that does not need a read is done in one call of every
 // epoll protected function.
 
-class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
+class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
     public:
         ResponseBuildStateFixture() : _state(0), _strategy(0), _request(0) {}
 
         void SetUp() override {
-            if (std::get<tclean>(GetParam()))
+            if (std::get< tclean >(GetParam()))
                 clean();
-            std::string buf = std::get<tdata>(GetParam());
+            std::string buf = std::get< tdata >(GetParam());
             try {
                 _request = new ClientRequest(0);
                 _request->parse_header(buf); // as everything is in buff, no call to read_body() is ever needed
@@ -84,7 +86,7 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
             if (_request->get_status() != OK)
                 FAIL() << "_request has error !";
             try {
-                _state = new ResponseBuildState<FakeServer, FakeRoute>(0, _request, _server);
+                _state = new ResponseBuildState< FakeServer, FakeRoute >(0, _request, _server);
             } catch (std::exception &e) {
                 FAIL() << "Could not build state." << e.what();
             }
@@ -123,8 +125,8 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
             if (_request)
                 delete _request;
             // if (_strategy)
-                // delete _strategy;
-            if (std::get<tclean>(GetParam()))
+            // delete _strategy;
+            if (std::get< tclean >(GetParam()))
                 clean();
         }
 
@@ -186,11 +188,12 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam<d_rbs> {
             );
         }
 
+        static FakeServer _server;
+
     protected:
-        static FakeServer                          _server;
-        ResponseBuildState<FakeServer, FakeRoute> *_state;
-        ResponseBuildingStrategy                  *_strategy;
-        ClientRequest                             *_request;
+        ResponseBuildState< FakeServer, FakeRoute > *_state;
+        ResponseBuildingStrategy                    *_strategy;
+        ClientRequest                               *_request;
 };
 
 #endif // INCLUDE_TEST_RESPONSEBUILDSTATE_TEST_HPP_

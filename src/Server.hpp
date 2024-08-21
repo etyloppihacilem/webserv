@@ -5,6 +5,7 @@
 #include "HttpStatusCodes.hpp"
 #include "Route.hpp"
 #include "ServerConfFields.hpp"
+#include "ServerGetRoute.hpp"
 #include "StringTokenizer.hpp"
 #include <exception>
 #include <map>
@@ -16,7 +17,7 @@
 # include "gtest/gtest.h"
 #endif
 
-class Server {
+class Server : public ServerGetRoute<> {
     public:
         typedef void (Server::*Setter)(const ValueList &);
         static Setter     fieldSetterList[COUNT_CONF_FIELD];
@@ -34,10 +35,8 @@ class Server {
         std::set< HttpMethod >            getMethods() const;
         int                               getMaxBodySize() const;
         std::map< HttpCode, std::string > getErrorPages() const;
-        const Route                      &getRoute(const std::string &path) const;
 
         bool hasServeName(const std::string &serverName) const;
-        bool hasRoute(const std::string &path) const;
 
         bool hasServeNameSet() const;
         bool hasListenSet() const;
@@ -46,18 +45,6 @@ class Server {
         bool hasAutoindexSet() const;
         bool hasMethodsSet() const;
         bool hasMaxBodySizeSet() const;
-
-        class RouteNotFoundWarn : public std::exception {
-            public:
-                RouteNotFoundWarn(std::string message = "") throw() : _message(message) {}
-
-                virtual ~RouteNotFoundWarn() throw() {}
-
-                const char *what() const throw() { return _message.c_str(); }
-
-            private:
-                std::string _message;
-        };
 
     private:
         std::vector< std::string >        _serverName;
@@ -68,7 +55,6 @@ class Server {
         std::set< HttpMethod >            _methods;
         int                               _maxBodySize;
         std::map< HttpCode, std::string > _errorPages;
-        std::map< std::string, Route >    _routes;
         std::vector< bool >               _isFieldSet;
 
         void setServerName(const ValueList &);

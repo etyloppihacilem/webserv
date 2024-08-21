@@ -23,7 +23,7 @@
 # include "gtest/gtest.h"
 #endif
 
-template <class ServerClass = Server, class RouteClass = Route> // template is there for testing purposes
+template < class ServerClass = Server, class RouteClass = Route > // template is there for testing purposes
 class Location {
     public:
         Location(const std::string &target, const ServerClass &server);
