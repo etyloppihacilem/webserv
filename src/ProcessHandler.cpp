@@ -43,7 +43,7 @@ void ProcessHandler::transition_to_rbs() {
                        "is now sending "
                     << InternalServerError << " using recovery ResponseBuildState." << std::endl;
         delete _state;
-        _state = new ResponseBuildState<>(_socket, InternalServerError);
+        _state = new ResponseBuildState<>(_socket, InternalServerError, _server);
         return;
     }
     ClientRequest *request;
@@ -60,7 +60,7 @@ void ProcessHandler::transition_to_rss() {
                        "_state is now sending "
                     << InternalServerError << " using recovery ResponseBuildState." << std::endl;
         delete _state;
-        _state = new ResponseBuildState<>(_socket, InternalServerError);
+        _state = new ResponseBuildState<>(_socket, InternalServerError, _server);
         return;
     }
     // TODO: transition is not done here;

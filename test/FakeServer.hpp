@@ -26,14 +26,15 @@ class LocationTestFixture;
 class FakeServer {
     public:
         FakeServer() {}
+
         FakeServer(int) {};
 
-        FakeRoute &getRoute(const std::string &path) {
+        const FakeRoute &getRoute(const std::string &path) const {
             if (path[0] != '/') {
                 warn.log() << "target '" << path
                            << "' is not starting with '/', wrong target. Choosing default route '/'." << std::endl;
                 if (hasRoute("/"))
-                    return _routes["/"];
+                    return _routes.at("/");
                 error.log() << "No default route with wrong target (not starting with /): '" << path << "'"
                             << std::endl;
                 throw std::exception();
@@ -56,18 +57,18 @@ class FakeServer {
                 }
                 testing = path.substr(0, i);
             }
-            return _routes[last_found]; // will return "/" route if default
+            return _routes.at(last_found); // will return "/" route if default
         }
 
         inline bool hasRoute(const std::string &path) const {
             return _routes.find(path) == _routes.end() ? false : true;
         }
 
-        const std::map<HttpCode, std::string> &getErrorPages() const { return _error_pages; }
+        const std::map< HttpCode, std::string > &getErrorPages() const { return _error_pages; }
 
     private:
-        std::map<std::string, FakeRoute> _routes;
-        std::map<HttpCode, std::string>  _error_pages;
+        std::map< std::string, FakeRoute > _routes;
+        std::map< HttpCode, std::string >  _error_pages;
 
         friend ResponseBuildStateFixture;
         friend LocationTestFixture;

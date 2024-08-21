@@ -14,6 +14,7 @@
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "gtest/gtest_prod.h"
+#include <set>
 #include <string>
 #include <vector>
 
@@ -25,22 +26,22 @@ class FakeRoute {
         FakeRoute() {};
 
         FakeRoute(
-            HttpCode                        _getRedirCode_,
-            bool                            _hasAutoindex_,
-            bool                            _hasCgiExtension_,
-            bool                            _hasCgiPath_,
-            bool                            _hasRedir_,
-            bool                            _hasUpload_,
-            const std::string              &_getCgiExtension_,
-            const std::string              &_getCgiPath_,
-            const std::string              &_getLocation_,
-            const std::string              &_getRedirPage_,
-            const std::string              &_getRootDir_,
-            const std::string              &_getUploadPath_,
+            HttpCode                          _getRedirCode_,
+            bool                              _hasAutoindex_,
+            bool                              _hasCgiExtension_,
+            bool                              _hasCgiPath_,
+            bool                              _hasRedir_,
+            bool                              _hasUpload_,
+            const std::string                &_getCgiExtension_,
+            const std::string                &_getCgiPath_,
+            const std::string                &_getLocation_,
+            const std::string                &_getRedirPage_,
+            const std::string                &_getRootDir_,
+            const std::string                &_getUploadPath_,
             // const std::string              &_getRoutePath_,
             // const std::string              &_getUploadPath_,
-            const std::vector<HttpMethod>  &_getMethods_,
-            const std::vector<std::string> &_getIndexPage_
+            const std::set< HttpMethod >  &_getMethods_,
+            const std::vector< std::string > &_getIndexPage_
         ) :
             _getRedirCode(_getRedirCode_),
             _hasAutoindex(_hasAutoindex_),
@@ -67,15 +68,15 @@ class FakeRoute {
 
         HttpCode getRedirCode() const { return _getRedirCode; }
 
-        bool hasAutoindex() const { return _hasAutoindex; }
+        bool hasAutoindexSet() const { return _hasAutoindex; }
 
-        bool hasCgiExtension() const { return _hasCgiExtension; }
+        bool hasCgiExtensionSet() const { return _hasCgiExtension; }
 
-        bool hasCgiPath() const { return _hasCgiPath; }
+        bool hasCgiPathSet() const { return _hasCgiPath; }
 
-        bool hasRedir() const { return _hasRedir; }
+        bool hasRedirSet() const { return _hasRedir; }
 
-        bool hasUpload() const { return _hasUpload; }
+        bool hasUploadSet() const { return _hasUpload; }
 
         const std::string &getCgiExtension() const { return _getCgiExtension; }
 
@@ -91,28 +92,28 @@ class FakeRoute {
 
         // const std::string &getRoutePath() const { return _getRoutePath; }
 
-        const std::vector<HttpMethod> &getMethods() const { return _getMethods; }
+        const std::set< HttpMethod > &getMethods() const { return _getMethods; }
 
-        const std::vector<std::string> &getIndexPage() const { return _getIndexPage; }
+        const std::vector< std::string > &getIndexPage() const { return _getIndexPage; }
 
         static std::string workdir; // used to set workdir to debug and or test
 
     private:
-        HttpCode                 _getRedirCode;
-        bool                     _hasAutoindex;
-        bool                     _hasCgiExtension;
-        bool                     _hasCgiPath;
-        bool                     _hasRedir;
-        bool                     _hasUpload;
-        std::string              _getCgiExtension;
-        std::string              _getCgiPath;
-        std::string              _getLocation;
-        std::string              _getRedirPage;
-        std::string              _getRootDir;
-        std::string              _getUploadPath;
+        HttpCode                   _getRedirCode;
+        bool                       _hasAutoindex;
+        bool                       _hasCgiExtension;
+        bool                       _hasCgiPath;
+        bool                       _hasRedir;
+        bool                       _hasUpload;
+        std::string                _getCgiExtension;
+        std::string                _getCgiPath;
+        std::string                _getLocation;
+        std::string                _getRedirPage;
+        std::string                _getRootDir;
+        std::string                _getUploadPath;
         // std::string              _getRoutePath;
-        std::vector<HttpMethod>  _getMethods;
-        std::vector<std::string> _getIndexPage;
+        std::set< HttpMethod >  _getMethods;
+        std::vector< std::string > _getIndexPage;
 
         friend ResponseBuildStateFixture;
         FRIEND_TEST(LocationTestSuite, BuildPathTest);
