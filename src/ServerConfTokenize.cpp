@@ -1,141 +1,21 @@
 #include "ServerConfTokenize.hpp"
 #include "Logger.hpp"
 #include "ServerConfFields.hpp"
-#include "ServerConfValidate.hpp"
+#include "ServerConfLogging.hpp"
 #include "StringTokenizer.hpp"
-#include <algorithm>
 #include <cstddef>
 #include <iterator>
 #include <ostream>
 #include <string>
 
-std::string tokenizeFile(const std::string &input) {
-    std::string tokenString(input);
-    const char  delim = '|';
-
-    std::replace(tokenString.begin(), tokenString.end(), ' ', delim);
-    std::replace(tokenString.begin(), tokenString.end(), '\t', delim);
-
-    StringTokenizer tokenizedFile(tokenString, '|');
-    std::string     errorString = tokenizedFile.remainingString().substr(0, 30);
-
-    std::replace(errorString.begin(), errorString.end(), '|', ' ');
-
-    std::string currentToken = tokenizedFile.nextToken(); // remove http
-
-    if (currentToken != ConfFieldString(http)) {
-        error.log() << errorString << " ... : the first token is not 'http', parsing canceled" << std::endl;
-        throw ServerConfError();
-    }
-    currentToken = tokenizedFile.nextToken(); // remove open bracket
-    if (currentToken != "{") {
-        error.log() << errorString << " ... : token '{' is missing after token 'http' , parsing canceled" << std::endl;
-        throw ServerConfError();
-    }
-
-    size_t closingBracePos = findClosingBrace(tokenizedFile.remainingString());
-
-    if (closingBracePos == std::string::npos) {
-        error.log() << errorString
-                    << " ... : token '}' is missing unable to locate the end of 'http' module , parsing canceled"
-                    << std::endl;
-        throw ServerConfError();
-    }
-    return tokenizedFile.nextToken(closingBracePos);
-}
-
-std::string tokenizeServer(StringTokenizer &tokenizedFile) {
-    std::string errorString = tokenizedFile.remainingString().substr(0, 30);
-
-    std::replace(errorString.begin(), errorString.end(), '|', ' ');
-
-    std::string currentToken = tokenizedFile.nextToken(); // remove Server
-
-    if (currentToken != ConfFieldString(server)) {
-        error.log() << errorString << " ... : the first token is not 'server', parsing canceled" << std::endl;
-        throw ServerConfError();
-    }
-    currentToken = tokenizedFile.nextToken(); // remove open bracket
-    if (currentToken != "{") {
-        error.log() << errorString << " ... : token '{' is missing after token 'server' , parsing canceled"
-                    << std::endl;
-        throw ServerConfError();
-    }
-
-    size_t closingBracePos = findClosingBrace(tokenizedFile.remainingString());
-
-    if (closingBracePos == std::string::npos) {
-        error.log() << errorString
-                    << " ... : token '}' is missing unable to locate the end of 'server' module , parsing canceled"
-                    << std::endl;
-        throw ServerConfError();
-    }
-    return tokenizedFile.nextToken(closingBracePos);
-}
-
-Field tokenizeLocation(StringTokenizer &tokenizedServer) {
-    Field       locationInfo;
-    std::string errorString = tokenizedServer.remainingString();
-
-    std::replace(errorString.begin(), errorString.end(), '|', ' ');
-
-    std::string currentToken = tokenizedServer.nextToken(); // remove location field name
-
-    if (currentToken != ConfFieldString(location)) {
-        error.log() << errorString << " ... : the first token is not 'location', parsing canceled" << std::endl;
-        throw ServerConfError();
-    }
-    locationInfo.first = tokenizedServer.nextToken(); // extract location root
-    currentToken       = tokenizedServer.nextToken(); // remove open bracket
-    if (currentToken != "{") {
-        error.log() << errorString << " ... : token '{' is missing after token 'location' , parsing canceled"
-                    << std::endl;
-        throw ServerConfError();
-    }
-
-    size_t closingBracePos = findClosingBrace(tokenizedServer.remainingString());
-
-    if (closingBracePos == std::string::npos) {
-        error.log() << errorString
-                    << " ... : token '}' is missing unable to locate the end of 'location' module , parsing canceled"
-                    << std::endl;
-        throw ServerConfError();
-    }
-    locationInfo.second = tokenizedServer.nextToken(closingBracePos);
-    return locationInfo;
-}
-
-Field tokenizeField(StringTokenizer &tokenizedServer) {
-    Field fieldInfo;
-
-    fieldInfo.first = tokenizedServer.nextToken(); // remove Server
-    if (isValidFieldName(fieldInfo.first)) {
-        tokenizedServer.nextToken(';');
-        warn.log() << fieldInfo.first << ": field name is not listed in server conf." << std::endl;
-        throw ServerConfWarn();
-    }
-    fieldInfo.second = tokenizedServer.nextToken(';'); // remove open bracket
-    if (fieldInfo.second.empty()) {
-        warn.log() << fieldInfo.first << ": field value is empty." << std::endl;
-        throw ServerConfWarn();
-    }
-    return fieldInfo;
-}
-
-ValueList tokenizeValue(const std::string &value) {
-    ValueList       valueList;
-    StringTokenizer tokenizedValue(value, '|');
-
-    while (tokenizedValue.hasMoreTokens())
-        valueList.push_back(tokenizedValue.nextToken());
-    return valueList;
-}
+// NOTE: this could actually be done before parsing while reading in order to prompt the line number if possible
+// this would remove all ServerConfError in ServerConfTokenizebut
 
 size_t findClosingBrace(const std::string &tokenString) {
     size_t ob_count;
     size_t cb_count;
 
-    if (tokenString.size() != 0)
+    if (tokenString.size() == 0)
         return 0;
     ob_count = 1;
     cb_count = 0;
@@ -147,12 +27,120 @@ size_t findClosingBrace(const std::string &tokenString) {
         if (ob_count == cb_count)
             return std::distance(tokenString.begin(), it);
     }
-    return 0;
+    return std::string::npos;
 }
 
-int findFieldCode(const std::string &fieldName) {
+StringTokenizer tokenizeFile(const std::string &fileContent) {
+    StringTokenizer tokenizedFile(fileContent, '|');
+    std::string     loggingInfo = buildLoggingInfo(tokenizedFile.remainingString());
+
+    std::string currentToken = tokenizedFile.nextToken();
+    if (currentToken != ConfFieldString(http)) {
+        logMissingFirstToken(http, loggingInfo);
+        throw ServerConfError();
+    }
+
+    currentToken = tokenizedFile.nextToken();
+    if (currentToken != "{") {
+        logMissingOpenBrace(http, loggingInfo);
+        throw ServerConfError();
+    }
+
+    size_t closingBracePos = findClosingBrace(tokenizedFile.remainingString());
+    if (closingBracePos == std::string::npos
+        || tokenizedFile.remainingString()[closingBracePos - 1] != tokenizedFile.delimiter()) {
+        logMissingCloseBrace(http, loggingInfo);
+        throw ServerConfError();
+    }
+
+    StringTokenizer tokenizedHttp(tokenizedFile.nextToken(closingBracePos), '|');
+    if (tokenizedFile.hasMoreTokens()) {
+        loggingInfo = buildLoggingInfo(tokenizedFile.remainingString());
+        info.log() << loggingInfo << "... : config file has some unwanted trailing content after http scope."
+                   << std::endl;
+    }
+    return tokenizedHttp;
+}
+
+StringTokenizer tokenizeServer(StringTokenizer &tokenizedHttp) {
+    std::string loggingInfo = buildLoggingInfo(tokenizedHttp.remainingString());
+
+    std::string currentToken = tokenizedHttp.nextToken();
+    if (currentToken != ConfFieldString(server)) {
+        logMissingFirstToken(server, loggingInfo);
+        throw ServerConfError();
+    }
+
+    currentToken = tokenizedHttp.nextToken();
+    if (currentToken != "{") {
+        logMissingOpenBrace(server, loggingInfo);
+        throw ServerConfError();
+    }
+
+    size_t closingBracePos = findClosingBrace(tokenizedHttp.remainingString());
+    if (closingBracePos == std::string::npos
+        || tokenizedHttp.remainingString()[closingBracePos - 1] != tokenizedHttp.delimiter()) {
+        logMissingCloseBrace(server, loggingInfo);
+        throw ServerConfError();
+    }
+
+    return StringTokenizer(tokenizedHttp.nextToken(closingBracePos), '|');
+}
+
+Field tokenizeLocation(StringTokenizer &tokenizedServer) {
+    std::string loggingInfo = buildLoggingInfo(tokenizedServer.remainingString());
+    Field       locationInfo;
+
+    std::string currentToken = tokenizedServer.nextToken();
+    if (currentToken != ConfFieldString(location)) {
+        logMissingFirstToken(location, loggingInfo);
+        throw ServerConfError();
+    }
+
+    locationInfo.first = tokenizedServer.nextToken();
+
+    currentToken = tokenizedServer.nextToken();
+    if (currentToken != "{") {
+        logMissingOpenBrace(location, loggingInfo);
+        throw ServerConfError();
+    }
+
+    size_t closingBracePos = findClosingBrace(tokenizedServer.remainingString());
+    if (closingBracePos == std::string::npos
+        || tokenizedServer.remainingString()[closingBracePos - 1] != tokenizedServer.delimiter()) {
+        logMissingCloseBrace(location, loggingInfo);
+        throw ServerConfError();
+    }
+    locationInfo.second = StringTokenizer(tokenizedServer.nextToken(closingBracePos), '|');
+
+    return locationInfo;
+}
+
+Field tokenizeField(StringTokenizer &tokenizedServer) {
+    Field fieldInfo;
+
+    fieldInfo.first = tokenizedServer.nextToken();
+
+    fieldInfo.second = StringTokenizer(tokenizedServer.nextToken(';'), '|');
+    if (fieldInfo.second.remainingString().empty()) {
+        warn.log() << fieldInfo.first << ": field value is empty." << std::endl;
+        throw ServerConfWarn();
+    }
+
+    return fieldInfo;
+}
+
+ValueList getFieldValues(StringTokenizer &tokenizedValues) {
+    ValueList valueList;
+
+    while (tokenizedValues.hasMoreTokens())
+        valueList.push_back(tokenizedValues.nextToken());
+    return valueList;
+}
+
+ConfField getFieldCode(const std::string &fieldName) {
     for (int i = 0; i < COUNT_CONF_FIELD; ++i)
         if (fieldName == ConfFieldString(i))
-            return i;
-    return -1;
+            return static_cast< ConfField >(i);
+    return static_cast< ConfField >(-1);
 }

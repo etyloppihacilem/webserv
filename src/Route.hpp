@@ -1,9 +1,12 @@
-#ifndef __INCLUDE_SRC_ROUTE_HPP_
-#define __INCLUDE_SRC_ROUTE_HPP_
+#ifndef INCLUDE_SRC_ROUTE_HPP_
+#define INCLUDE_SRC_ROUTE_HPP_
 
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "ServerConfFields.hpp"
+#include "StringTokenizer.hpp"
+#include <cstdlib>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -11,61 +14,55 @@ class Server;
 
 class Route {
     public:
+        typedef void (Route::*Setter)(const ValueList &);
+        static Setter fieldSetterList[COUNT_CONF_FIELD];
+
         Route();
         Route(Server &);
-        Route(const std::string &, const std::string &, Server &);
+        Route(const std::string &, StringTokenizer &, Server &);
         ~Route();
 
-        std::vector<HttpMethod>  getMethods() const;
-        std::string              getRootDir() const;
-        std::vector<std::string> getIndexPage() const;
-        bool                     getAutoindex() const;
-        HttpCode                 getRedirCode() const;
-        std::string              getRedirPage() const;
-        std::string              getUploadPath() const;
-        std::string              getCgiPath() const;
-        std::string              getCgiExtension() const;
-        std::string              getLocation() const;
+        std::string                getLocation() const;
+        std::string                getRootDir() const;
+        std::vector< std::string > getIndexPage() const;
+        bool                       getAutoindex() const;
+        std::set< HttpMethod >     getMethods() const;
+        std::string                getUploadPath() const;
+        HttpCode                   getRedirCode() const;
+        std::string                getRedirPage() const;
+        std::string                getCgiPath() const;
+        std::string                getCgiExtension() const;
 
-        bool hasMethods() const;
-        bool hasRoot() const;
-        bool hasIndexPage() const;
-        bool hasAutoindex() const;
-        bool hasRedir() const;
-        bool hasUpload() const;
-        bool hasCgiPath() const;
-        bool hasCgiExtension() const;
+        bool hasRootSet() const;
+        bool hasIndexPageSet() const;
+        bool hasAutoindexSet() const;
+        bool hasMethodsSet() const;
+        bool hasUploadSet() const;
+        bool hasRedirSet() const;
+        bool hasCgiPathSet() const;
+        bool hasCgiExtensionSet() const;
 
-        void setMethods(const ValueList &);
+    private:
+        std::string                _location;
+        std::string                _rootDir;
+        std::vector< std::string > _indexPage;
+        bool                       _autoindex;
+        std::set< HttpMethod >     _methods;
+        std::string                _uploadPath;
+        HttpCode                   _redirCode;
+        std::string                _redirPage;
+        std::string                _cgiPath;
+        std::string                _cgiExtension;
+        std::vector< bool >        _isFieldSet;
+
         void setRootDir(const ValueList &);
         void setIndexPage(const ValueList &);
         void setAutoindex(const ValueList &);
-        void setRedirection(const ValueList &);
+        void setMethods(const ValueList &);
         void setUpload(const ValueList &);
-        void setCgi(const ValueList &, const ValueList &);
+        void setRedirection(const ValueList &);
         void setCgiPath(const ValueList &);
         void setCgiExtension(const ValueList &);
-
-    private:
-        std::string              _location;
-        std::vector<HttpMethod>  _methods;
-        std::string              _rootDir;
-        std::vector<std::string> _indexPage;
-        bool                     _autoindex;
-        std::string              _uploadPath;
-        HttpCode                 _redirCode;
-        std::string              _redirPage;
-        std::string              _cgiPath;
-        std::string              _cgiExtension;
-
-        bool _indexPageSet;
-        bool _autoindexSet;
-        bool _rootDirSet;
-        bool _methodsSet;
-        bool _redirectionSet;
-        bool _uploadSet;
-        bool _cgiPathSet;
-        bool _cgiExtensionSet;
 };
 
-#endif // !__INCLUDE_SRC_ROUTE__
+#endif // INCLUDE_SRC_ROUTE_HPP

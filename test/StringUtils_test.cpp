@@ -12,6 +12,34 @@
 #include "gtest/gtest.h"
 #include <string>
 
+TEST(StringUtilsTestSuite, add_trailing_slash) {
+    std::string a;
+    a = "";
+    EXPECT_EQ("", add_trailing_slash(a));
+    a = "/";
+    EXPECT_EQ("/", add_trailing_slash(a));
+    a = "coucou/je";
+    EXPECT_EQ("coucou/je/", add_trailing_slash(a));
+    a = "coucou/je/";
+    EXPECT_EQ("coucou/je/", add_trailing_slash(a));
+    a = "/recoucou/je/";
+    EXPECT_EQ("/recoucou/je/", add_trailing_slash(a));
+}
+
+TEST(StringUtilsTestSuite, clean_trailing_slash) {
+    std::string a;
+    a = "";
+    EXPECT_EQ("", clean_trailing_slash(a));
+    a = "/";
+    EXPECT_EQ("/", clean_trailing_slash(a));
+    a = "coucou/je";
+    EXPECT_EQ("coucou/je", clean_trailing_slash(a));
+    a = "coucou/je/";
+    EXPECT_EQ("coucou/je", clean_trailing_slash(a));
+    a = "/recoucou/je/";
+    EXPECT_EQ("/recoucou/je", clean_trailing_slash(a));
+}
+
 TEST(StringUtilsTestSuite, extract_extension) {
     std::string a;
     a = "";

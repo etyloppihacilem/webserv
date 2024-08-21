@@ -23,7 +23,9 @@ class Path {
         Path              &operator=(const Path &);
         Path              &operator=(const std::string &);
         Path               operator+(const Path &) const;
+        Path               operator+(const std::string &) const;
         Path              &operator+=(const Path &);
+        Path              &operator+=(const std::string &);
         const std::string &str() const;
 
     private:

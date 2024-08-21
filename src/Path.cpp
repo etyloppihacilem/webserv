@@ -36,16 +36,15 @@ Path &Path::operator=(const string &path) {
 }
 
 Path Path::operator+(const Path &b) const {
-    bool trailing = *this->_path.rbegin() == '/';
-    bool heading  = *b._path.begin() == '/';
-    if (trailing && heading) {
-        std::string tmp = this->_path;
-        tmp.resize(tmp.length() - 1);
-        return Path(tmp + b._path);
-    }
-    if (trailing || heading)
-        return Path(this->_path + b._path);
-    return Path(this->_path + "/" + b._path);
+    Path ret(*this);
+    ret += b;
+    return ret;
+}
+
+Path Path::operator+(const std::string &b) const {
+    Path ret(*this);
+    ret += b;
+    return ret;
 }
 
 Path &Path::operator+=(const Path &b) {
@@ -56,9 +55,25 @@ Path &Path::operator+=(const Path &b) {
         this->_path.resize(this->_path.length() - 1);
         this->_path += b._path;
     }
-    if (trailing || heading)
+    else if (trailing || heading)
         this->_path += b._path;
-    this->_path = +"/" + b._path;
+    else
+        this->_path += "/" + b._path;
+    return *this;
+}
+
+Path &Path::operator+=(const std::string &b) {
+    bool trailing = *this->_path.rbegin() == '/';
+    bool heading  = *b.begin() == '/';
+    if (trailing && heading) {
+        /*std::string tmp = this->_path;*/
+        this->_path.resize(this->_path.size() - 1);
+        this->_path += b;
+    }
+    else if (trailing || heading)
+        this->_path += b;
+    else
+        this->_path += "/" + b;
     return *this;
 }
 

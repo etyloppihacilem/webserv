@@ -6,10 +6,11 @@
 
 class StringTokenizer {
     public:
+        StringTokenizer();
         StringTokenizer(const std::string &str, const char delim);
         ~StringTokenizer();
 
-        std::string remainingString();
+        const std::string &remainingString();
         char        delimiter();
 
         bool        hasMoreTokens();
@@ -26,7 +27,8 @@ class StringTokenizer {
         char        _delimiter;
 
         std::string extractToken(std::size_t postion);
-        void        removeTrailingDelimiter(std::string &token);
+        void        trimEndingDelimiter(std::string &token);
+        void        trimLeadingDelimiter(std::string &token);
 };
 
 #endif // INCLUDE_SRC_STRINGTOKENIZER_HPP_

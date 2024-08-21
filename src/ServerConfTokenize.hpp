@@ -6,13 +6,13 @@
 #include <cstddef>
 #include <string>
 
-std::string tokenizeFile(const std::string &);
-std::string tokenizeServer(StringTokenizer &);
-Field       tokenizeLocation(StringTokenizer &);
-Field       tokenizeField(StringTokenizer &);
-ValueList   tokenizeValue(const std::string &);
+size_t          findClosingBrace(const std::string &);
+StringTokenizer tokenizeFile(const std::string &);
+StringTokenizer tokenizeServer(StringTokenizer &);
+Field           tokenizeLocation(StringTokenizer &);
+Field           tokenizeField(StringTokenizer &);
 
-size_t findClosingBrace(const std::string &);
-int    findFieldCode(const std::string &);
+ConfField getFieldCode(const std::string &);
+ValueList getFieldValues(StringTokenizer &); // getTokenizedValues()
 
 #endif // INCLUDE_SRC_SERVERCONFTOKENIZE_HPP_

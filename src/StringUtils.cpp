@@ -12,6 +12,24 @@
 #include <cstddef>
 #include <string>
 
+std::string add_trailing_slash(const std::string &str) {
+    std::string retStr(str);
+
+    if (!retStr.empty() && retStr.at(retStr.size() - 1) != '/')
+        retStr.push_back('/');
+    return retStr;
+}
+
+std::string clean_trailing_slash(const std::string &str) {
+    std::string cleanStr(str);
+
+    if (cleanStr == "/" )
+        return cleanStr;
+    if (!cleanStr.empty() && cleanStr.at(cleanStr.size() - 1) == '/')
+        cleanStr.erase(cleanStr.size() - 1, 1);
+    return cleanStr;
+}
+
 /**
   Shrink std::string allocation to match size.
   Saves memory.

@@ -1,18 +1,13 @@
 #include "StringTokenizer.hpp"
-#include "Logger.hpp"
 #include "StringUtils.hpp"
 #include <cstddef>
-#include <ostream>
 #include <string>
 
-StringTokenizer::StringTokenizer(const std::string &str, const char delim) : _tokenString(""), _delimiter(delim) {
-    if (str.empty()) {
-        _tokenString = "";
-        return;
-    }
-    _tokenString = str;
-    _delimiter   = delim;
+StringTokenizer::StringTokenizer() : _tokenString(""), _delimiter('|') {}
 
+StringTokenizer::StringTokenizer(const std::string &str, const char delim) : _tokenString(str), _delimiter(delim) {
+    if (_tokenString.empty())
+        return;
     /* Remove sequential delimiter */
     std::size_t currentPosition = 0;
 
@@ -43,7 +38,7 @@ bool StringTokenizer::hasMoreTokens() {
     return _tokenString.size() > 0;
 }
 
-std::string StringTokenizer::remainingString() {
+const std::string &StringTokenizer::remainingString() {
     return _tokenString;
 }
 
@@ -118,11 +113,6 @@ std::string StringTokenizer::extractToken(std::size_t position) {
     return token;
 }
 
-void StringTokenizer::removeTrailingDelimiter(std::string &token) {
-    if (token.rfind(_delimiter) == token.size() - 1)
-        token = token.substr(0, token.size() - 1);
-}
-
 std::string StringTokenizer::nextToken() {
     if (_tokenString.empty())
         return "";
@@ -133,6 +123,16 @@ std::string StringTokenizer::nextToken() {
     return token;
 }
 
+void StringTokenizer::trimLeadingDelimiter(std::string &token) {
+    if (token.find(_delimiter) == 0)
+        token = token.substr(1, token.size() - 1);
+}
+
+void StringTokenizer::trimEndingDelimiter(std::string &token) {
+    if (token.rfind(_delimiter) == token.size() - 1)
+        token = token.substr(0, token.size() - 1);
+}
+
 std::string StringTokenizer::nextToken(const char separator) {
     if (_tokenString.empty())
         return "";
@@ -140,7 +140,8 @@ std::string StringTokenizer::nextToken(const char separator) {
     std::size_t separatorPosition = _tokenString.find(separator, 0);
     std::string token             = extractToken(separatorPosition);
 
-    removeTrailingDelimiter(token);
+    trimLeadingDelimiter(_tokenString);
+    trimEndingDelimiter(token);
     return token;
 }
 
@@ -150,6 +151,7 @@ std::string StringTokenizer::nextToken(std::size_t separatorPosition) {
 
     std::string token = extractToken(separatorPosition);
 
-    removeTrailingDelimiter(token);
+    trimLeadingDelimiter(_tokenString);
+    trimEndingDelimiter(token);
     return token;
 }

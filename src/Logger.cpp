@@ -27,7 +27,7 @@ Logger::Logger(std::ostream &os, std::string level, std::string color, size_t wi
     _width = (width <= _level.length()) ? _level.length() : width;
     if (os.rdbuf() == std::cout.rdbuf() || os.rdbuf() == std::cerr.rdbuf()) {
         _width += color.length() + sizeof(_RESET) - 1; // if log to stdout or stderr enable color
-        _level  = "[" + color + level + _RESET "]";
+        _level  = "[" + color + level + _RESET "] ";
     }
     _os.copyfmt(os);
     _os.clear(os.rdstate());
@@ -110,6 +110,6 @@ bool Logger::is_forced() {
 std::ofstream Logger::_dev_null;
 bool          Logger::_force = false;
 
-Logger info(std::cerr, "INFO", _BLUE, 5);
-Logger warn(std::cerr, "WARN", _YELLOW, 5);
-Logger error(std::cerr, "ERROR", _RED, 5);
+Logger info(std::cerr, "  INFO    ", _BLUE, 5);
+Logger warn(std::cerr, "  WARNING ", _YELLOW, 5);
+Logger error(std::cerr, "  ERROR   ", _RED, 5);

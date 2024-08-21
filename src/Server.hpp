@@ -5,13 +5,48 @@
 #include "HttpStatusCodes.hpp"
 #include "Route.hpp"
 #include "ServerConfFields.hpp"
+#include "StringTokenizer.hpp"
 #include <exception>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
+#ifdef TESTING
+# include "gtest/gtest.h"
+#endif
+
 class Server {
     public:
+        typedef void (Server::*Setter)(const ValueList &);
+        static Setter     fieldSetterList[COUNT_CONF_FIELD];
+        static HttpMethod initMethod[1];
+
+        Server();
+        Server(StringTokenizer &);
+        ~Server();
+
+        std::vector< std::string >        getServerName() const;
+        int                               getPort() const;
+        std::string                       getRootDir() const;
+        std::vector< std::string >        getIndexPage() const;
+        bool                              getAutoindex() const;
+        std::set< HttpMethod >            getMethods() const;
+        int                               getMaxBodySize() const;
+        std::map< HttpCode, std::string > getErrorPages() const;
+        const Route                      &getRoute(const std::string &path) const;
+
+        bool hasServeName(const std::string &serverName) const;
+        bool hasRoute(const std::string &path) const;
+
+        bool hasServeNameSet() const;
+        bool hasListenSet() const;
+        bool hasRootSet() const;
+        bool hasIndexPageSet() const;
+        bool hasAutoindexSet() const;
+        bool hasMethodsSet() const;
+        bool hasMaxBodySizeSet() const;
+
         class RouteNotFoundWarn : public std::exception {
             public:
                 RouteNotFoundWarn(std::string message = "") throw() : _message(message) {}
@@ -24,23 +59,17 @@ class Server {
                 std::string _message;
         };
 
-        Server(const std::string &);
-        ~Server();
-
-        bool                     hasServeName(const std::string &serverName) const;
-        std::vector<std::string> getServerName() const;
-
-        unsigned int getPort() const;
-
-        bool                     getAutoindex() const;
-        std::vector<HttpMethod>  getMethods() const;
-        std::string              getRootDir() const;
-        std::vector<std::string> getIndexPage() const;
-
-        const std::map<HttpCode, std::string> &getErrorPages() const;
-
-        bool   hasRoute(const std::string &path) const;
-        Route &getRoute(const std::string &path);
+    private:
+        std::vector< std::string >        _serverName;
+        int                               _port;
+        std::string                       _rootDir;
+        std::vector< std::string >        _indexPage;
+        bool                              _autoindex;
+        std::set< HttpMethod >            _methods;
+        int                               _maxBodySize;
+        std::map< HttpCode, std::string > _errorPages;
+        std::map< std::string, Route >    _routes;
+        std::vector< bool >               _isFieldSet;
 
         void setServerName(const ValueList &);
         void setPort(const ValueList &);
@@ -49,30 +78,13 @@ class Server {
         void setAutoindex(const ValueList &);
         void setMethods(const ValueList &);
         void setMaxBodySize(const ValueList &);
-        void addRoute(const Field &);
         void addErrorPage(const ValueList &);
+        void addRoute(Field &);
 
-    private:
-        std::vector<std::string> _serverName;
-        unsigned int             _port;
-        int                      _maxBodySize;
-
-        bool                     _autoindex;
-        std::vector<HttpMethod>  _methods;
-        std::string              _rootDir;
-        std::vector<std::string> _indexPage;
-
-        std::map<std::string, Route>    _routes;
-        std::map<HttpCode, std::string> _errorPages;
-
-        bool _serverNameSet;
-        bool _portSet;
-        bool _maxBodySizeSet;
-
-        bool _autoindexSet;
-        bool _indexPageSet;
-        bool _methodsSet;
-        bool _rootDirSet;
+#ifdef TESTING
+        friend class ServerRouteTestSuite;
+        FRIEND_TEST(ServerRouteTestSuite, getRoute);
+#endif // DEBUG
 };
 
 #endif // INCLUDE_SRC_SERVER_HPP_

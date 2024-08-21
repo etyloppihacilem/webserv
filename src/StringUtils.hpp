@@ -13,6 +13,8 @@
 
 #include <string>
 
+std::string add_trailing_slash(const std::string &str);
+std::string clean_trailing_slash(const std::string &str);
 // redefinition because is not implemented in c++98.
 void        shrink_to_fit(std::string &s);
 std::string extract_extension(const std::string &s);

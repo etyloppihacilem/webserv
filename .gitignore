@@ -4,6 +4,7 @@
 .DS_Store
 .clangd
 .ignore
+.vscode
 .nfs*
 NOT*
 Session.vim
