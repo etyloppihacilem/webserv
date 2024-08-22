@@ -23,7 +23,7 @@ std::string add_trailing_slash(const std::string &str) {
 std::string clean_trailing_slash(const std::string &str) {
     std::string cleanStr(str);
 
-    if (cleanStr == "/" )
+    if (cleanStr == "/")
         return cleanStr;
     if (!cleanStr.empty() && cleanStr.at(cleanStr.size() - 1) == '/')
         cleanStr.erase(cleanStr.size() - 1, 1);
@@ -60,4 +60,37 @@ std::string extract_basename(const std::string &s) {
     else
         slash += 1;
     return s.substr(slash, s.length() - slash);
+}
+
+/**
+  RFC 9112, $2.2:
+  ===
+
+  Although the line terminator for the start-line and fields is the sequence CRLF, a recipient MAY recognize a single LF
+  as a line terminator and ignore any preceding CR.
+
+  A sender MUST NOT generate a bare CR (a CR character not immediately followed by LF) within any protocol elements
+  other than the content. A recipient of such a bare CR MUST consider that element to be invalid or replace each bare CR
+  with SP before processing the element or forwarding the message.
+  */
+std::string &sanitize_HTTP_string(std::string &s) {
+    size_t found = 0;
+    while ((found = s.find("\r\n", found)) != s.npos)
+        s.replace(found, 2, "\n");
+    found = 0;
+    while ((found = s.find("\r", found)) != s.npos)
+        s.replace(found, 1, " ");
+    return s;
+}
+
+// this exists mostly for testing purposes
+std::string sanitize_HTTP_string(const std::string &s) {
+    std::string tmp = s;
+    return sanitize_HTTP_string(tmp);
+}
+
+// this exists mostly for testing purposes
+std::string sanitize_HTTP_string(const char *s) {
+    std::string tmp = std::string(s);
+    return sanitize_HTTP_string(tmp);
 }

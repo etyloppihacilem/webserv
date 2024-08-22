@@ -28,7 +28,10 @@ Response::Response() : _code(OK), _header(), _body(0) {
 // HERE: Coder RESPONSESENDSTATE
 
 // TODO:connection header is not there yet !!!!
-
+// Logic should be :
+//  - in case of error (error code 4xx or 5xx) : connection close;
+//  - else : connection keep-alive
+// check how to close timeout connection
 Response::~Response() {
     if (_body)
         delete _body;

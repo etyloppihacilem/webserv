@@ -83,7 +83,7 @@ t_state ReadState::process_buffer(char *buffer) {
             return _state = ready; // TODO:close connection after error response is sent.
 
         //_buffer = _buffer.substr(0, end);  // wtf is this what about the body ????
-        _buffer = _buffer.substr(end + 4, _buffer.length() - (end + 4));
+        _buffer = _buffer.substr(end + 4, _buffer.length() - (end + 4)); // is it +4 or +2 ?
         _in_progress->init_body(_buffer);
         _state = ready;
     }
