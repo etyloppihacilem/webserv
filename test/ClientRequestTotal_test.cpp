@@ -415,6 +415,7 @@ std::vector<TotalRequest> TotalRequestData = {
       false },
 };
 
+// HERE: Trouver les erreurs et réecrire les bons tests
 class TotalRequestFixture : public ::testing::TestWithParam<TotalRequest> {
     public:
         TotalRequestFixture() : _test(0), _request(0), _fd{ 0, 0 } {}

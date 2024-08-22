@@ -10,6 +10,7 @@
 
 #include "ReadState.hpp"
 #include "ClientRequest.hpp"
+#include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "ProcessState.hpp"
@@ -21,7 +22,7 @@
 #include <ostream>
 #include <unistd.h>
 
-ReadState::ReadState(int socket) : ProcessState(socket), _buffer(), _in_progress(0) {}
+ReadState::ReadState(int socket) : ProcessState(socket), _buffer(), _in_progress(0), _parse_state(request_line) {}
 
 ReadState::~ReadState() {
     if (_in_progress)
@@ -58,35 +59,31 @@ t_state ReadState::process() {
   Called by process().
   */
 t_state ReadState::process_buffer(char *buffer) {
+    size_t eol; // end of line
     _buffer += buffer;
     sanitize_HTTP_string(_buffer, 0);
     if (_state == waiting) {
-        // getting stuff that needs to be detected as header.
-        // if _buffer does not start with a request line, everything will be discarded
-        // until request line is found.
-        if (_in_progress) {
-            delete _in_progress;
-            _in_progress = 0;
+        if (_in_progress == 0)
+            _in_progress = new ClientRequest(_socket);
+        if ((eol = _buffer.find("\n")) != _buffer.npos) {
+            if (_parse_state == request_line) {
+                if (!_in_progress->parse_request_line(_buffer))
+                    return _state = ready; // ready to return error
+                _parse_state = headers;    // next state
+            } else if (_parse_state == headers) {
+                try {
+                    if (_in_progress->parse_headers(_buffer))
+                        _parse_state = body;
+                } catch (HttpError &e) {
+                    return _state = ready; // ready to return on error
+                };
+            }
         }
-
-        // TODO: verifier la longueur du buffer ?
-        size_t end = _buffer.find("\n\n", 0);
-        size_t eol = _buffer.find("\n");
-
-        if (end == _buffer.npos)
-            return _state;
-        if (eol >= end) { // eq is the only possible case
-            _buffer = _buffer.substr(end + 2, _buffer.length() - (end + 2));
-            return return_error();
+        if (_parse_state == body) {
+            _in_progress->init_body(_buffer);
+            _parse_state = finished;
+            _state       = ready;
         }
-        _in_progress = new ClientRequest(_socket);
-        if (!_in_progress->parse(_buffer))
-            return _state = ready; // TODO:close connection after error response is sent.
-
-        //_buffer = _buffer.substr(0, end);  // wtf is this what about the body ????
-        _buffer = _buffer.substr(end + 2, _buffer.length() - (end + 2));
-        _in_progress->init_body(_buffer);
-        _state = ready;
     }
     return _state;
 }
@@ -107,8 +104,8 @@ ClientRequest *ReadState::get_client_request() {
         error.log() << "Getting a non existing ClientRequest." << std::endl;
     if (_state != ready)
         warn.log() << "ReadState: getting ClientRequest that is not totally generated. As a result, it will not be "
-                       "removed from ReadState object and may be deleted at its destruction."
-                    << std::endl;
+                      "removed from ReadState object and may be deleted at its destruction."
+                   << std::endl;
     else {
         _in_progress = 0;
         _state       = waiting;

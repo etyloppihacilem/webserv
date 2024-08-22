@@ -157,24 +157,31 @@ void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_
         _header[key] = in.substr(sep, (end + 1) - sep);
 }
 
-void ClientRequest::init_header(const std::string &in) {
-    size_t begin = in.find("\n");
-    size_t end   = in.find("\n", begin + 1);
+/**
+  returns true when headers are done parsing.
+  */
+bool ClientRequest::init_header(std::string &in) {
+    size_t begin = 0;
+    size_t end   = in.find("\n");
 
-    if (begin == std::string::npos || end == std::string::npos)
-        throw HttpError(BadRequest);
-    while (begin + 1 != end) {
-        parse_header_line(in, begin + 1, end);
-        begin = end;
-        end   = in.find("\n", begin + 1);
-        if (begin == std::string::npos || end == std::string::npos)
-            throw HttpError(BadRequest);
+    while (end != in.npos) {
+        if (end == 0) {
+            // TODO: get this check out of this function.
+            if (in.length() == 1)
+                in = "";
+            else
+                in = in.substr(1, in.length() - 1);
+            return true;
+        }
+        parse_header_line(in, begin, end);
+        if (end + 1 == in.length())
+            in = "";
+        else
+            in = in.substr(end + 1, in.length() - (end + 1));
+        end = in.find("\n");
     }
-    if (_header.find("Host") == _header.end())
-        throw HttpError(BadRequest);
+    return false; // change this to not make another call
 }
-
-/// Parsing header of request.
 
 /**
   Will first parse the method, then the target and parameters, and the headers.
@@ -186,38 +193,64 @@ void ClientRequest::init_header(const std::string &in) {
 
   In the particular case of a 3xx code (redirect), the only item in `_header` should be 'Location', containing a string
   to redirect to. This should be the *only* header set.
-  */
-bool ClientRequest::parse(const std::string &in) {
-    {
-        size_t sp = in.find_first_of(" \t");
 
-        try {
-            _method = parse_method(in, sp);
-        } catch (HttpError &e) {
-            _method = none;
-            _status = e.get_code();
-            return false;
-        }
-        try {
-            parse_target(in, sp);
-            parse_parameters(); // parameters are everyting after '?'
-            decode_target(); // to replace every %XX value
-        } catch (HttpError &e) {
-            _status = e.get_code();
-            if (_status == MovedPermanently)
-                _header["Location"] = e.get_message(); // Location is the only header to redirect
-                                                       // it is the only header at all because init_header isnt called.
-            return false;
-        }
-    }
+  THIS FUNCTION IS DEPRECATED
+  and is replaced by parse_request_line and parse_headers
+  */
+// bool ClientRequest::parse(const std::string &in) ;
+
+/**
+  this functions parses the request line after a first '\n' is detected.
+  it trims the in string after parsing is successful.
+  */
+bool ClientRequest::parse_request_line(std::string &in) {
+    size_t sp = in.find_first_of(" \t");
     try {
-        init_header(in); // TODO: get this out of there to conform with RFC
-        parse_port();
+        _method = parse_method(in, sp);
     } catch (HttpError &e) {
+        _method = none;
         _status = e.get_code();
         return false;
     }
+    try {
+        parse_target(in, sp);
+        parse_parameters(); // parameters are everyting after '?'
+        decode_target();    // to replace every %XX value
+    } catch (HttpError &e) {
+        _status = e.get_code();
+        if (_status == MovedPermanently)
+            _header["Location"] = e.get_message(); // Location is the only header to redirect
+                                                   // it is the only header at all because init_header isnt called.
+        return false;
+    }
+    if ((sp = in.find("\n")) == in.npos) {
+        error.log() << "Line ending not found while parsing request line. This should not happen as parse_request_line "
+                       "should be called only when a \\n is found in _buffer."
+                    << std::endl;
+        _status = BadRequest;
+        return false;
+    }
+    if (sp + 1 == in.length())
+        in = "";
+    else
+        in = in.substr(sp + 1, in.length() - (sp + 1));
     return true;
+}
+
+/**
+  This functions parses headers and returns false if theres no more headers or if theres an error.
+  i.e. when the program should stop to call this function.
+  */
+bool ClientRequest::parse_headers(std::string &in) {
+    if (init_header(in)) {
+        if (!isError(_status) && _header.find("Host") == _header.end()) // only check when done parsing headers
+            _status = BadRequest;
+        if (isError(_status))
+            throw HttpError(_status);
+        parse_port();
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -366,7 +399,7 @@ Body *ClientRequest::get_body() {
     return _body;
 }
 
-const std::map<std::string, std::string> &ClientRequest::get_header() {
+const std::map< std::string, std::string > &ClientRequest::get_header() {
     return _header;
 }
 

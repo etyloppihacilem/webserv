@@ -15,6 +15,13 @@
 #include "ProcessState.hpp"
 #include <string>
 
+typedef enum e_parse_state {
+    request_line = 0,
+    headers,
+    body,
+    finished
+} parse_state;
+
 class ReadState : public ProcessState {
     public:
         ReadState(int socket);
@@ -32,6 +39,7 @@ class ReadState : public ProcessState {
         std::string    _buffer; ///< Buffer for parsing on socket
         /**< buffer is supposed clean at the end of a successful parsing on it. */
         ClientRequest *_in_progress; ///< ClientRequest that is built
+        parse_state _parse_state;
 
 #ifdef TESTING
         FRIEND_TEST(ReadStateSuite, FindMethod);

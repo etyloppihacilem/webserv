@@ -14,8 +14,10 @@
 #include "ClientRequest.hpp"
 #include "FakeRoute.hpp"
 #include "FakeServer.hpp"
+#include "HttpError.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
+#include "Logger.hpp"
 #include "ProcessState.hpp"
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
@@ -80,7 +82,13 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
             std::string buf = std::get< tdata >(GetParam());
             try {
                 _request = new ClientRequest(0);
-                _request->parse(sanitize_HTTP_string(buf)); // as everything is in buff, no call to read_body() is ever needed
+                std::string a = sanitize_HTTP_string(buf);
+                _request->parse_request_line(a); // as everything is in buff, no call to read_body() is never needed
+                try {
+                    _request->parse_headers(buf);
+                } catch (HttpError &e) {
+                    ; // nothing this is absolutely normal
+                };
             } catch (std::exception &e) {
                 FAIL() << "Could not build request." << e.what();
             }
