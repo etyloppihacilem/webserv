@@ -19,7 +19,6 @@
 #include <cassert>
 #include <cstddef>
 #include <map>
-#include <ostream>
 #include <string>
 #include <tuple>
 #include <unistd.h>
@@ -389,6 +388,28 @@ std::vector<TotalRequest> TotalRequestData = {
       "",
       { { "Host", "127.0.0.1" }, { "Name", "fireTesting/1.0" } },
       OK,
+      80,
+      "hihi=ahah",
+      false },
+    { "Bad_header_after_name",
+      "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName : fireTesting/1.0\r\n\r\n",
+      "/helloworld.html",
+      GET,
+      false,
+      "",
+      { { "Host", "127.0.0.1" }, { "Name", "fireTesting/1.0" } },
+      BadRequest,
+      80,
+      "hihi=ahah",
+      false },
+    { "Bad_header_before_name",
+      "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n Host: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+      "/helloworld.html",
+      GET,
+      false,
+      "",
+      { { "Host", "127.0.0.1" }, { "Name", "fireTesting/1.0" } },
+      BadRequest,
       80,
       "hihi=ahah",
       false },

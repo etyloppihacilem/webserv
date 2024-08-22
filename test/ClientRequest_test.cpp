@@ -328,6 +328,13 @@ TEST(ClientRequestTestSuite, decode_target) {
     EXPECT_EQ(test._target, "Coucou je suis heureux");
 }
 
+TEST(ClientRequestTestSuite, decode_target_loop) {
+    ClientRequest test(0);
+    test._target = "coucou%2520super";
+    test.decode_target();
+    EXPECT_EQ(test._target, "coucou%20super");
+}
+
 /* TEST(ClientRequestTestSuite, parse_parameters) {
     ClientRequest test(0);
 

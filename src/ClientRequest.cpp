@@ -252,15 +252,16 @@ bool ClientRequest::init_body(std::string &buffer) {
     `HEX` being a 2 digit hex value.
   */
 void ClientRequest::decode_target() {
-    size_t percent;
+    size_t percent = 0;
     int    c;
 
-    while ((percent = _target.find('%')) != _target.npos) {
+    while ((percent = _target.find('%', percent)) != _target.npos) {
         std::stringstream st;
 
         st << std::hex << _target.substr(percent + 1, 2);
         st >> c;
         _target.replace(percent, 3, 1, c);
+        percent++; // to prevent a %25 ('%') to encode itself
     }
 }
 
