@@ -55,7 +55,7 @@ ClientRequest::~ClientRequest() {
         delete _body;
 }
 
-HttpMethod ClientRequest::parse_method(const std::string &method, const size_t &end) {
+HttpMethod ClientRequest::parse_method(const std::string &method, size_t end) {
     if (method.length() < 2 || end > MAX_METHOD)
         throw HttpError(NotImplemented);
     if (method[0] == 'G' && method.find(method_string(GET)) == 0 && end == 3)
@@ -80,14 +80,14 @@ static void replace_all(std::string &str, const std::string &to_find, const std:
   Parse target. If is origin form, parses it normally, and if is absolute form, parses it in a way to make it normal
   and adding Host header.
   */
-void ClientRequest::parse_target(const std::string &in, const size_t &pos) {
+void ClientRequest::parse_target(const std::string &in, size_t pos) {
     {
         size_t sp_protocol;
         size_t protocol;
 
         sp_protocol = in.find_first_of(" \t", pos + 1);
         protocol    = in.find("HTTP", pos);
-        if (protocol == std::string::npos || sp_protocol == std::string::npos || protocol + 8 != in.find("\r\n", pos))
+        if (protocol == std::string::npos || sp_protocol == std::string::npos || protocol + 8 != in.find("\n", pos))
             throw HttpError(BadRequest);
         if (in.substr(protocol, 7) != "HTTP/1." || (in[protocol + 7] != '0' && in[protocol + 7] != '1'))
             throw HttpError(HTTPVersionNotSupported);
@@ -158,15 +158,15 @@ void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_
 }
 
 void ClientRequest::init_header(const std::string &in) {
-    size_t begin = in.find("\r\n");
-    size_t end   = in.find("\r\n", begin + 2);
+    size_t begin = in.find("\n");
+    size_t end   = in.find("\n", begin + 1);
 
     if (begin == std::string::npos || end == std::string::npos)
         throw HttpError(BadRequest);
-    while (begin + 2 != end) {
-        parse_header_line(in, begin + 2, end);
+    while (begin + 1 != end) {
+        parse_header_line(in, begin + 1, end);
         begin = end;
-        end   = in.find("\r\n", begin + 2);
+        end   = in.find("\n", begin + 1);
         if (begin == std::string::npos || end == std::string::npos)
             throw HttpError(BadRequest);
     }
@@ -187,7 +187,7 @@ void ClientRequest::init_header(const std::string &in) {
   In the particular case of a 3xx code (redirect), the only item in `_header` should be 'Location', containing a string
   to redirect to. This should be the *only* header set.
   */
-bool ClientRequest::parse_header(const std::string &in) {
+bool ClientRequest::parse(const std::string &in) {
     {
         size_t sp = in.find_first_of(" \t");
 
@@ -200,8 +200,8 @@ bool ClientRequest::parse_header(const std::string &in) {
         }
         try {
             parse_target(in, sp);
-            parse_parameters();
-            decode_target();
+            parse_parameters(); // parameters are everyting after '?'
+            decode_target(); // to replace every %XX value
         } catch (HttpError &e) {
             _status = e.get_code();
             if (_status == MovedPermanently)
@@ -211,7 +211,7 @@ bool ClientRequest::parse_header(const std::string &in) {
         }
     }
     try {
-        init_header(in); // TODO: COMMENTS AND QUOTED HEADERS PROBLEM THERE
+        init_header(in); // TODO: get this out of there to conform with RFC
         parse_port();
     } catch (HttpError &e) {
         _status = e.get_code();
@@ -310,6 +310,7 @@ std::string ClientRequest::get_query_string() const {
     }
     return ret;
 } */
+
 void ClientRequest::parse_parameters() {
     size_t mark;
 

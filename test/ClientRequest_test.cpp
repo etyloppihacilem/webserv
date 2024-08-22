@@ -14,6 +14,7 @@
 #include "HttpError.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
+#include "StringUtils.hpp"
 #include "gtest/gtest.h"
 #include <cstddef>
 #include <exception>
@@ -145,7 +146,7 @@ TEST_P(ClientRequestTestTarget, ParseTargetTest) {
         EXPECT_THROW(
             {
                 try {
-                    test.parse_target(line, pos);
+                    test.parse_target(sanitize_HTTP_string(line), pos);
                 } catch (HttpError &e) {
                     EXPECT_EQ(e.get_code(), BadRequest);
                     throw;
@@ -159,7 +160,7 @@ TEST_P(ClientRequestTestTarget, ParseTargetTest) {
         EXPECT_THROW(
             {
                 try {
-                    test.parse_target(line, pos);
+                    test.parse_target(sanitize_HTTP_string(line), pos);
                 } catch (HttpError &e) {
                     EXPECT_EQ(e.get_code(), URITooLong);
                     throw;
@@ -173,7 +174,7 @@ TEST_P(ClientRequestTestTarget, ParseTargetTest) {
         EXPECT_THROW(
             {
                 try {
-                    test.parse_target(line, pos);
+                    test.parse_target(sanitize_HTTP_string(line), pos);
                 } catch (HttpError &e) {
                     EXPECT_EQ(e.get_code(), MovedPermanently);
                     EXPECT_EQ(e.what(), params[2]);
@@ -185,7 +186,7 @@ TEST_P(ClientRequestTestTarget, ParseTargetTest) {
             HttpError
         );
     } else {
-        EXPECT_NO_THROW(test.parse_target(line, pos));
+        EXPECT_NO_THROW(test.parse_target(sanitize_HTTP_string(line), pos));
         EXPECT_EQ(test._target, params[1]);
         if (params[2] != "")
             EXPECT_EQ(test._header["Host"], params[2]);
@@ -237,7 +238,7 @@ TEST_P(ClientRequestTestParseHeader, ParseHeaderLineTest) {
         ASSERT_THROW(
             {
                 try {
-                    test.parse_header_line(tmp.c1, begin, end);
+                    test.parse_header_line(sanitize_HTTP_string(tmp.c1), begin, end);
                 } catch (HttpError &e) {
                     EXPECT_EQ(e.get_code(), BadRequest);
                     throw;
@@ -249,7 +250,7 @@ TEST_P(ClientRequestTestParseHeader, ParseHeaderLineTest) {
         );
         EXPECT_EQ(test._header.find(tmp.c2), test._header.end());
     } else {
-        ASSERT_NO_THROW(test.parse_header_line(tmp.c1, begin, end));
+        ASSERT_NO_THROW(test.parse_header_line(sanitize_HTTP_string(tmp.c1), begin, end));
         EXPECT_NE(test._header.find(tmp.c2), test._header.end());
         EXPECT_EQ(test._header[tmp.c2], tmp.c3);
     }
@@ -275,7 +276,7 @@ TEST_P(ClientRequestTestInitHeader, InitHeaderTest) {
         ASSERT_THROW(
             {
                 try {
-                    test.init_header(tmp.request);
+                    test.init_header(sanitize_HTTP_string(tmp.request));
                 } catch (HttpError &e) {
                     EXPECT_EQ(e.get_code(), BadRequest);
                     throw;
@@ -286,7 +287,7 @@ TEST_P(ClientRequestTestInitHeader, InitHeaderTest) {
             HttpError
         );
     } else {
-        ASSERT_NO_THROW(test.init_header(tmp.request));
+        ASSERT_NO_THROW(test.init_header(sanitize_HTTP_string(tmp.request)));
         for (auto it = tmp.headers.begin(); it != tmp.headers.end(); it++) {
             ASSERT_NE(test._header.find(it->first), test._header.end());
             EXPECT_EQ(test._header[it->first], it->second);

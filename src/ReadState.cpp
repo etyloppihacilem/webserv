@@ -59,6 +59,7 @@ t_state ReadState::process() {
   */
 t_state ReadState::process_buffer(char *buffer) {
     _buffer += buffer;
+    sanitize_HTTP_string(_buffer, 0);
     if (_state == waiting) {
         // getting stuff that needs to be detected as header.
         // if _buffer does not start with a request line, everything will be discarded
@@ -69,21 +70,21 @@ t_state ReadState::process_buffer(char *buffer) {
         }
 
         // TODO: verifier la longueur du buffer ?
-        size_t end = _buffer.find("\r\n\r\n", 0);
-        size_t eol = _buffer.find("\r\n");
+        size_t end = _buffer.find("\n\n", 0);
+        size_t eol = _buffer.find("\n");
 
         if (end == _buffer.npos)
             return _state;
-        if (eol >= end) {
-            _buffer = _buffer.substr(end + 4, _buffer.length() - (end + 4));
+        if (eol >= end) { // eq is the only possible case
+            _buffer = _buffer.substr(end + 2, _buffer.length() - (end + 2));
             return return_error();
         }
         _in_progress = new ClientRequest(_socket);
-        if (!_in_progress->parse_header(_buffer))
+        if (!_in_progress->parse(_buffer))
             return _state = ready; // TODO:close connection after error response is sent.
 
         //_buffer = _buffer.substr(0, end);  // wtf is this what about the body ????
-        _buffer = _buffer.substr(end + 4, _buffer.length() - (end + 4)); // is it +4 or +2 ?
+        _buffer = _buffer.substr(end + 2, _buffer.length() - (end + 2));
         _in_progress->init_body(_buffer);
         _state = ready;
     }

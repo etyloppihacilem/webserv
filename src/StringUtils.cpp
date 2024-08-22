@@ -9,7 +9,9 @@
 ############################################################################# */
 
 #include "StringUtils.hpp"
+#include "Logger.hpp"
 #include <cstddef>
+#include <ostream>
 #include <string>
 
 std::string add_trailing_slash(const std::string &str) {
@@ -73,24 +75,31 @@ std::string extract_basename(const std::string &s) {
   other than the content. A recipient of such a bare CR MUST consider that element to be invalid or replace each bare CR
   with SP before processing the element or forwarding the message.
   */
-std::string &sanitize_HTTP_string(std::string &s) {
+std::string &sanitize_HTTP_string(std::string &s, size_t len) {
     size_t found = 0;
-    while ((found = s.find("\r\n", found)) != s.npos)
+    if (len == 0)
+        len = s.length();
+    while ((found = s.find("\r\n", found)) != s.npos && found < len){
         s.replace(found, 2, "\n");
+        len--; // because overall length is reduce by 1 by replacing...
+    }
     found = 0;
-    while ((found = s.find("\r", found)) != s.npos)
-        s.replace(found, 1, " ");
+    while ((found = s.find("\r", found)) != s.npos && found < len && found < s.length() - 1)
+        s.replace(found, 1, " "); // do not replace last \r because it may be a followed by a \n not read yet
     return s;
 }
 
 // this exists mostly for testing purposes
 std::string sanitize_HTTP_string(const std::string &s) {
+#ifndef TESTING
+    warn.log() << "Const sanitize_HTTP_string called while not being TESTING. Argument is not modified." << std::endl;
+#endif
     std::string tmp = s;
-    return sanitize_HTTP_string(tmp);
+    return sanitize_HTTP_string(tmp, 0);
 }
 
 // this exists mostly for testing purposes
 std::string sanitize_HTTP_string(const char *s) {
     std::string tmp = std::string(s);
-    return sanitize_HTTP_string(tmp);
+    return sanitize_HTTP_string(tmp, 0);
 }

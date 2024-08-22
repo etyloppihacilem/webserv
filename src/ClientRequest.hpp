@@ -28,7 +28,7 @@ class ClientRequest {
         ClientRequest(int socket, HttpCode code, int port);
         ~ClientRequest();
 
-        bool        parse_header(const std::string &in);
+        bool        parse(const std::string &in);
         bool        init_body(std::string &buffer);
         void        save_mem();
         std::string get_target() const;
@@ -45,8 +45,8 @@ class ClientRequest {
         const std::map<std::string, std::string> &get_header();
 
     private:
-        HttpMethod parse_method(const std::string &method, const size_t &end);
-        void       parse_target(const std::string &in, const size_t &pos);
+        HttpMethod parse_method(const std::string &method, size_t end);
+        void       parse_target(const std::string &in, size_t pos);
         void       decode_target();
         void       parse_parameters();
         void       init_header(const std::string &in);

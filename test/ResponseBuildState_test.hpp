@@ -19,6 +19,7 @@
 #include "ProcessState.hpp"
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "StringUtils.hpp"
 #include "global_test.h"
 #include "gtest/gtest.h"
 #include <cstdio>
@@ -79,7 +80,7 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
             std::string buf = std::get< tdata >(GetParam());
             try {
                 _request = new ClientRequest(0);
-                _request->parse_header(buf); // as everything is in buff, no call to read_body() is ever needed
+                _request->parse(sanitize_HTTP_string(buf)); // as everything is in buff, no call to read_body() is ever needed
             } catch (std::exception &e) {
                 FAIL() << "Could not build request." << e.what();
             }
