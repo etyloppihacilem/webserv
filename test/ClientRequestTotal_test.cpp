@@ -382,7 +382,7 @@ std::vector<TotalRequest> TotalRequestData = {
       "hihi=ahah",
       false },
     { "Bad_line_terminator_r_as_space",
-      "GET /helloworld.html?hihi=ahah\r HTTP/1.1\r\nHost: \r127.0.0.1\r\nName:\r fireTesting/1.0\r\n\r\n",
+      "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: \r127.0.0.1\r\nName:\r fireTesting/1.0\r\n\r\n",
       "/helloworld.html",
       GET,
       false,

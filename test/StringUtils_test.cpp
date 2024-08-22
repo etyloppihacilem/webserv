@@ -96,3 +96,8 @@ TEST(StringUtilsTestSuite, sanitize_HTTP_stringLen) {
     std::string a = "ab\r\ncd\r\n";
     EXPECT_EQ("ab\ncd\r\n", sanitize_HTTP_string(a, 4));
 }
+
+TEST(StringUtilsTestSuite, sanitize_HTTP_stringEndOfHeader) {
+    std::string a = "ab\r\n\r\ncd\r\nhihi";
+    EXPECT_EQ("ab\n\ncd\r\nhihi", sanitize_HTTP_string(a, 0));
+}

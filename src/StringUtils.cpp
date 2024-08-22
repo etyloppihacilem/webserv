@@ -77,14 +77,22 @@ std::string extract_basename(const std::string &s) {
   */
 std::string &sanitize_HTTP_string(std::string &s, size_t len) {
     size_t found = 0;
+    size_t len_rn;
     if (len == 0)
         len = s.length();
-    while ((found = s.find("\r\n", found)) != s.npos && found < len){
+    if ((len_rn = s.find("\n\n")) == s.npos)
+        len_rn = len;
+    while ((found = s.find("\r\n", found)) != s.npos && found < len_rn){
         s.replace(found, 2, "\n");
+        if (found != 0 && s.find("\n\n", found - 1) == found - 1)
+            break ; // double \n found, not sanitizing further (bc body)
         len--; // because overall length is reduce by 1 by replacing...
+        len_rn--; // in case \n\n is already present
     }
     found = 0;
-    while ((found = s.find("\r", found)) != s.npos && found < len && found < s.length() - 1)
+    if ((len_rn = s.find("\n\n")) == s.npos)
+        len_rn = len;
+    while ((found = s.find("\r", found)) != s.npos && found < len_rn && found < s.length() - 1)
         s.replace(found, 1, " "); // do not replace last \r because it may be a followed by a \n not read yet
     return s;
 }
