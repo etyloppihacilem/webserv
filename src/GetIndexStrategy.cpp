@@ -35,9 +35,9 @@ GetIndexStrategy::GetIndexStrategy(const std::string &location, const std::strin
     _dir(0),
     _init_done(false),
     _deinit_done(false) {
-        if (*_target.rbegin() != '/')
-            _target += "/";
-    }
+    if (*_target.rbegin() != '/')
+        _target += "/";
+}
 
 GetIndexStrategy::~GetIndexStrategy() {
     if (_dir)
@@ -81,7 +81,7 @@ std::string GetIndexStrategy::getType(mode_t mode) {
   */
 std::string GetIndexStrategy::generateLine(char *name, struct stat *st) {
     std::string path = _location + std::string(name);
-    //+ (*_location.rbegin() != '/' ? "/" : "") // not suppsed to be needed !!!
+    //+ (*_location.rbegin() != '/' ? "/" : "") // not suppsed to be needed 265 103!!!
 
     if (!stat(path.c_str(), st))
         return name;
@@ -97,8 +97,7 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     if (!_init_done) {
         if (*_location.rbegin() != '/')
             _location += "/";
-        buffer
-            += "<head></head><body><h1>" + _target + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
+        buffer += "<head></head><body><h1>" + _target + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
     }
 
     dir_item   *item;
@@ -108,12 +107,15 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     while ((item = readdir(_dir)) && buffer.length() < size) {
         name = generateLine(item->d_name, &st);
         std::stringstream stream;
-        stream << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _target << item->d_name << "\">"
-               << name << "</a></td><td>" << (S_ISREG(st.st_mode) ? st.st_size : 0) << "</td></tr>";
+        stream << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _target << item->d_name << "\">" << name
+               << "</a></td><td>" << (S_ISREG(st.st_mode) ? st.st_size : 0) << "</td></tr>";
         buffer += stream.str();
     }
-    if (errno == EBADF)
+    if (errno == EBADF) {
+        warn.log() << "GetIndexStrategy: Bad directory descriptor for '" << _location << "', sending "
+                   << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
+    }
     if (buffer.length() < size && !_deinit_done) {
         buffer += "</table></body>";
         closedir(_dir);
@@ -148,13 +150,23 @@ bool GetIndexStrategy::build_response() {
     }
     _dir = opendir(_location.c_str());
     if (!_dir) {
-        if (errno == EACCES)
-            throw HttpError(Forbidden);
-        if (errno == ENOENT)
-            throw HttpError(NotFound);
-        if (errno == ENOMEM)
-            throw std::bad_alloc(); // to begin memory recovery procedure
-        throw HttpError(InternalServerError);
+        switch (errno) {
+
+            case EACCES:
+                info.log() << "GetIndexStrategy: cannot open directory '" << _location
+                           << "' permission denied, sending " << Forbidden;
+                throw HttpError(Forbidden);
+            case ENOENT:
+                info.log() << "GetIndexStrategy: cannot open directory '" << _location << "' " << strerror(errno)
+                           << ", sending " << NotFound;
+                throw HttpError(NotFound);
+            case ENOMEM:
+                throw std::bad_alloc(); // to begin memory recovery procedure
+            default:
+                warn.log() << "GetIndexStrategy: cannot open directory '" << _location << "' " << strerror(errno)
+                           << ", sending " << InternalServerError << std::endl;
+                throw HttpError(InternalServerError);
+        }
     }
     _response.add_header("Content-Type", "text/html; charset=utf-8");
     _response.set_body(*this);

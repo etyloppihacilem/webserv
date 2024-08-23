@@ -13,5 +13,6 @@
 
 #define MAX_METHOD 8
 #define MAX_URI 8192
+#define MAX_REQUEST_LINE MAX_URI + 17
 
 #endif // INCLUDE_SRC_HTTPUTILS_HPP_

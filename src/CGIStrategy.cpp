@@ -49,19 +49,20 @@ bool CGIStrategy::build_response() {
             while (body->is_done())          // retrieving whole body. TODO: body cannot be read without a epoll
                 body->get();
         size = body->length();
+        (void) size; // TODO: delete this
     }
 
     std::map<std::string, std::string> env;
 
     // program separation
     if (pipe(_pipin) < 0) {
-        error.log() << "Could not open pipe for CGIStrategy. Sending " << InternalServerError << std::endl;
+        error.log() << "CGIStrategy: Could not open pipe, sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     }
     if (pipe(_pipout) < 0) {
         close(_pipin[0]);
         close(_pipin[1]);
-        error.log() << "Could not open pipe for CGIStrategy. Sending " << InternalServerError << std::endl;
+        error.log() << "CGIStrategy: Could not open pipe, sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     }
     pid_t pid = fork();
@@ -70,18 +71,18 @@ bool CGIStrategy::build_response() {
         close(_pipin[1]);
         close(_pipout[0]);
         close(_pipout[1]);
-        error.log() << "Could not fork CGIStrategy. Sending " << InternalServerError << std::endl;
+        error.log() << "CGIStrategy: Could not open pipe, sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     } else if (pid) { // parent
         close(_pipin[0]);
         close(_pipout[1]);
-        info.log() << "Child " << pid << " running." << std::endl;
+        info.log() << "CGIStrategy: Child " << pid << " running." << std::endl;
     } else { // child
         char **c_env = generate_env(env);
         close(_pipin[1]);
         close(_pipout[0]);
         // execve(c_env);
-        error.log() << "Execve failed to run " << "" << std::endl;
+        error.log() << "CGIStrategy: Execve failed to run " << "" << std::endl; // logging is on stderr
         close(_pipin[0]);
         close(_pipout[1]);
         free(c_env);
@@ -116,7 +117,7 @@ char **CGIStrategy::generate_env(const std::map<std::string, std::string> &env) 
     char **ret = 0;
 
     if (!(ret = new (std::nothrow) char *[env.size() + 1])) {
-        error.log() << "Env alloc failed. CGI env will not be generated." << std::endl;
+        error.log() << "CGIStrategy: env alloc failed. CGI env will not be generated." << std::endl;
         return 0;
     }
     bzero(ret, env.size() + 1);
@@ -127,7 +128,7 @@ char **CGIStrategy::generate_env(const std::map<std::string, std::string> &env) 
         std::string tmp = it->first + "=" + it->second;
 
         if (!(ret[i] = strdup(tmp.c_str()))) { // bad alloc
-            error.log() << "Env alloc partially failed. CGI env will not be generated." << std::endl;
+            error.log() << "CGIStrategy: env alloc partially failed. CGI env will not be generated." << std::endl;
             for (size_t j = 0; j <= env.size(); j++)
                 if (ret[j])
                     delete[] ret[j];

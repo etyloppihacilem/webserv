@@ -56,14 +56,18 @@ ClientRequest::~ClientRequest() {
 }
 
 HttpMethod ClientRequest::parse_method(const std::string &method, size_t end) {
-    if (method.length() < 2 || end > MAX_METHOD)
+    if (method.length() < 2 || end > MAX_METHOD) {
+        info.log() << "Method '" << method.substr(0, end) << "' not implemented, sending " << NotImplemented
+                   << std::endl;
         throw HttpError(NotImplemented);
+    }
     if (method[0] == 'G' && method.find(method_string(GET)) == 0 && end == 3)
         return GET;
     if (method[0] == 'P' && method.find(method_string(POST)) == 0 && end == 4)
         return POST;
     if (method[0] == 'D' && method.find(method_string(DELETE)) == 0 && end == 6)
         return DELETE;
+    info.log() << "Method '" << method.substr(0, end) << "' not implemented, sending " << NotImplemented << std::endl;
     throw HttpError(NotImplemented);
 }
 
@@ -87,18 +91,27 @@ void ClientRequest::parse_target(const std::string &in, size_t pos) {
 
         sp_protocol = in.find_first_of(" \t", pos + 1);
         protocol    = in.find("HTTP", pos);
-        if (protocol == std::string::npos || sp_protocol == std::string::npos || protocol + 8 != in.find("\n", pos))
+        if (protocol == std::string::npos || sp_protocol == std::string::npos || protocol + 8 != in.find("\n", pos)) {
+            info.log() << "Bad request_line, sending " << BadRequest << std::endl;
             throw HttpError(BadRequest);
-        if (in.substr(protocol, 7) != "HTTP/1." || (in[protocol + 7] != '0' && in[protocol + 7] != '1'))
+        }
+        if (in.substr(protocol, 7) != "HTTP/1." || (in[protocol + 7] != '0' && in[protocol + 7] != '1')) {
+            info.log() << "Http version " << in.substr(protocol, 8) << " not supported, sending "
+                       << HTTPVersionNotSupported << std::endl;
             throw HttpError(HTTPVersionNotSupported);
-        if ((protocol - 1) - (pos + 1) > MAX_URI)
+        }
+        if ((protocol - 1) - (pos + 1) > MAX_URI) {
+            info.log() << "URI too long (" << (protocol - 1) - (pos + 1) << "b), sending " << URITooLong << std::endl;
             throw HttpError(URITooLong);
+        }
         if (sp_protocol != protocol - 1) { // there are SP remaining in URI, that is wrong, going for
                                            // 301 MovedPermanently.
             std::string redirect = in.substr(pos + 1, (protocol - 1) - (pos + 1));
 
             replace_all(redirect, " ", "%20");
             replace_all(redirect, "\t", "%09");
+            info.log() << "URI containing illegal spaces, redirecting with " << MovedPermanently << " to '" << redirect
+                       << "'" << std::endl;
             throw HttpError(MovedPermanently, redirect); // message is the redirect location
         }
         _target = in.substr(pos + 1, (protocol - 1) - (pos + 1)); // if origin form, nothing to do because target
@@ -109,13 +122,17 @@ void ClientRequest::parse_target(const std::string &in, size_t pos) {
     if (host == 0) { // absolute form
         size_t host_end = _target.find("/", 7);
 
-        if (host_end == std::string::npos || host_end == 7)
+        if (host_end == std::string::npos || host_end == 7) {
+            info.log() << "Absolute form error, sending " << BadRequest << std::endl;
             throw HttpError(BadRequest);
+        }
         _header["Host"] = _target.substr(7, host_end - 7);
         _target         = _target.substr(host_end, _target.length() - host_end);
         _absolute_form  = true;
-    } else if (_target[0] != '/') // not origin form
+    } else if (_target[0] != '/') { // not origin form
+        info.log() << "Origin not starting with /, sending " << BadRequest << std::endl;
         throw HttpError(BadRequest);
+    }
 }
 
 /**
@@ -130,11 +147,11 @@ void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_
     size_t sep = in.find_first_of(":", begin);
     size_t ows = in.find_first_of(" \t", begin);
 
-    if (ows < sep || sep > end || sep <= begin || sep == std::string::npos)
+    if (ows < sep || sep > end || sep <= begin || sep == std::string::npos) {
+        info.log() << "Bad header line, sending " << BadRequest << std::endl;
         throw HttpError(BadRequest);
-
+    }
     std::string key = in.substr(begin, sep - begin);
-
     do {
         ows = in.find_first_of(" \t", sep + 1);
         sep++;
@@ -144,14 +161,16 @@ void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_
         end--;
     } while (ows == end); // end is last optional whistspace after this
     if (key == "Host") {
-        if (!_absolute_form && _header.find("Host") != _header.end())
+        if (!_absolute_form && _header.find("Host") != _header.end()) {
+            info.log() << "Duplicate header 'Host' while not in absolute form, sending " << BadRequest << std::endl;
             throw HttpError(BadRequest);
-        else if (_absolute_form)
+        } else if (_absolute_form)
             return;
     }
-    if (end + 1 <= sep)
+    if (end + 1 <= sep) {
+        info.log() << "Header '" << key << "' without value, sending " << BadRequest << std::endl;
         throw HttpError(BadRequest);
-    else if (_header.find(key) != _header.end())
+    } else if (_header.find(key) != _header.end())
         _header[key] += ", " + in.substr(sep, (end + 1) - sep);
     else
         _header[key] = in.substr(sep, (end + 1) - sep);
@@ -224,8 +243,8 @@ bool ClientRequest::parse_request_line(std::string &in) {
     }
     if ((sp = in.find("\n")) == in.npos) {
         error.log() << "Line ending not found while parsing request line. This should not happen as parse_request_line "
-                       "should be called only when a \\n is found in _buffer."
-                    << std::endl;
+                       "should be called only when a \\n is found in _buffer. Sending "
+                    << BadRequest << std::endl;
         _status = BadRequest;
         return false;
     }
@@ -241,12 +260,15 @@ bool ClientRequest::parse_request_line(std::string &in) {
   i.e. when the program should stop to call this function.
   */
 bool ClientRequest::parse_headers(std::string &in) {
-    try {
+    try { // cause exception can happen inside functions
         if (init_header(in)) {
             if (!isError(_status) && _header.find("Host") == _header.end()) // only check when done parsing headers
+            {
+                info.log() << "Missing required 'Host' header after parsing, sending " << BadRequest << std::endl;
                 _status = BadRequest;
+            }
             if (isError(_status))
-                throw HttpError(_status);
+                throw HttpError(_status); // yeah its weird
             parse_port();
             return true;
         }
@@ -265,7 +287,7 @@ bool ClientRequest::parse_headers(std::string &in) {
   */
 bool ClientRequest::init_body(std::string &buffer) {
     if (_body) {
-        warn.log() << "Trying to init_body() when a body is already there." << std::endl;
+        warn.log() << "Trying to init_body() when a body is already there. Re-initializing body." << std::endl;
         delete _body;
     }
     if (_header.find("Transfer-Encoding") != _header.end()) {
@@ -276,6 +298,11 @@ bool ClientRequest::init_body(std::string &buffer) {
         _body        = new BodyLength(_socket, buffer, _header["Content-Length"]);
     } else { // no body
         _body_exists = false;
+        if (buffer.length() != 0)
+        {
+            info.log() << "Body detected while no length is provided, sending " << LengthRequired << std::endl;
+            _status = LengthRequired; // bc theres something that looks like a body but that is not...
+        }
     }
     return _body_exists;
 }

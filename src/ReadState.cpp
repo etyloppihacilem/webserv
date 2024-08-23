@@ -12,6 +12,7 @@
 #include "ClientRequest.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
+#include "HttpUtils.hpp"
 #include "Logger.hpp"
 #include "ProcessState.hpp"
 #include "StringUtils.hpp"
@@ -22,11 +23,11 @@
 #include <ostream>
 #include <unistd.h>
 
-ReadState::ReadState(int socket) : ProcessState(socket), _buffer(), _in_progress(0), _parse_state(request_line) {}
+ReadState::ReadState(int socket) : ProcessState(socket), _buffer(), _request(0), _parse_state(request_line) {}
 
 ReadState::~ReadState() {
-    if (_in_progress)
-        delete _in_progress;
+    if (_request)
+        delete _request;
 }
 
 /**
@@ -41,9 +42,11 @@ t_state ReadState::process() {
     if (_state == waiting) {
         int a;
 
-        if ((a = read(_socket, buffer, BUFFER_SIZE)) < 0)
-            error.log() << "Reading into socket " << _socket << " resulted in error: " << strerror(errno) << std::endl;
-        else if (a == 0) {
+        if ((a = read(_socket, buffer, BUFFER_SIZE)) < 0) {
+            error.log() << "Reading into socket " << _socket << " resulted in error: " << strerror(errno)
+                        << ", sending " << InternalServerError << std::endl;
+            return return_error();
+        } else if (a == 0) {
             // this should not happen.
             warn.log() << "Reading nothing into socket " << _socket << ", closing connection with " << BadRequest
                        << std::endl;
@@ -63,23 +66,34 @@ t_state ReadState::process_buffer(char *buffer) {
     _buffer += buffer;
     sanitize_HTTP_string(_buffer, 0);
     if (_state == waiting) {
-        if (_in_progress == 0)
-            _in_progress = new ClientRequest(_socket);
+        if (_request == 0)
+            _request = new ClientRequest(_socket);
+        // length check
         while (_parse_state != body && (eol = _buffer.find("\n")) != _buffer.npos) {
-            if (_parse_state == request_line) {
-                if (!_in_progress->parse_request_line(_buffer))
+            if (_parse_state == request_line && eol == 0)
+                _buffer = _buffer.substr(1, _buffer.length() - 1); // to discard leading lines of request
+            else if (_parse_state == request_line) {
+                if (!_request->parse_request_line(_buffer))
                     return _state = ready; // ready to return error
                 _parse_state = headers;    // next state
             } else if (_parse_state == headers) {
-                if (_in_progress->parse_headers(_buffer)) {
-                    if (isError(_in_progress->get_status()))
+                if (_request->parse_headers(_buffer)) {
+                    if (isError(_request->get_status()))
                         return _state = ready;
                     _parse_state = body;
                 }
             }
         }
+        if (_buffer.length() > MAX_REQUEST_LINE) {
+            _buffer = "";
+            shrink_to_fit(_buffer); // because it is large
+            info.log() << "MAX_REQUEST_LINE was reached while parsing "
+                       << (_parse_state == request_line ? "request_line" : "headers") << ", sending " << EntityTooLarge
+                       << std::endl;
+            return_error(EntityTooLarge);
+        }
         if (_parse_state == body) {
-            _in_progress->init_body(_buffer);
+            _request->init_body(_buffer);
             _parse_state = finished;
             _state       = ready;
         }
@@ -87,33 +101,33 @@ t_state ReadState::process_buffer(char *buffer) {
     return _state;
 }
 
-t_state ReadState::return_error() {
-    if (_in_progress)
-        delete _in_progress;
-    _in_progress  = new ClientRequest(_socket, BadRequest, 80); // TODO: trouver si le port est necessaire et
-    return _state = ready;                                      // mettre le bon le cas echeant.
+t_state ReadState::return_error(HttpCode code) {
+    if (_request)
+        delete _request;
+    _request      = new ClientRequest(_socket, code, 80); // TODO: trouver si le port est necessaire et
+    return _state = ready;                                // mettre le bon le cas echeant.
 }
 
 /**
   Returns pointer on generated request
   */
 ClientRequest *ReadState::get_client_request() {
-    ClientRequest *ret = _in_progress;
-    if (_in_progress == 0)
+    ClientRequest *ret = _request;
+    if (_request == 0)
         error.log() << "Getting a non existing ClientRequest." << std::endl;
     if (_state != ready)
         warn.log() << "ReadState: getting ClientRequest that is not totally generated. As a result, it will not be "
                       "removed from ReadState object and may be deleted at its destruction."
                    << std::endl;
     else {
-        _in_progress = 0;
-        _state       = waiting;
+        _request = 0;
+        _state   = waiting;
     }
     return ret;
 }
 
 void ReadState::save_mem() {
     shrink_to_fit(_buffer);
-    if (_in_progress)
-        _in_progress->save_mem();
+    if (_request)
+        _request->save_mem();
 }

@@ -182,8 +182,10 @@ void BodyChunk::init_chunk() { // discard until a size line is found
         std::stringstream tmp;
 
         tmp << std::hex << _buffer.substr(0, std::distance(_buffer.begin(), i));
-        if (!(tmp >> _bytes_remaining))
+        if (!(tmp >> _bytes_remaining)) {
+            info.log() << "Invalid chunk detected in body, sending " << BadRequest << std::endl;
             throw HttpError(BadRequest); // invalid chunk
+        }
     }
     _buffer = _buffer.substr(sp + 2, _buffer.length() - (sp + 2));
     if (!_bytes_remaining) { // if last byte

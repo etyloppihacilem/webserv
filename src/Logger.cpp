@@ -22,16 +22,18 @@
 
 Logger::Logger(std::ostream &os, std::string level, std::string color, size_t width) : _enabled(true) {
     _dev_null.setstate(std::ios_base::badbit); // set /dev/null to be /dev/null
-    width += 3;
-    _level = "[" + level + "]";
-    _width = (width <= _level.length()) ? _level.length() : width;
-    if (os.rdbuf() == std::cout.rdbuf() || os.rdbuf() == std::cerr.rdbuf()) {
-        _width += color.length() + sizeof(_RESET) - 1; // if log to stdout or stderr enable color
-        _level  = "[" + color + level + _RESET "] ";
-    }
+    width -= level.length();
+    _level = "[ ";
+    for (size_t i = 0; i < width; i++)
+        _level += " ";
+    if (os.rdbuf() == std::cout.rdbuf() || os.rdbuf() == std::cerr.rdbuf())
+        _level += color + level + _RESET;
+    else
+        _level += level;
+    _level += " ]";
     _os.copyfmt(os);
     _os.clear(os.rdstate());
-    _os.basic_ios<char>::rdbuf(os.rdbuf());
+    _os.basic_ios< char >::rdbuf(os.rdbuf());
 }
 
 Logger::~Logger() {}
@@ -60,7 +62,7 @@ Logger::~Logger() {}
 // }
 
 std::ostream &operator<<(std::ostream &os, const HttpCode code) {
-    os << static_cast<int>(code) << " " << status_string(code);
+    os << static_cast< int >(code) << " " << status_string(code);
     return os;
 }
 
@@ -70,10 +72,10 @@ std::ofstream &Logger::log() {
     time_t now = time(0);
     tm    *ltm = localtime(&now);
 
-    _os << std::dec << std::setw(_width) << std::setfill(' ') << std::left << _level << std::right << std::setw(2)
-        << std::setfill('0') << ltm->tm_hour << ":" << std::setw(2) << std::setfill('0') << ltm->tm_min << ":"
-        << std::setw(2) << std::setfill('0') << ltm->tm_sec << " " << std::setw(2) << std::setfill('0') << ltm->tm_mday
-        << "/" << std::setw(2) << std::setfill('0') << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year << ": ";
+    _os << std::dec << std::setfill(' ') << std::left << _level << std::right << std::setw(2) << std::setfill('0')
+        << ltm->tm_hour << ":" << std::setw(2) << std::setfill('0') << ltm->tm_min << ":" << std::setw(2)
+        << std::setfill('0') << ltm->tm_sec << " " << std::setw(2) << std::setfill('0') << ltm->tm_mday << "/"
+        << std::setw(2) << std::setfill('0') << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year << ": ";
     return _os;
 }
 
@@ -110,6 +112,7 @@ bool Logger::is_forced() {
 std::ofstream Logger::_dev_null;
 bool          Logger::_force = false;
 
-Logger info(std::cerr, "  INFO    ", _BLUE, 5);
-Logger warn(std::cerr, "  WARNING ", _YELLOW, 5);
-Logger error(std::cerr, "  ERROR   ", _RED, 5);
+Logger info(std::cerr, "INFO", _BLUE, 8);
+Logger warn(std::cerr, "WARNING", _YELLOW, 8);
+Logger error(std::cerr, "ERROR", _RED, 8);
+Logger fatal(std::cerr, "FATAL", _PURPLE _BLINK, 8);

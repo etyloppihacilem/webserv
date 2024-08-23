@@ -8,12 +8,13 @@
 
 ##################################################################################################################### */
 
+#include "ClientRequestTotal_test.hpp"
 #include "ClientRequest.hpp"
 #include "HttpError.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
+#include "HttpUtils.hpp"
 #include "Logger.hpp"
-#include "ProcessState.hpp"
 #include "ReadState.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -21,38 +22,8 @@
 #include <cstddef>
 #include <map>
 #include <string>
-#include <tuple>
 #include <unistd.h>
 #include <vector>
-
-typedef enum e_total_index {
-    tname = 0,
-    tdata,
-    ttarget,
-    tmethod,
-    thavebody,
-    tbody,
-    theaders,
-    tstatus,
-    tport,
-    tqs,
-    tbadbody,
-} t_ti;
-
-typedef std::tuple<
-    std::string,                          ///< Name
-    std::string,                          ///< Request data (including body and all stuff)
-    std::string,                          ///< Target
-    HttpMethod,                           ///< Method
-    bool,                                 ///< HaveBody
-    std::string,                          ///< Body after parsing (will be used to test Body objects)
-    std::map< std::string, std::string >, ///< Headers
-    HttpCode,                             ///< Status
-    int,                                  ///< port ???
-    std::string,                          ///< QueryString (things after ?)
-    bool                                  ///< Should Body Bad Request ?
-    >
-    TotalRequest;
 
 std::vector< TotalRequest > TotalRequestData = {
     {
@@ -518,61 +489,87 @@ std::vector< TotalRequest > TotalRequestData = {
         "hihi=ahah",
         false,
     },
-};
-
-class TotalRequestFixture : public ::testing::TestWithParam< TotalRequest > {
-    public:
-        TotalRequestFixture() : _test(0), _request(0), _fd{ 0, 0 } {}
-
-        void SetUp() override {
-            if (pipe(_fd))
-                GTEST_FATAL_FAILURE_("Pipe error");
-
-            const std::string &raw = std::get< tdata >(GetParam());
-
-            size_t i = 0;
-
-            if ((i = write(_fd[1], raw.c_str(), raw.length())) < 0)
-                GTEST_FATAL_FAILURE_("Write in pipe failure");
-            if (i != raw.length())
-                GTEST_FATAL_FAILURE_("Partial write in pipe");
-            close(_fd[1]);
-            _test     = new ReadState(_fd[0]);
-            _fd_check = _fd[0];
-
-            if (std::get< tname >(GetParam()) == "Bad_line_terminator_r")
-                warn.disable(); // because reading nothing into socket is normal
-            i = 0;
-            while ((_test->process() == waiting) && (i < 100))
-                i++;
-            warn.enable();
-            if (i >= 100)
-                GTEST_FATAL_FAILURE_("Infinite loop detected.");
-            // if (_test->get_state() == s_error)
-            //     GTEST_SKIP() << "Really Bad request successfully ignored";
-            _request = _test->get_client_request();
-            ASSERT_NE(_request, (void *) 0);
-        }
-
-        void TearDown() override {
-            if (_test)
-                delete _test;
-            if (_request)
-                delete _request;
-            // if (_request)
-            //     delete _request;
-            if (_fd[0] != 0)
-                close(_fd[0]);
-        }
-
-    protected:
-        ReadState     *_test;
-        ClientRequest *_request;
-        int            _fd_check;
-
-    private:
-        int         _fd[2];
-        std::string _buffer;
+    {
+        "leading_CRLF",
+        "\r\nGET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/helloworld.html",
+        GET,
+        false,
+        "",
+        {
+            { "Host", "127.0.0.1" },
+            { "Name", "fireTesting/1.0" },
+        },
+        OK,
+        80,
+        "hihi=ahah",
+        false,
+    },
+    {
+        "leading_CRLF2",
+        "\r\n\r\nGET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/helloworld.html",
+        GET,
+        false,
+        "",
+        {
+            { "Host", "127.0.0.1" },
+            { "Name", "fireTesting/1.0" },
+        },
+        OK,
+        80,
+        "hihi=ahah",
+        false,
+    },
+    {
+        "Request_line_limit",
+        "GET " REQUEST_LINE_LIMIT_STRING " HTTP/1.1\r\nHost: 127.0.0.1\r\nName: "
+        "fireTesting/1.0\r\n\r\n",
+        REQUEST_LINE_LIMIT_STRING,
+        GET,
+        false,
+        "",
+        {
+            { "Host", "127.0.0.1" },
+            { "Name", "fireTesting/1.0" },
+        },
+        OK,
+        80,
+        "hihi=ahah",
+        false,
+    },
+    {
+        "Request_line_too_long",
+        "GET  HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/helloworld.html",
+        GET,
+        false,
+        "",
+        {
+            { "Host", "127.0.0.1" },
+            { "Name", "fireTesting/1.0" },
+        },
+        OK,
+        80,
+        "hihi=ahah",
+        false,
+    },
+    {
+        "Header_too_long",
+        "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
+        "/helloworld.html",
+        GET,
+        false,
+        "",
+        {
+            { "Host", "127.0.0.1" },
+            { "Name", "fireTesting/1.0" },
+        },
+        OK,
+        80,
+        "hihi=ahah",
+        false,
+    },
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -632,22 +629,22 @@ TEST_P(TotalRequestFixture, BodyTest) {
     if (std::get< tbadbody >(GetParam())) {
         EXPECT_THROW(
             {
-                while (!body->is_done() && i++ < 100) {
+                while (!body->is_done() && i++ < MAX_REQUEST_LINE) {
                     body->read_body();
                     body->get();
                 }
             },
             HttpError
         );
-        if (i >= 100)
+        if (i >= MAX_REQUEST_LINE)
             FAIL() << "Infinite loop in body getter, Body tests should fail too.";
         return;
     }
-    while (!body->is_done() && i++ < 100) {
+    while (!body->is_done() && i++ < MAX_REQUEST_LINE) {
         body->read_body();
         body->get();
     }
-    if (i >= 100)
+    if (i >= MAX_REQUEST_LINE)
         FAIL() << "Infinite loop in body getter, Body tests should fail too.";
 
     auto body_content = body->get();

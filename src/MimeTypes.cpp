@@ -63,7 +63,7 @@ MimeTypes::MimeTypes(std::string path) : _done(false), _types() {
 
 MimeTypes::MimeTypes(MimeTypes &other) : _done(), _types() {
     (void) other;
-    error.log() << "FATAL you should not duplicate any MimeTypes object." << std::endl;
+    fatal.log() << "You should not duplicate any MimeTypes object." << std::endl;
 }
 
 MimeTypes::~MimeTypes() {}

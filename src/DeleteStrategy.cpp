@@ -16,6 +16,7 @@
 #include "StringUtils.hpp"
 #include <cerrno>
 #include <cstdio>
+#include <cstring>
 #include <ostream>
 #include <string>
 
@@ -32,13 +33,20 @@ bool DeleteStrategy::build_response() {
         return _built;
     }
     if (std::remove(_location.c_str())) {
-        if (errno == ENOENT)
-            throw HttpError(NotFound);
-        if (errno == EACCES)
-            throw HttpError(Forbidden);
-        error.log() << "Unknown error while deleting " << _location << ", throwing " << InternalServerError
-                    << std::endl;
-        throw HttpError(InternalServerError);
+        switch (errno) {
+            case ENOENT:
+                info.log() << "DeleteStrategy: could not remove file '" << _location << "' " << strerror(errno)
+                           << ", sending " << NotFound << std::endl;
+                throw HttpError(NotFound);
+            case EACCES:
+                info.log() << "DeleteStrategy: could not remove file '" << _location << "' " << strerror(errno)
+                           << ", sending " << Forbidden << std::endl;
+                throw HttpError(Forbidden);
+            default:
+                error.log() << "DeleteStrategy: Unknown error while removing '" << _location << "' " << strerror(errno)
+                            << ", sending " << InternalServerError << std::endl;
+                throw HttpError(InternalServerError);
+        }
     }
     _response.set_code(NoContent); // 204, everything is done and there's no content
     _done         = true;

@@ -12,9 +12,11 @@
 #include "Body.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
+#include "Logger.hpp"
 #include "todo.hpp"
 #include <cctype>
 #include <cstddef>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <unistd.h>
@@ -24,14 +26,19 @@ BodyLength::BodyLength(int socket, std::string &buffer, std::string length) :
     _length(0),
     _read_length(_buffer.length()) {
     for (std::string::iterator i = length.begin(); i != length.end(); i++)
-        if (!isdigit(*i))
+        if (!isdigit(*i)) {
+            info.log() << "BodyLength: Invalid length detected (NaN), sending " << BadRequest << std::endl;
             throw HttpError(BadRequest); // invalid length
+        }
 
     std::stringstream tmp(length);
 
-    if (!(tmp >> _length))
+    if (!(tmp >> _length)) {
+        info.log() << "BodyLength: Converting length '" << length << "' to number failed, sending " << BadRequest << std::endl;
         throw HttpError(BadRequest); // other invalid length
+    }
     _total = _length;
+    // TODO: implementer MaxBodySize
 }
 
 BodyLength::~BodyLength() {}

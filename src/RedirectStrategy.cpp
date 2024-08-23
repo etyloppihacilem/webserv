@@ -23,7 +23,8 @@ RedirectStrategy::RedirectStrategy(const std::string &location, HttpCode code) :
     _location(location),
     _code(code) {
     if (!isRedirection(code)) {
-        error.log() << "Trying to redirect with a non redirect code : " << code << std::endl;
+        error.log() << "RedirectStrategy: Trying to redirect with a non redirect code : " << code << ", sending "
+                    << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     }
 }
@@ -33,19 +34,19 @@ RedirectStrategy::RedirectStrategy(const std::string &location, const std::strin
     _location(location),
     _code(code) {
     if (!isRedirection(code)) {
-        error.log() << "Trying to redirect with a non redirect code : " << code << std::endl;
+        error.log() << "RedirectStrategy: Trying to redirect with a non redirect code : " << code << ", sending "
+                    << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     }
-    if (query_string != "") {
+    if (query_string != "")
         _location += (*query_string.rbegin() == '?' ? "" : "?") + query_string;
-    }
 }
 
 RedirectStrategy::~RedirectStrategy() {}
 
 bool RedirectStrategy::build_response() {
     if (_built) {
-        warn.log() << "RedirectStrategy : trying to build response, but is already built." << std::endl;
+        warn.log() << "RedirectStrategy: trying to build response, but is already built." << std::endl;
         return _built;
     }
     _response.add_header("Location", _location);

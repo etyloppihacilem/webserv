@@ -22,6 +22,6 @@ int main(int ac, char **av) {
     warn.log() << "warn message -> " << "hihi " << ImATeapot << std::endl;
     error.log() << "error message -> " << (void *) "mais" << std::endl;
     mem.allocate(); // allocating memory
-    info.log() << std::hex << 42 << std::endl;
+    fatal.log() << std::hex << 42 << std::endl;
     return 0;
 }

@@ -19,6 +19,7 @@
 #include "StringUtils.hpp"
 #include <algorithm>
 #include <cerrno>
+#include <cstring>
 #include <features.h>
 #include <ostream>
 #include <set>
@@ -63,35 +64,50 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
 
         const std::set< HttpMethod > &methods = route.getMethods();
 
+        _route     = route.getLocation();
         _is_get    = std::find(methods.begin(), methods.end(), GET) != methods.end();
         _is_post   = std::find(methods.begin(), methods.end(), POST) != methods.end();
         _is_delete = std::find(methods.begin(), methods.end(), DELETE) != methods.end();
         // _is_put  = std::find(methods.begin(), methods.end(), PUT) != methods.end(); // not implemented yet
         if (stat(_path.c_str(), &buf) != 0) {
-            if (errno == ENOENT || errno == ENOTDIR) {
-                if (!_is_post)                        // post could create a non existing resource.
-                    throw HttpError(NotFound);        // there's nothing to be found
-                _autoindex = route.hasAutoindexSet(); // if nothing else found
-                return;                               // we do not know if it is a dir
+            switch (errno) {
+                case ENOENT:
+                case ENOTDIR:
+                    if (!_is_post) { // post could create a non existing resource.
+                        info.log() << "Location: resource '" << target
+                                   << "' not found and POST method is not allowed, sending " << NotFound << std::endl;
+                        throw HttpError(NotFound); // there's nothing to be found
+                    }
+                    _autoindex = route.hasAutoindexSet(); // if nothing else found
+                    return;                               // we do not know if it is a dir
+                case EACCES:
+                    info.log() << "Location: resource '" << target << "' " << strerror(errno) << ", sending "
+                               << Forbidden << std::endl;
+                    throw HttpError(Forbidden);
+                case ENAMETOOLONG:
+                    info.log() << "Location: resource '" << target << "' " << strerror(errno) << ", sending "
+                               << Forbidden << std::endl;
+                    throw HttpError(URITooLong);
+                default:
+                    error.log() << "Location: resource '" << target << "' at location '" << _path << "' using route '"
+                                << route.getLocation() << "'" << strerror(errno) << ", sending " << InternalServerError
+                                << std::endl;
+                    throw HttpError(InternalServerError);
             }
-            if (errno == EACCES)
-                throw HttpError(Forbidden);
-            if (errno == ENAMETOOLONG)
-                throw HttpError(URITooLong);
-            error.log() << "Stat failed to check target '" << target << "' using route '" << route.getLocation()
-                        << "' at location (path) '" << _path << "'." << std::endl;
-            throw HttpError(InternalServerError);
         }
-        if (S_ISDIR(buf.st_mode)) {      // in case target is a directory
+        if (S_ISDIR(buf.st_mode)) {     // in case target is a directory
             if (find_index(route, buf)) // if index file is found
                 return;
             _autoindex = route.hasAutoindexSet(); // if nothing else found
-        } else {                                // in case target is anything but a directory
-            _is_file = true;                    // not a dir
+        } else {                                  // in case target is anything but a directory
+            _is_file = true;                      // not a dir
             if (route.hasCgiExtensionSet() && extract_extension(_path) == route.getCgiExtension())
                 setup_cgi(route);
         }
     } catch (Server::RouteNotFoundWarn &e) {
+        fatal.log() << "Location: Route not found. Should NEVER happen, this means Server object is broken and "
+                       "default Route '/' do not exist. Sending "
+                    << InternalServerError << std::endl;
         throw HttpError(InternalServerError); // this is to prevent use of route out of scope if not defined
     }
 } // 44 lines its a bit better
@@ -222,6 +238,11 @@ bool Location< ServerClass, RouteClass >::is_redirect() const {
 template < class ServerClass, class RouteClass >
 HttpCode Location< ServerClass, RouteClass >::get_status_code() const {
     return _status_code;
+}
+
+template < class ServerClass, class RouteClass >
+const std::string &Location< ServerClass, RouteClass >::get_route() const {
+    return _route;
 }
 
 template < class ServerClass, class RouteClass >

@@ -52,6 +52,7 @@ enum HttpCode {
     PreconditionFailed            = 412,
     ContentTooLarge               = 413,
     PayloadTooLarge               = 413,
+    EntityTooLarge                = 413,
     URITooLong                    = 414,
     UnsupportedMediaType          = 415,
     RangeNotSatisfiable           = 416,

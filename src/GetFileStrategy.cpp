@@ -18,6 +18,7 @@
 #include "todo.hpp"
 #include <cerrno>
 #include <cstddef>
+#include <cstring>
 #include <fstream>
 #include <ios>
 #include <new>
@@ -50,24 +51,37 @@ bool GetFileStrategy::build_response() {
         struct stat buf;
 
         if (stat(_location.c_str(), &buf)) {
-            if (errno == ENOENT)
-                throw HttpError(NotFound);
-            if (errno == EACCES)
-                throw HttpError(Forbidden);
-            if (errno == ENOMEM)
-                throw std::bad_alloc();
-            if (errno == ENOTDIR)
-                throw HttpError(Forbidden, "DIR"); // this is to tell the difference between directory forbidden and no
-                                                   // directory forbidden
-            if (errno == ENAMETOOLONG)
-                throw HttpError(URITooLong);
-            throw HttpError(InternalServerError);
+            switch (errno) {
+                case ENOENT:
+                    info.log() << "GetFileStrategy: cannot open file '" << _location << "' " << strerror(errno)
+                               << ", sending " << NotFound << std::endl;
+                    throw HttpError(NotFound);
+                case EACCES:
+                    info.log() << "GetFileStrategy: cannot open file '" << _location << "' " << strerror(errno)
+                               << ", sending " << Forbidden << std::endl;
+                    throw HttpError(Forbidden);
+                case ENOMEM:
+                    throw std::bad_alloc();
+                case ENOTDIR:
+                    info.log() << "GetFileStrategy: cannot open file '" << _location << "' " << strerror(errno)
+                               << ", sending " << Forbidden << std::endl;
+                    throw HttpError(Forbidden, "DIR"); // this is to tell the difference between directory forbidden and
+                                                       // no directory forbidden
+                case ENAMETOOLONG:
+                    info.log() << "GetFileStrategy: cannot open file '" << _location << "' " << strerror(errno)
+                               << ", sending " << URITooLong << std::endl;
+                    throw HttpError(URITooLong);
+                default:
+                    warn.log() << "GetFileStrategy: cannot open file '" << _location << "' " << strerror(errno)
+                               << ", sending " << InternalServerError << std::endl;
+                    throw HttpError(InternalServerError);
+            }
         }
         _estimated_size = buf.st_size;
     } // saving stack
     _file.open(_location.c_str(), std::fstream::binary | std::ios_base::in);
     if (!_file.is_open()) {
-        error.log() << "Undetected error opening file " << _location << ". Sending " << InternalServerError
+        error.log() << "GetFileStrategy: Undetected error opening file " << _location << ". Sending " << InternalServerError
                     << std::endl;
         throw HttpError(InternalServerError);
     }
@@ -87,7 +101,7 @@ bool GetFileStrategy::fill_buffer(std::string &buffer, size_t size) {
     char buf[BUFFER_SIZE + 1] = { 0 }; // init with 0
 
     if (!_file.is_open()) {
-        error.log() << "File " << _location << " is read but not open." << std::endl;
+        error.log() << "GetFileStrategy: File " << _location << " is read but not open." << std::endl;
         throw HttpError(InternalServerError);
     }
     if (_done)

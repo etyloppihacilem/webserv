@@ -15,7 +15,9 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include <cerrno>
 #include <cstddef>
+#include <cstring>
 #include <fstream>
 #include <ostream>
 #include <string>
@@ -74,7 +76,8 @@ void UploadStrategy::init() {
     _file.close();
     _file.open(_location.c_str(), std::fstream::out | (_replace ? std::fstream::trunc : std::fstream::app));
     if (!_file.is_open()) {
-        error.log() << "Cannot open " << _location << " to upload. Sending " << Forbidden << std::endl;
+        error.log() << "UploadStrategy: cannot open " << _location << " to upload: " << strerror(errno) << ". Sending "
+                    << Forbidden << std::endl;
         throw HttpError(Forbidden);
     }
     _init = true;

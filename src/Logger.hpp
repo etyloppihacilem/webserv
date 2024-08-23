@@ -51,7 +51,6 @@ class Logger : public std::ostream {
         static bool          _force;    ///< force log even if disabled
         std::string          _level;    ///< Log level
         std::ofstream        _os;       ///< Out stream
-        int                  _width;    ///< Width to align level
         bool                 _enabled;  ///< Tells if test is enabled
 };
 
@@ -60,5 +59,6 @@ std::ostream &operator<<(std::ostream &os, const HttpCode code);
 extern Logger info;
 extern Logger warn;
 extern Logger error;
+extern Logger fatal;
 
 #endif // INCLUDE_SRC_LOGGER_HPP_
