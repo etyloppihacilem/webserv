@@ -64,7 +64,7 @@ BitFieldColonSpacing: Both
 BraceWrapping:
   AfterCaseLabel:  false
   AfterClass:      false
-  AfterControlStatement: Never
+  AfterControlStatement: Always
   AfterEnum:       false
   AfterExternBlock: false
   AfterFunction:   false
@@ -76,7 +76,7 @@ BraceWrapping:
   BeforeElse:      false
   BeforeLambdaBody: false
   BeforeWhile:     false
-  IndentBraces:    true
+  IndentBraces:    false
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: true

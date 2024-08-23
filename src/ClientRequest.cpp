@@ -166,7 +166,6 @@ bool ClientRequest::init_header(std::string &in) {
 
     while (end != in.npos) {
         if (end == 0) {
-            // TODO: get this check out of this function.
             if (in.length() == 1)
                 in = "";
             else
@@ -242,12 +241,17 @@ bool ClientRequest::parse_request_line(std::string &in) {
   i.e. when the program should stop to call this function.
   */
 bool ClientRequest::parse_headers(std::string &in) {
-    if (init_header(in)) {
-        if (!isError(_status) && _header.find("Host") == _header.end()) // only check when done parsing headers
-            _status = BadRequest;
-        if (isError(_status))
-            throw HttpError(_status);
-        parse_port();
+    try {
+        if (init_header(in)) {
+            if (!isError(_status) && _header.find("Host") == _header.end()) // only check when done parsing headers
+                _status = BadRequest;
+            if (isError(_status))
+                throw HttpError(_status);
+            parse_port();
+            return true;
+        }
+    } catch (HttpError &e) {
+        _status = e.get_code();
         return true;
     }
     return false;

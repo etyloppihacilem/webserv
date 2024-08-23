@@ -65,18 +65,17 @@ t_state ReadState::process_buffer(char *buffer) {
     if (_state == waiting) {
         if (_in_progress == 0)
             _in_progress = new ClientRequest(_socket);
-        if ((eol = _buffer.find("\n")) != _buffer.npos) {
+        while (_parse_state != body && (eol = _buffer.find("\n")) != _buffer.npos) {
             if (_parse_state == request_line) {
                 if (!_in_progress->parse_request_line(_buffer))
                     return _state = ready; // ready to return error
                 _parse_state = headers;    // next state
             } else if (_parse_state == headers) {
-                try {
-                    if (_in_progress->parse_headers(_buffer))
-                        _parse_state = body;
-                } catch (HttpError &e) {
-                    return _state = ready; // ready to return on error
-                };
+                if (_in_progress->parse_headers(_buffer)) {
+                    if (isError(_in_progress->get_status()))
+                        return _state = ready;
+                    _parse_state = body;
+                }
             }
         }
         if (_parse_state == body) {

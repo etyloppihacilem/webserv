@@ -84,16 +84,12 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
                 _request = new ClientRequest(0);
                 std::string a = sanitize_HTTP_string(buf);
                 _request->parse_request_line(a); // as everything is in buff, no call to read_body() is never needed
-                try {
-                    _request->parse_headers(buf);
-                } catch (HttpError &e) {
-                    ; // nothing this is absolutely normal
-                };
+                _request->parse_headers(a);
             } catch (std::exception &e) {
                 FAIL() << "Could not build request." << e.what();
             }
             if (_request->get_status() != OK)
-                FAIL() << "_request has error !";
+                FAIL() << "_request has error ! (" << _request->get_status() << ")";
             try {
                 _state = new ResponseBuildState< FakeServer, FakeRoute >(0, _request, _server);
             } catch (std::exception &e) {
