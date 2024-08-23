@@ -14,6 +14,7 @@
 #include "HttpError.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
+#include "Logger.hpp"
 #include "StringUtils.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -144,6 +145,7 @@ TEST_P(ClientRequestTestTarget, ParseTargetTest) {
     params[2] = tmp.c3;
     line     += params[0];
     if (params[1] == "BadRequest") {
+        info.disable();
         EXPECT_THROW(
             {
                 try {
@@ -157,7 +159,9 @@ TEST_P(ClientRequestTestTarget, ParseTargetTest) {
             },
             HttpError
         );
+        info.enable();
     } else if (params[1] == "URITooLong") {
+        info.disable();
         EXPECT_THROW(
             {
                 try {
@@ -171,7 +175,9 @@ TEST_P(ClientRequestTestTarget, ParseTargetTest) {
             },
             HttpError
         );
+        info.enable();
     } else if (params[1] == "MovedPermanently") {
+        info.disable();
         EXPECT_THROW(
             {
                 try {
@@ -186,6 +192,7 @@ TEST_P(ClientRequestTestTarget, ParseTargetTest) {
             },
             HttpError
         );
+        info.enable();
     } else {
         EXPECT_NO_THROW(test.parse_target(sanitize_HTTP_string(line), pos));
         EXPECT_EQ(test._target, params[1]);
@@ -214,6 +221,7 @@ TEST(ClientRequestTestSuite, ParseHeaderLineTestHost) {
 
     EXPECT_NO_THROW(test.parse_header_line(header, 0, header.length()));
     EXPECT_EQ(test._header["Host"], "www.example.com");
+    info.disable();
     EXPECT_THROW(
         {
             try {
@@ -227,6 +235,7 @@ TEST(ClientRequestTestSuite, ParseHeaderLineTestHost) {
         },
         HttpError
     );
+    info.enable();
     EXPECT_EQ(test._header["Host"], "www.example.com");
 }
 
@@ -238,12 +247,16 @@ TEST_P(ClientRequestTestParseHeader, ParseHeaderLineTest) {
     if (tmp.c3 == "BadRequest") {
         ASSERT_THROW(
             {
+                info.disable();
                 try {
                     test.parse_header_line(sanitize_HTTP_string(tmp.c1), begin, end);
+                    info.enable();
                 } catch (HttpError &e) {
                     EXPECT_EQ(e.get_code(), BadRequest);
+                    info.enable();
                     throw;
                 } catch (std::exception &e) {
+                    info.enable();
                     throw;
                 }
             },
@@ -274,8 +287,10 @@ TEST_P(ClientRequestTestInitHeader, InitHeaderTest) {
 
     test.parse_request_line(a);
     if (tmp.error == BadRequest) {
+        info.disable();
         test.parse_headers(a);
         EXPECT_EQ(test.get_status(), BadRequest);
+        info.enable();
     } else {
         ASSERT_NO_THROW(test.parse_headers(a));
         EXPECT_THAT(test._header, ::testing::ContainerEq(tmp.headers));

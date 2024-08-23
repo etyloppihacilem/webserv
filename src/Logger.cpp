@@ -72,21 +72,21 @@ std::ofstream &Logger::log() {
     time_t now = time(0);
     tm    *ltm = localtime(&now);
 
-    _os << std::dec << std::setfill(' ') << std::left << _level << std::right << std::setw(2) << std::setfill('0')
-        << ltm->tm_hour << ":" << std::setw(2) << std::setfill('0') << ltm->tm_min << ":" << std::setw(2)
-        << std::setfill('0') << ltm->tm_sec << " " << std::setw(2) << std::setfill('0') << ltm->tm_mday << "/"
-        << std::setw(2) << std::setfill('0') << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year << ": ";
+    _os << _level << " " << std::right << std::setw(2) << std::setfill('0') << ltm->tm_hour << ":" << std::setw(2)
+        << std::setfill('0') << ltm->tm_min << ":" << std::setw(2) << std::setfill('0') << ltm->tm_sec << " "
+        << std::setw(2) << std::setfill('0') << ltm->tm_mday << "/" << std::setw(2) << std::setfill('0')
+        << 1 + ltm->tm_mon << "/" << 1900 + ltm->tm_year << ": ";
     return _os;
 }
 
 void Logger::enable() {
-    _enabled = true;
-    if (_force)
+    if (_force && !_enabled)
         log() << "Enabling this log. (force)" << std::endl;
+    _enabled = true;
 }
 
 void Logger::disable() {
-    if (_force)
+    if (_force && _enabled)
         log() << "Disabling this log. (force)" << std::endl;
     _enabled = false;
 }

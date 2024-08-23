@@ -154,17 +154,17 @@ bool GetIndexStrategy::build_response() {
 
             case EACCES:
                 info.log() << "GetIndexStrategy: cannot open directory '" << _location
-                           << "' permission denied, sending " << Forbidden;
+                           << "' permission denied, sending " << Forbidden << std::endl;
                 throw HttpError(Forbidden);
             case ENOENT:
                 info.log() << "GetIndexStrategy: cannot open directory '" << _location << "' " << strerror(errno)
-                           << ", sending " << NotFound;
+                           << ", sending " << NotFound << std::endl;
                 throw HttpError(NotFound);
             case ENOMEM:
                 throw std::bad_alloc(); // to begin memory recovery procedure
             default:
                 warn.log() << "GetIndexStrategy: cannot open directory '" << _location << "' " << strerror(errno)
-                           << ", sending " << InternalServerError << std::endl;
+                           << ", sending " << InternalServerError << std::endl << std::endl;
                 throw HttpError(InternalServerError);
         }
     }

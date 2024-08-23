@@ -81,7 +81,7 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
                 clean();
             std::string buf = std::get< tdata >(GetParam());
             try {
-                _request = new ClientRequest(0);
+                _request      = new ClientRequest(0);
                 std::string a = sanitize_HTTP_string(buf);
                 _request->parse_request_line(a); // as everything is in buff, no call to read_body() is never needed
                 _request->parse_headers(a);
@@ -135,9 +135,13 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
                 clean();
         }
 
-        static void TearDownTestSuite() { clean(); }
+        static void TearDownTestSuite() {
+            clean();
+            info.enable();
+        }
 
         static void SetUpTestSuite() {
+            info.disable();
             if (!filesystem_tests)
                 GTEST_SKIP();
             _server._routes["/"] = FakeRoute(

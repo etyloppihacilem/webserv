@@ -89,6 +89,10 @@ class TotalRequestFixture : public ::testing::TestWithParam< TotalRequest > {
             ASSERT_NE(_request, (void *) 0);
         }
 
+        static void TearDownTestSuite() { info.enable(); }
+
+        static void SetUpTestSuite() { info.disable(); }
+
         void TearDown() override {
             if (_test)
                 delete _test;
@@ -111,7 +115,7 @@ class TotalRequestFixture : public ::testing::TestWithParam< TotalRequest > {
 };
 
 #define REQUEST_LINE_LIMIT_STRING                                                                                      \
-    "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu" \
+    "/uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu" \
     "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu" \
     "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu" \
     "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu" \
