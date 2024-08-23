@@ -548,9 +548,8 @@ class TotalRequestFixture : public ::testing::TestWithParam< TotalRequest > {
             warn.enable();
             if (i >= 100)
                 GTEST_FATAL_FAILURE_("Infinite loop detected.");
-            if (_test->get_state() == s_error)
-                GTEST_SKIP() << "Really Bad request successfully ignored";
-            // ASSERT_TRUE(_test->process());
+            // if (_test->get_state() == s_error)
+            //     GTEST_SKIP() << "Really Bad request successfully ignored";
             _request = _test->get_client_request();
             ASSERT_NE(_request, (void *) 0);
         }
