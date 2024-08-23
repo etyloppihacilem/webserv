@@ -43,112 +43,178 @@ FakeServer ResponseBuildStateFixture::_server;
 // Do not include default server header in header verification list.
 // WARN: Do not test for CGI yet !! not implemented !!
 std::vector< d_rbs > ResponseBuildData = {
-    { "GET",
-      "GET /index.html HTTP/1.1\r\nHost: coucou\r\n\r\n",
-      tGetFileStrategy,
-      OK,
-      { { "Content-Type", "text/html" }, { "Content-Length", "102" } },
-      true,
-      "<body><h1>Coucou je suis heureux</h1><div>This file is there for test and demo purposes.</div></body>\n",
-      false, "/" },
-    { "GET_not_found",
-      "GET /indox.html HTTP/1.1\r\nHost: coucou\r\n\r\n",
-      tErrorStrategy,
-      NotFound,
-      { { "Content-Type", "text/html; charset=utf-8" }, { "Content-Length", "134" } },
-      true,
-      "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was automatically "
-      "generated.</div></body>",
-      false, "/" },
-    { "POST_create",
-      "POST /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
-      tUploadStrategy,
-      Created,
-      { { "Location", "/test/upload.txt" } },
-      false,
-      "",
-      true, "/test" },
-    { "DELETE",
-      "DELETE /test/delete.png HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
-      tDeleteStrategy,
-      NoContent,
-      {},
-      false,
-      "",
-      true, "/test" },
-    { "DELETE_not_found",
-      "DELETE /test/not_upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
-      tErrorStrategy,
-      NotFound,
-      { { "Content-Type", "text/html; charset=utf-8" }, { "Content-Length", "134" } },
-      true,
-      "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was automatically "
-      "generated.</div></body>",
-      false, "/test" },
-    { "redirect",
-      "GET /space_travel HTTP/1.1\r\nHost: coucou\r\n\r\n",
-      tRedirectStrategy,
-      MovedPermanently,
-      { { "Location", "/star_wars/milky_way.html" } },
-      false,
-      "",
-      false, "/space_travel" },
-    { "redirect_discarding",
-      "GET /space_travel/some/things HTTP/1.1\r\nHost: coucou\r\n\r\n",
-      tRedirectStrategy,
-      MovedPermanently,
-      { { "Location", "/star_wars/milky_way.html" } },
-      false,
-      "",
-      false, "/space_travel" },
-    { "redirect_append_nothing",
-      "GET /space_corridor HTTP/1.1\r\nHost: coucou\r\n\r\n",
-      tRedirectStrategy,
-      TemporaryRedirect,
-      { { "Location", "http://space_corridor.fr/" } },
-      false,
-      "",
-      false, "/space_corridor" },
-    { "redirect_append",
-      "GET /space_corridor/search/ici?ici=coucou HTTP/1.1\r\nHost: coucou\r\n\r\n",
-      tRedirectStrategy,
-      TemporaryRedirect,
-      { { "Location", "http://space_corridor.fr/search/ici?ici=coucou" } },
-      false,
-      "",
-      false, "/space_corridor" },
-    { "indexStrategy",
-      "GET /test HTTP/1.1\r\nHost: coucou\r\n\r\n",
-      tGetIndexStrategy,
-      OK,
-      { { "Content-Type", "text/html; charset=utf-8" }, { "Content-Length", "557" } },
-      true,
-      "<head></head><body><h1>/test/</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr><tr><td>DIR</td><td><a "
-      "href=\"/test/.\">.</a></td><td>0</td></tr><tr><td>DIR</td><td><a "
-      "href=\"/test/..\">..</a></td><td>0</td></tr><tr><td>REG</td><td><a "
-      "href=\"/test/upload_a.md\">upload_a.md</a></td><td>23</td></tr><tr><td>REG</td><td><a "
-      "href=\"/test/test.txt\">test.txt</a></td><td>33</td></tr><tr><td>REG</td><td><a "
-      "href=\"/test/delete.png\">delete.png</a></td><td>0</td></tr><tr><td>REG</td><td><a "
-      "href=\"/test/index.html\">index.html</a></td><td>11</td></tr></table></body>",
-
-      false , "/test"},
-    { "indexStrategy_not_found",
-      "GET /super/mais/non HTTP/1.1\r\nHost: coucou\r\n\r\n",
-      tErrorStrategy,
-      NotFound,
-      { { "Content-Type", "text/html; charset=utf-8" }, { "Content-Length", "134" } },
-      true,
-      "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was automatically "
-      "generated.</div></body>",
-      false, "/" },
-    { "python_route_only",
-      "GET /python HTTP/1.1\r\nHost: coucou\r\n\r\n",
-      tGetFileStrategy,
-      OK,
-      { { "Content-Type", "text/html" }, { "Content-Length", "6" } },
-      true,
-      "Hey:)\n",
-      false, "/python" },
+    {
+        "GET",
+        "GET /index.html HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        tGetFileStrategy,
+        OK,
+        {
+            { "Content-Type", "text/html" },
+            { "Content-Length", "102" },
+        },
+        true,
+        "<body><h1>Coucou je suis heureux</h1><div>This file is there for test and demo purposes.</div></body>\n",
+        false,
+        "/",
+    },
+    {
+        "GET_not_found",
+        "GET /indox.html HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        tErrorStrategy,
+        NotFound,
+        {
+            { "Content-Type", "text/html; charset=utf-8" },
+            { "Content-Length", "134" },
+        },
+        true,
+        "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was "
+        "automatically "
+        "generated.</div></body>",
+        false,
+        "/",
+    },
+    {
+        "POST_create",
+        "POST /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+        tUploadStrategy,
+        Created,
+        {
+            { "Location", "/test/upload.txt" },
+        },
+        false,
+        "",
+        true,
+        "/test",
+    },
+    {
+        "DELETE",
+        "DELETE /test/delete.png HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+        tDeleteStrategy,
+        NoContent,
+        {},
+        false,
+        "",
+        true,
+        "/test",
+    },
+    {
+        "DELETE_not_found",
+        "DELETE /test/not_upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+        tErrorStrategy,
+        NotFound,
+        {
+            { "Content-Type", "text/html; charset=utf-8" },
+            { "Content-Length", "134" },
+        },
+        true,
+        "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was "
+        "automatically "
+        "generated.</div></body>",
+        false,
+        "/test",
+    },
+    {
+        "redirect",
+        "GET /space_travel HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        tRedirectStrategy,
+        MovedPermanently,
+        {
+            { "Location", "/star_wars/milky_way.html" },
+        },
+        false,
+        "",
+        false,
+        "/space_travel",
+    },
+    {
+        "redirect_discarding",
+        "GET /space_travel/some/things HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        tRedirectStrategy,
+        MovedPermanently,
+        {
+            { "Location", "/star_wars/milky_way.html" },
+        },
+        false,
+        "",
+        false,
+        "/space_travel",
+    },
+    {
+        "redirect_append_nothing",
+        "GET /space_corridor HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        tRedirectStrategy,
+        TemporaryRedirect,
+        {
+            { "Location", "http://space_corridor.fr/" },
+        },
+        false,
+        "",
+        false,
+        "/space_corridor",
+    },
+    {
+        "redirect_append",
+        "GET /space_corridor/search/ici?ici=coucou HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        tRedirectStrategy,
+        TemporaryRedirect,
+        {
+            { "Location", "http://space_corridor.fr/search/ici?ici=coucou" },
+        },
+        false,
+        "",
+        false,
+        "/space_corridor",
+    },
+    {
+        "indexStrategy",
+        "GET /test HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        tGetIndexStrategy,
+        OK,
+        {
+            { "Content-Type", "text/html; charset=utf-8" },
+            { "Content-Length", "557" },
+        },
+        true,
+        "<head></head><body><h1>/test/</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr><tr><td>DIR</"
+        "td><td><a href=\"/test/.\">.</a></td><td>0</td></tr><tr><td>DIR</td><td><a "
+        "href=\"/test/..\">..</a></td><td>0</td></tr><tr><td>REG</td><td><a "
+        "href=\"/test/upload_a.md\">upload_a.md</a></td><td>23</td></tr><tr><td>REG</td><td><a "
+        "href=\"/test/test.txt\">test.txt</a></td><td>33</td></tr><tr><td>REG</td><td><a "
+        "href=\"/test/delete.png\">delete.png</a></td><td>0</td></tr><tr><td>REG</td><td><a "
+        "href=\"/test/index.html\">index.html</a></td><td>11</td></tr></table></body>",
+        false,
+        "/test",
+    },
+    {
+        "indexStrategy_not_found",
+        "GET /super/mais/non HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        tErrorStrategy,
+        NotFound,
+        {
+            { "Content-Type", "text/html; charset=utf-8" },
+            { "Content-Length", "134" },
+        },
+        true,
+        "<head><title>404 Error</title></head><body><h1>Error: 404 Not Found</h1><div>This error page was "
+        "automatically "
+        "generated.</div></body>",
+        false,
+        "/",
+    },
+    {
+        "python_route_only",
+        "GET /python HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        tGetFileStrategy,
+        OK,
+        {
+            { "Content-Type", "text/html" },
+            { "Content-Length", "6" },
+        },
+        true,
+        "Hey:)\n",
+        false,
+        "/python",
+    },
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -234,8 +300,8 @@ TEST_P(ResponseBuildStateFixture, BodyValue) {
 }
 
 TEST_P(ResponseBuildStateFixture, HaveCorrectRoot) {
-    const std::string &target = _request->_target;
-    std::string correct = std::get< troute >(GetParam());
+    const std::string &target  = _request->_target;
+    std::string        correct = std::get< troute >(GetParam());
 
     EXPECT_EQ(_server.getRoute(target).getLocation(), correct);
 }
