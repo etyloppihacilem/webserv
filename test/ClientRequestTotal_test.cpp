@@ -15,6 +15,7 @@
 #include "Logger.hpp"
 #include "ProcessState.hpp"
 #include "ReadState.hpp"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include <cassert>
 #include <cstddef>
@@ -519,7 +520,6 @@ std::vector< TotalRequest > TotalRequestData = {
     },
 };
 
-// HERE: Trouver les erreurs et réecrire les bons tests
 class TotalRequestFixture : public ::testing::TestWithParam< TotalRequest > {
     public:
         TotalRequestFixture() : _test(0), _request(0), _fd{ 0, 0 } {}
@@ -675,22 +675,7 @@ TEST_P(TotalRequestFixture, HeadersTest) {
     map::const_iterator test_item;
     map::const_iterator correct_item;
 
-    EXPECT_EQ(correct.size(), test_headers.size());
-    for (correct_item = correct.begin(); correct_item != correct.end(); correct_item++) {
-        test_item = test_headers.find(correct_item->first);
-        if (test_item == test_headers.end())
-            FAIL() << "This header was expected :\n"
-                   << correct_item->first << ": " << correct_item->second << "\n...not found.";
-        if (test_item != test_headers.end())
-            EXPECT_EQ(test_item->second, correct_item->second);
-    }
-    for (test_item = test_headers.begin(); test_item != test_headers.end(); test_item++) {
-        correct_item = correct.find(test_item->first);
-
-        if (correct_item == correct.end())
-            FAIL() << "This header was found :\n"
-                   << test_item->first << ": " << test_item->second << "\n...not expected.";
-    } // double verification is to display clearly which one is missing.
+    EXPECT_THAT(test_headers, ::testing::ContainerEq(correct));
 }
 
 TEST_P(TotalRequestFixture, HaveBodyTest) {

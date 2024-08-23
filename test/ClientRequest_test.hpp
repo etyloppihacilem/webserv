@@ -278,12 +278,12 @@ static const t_test_messages ClientRequestTestData[]{
     // "name",
     // "request",
     // {
-    // {"Host", "coucou"},
+    // { "Host", "coucou" },
     // },
     // "target",
     // "method",
     // false,
-    // unset
+    // unset,
     // },
     {
         "base",
@@ -309,8 +309,7 @@ static const t_test_messages ClientRequestTestData[]{
         "Host: www.example.com\r\n"
         "Infos: il_n'y_a_rien_ici\r\n"
         "coucou: jesuisheureux\r\n"
-        "\r\n", // no
-                // data
+        "\r\n", // no data
         {
             { "Host", "www.example.com" },
             { "Infos", "il_n'y_a_rien_ici" },
