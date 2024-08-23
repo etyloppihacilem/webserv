@@ -540,9 +540,12 @@ class TotalRequestFixture : public ::testing::TestWithParam< TotalRequest > {
             _test     = new ReadState(_fd[0]);
             _fd_check = _fd[0];
 
+            if (std::get< tname >(GetParam()) == "Bad_line_terminator_r")
+                warn.disable(); // because reading nothing into socket is normal
             i = 0;
             while ((_test->process() == waiting) && (i < 100))
                 i++;
+            warn.enable();
             if (i >= 100)
                 GTEST_FATAL_FAILURE_("Infinite loop detected.");
             if (_test->get_state() == s_error)
