@@ -21,19 +21,18 @@
 #include <string>
 
 BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state) : BodyWriter(state), _body() {
-    uint16_t i = 0;
+    size_t i = 0;
 
-    while (++i && !(_done = _strategy->fill_buffer(_body)) && length() <= MAX_BODY_BUFFER)
+    while (++i <= MAX_BODY_BUFFER && !(_done = _strategy->fill_buffer(_body)) && length() <= MAX_BODY_BUFFER)
         ; // i is to prevent infinite loop in case buffer is not filling
     if (length() > MAX_BODY_BUFFER) {
         _body = "";
         shrink_to_fit(_body); // wiping body;
         throw std::bad_alloc();
     }
-    if (i == 0)
+    if (i > MAX_BODY_BUFFER)
         error.log() << "BodyWriterLength : maximum fill_buffer iterations exceeded. This happens to prevent "
                     << "infinite loop. " << "Result may be incomplete. Check value of MAX_BODY_BUFFER." << std::endl;
-    _done = true;
 }
 
 BodyWriterLength::~BodyWriterLength() {}
