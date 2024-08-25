@@ -98,8 +98,7 @@ bool Response::build_response(std::string &buffer, size_t size) {
             debug.log() << "Generating status line" << std::endl;
             buffer = generate_status_line();
             _state = headers;
-        }
-        else if (_state == headers) {
+        } else if (_state == headers) {
             debug.log() << "Generating headers" << std::endl;
             buffer += generate_header();
             if (_body) {
@@ -109,8 +108,7 @@ bool Response::build_response(std::string &buffer, size_t size) {
                 _state = finished;
                 debug.log() << "Response generated" << std::endl;
             }
-        }
-        else if (_state == body) {
+        } else if (_state == body) {
             if (!_body->is_done())
                 buffer += _body->generate();
             if (_body->is_done()) {
@@ -123,7 +121,7 @@ bool Response::build_response(std::string &buffer, size_t size) {
 }
 
 bool Response::is_done() const {
-    return (_state == finished);
+    return _state == finished;
 }
 
 /**
@@ -168,21 +166,22 @@ void Response::clean_body() {
 
   BodyWriter object uses the ResponseBuildingStrategy.fill_buffer() method to send body chunked or by length.
   */
-void Response::set_body(ResponseBuildingStrategy &strategy) {
-    // check for body
+void Response::set_body(ResponseBuildingStrategy *strategy) {
+    if (!strategy)
+        return;
     clean_body();
-    if (strategy.get_estimated_size() > MAX_BODY_BUFFER) {
-        _body = new BodyWriterChunk(strategy);
+    if (strategy->get_estimated_size() > MAX_BODY_BUFFER) {
+        _body = new BodyWriterChunk(*strategy);
         debug.log() << "Response sending format : chunk." << std::endl;
         _header["Transfer-Encoding"] = "chunk";
     } else {
         std::stringstream st;
         try {
-            _body = new BodyWriterLength(strategy);
+            _body = new BodyWriterLength(*strategy);
             st << _body->length();
             debug.log() << "Response sending format : chunk." << std::endl;
         } catch (std::bad_alloc &e) {
-            _body                        = new BodyWriterChunk(strategy);
+            _body                        = new BodyWriterChunk(*strategy);
             _header["Transfer-Encoding"] = "chunk";
             warn.log() << "Response sending format : chunk (bad_alloc)." << std::endl;
             return;

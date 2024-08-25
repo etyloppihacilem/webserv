@@ -169,7 +169,7 @@ bool GetIndexStrategy::build_response() {
         }
     }
     _response.add_header("Content-Type", "text/html; charset=utf-8");
-    _response.set_body(*this);
+    _response.set_body(this);
     if (*_location.rbegin() != '/')
         _location += "/";
     return _built = true;

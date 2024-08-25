@@ -31,7 +31,7 @@ bool ErrorStrategy::build_response() {
     _response.add_header("Content-Type", "text/html; charset=utf-8");
     _estimated_size = 0; // choose BodyWriterLength
     _response.set_code(_code);
-    _response.set_body(*this); // to init response body.
+    _response.set_body(this); // to init response body.
     return _built = true;
 }
 

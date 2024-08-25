@@ -85,7 +85,7 @@ bool GetFileStrategy::build_response() {
                     << std::endl;
         throw HttpError(InternalServerError);
     }
-    _response.set_body(*this);
+    _response.set_body(this);
 
     std::string extension = extract_extension(_location);
 

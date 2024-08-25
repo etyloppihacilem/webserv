@@ -23,24 +23,28 @@
   This class is in charge of initiating the right strategy for the given ClientRequest and generating the response.
   It will be done when the response will be built.
   */
-template <class ServerClass = Server, class RouteClass = Route> // template is there for testing purposes
+template < class ServerClass = Server, class RouteClass = Route > // template is there for testing purposes
 class ResponseBuildState : public ProcessState {
     public:
         ResponseBuildState(int socket, ClientRequest *request, const ServerClass &server);
-        ResponseBuildState(int socket, HttpCode code, const ServerClass &server); // equivalent of calling recovery on ErrorBuildingStrategy
+        ResponseBuildState(
+            int                socket,
+            HttpCode           code,
+            const ServerClass &server
+        ); // equivalent of calling recovery on ErrorBuildingStrategy
         ~ResponseBuildState();
 
         t_state                   process();
         ClientRequest            *get_request();
         ResponseBuildingStrategy *get_response_strategy(); // OPTI: check wich one is not in use
-        void                     save_mem();
+        void                      save_mem();
 
     private:
         void init_strategy();
         void init_strategy(HttpCode code);
 
         ClientRequest            *_request;
-        const ServerClass               &_server;
+        const ServerClass        &_server;
         ResponseBuildingStrategy *_strategy;
         bool                      _recovery;
         HttpCode                  _code;

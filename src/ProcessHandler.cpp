@@ -16,14 +16,18 @@
 #include "ProcessState.hpp"
 #include "ReadState.hpp"
 #include "ResponseBuildState.hpp"
+#include "ResponseBuildingStrategy.hpp"
+#include "ResponseSendState.hpp"
 #include "Server.hpp"
 #include <ostream>
 
 ProcessHandler::ProcessHandler(int socket, Server &server) : EventHandler(socket, server), _state(0) {}
 
 ProcessHandler::~ProcessHandler() {
-    if (_state)
+    if (_state) {
+        debug.log() << "ProcessHandler deletes ProcessState" << std::endl;
         delete _state;
+    }
 }
 
 void ProcessHandler::handle() {
@@ -33,8 +37,19 @@ void ProcessHandler::handle() {
         // passer au state suivant parce qu'il vient de finir.
         if (dynamic_cast<ReadState *>(_state) != 0)
             transition_to_rbs();
+        if (dynamic_cast<ResponseBuildState<> *>(_state) != 0)
+            transition_to_rss();
+        if (dynamic_cast<ResponseSendState *>(_state) != 0) {
+            delete _state;
+            _state = 0;
+        }
+    }
+    if (_state->get_state() == s_error) {
+        // TODO: Close connexion here
+        return;
     }
 }
+// TODO: change status of epoll in this function
 
 void ProcessHandler::transition_to_rbs() {
     ReadState *read_state; // to cast
@@ -63,6 +78,7 @@ void ProcessHandler::transition_to_rss() {
         _state = new ResponseBuildState<>(_socket, InternalServerError, _server);
         return;
     }
-    // TODO: transition is not done here;
-    // construction of ResponseSendState
+    ResponseBuildingStrategy *strategy = response_build_state->get_response_strategy();
+    delete _state;
+    _state = new ResponseSendState(_socket, strategy);
 }

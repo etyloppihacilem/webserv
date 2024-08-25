@@ -24,7 +24,6 @@
 #include "MimeTypes.hpp"
 #include "ProcessState.hpp"
 #include "RedirectStrategy.hpp"
-#include "Response.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "Route.hpp"
 #include "Server.hpp"
