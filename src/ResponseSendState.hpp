@@ -12,13 +12,18 @@
 #define INCLUDE_SRC_RESPONSESENDSTATE_HPP_
 
 #include "ProcessState.hpp"
+#include "Response.hpp"
 
 class ResponseSendState : public ProcessState {
     public:
-        ResponseSendState(int socket);
+        ResponseSendState(int socket, Response *response);
         ~ResponseSendState();
 
+        t_state process();
+        void    save_mem();
+
     private:
+        Response *_response;
 };
 
 #endif // INCLUDE_SRC_RESPONSESENDSTATE_HPP_

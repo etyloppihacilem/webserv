@@ -66,8 +66,10 @@ t_state ReadState::process_buffer(char *buffer) {
     _buffer += buffer;
     sanitize_HTTP_string(_buffer, 0);
     if (_state == waiting) {
-        if (_request == 0)
+        if (_request == 0) {
             _request = new ClientRequest(_socket);
+            debug.log() << "Parsing request line." << std::endl;
+        }
         // length check
         while (_parse_state != body && (eol = _buffer.find("\n")) != _buffer.npos) {
             if (_parse_state == request_line && eol == 0)
@@ -75,11 +77,13 @@ t_state ReadState::process_buffer(char *buffer) {
             else if (_parse_state == request_line) {
                 if (!_request->parse_request_line(_buffer))
                     return _state = ready; // ready to return error
+                debug.log() << "Parsing headers." << std::endl;
                 _parse_state = headers;    // next state
             } else if (_parse_state == headers) {
                 if (_request->parse_headers(_buffer)) {
                     if (isError(_request->get_status()))
                         return _state = ready;
+                    debug.log() << "Parsing body if any." << std::endl;
                     _parse_state = body;
                 }
             }

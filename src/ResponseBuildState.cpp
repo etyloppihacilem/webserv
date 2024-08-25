@@ -148,20 +148,28 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
 
     Location< ServerClass, RouteClass > location(_request->get_target(), _server);
 
-    if (location.is_redirect())
+    if (location.is_redirect()) {
+        debug.log() << "Choosing RedirectStrategy" << std::endl;
         _strategy = new RedirectStrategy(location.get_path(), _request->get_query_string(), location.get_status_code());
-    else if (location.is_cgi())
+    }
+    else if (location.is_cgi()) {
+        debug.log() << "Choosing CGIStrategy" << std::endl;
         _strategy = new CGIStrategy(location.get_path(), _request);
+    }
     else if (_request->get_method() == GET) {
         if (!location.is_get()) {
             info.log() << "ResponseBuildState: GET method is not allowed in route '" << location.get_route()
                        << "', sending " << MethodNotAllowed << std::endl;
             throw HttpError(MethodNotAllowed);
         }
-        if (location.is_file())
+        if (location.is_file()) {
+            debug.log() << "Choosing GetFileStrategy" << std::endl;
             _strategy = new GetFileStrategy(mime_types, location.get_path());
-        else if (location.has_autoindex())
+        }
+        else if (location.has_autoindex()) {
+            debug.log() << "Choosing GetIndexStrategy" << std::endl;
             _strategy = new GetIndexStrategy(location.get_path(), _request->get_target());
+        }
         else {
             info.log() << "ResponseBuildState: '" << _request->get_target() << "' is not a file, sending " << Forbidden
                        << std::endl;
@@ -173,6 +181,7 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
                        << "', sending " << MethodNotAllowed << std::endl;
             throw HttpError(MethodNotAllowed);
         }
+        debug.log() << "Choosing UploadStrategy" << std::endl;
         _strategy = new UploadStrategy(*_request, location.get_path());
     } else if (_request->get_method() == DELETE) {
         if (!location.is_delete()) {
@@ -180,6 +189,7 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
                        << "', sending " << MethodNotAllowed << std::endl;
             throw HttpError(MethodNotAllowed);
         }
+        debug.log() << "Choosing DeleteStrategy" << std::endl;
         _strategy = new DeleteStrategy(location.get_path());
     }
     if (!_strategy) {
@@ -197,6 +207,7 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy(HttpCode code)
     if (!isError(code))
         warn.log() << "Generating error for non error code " << code << std::endl;
     try {
+        debug.log() << "Generating error page for " << code << std::endl;
         _strategy = new ErrorStrategy(code);
     } catch (std::exception &e) {
         throw e; // do not try to send response after this, only close connection.

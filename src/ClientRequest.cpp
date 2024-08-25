@@ -61,12 +61,18 @@ HttpMethod ClientRequest::parse_method(const std::string &method, size_t end) {
                    << std::endl;
         throw HttpError(NotImplemented);
     }
-    if (method[0] == 'G' && method.find(method_string(GET)) == 0 && end == 3)
+    if (method[0] == 'G' && method.find(method_string(GET)) == 0 && end == 3) {
+        debug.log() << "Request with method GET" << std::endl;
         return GET;
-    if (method[0] == 'P' && method.find(method_string(POST)) == 0 && end == 4)
+    }
+    if (method[0] == 'P' && method.find(method_string(POST)) == 0 && end == 4) {
+        debug.log() << "Request with method POST" << std::endl;
         return POST;
-    if (method[0] == 'D' && method.find(method_string(DELETE)) == 0 && end == 6)
+    }
+    if (method[0] == 'D' && method.find(method_string(DELETE)) == 0 && end == 6) {
+        debug.log() << "Request with method DELETE" << std::endl;
         return DELETE;
+    }
     info.log() << "Method '" << method.substr(0, end) << "' not implemented, sending " << NotImplemented << std::endl;
     throw HttpError(NotImplemented);
 }
@@ -127,12 +133,16 @@ void ClientRequest::parse_target(const std::string &in, size_t pos) {
             throw HttpError(BadRequest);
         }
         _header["Host"] = _target.substr(7, host_end - 7);
-        _target         = _target.substr(host_end, _target.length() - host_end);
-        _absolute_form  = true;
+        debug.log() << "Target " << _target << " in absolute form." << std::endl;
+        debug.log() << ">> Host: " << _header["Host"] << std::endl;
+        _target = _target.substr(host_end, _target.length() - host_end);
+        debug.log() << ">> New target: " << _target << std::endl;
+        _absolute_form = true;
     } else if (_target[0] != '/') { // not origin form
         info.log() << "Origin not starting with /, sending " << BadRequest << std::endl;
         throw HttpError(BadRequest);
-    }
+    } else
+        debug.log() << "Target parsed: " << _target << std::endl;
 }
 
 /**
@@ -170,10 +180,13 @@ void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_
     if (end + 1 <= sep) {
         info.log() << "Header '" << key << "' without value, sending " << BadRequest << std::endl;
         throw HttpError(BadRequest);
-    } else if (_header.find(key) != _header.end())
+    } else if (_header.find(key) != _header.end()) {
         _header[key] += ", " + in.substr(sep, (end + 1) - sep);
-    else
+        debug.log() << "Parsed header line " << key << "+: " << _header[key] << std::endl;
+    } else {
+        debug.log() << "Parsed header line " << key << " : " << _header[key] << std::endl;
         _header[key] = in.substr(sep, (end + 1) - sep);
+    }
 }
 
 /**
@@ -252,6 +265,7 @@ bool ClientRequest::parse_request_line(std::string &in) {
         in = "";
     else
         in = in.substr(sp + 1, in.length() - (sp + 1));
+    debug.log() << "Request line successfully parsed." << std::endl;
     return true;
 }
 
@@ -293,16 +307,18 @@ bool ClientRequest::init_body(std::string &buffer) {
     if (_header.find("Transfer-Encoding") != _header.end()) {
         _body_exists = true;
         _body        = new BodyChunk(_socket, buffer);
+        debug.log() << "Request with body of type chunk." << std::endl;
     } else if (_header.find("Content-Length") != _header.end()) {
         _body_exists = true;
         _body        = new BodyLength(_socket, buffer, _header["Content-Length"]);
+        debug.log() << "Request with body of type length." << std::endl;
     } else { // no body
         _body_exists = false;
-        if (buffer.length() != 0)
-        {
+        if (buffer.length() != 0) {
             info.log() << "Body detected while no length is provided, sending " << LengthRequired << std::endl;
             _status = LengthRequired; // bc theres something that looks like a body but that is not...
-        }
+        } else
+            debug.log() << "No body in request." << std::endl;
     }
     return _body_exists;
 }
@@ -327,6 +343,7 @@ void ClientRequest::decode_target() {
         _target.replace(percent, 3, 1, c);
         percent++; // to prevent a %25 ('%') to encode itself
     }
+    debug.log() << "Target decoded: " << _target << std::endl;
 }
 
 /**
@@ -384,6 +401,7 @@ void ClientRequest::parse_parameters() {
         return;
     _query_string = _target.substr(mark + 1, _target.length() - (mark + 1));
     _target.resize(mark);
+    debug.log() << "Parsed query string: " << _query_string << std::endl;
 }
 
 std::string ClientRequest::get_query_string() const {
@@ -407,7 +425,9 @@ void ClientRequest::parse_port() {
         host.resize(sep); // removing end of host
         if (!(st >> _port))
             throw HttpError(BadRequest);
-    }
+        debug.log() << "Parsed port: " << _port << std::endl;
+    } else
+        debug.log() << "Default port: " << _port << std::endl;
 }
 
 std::string ClientRequest::get_target() const {

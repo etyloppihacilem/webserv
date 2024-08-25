@@ -8,9 +8,11 @@
 
 ##################################################################################################################### */
 
-// #include "gtest/gtest.h"
-// #include "ResponseBuildState_test.hpp"
-// #include <cstddef>
+#include "gtest/gtest.h"
+#include "Logger.hpp"
+#include "ResponseBuildState_test.hpp"
+#include <cstddef>
+#include <ostream>
 
 // TEST_P(ResponseBuildStateFixture, speed_test) {
 //     for (size_t i = 0; i < 100000; i++) {
@@ -21,6 +23,7 @@
 //         _server.getRoute("/");
 //     }
 // }
+
 //
 // TEST_P(ResponseBuildStateFixture, speed_test2) {
 //     for (size_t i = 0; i < 100000; i++) {

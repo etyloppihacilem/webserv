@@ -25,8 +25,6 @@ Response::Response() : _code(OK), _header(), _body(0) {
     add_header("Server", SERVER_SOFTWARE); // adding server name, this is not MUST but SHOULD in RFC
 }
 
-// HERE: Coder RESPONSESENDSTATE
-
 // TODO:connection header is not there yet !!!!
 // Logic should be :
 //  - in case of error (error code 4xx or 5xx) : connection close;
@@ -137,22 +135,24 @@ void Response::clean_body() {
   BodyWriter object uses the ResponseBuildingStrategy.fill_buffer() method to send body chunked or by length.
   */
 void Response::set_body(ResponseBuildingStrategy &strategy) {
+    // check for body
     clean_body();
     if (strategy.get_estimated_size() > MAX_BODY_BUFFER) {
         _body                        = new BodyWriterChunk(strategy);
+        debug.log() << "Response sending format : chunk." << std::endl;
         _header["Transfer-Encoding"] = "chunk";
     } else {
+        std::stringstream st;
         try {
             _body = new BodyWriterLength(strategy);
+            st << _body->length();
+            debug.log() << "Response sending format : chunk." << std::endl;
         } catch (std::bad_alloc &e) {
             _body                        = new BodyWriterChunk(strategy);
             _header["Transfer-Encoding"] = "chunk";
+            warn.log() << "Response sending format : chunk (bad_alloc)." << std::endl;
             return;
         }
-
-        std::stringstream st;
-
-        st << _body->length();
         _header["Content-Length"] = st.str();
     }
 }

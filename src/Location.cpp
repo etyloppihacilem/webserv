@@ -55,20 +55,27 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
     try {
         const RouteClass &route = server.getRoute(target);
         if (route.hasRedirSet()) {
+            debug.log() << "Using route " << route.getLocation() << " to redirect" << std::endl;
             _status_code = route.getRedirCode();
             _is_redirect = true;
             build_path(target, route, route.getRedirPage());
+            debug.log() << "Redirection location: " << _path << std::endl;
             return;
         }
         build_path(target, route);
 
         const std::set< HttpMethod > &methods = route.getMethods();
 
-        _route     = route.getLocation();
-        _is_get    = std::find(methods.begin(), methods.end(), GET) != methods.end();
-        _is_post   = std::find(methods.begin(), methods.end(), POST) != methods.end();
+        _route = route.getLocation();
+        debug.log() << "Using route " << _route << std::endl;
+        _is_get = std::find(methods.begin(), methods.end(), GET) != methods.end();
+        debug.log() << "GET is enabled" << std::endl;
+        _is_post = std::find(methods.begin(), methods.end(), POST) != methods.end();
+        debug.log() << "POST is enabled" << std::endl;
         _is_delete = std::find(methods.begin(), methods.end(), DELETE) != methods.end();
+        debug.log() << "DELETE is enabled" << std::endl;
         // _is_put  = std::find(methods.begin(), methods.end(), PUT) != methods.end(); // not implemented yet
+        // debug.log() << "PUT is enabled." << std::endl;
         if (stat(_path.c_str(), &buf) != 0) {
             switch (errno) {
                 case ENOENT:
@@ -95,14 +102,20 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
                     throw HttpError(InternalServerError);
             }
         }
-        if (S_ISDIR(buf.st_mode)) {     // in case target is a directory
+        if (S_ISDIR(buf.st_mode)) { // in case target is a directory
+            debug.log() << "Target is a directory" << std::endl;
             if (find_index(route, buf)) // if index file is found
                 return;
             _autoindex = route.hasAutoindexSet(); // if nothing else found
-        } else {                                  // in case target is anything but a directory
-            _is_file = true;                      // not a dir
-            if (route.hasCgiExtensionSet() && extract_extension(_path) == route.getCgiExtension())
+            debug.log() << "Autoindex is " << (_autoindex ? "enabled" : "disabled") << std::endl;
+        } else {             // in case target is anything but a directory
+            _is_file = true; // not a dir
+            debug.log() << "Target is a file" << std::endl;
+            if (route.hasCgiExtensionSet() && extract_extension(_path) == route.getCgiExtension()) {
+                debug.log() << "Route has cgi " << route.getCgiPath() << " and target correct extension "
+                            << route.getCgiExtension() << std::endl;
                 setup_cgi(route);
+            }
         }
     } catch (Server::RouteNotFoundWarn &e) {
         fatal.log() << "Location: Route not found. Should NEVER happen, this means Server object is broken and "
@@ -123,27 +136,35 @@ bool Location< ServerClass, RouteClass >::find_index(const RouteClass &route, st
     const std::vector< std::string > &indexs   = route.getIndexPage();
     const std::string                 trailing = (*_path.rbegin() == '/' ? "" : "/");
 
+    debug.log() << "Searching for index file in " << _path << std::endl;
     for (std::vector< std::string >::const_iterator it = indexs.begin(); it != indexs.end(); it++) {
         std::string index_path = _path + trailing + *it;
 
         if (stat(index_path.c_str(), &buf) == 0) {
+            debug.log() << "Trying " << index_path << std::endl;
             if (!S_ISREG(buf.st_mode)) { // if index.html or so is not a file.
                 warn.log() << *it << " is not a file, so cannot be an index. Continuing." << std::endl;
                 continue;
             }
             _path    = index_path;
             _is_file = true;
+            debug.log() << "Index file " << _path << " was found" << std::endl;
             if (route.hasCgiExtensionSet() && extract_extension(_path) == route.getCgiExtension())
                 setup_cgi(route);
             return true; // index file found and telling to read it
         }
         if (errno == ENOENT)
             continue; // file not found so searching forward
-        if (errno == EACCES)
+        if (errno == EACCES) {
+            info.log() << "Index file " << index_path << " found,  " << strerror(errno) << ", sending " << Forbidden
+                       << std::endl;
             throw HttpError(Forbidden); // file found but won't open
-        error.log() << "Cannot stat index file at " << index_path << "and unknown error occured." << std::endl;
+        }
+        error.log() << "Cannot stat index file at " << index_path << "and unknown error occured: " << strerror(errno)
+                    << std::endl;
         throw HttpError(InternalServerError); // anything else is sus
     }
+    debug.log() << "No index file found in " << _path << std::endl;
     return false;
 }
 
