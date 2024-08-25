@@ -14,14 +14,16 @@
 #include "BodyWriterLength.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include "ProcessState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
+#include <cstddef>
 #include <new>
 #include <ostream>
 #include <sstream>
 #include <string>
 
-Response::Response() : _code(OK), _header(), _body(0) {
+Response::Response() : _code(OK), _header(), _body(0), _state(rs_line) {
     add_header("Server", SERVER_SOFTWARE); // adding server name, this is not MUST but SHOULD in RFC
 }
 
@@ -31,8 +33,10 @@ Response::Response() : _code(OK), _header(), _body(0) {
 //  - else : connection keep-alive
 // check how to close timeout connection
 Response::~Response() {
-    if (_body)
+    if (_body) {
+        debug.log() << "Response deletes BodyWriter" << std::endl;
         delete _body;
+    }
 }
 
 /**
@@ -84,12 +88,42 @@ bool Response::have_body() {
 
   I do not know what it really means yet. Mayby just the headers.
   */
-std::string Response::build_response() {
-    std::string res = "";
+bool Response::build_response(std::string &buffer, size_t size) {
+    if (_state == finished) {
+        warn.log() << "Response already done generating" << std::endl;
+        return true;
+    }
+    while (buffer.length() < size) {
+        if (_state == rs_line) {
+            debug.log() << "Generating status line" << std::endl;
+            buffer = generate_status_line();
+            _state = headers;
+        }
+        else if (_state == headers) {
+            debug.log() << "Generating headers" << std::endl;
+            buffer += generate_header();
+            if (_body) {
+                debug.log() << "Generating body" << std::endl;
+                _state = body;
+            } else {
+                _state = finished;
+                debug.log() << "Response generated" << std::endl;
+            }
+        }
+        else if (_state == body) {
+            if (!_body->is_done())
+                buffer += _body->generate();
+            if (_body->is_done()) {
+                debug.log() << "Body is done generating" << std::endl;
+                _state = finished;
+            }
+        }
+    }
+    return _state == finished;
+}
 
-    res  = generate_status_line();
-    res += generate_header();
-    return res;
+bool Response::is_done() const {
+    return (_state == finished);
 }
 
 /**
@@ -138,7 +172,7 @@ void Response::set_body(ResponseBuildingStrategy &strategy) {
     // check for body
     clean_body();
     if (strategy.get_estimated_size() > MAX_BODY_BUFFER) {
-        _body                        = new BodyWriterChunk(strategy);
+        _body = new BodyWriterChunk(strategy);
         debug.log() << "Response sending format : chunk." << std::endl;
         _header["Transfer-Encoding"] = "chunk";
     } else {

@@ -13,6 +13,8 @@
 
 #include "BodyWriter.hpp"
 #include "HttpStatusCodes.hpp"
+#include "ProcessState.hpp"
+#include <cstddef>
 #include <map>
 #include <string>
 
@@ -20,7 +22,7 @@
 # include "gtest/gtest.h"
 #endif
 
-typedef std::map<std::string, std::string>::const_iterator mapit;
+typedef std::map< std::string, std::string >::const_iterator mapit;
 
 /**
   Response object. This contains everything needed to store and generate a response header and body.
@@ -34,7 +36,8 @@ class Response {
         void        add_header(const std::string &field, const std::string &value);
         void        set_code(const HttpCode &code);
         HttpCode    get_code() const;
-        std::string build_response();
+        bool        build_response(std::string &buffer, size_t size);
+        bool        is_done() const;
         void        save_mem();
         BodyWriter *get_body();
         bool        have_body();
@@ -44,9 +47,10 @@ class Response {
         std::string generate_header() const;
         void        clean_body();
 
-        HttpCode                           _code;   ///< HttpStatusCodes of response
-        std::map<std::string, std::string> _header; ///< Header map
-        BodyWriter                        *_body;   ///< Body of response (if any)
+        HttpCode                             _code;   ///< HttpStatusCodes of response
+        std::map< std::string, std::string > _header; ///< Header map
+        BodyWriter                          *_body;   ///< Body of response (if any)
+        internal_state                       _state;  ///< To know what is left to generate
 #ifdef TESTING
         FRIEND_TEST(ResponseTestSuite, generate_status_line);
         FRIEND_TEST(ResponseBuildStateFixture, CorrectHeaders);

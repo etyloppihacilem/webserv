@@ -10,7 +10,6 @@
 
 #include "ReadState.hpp"
 #include "ClientRequest.hpp"
-#include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "HttpUtils.hpp"
 #include "Logger.hpp"
@@ -23,7 +22,7 @@
 #include <ostream>
 #include <unistd.h>
 
-ReadState::ReadState(int socket) : ProcessState(socket), _buffer(), _request(0), _parse_state(request_line) {}
+ReadState::ReadState(int socket) : ProcessState(socket), _buffer(), _request(0), _parse_state(rs_line) {}
 
 ReadState::~ReadState() {
     if (_request)
@@ -72,9 +71,9 @@ t_state ReadState::process_buffer(char *buffer) {
         }
         // length check
         while (_parse_state != body && (eol = _buffer.find("\n")) != _buffer.npos) {
-            if (_parse_state == request_line && eol == 0)
+            if (_parse_state == rs_line && eol == 0)
                 _buffer = _buffer.substr(1, _buffer.length() - 1); // to discard leading lines of request
-            else if (_parse_state == request_line) {
+            else if (_parse_state == rs_line) {
                 if (!_request->parse_request_line(_buffer))
                     return _state = ready; // ready to return error
                 debug.log() << "Parsing headers." << std::endl;
@@ -92,7 +91,7 @@ t_state ReadState::process_buffer(char *buffer) {
             _buffer = "";
             shrink_to_fit(_buffer); // because it is large
             info.log() << "MAX_REQUEST_LINE was reached while parsing "
-                       << (_parse_state == request_line ? "request_line" : "headers") << ", sending " << EntityTooLarge
+                       << (_parse_state == rs_line ? "request_line" : "headers") << ", sending " << EntityTooLarge
                        << std::endl;
             return_error(EntityTooLarge);
         }

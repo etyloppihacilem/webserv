@@ -13,6 +13,7 @@
 
 #include "ProcessState.hpp"
 #include "Response.hpp"
+#include <string>
 
 class ResponseSendState : public ProcessState {
     public:
@@ -23,7 +24,8 @@ class ResponseSendState : public ProcessState {
         void    save_mem();
 
     private:
-        Response *_response;
+        Response   *_response;
+        std::string _buffer;
 };
 
 #endif // INCLUDE_SRC_RESPONSESENDSTATE_HPP_

@@ -11,12 +11,18 @@
 #ifndef INCLUDE_SRC_PROCESSSTATE_HPP_
 #define INCLUDE_SRC_PROCESSSTATE_HPP_
 
-#include "EventHandler.hpp"
 typedef enum e_state {
     s_error = -1, ///< if there is an error (NOT HTTP ERROR !!!!)
     waiting,      ///< waiting for header to exist or to end
     ready,        ///< done
 } t_state;
+
+typedef enum e_internal_state {
+    rs_line = 0,
+    headers,
+    body,
+    finished
+} internal_state;
 
 class ProcessState {
     public:

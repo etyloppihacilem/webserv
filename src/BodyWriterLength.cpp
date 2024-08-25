@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include <string>
 
-BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state) : BodyWriter(state), _body(), _recovered(false) {
+BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state) : BodyWriter(state), _body() {
     uint16_t i = 0;
 
     while (++i && !(_done = _strategy->fill_buffer(_body)) && length() <= MAX_BODY_BUFFER)
@@ -43,10 +43,10 @@ BodyWriterLength::~BodyWriterLength() {}
   */
 std::string BodyWriterLength::generate(size_t size /** is discarded because not needed in BodyWriterLength */) {
     (void) size;
-    if (_recovered)
+    if (_done)
         warn.log() << "Body already recovered. Risk of loosing body data if save_mem procedures are initiated."
                    << std::endl;
-    _recovered = true;
+    _done = true;
     return _body;
 }
 
@@ -55,7 +55,7 @@ size_t BodyWriterLength::length() const {
 }
 
 void BodyWriterLength::save_mem() {
-    if (_recovered)
+    if (_done)
         _body = "";
     shrink_to_fit(_body); // reducing memory usage.
 }
