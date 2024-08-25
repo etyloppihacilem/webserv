@@ -97,7 +97,6 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
             }
             ASSERT_EQ(_state->process(), ready);
             _strategy = _state->get_response_strategy();
-            // _strategy->build_response(); // at least once without read worry
             ASSERT_NE(_strategy, (void *) 0);
         }
 

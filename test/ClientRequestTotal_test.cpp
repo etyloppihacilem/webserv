@@ -568,6 +568,24 @@ std::vector< TotalRequest > TotalRequestData = {
         "",
         false,
     },
+    {
+        "Smol_headers",
+        "GET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: a\r\nb:c\r\nd: e\r\nf:g \r\n\r\n",
+        "/helloworld.html",
+        GET,
+        false,
+        "",
+        {
+            { "Host", "a" },
+            { "b", "c" },
+            { "d", "e" },
+            { "f", "g" },
+        },
+        OK,
+        80,
+        "hihi=ahah",
+        false,
+    }
 };
 
 INSTANTIATE_TEST_SUITE_P(

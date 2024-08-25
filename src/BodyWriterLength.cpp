@@ -23,7 +23,7 @@
 BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state) : BodyWriter(state), _body() {
     size_t i = 0;
 
-    while (++i <= MAX_BODY_BUFFER && !(_done = _strategy->fill_buffer(_body)) && length() <= MAX_BODY_BUFFER)
+    while (++i <= MAX_BODY_BUFFER && !(_strategy->fill_buffer(_body)) && length() <= MAX_BODY_BUFFER)
         ; // i is to prevent infinite loop in case buffer is not filling
     if (length() > MAX_BODY_BUFFER) {
         _body = "";
