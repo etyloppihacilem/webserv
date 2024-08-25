@@ -20,7 +20,9 @@
 #include <ostream>
 #include <string>
 
-Logger::Logger(std::ostream &os, std::string level, std::string color, size_t width) : _enabled(true) {
+Logger::Logger(std::ostream &os, std::string level, std::string color, size_t width, bool no_force) :
+    _enabled(true),
+    _no_force(no_force) {
     _dev_null.setstate(std::ios_base::badbit); // set /dev/null to be /dev/null
     width -= level.length();
     _level = "[ ";
@@ -67,7 +69,7 @@ std::ostream &operator<<(std::ostream &os, const HttpCode code) {
 }
 
 std::ofstream &Logger::log() {
-    if (!_enabled && !_force)
+    if (!_enabled && !(_force && !_no_force))
         return _dev_null;
     time_t now = time(0);
     tm    *ltm = localtime(&now);
@@ -80,19 +82,19 @@ std::ofstream &Logger::log() {
 }
 
 void Logger::enable() {
-    if (_force && !_enabled)
+    if ((_force && !_no_force) && !_enabled)
         log() << "Enabling this log. (force)" << std::endl;
     _enabled = true;
 }
 
 void Logger::disable() {
-    if (_force && _enabled)
+    if ((_force && !_no_force) && _enabled)
         log() << "Disabling this log. (force)" << std::endl;
     _enabled = false;
 }
 
 bool Logger::is_enabled() {
-    if (_force)
+    if ((_force && !_no_force))
         log() << "This log is " << (_enabled ? "enabled" : "disabled") << ". (force)" << std::endl;
     return _enabled;
 }
@@ -116,3 +118,4 @@ Logger info(std::cerr, "INFO", _BLUE, 8);
 Logger warn(std::cerr, "WARNING", _YELLOW, 8);
 Logger error(std::cerr, "ERROR", _RED, 8);
 Logger fatal(std::cerr, "FATAL", _PURPLE _BLINK, 8);
+Logger debug(std::cerr, "DEBUG", _GREEN, 8, true); // Cannot be forced

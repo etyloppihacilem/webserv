@@ -29,10 +29,11 @@
 class Logger : public std::ostream {
     public:
         Logger(
-            std::ostream &os,             ///< Out stream
-            std::string   level = "INFO", ///< Level to display
-            std::string   color = "",     ///< Color ANSI code (no reset, but including ESC)
-            size_t        width = 0       ///< Width to align level
+            std::ostream &os,                ///< Out stream
+            std::string   level    = "INFO", ///< Level to display
+            std::string   color    = "",     ///< Color ANSI code (no reset, but including ESC)
+            size_t        width    = 0,      ///< Width to align level
+            bool          no_force = false   ///< Remove force option for this log stream
         );
         ~Logger();
 
@@ -52,6 +53,7 @@ class Logger : public std::ostream {
         std::string          _level;    ///< Log level
         std::ofstream        _os;       ///< Out stream
         bool                 _enabled;  ///< Tells if test is enabled
+        bool                 _no_force; ///< force log even if disabled
 };
 
 std::ostream &operator<<(std::ostream &os, const HttpCode code);
@@ -60,5 +62,6 @@ extern Logger info;
 extern Logger warn;
 extern Logger error;
 extern Logger fatal;
+extern Logger debug;
 
 #endif // INCLUDE_SRC_LOGGER_HPP_
