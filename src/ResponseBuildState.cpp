@@ -138,10 +138,13 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
 
         std::map< HttpCode, std::string >::const_iterator it = error_pages.find(_request->get_status());
 
-        if (it == error_pages.end())
+        if (it == error_pages.end()) {
+            debug.log() << "Sending " << _request->get_status() << " with generated page" << std::endl;
             _strategy = new ErrorStrategy(_request->get_status()); // page not found
-        else                                                       // page found
+        } else {                                                   // page found
+            debug.log() << "Sending " << _request->get_status() << " with file " << it->second << std::endl;
             _strategy = new GetFileStrategy(mime_types, it->second, _request->get_status());
+        }
         return;
     }
 
@@ -150,12 +153,10 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
     if (location.is_redirect()) {
         debug.log() << "Choosing RedirectStrategy" << std::endl;
         _strategy = new RedirectStrategy(location.get_path(), _request->get_query_string(), location.get_status_code());
-    }
-    else if (location.is_cgi()) {
+    } else if (location.is_cgi()) {
         debug.log() << "Choosing CGIStrategy" << std::endl;
         _strategy = new CGIStrategy(location.get_path(), _request);
-    }
-    else if (_request->get_method() == GET) {
+    } else if (_request->get_method() == GET) {
         if (!location.is_get()) {
             info.log() << "ResponseBuildState: GET method is not allowed in route '" << location.get_route()
                        << "', sending " << MethodNotAllowed << std::endl;
@@ -164,12 +165,10 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
         if (location.is_file()) {
             debug.log() << "Choosing GetFileStrategy" << std::endl;
             _strategy = new GetFileStrategy(mime_types, location.get_path());
-        }
-        else if (location.has_autoindex()) {
+        } else if (location.has_autoindex()) {
             debug.log() << "Choosing GetIndexStrategy" << std::endl;
             _strategy = new GetIndexStrategy(location.get_path(), _request->get_target());
-        }
-        else {
+        } else {
             info.log() << "ResponseBuildState: '" << _request->get_target() << "' is not a file, sending " << Forbidden
                        << std::endl;
             throw HttpError(Forbidden);

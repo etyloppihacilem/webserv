@@ -21,10 +21,13 @@ TEST(speed_test, no_debug_log) {
 }
 
 TEST(speed_test, debug_log) {
+    bool is_enabled = debug.is_enabled();
     debug.disable();
     for (size_t i = 0; i < 100000; i++) {
         debug.log() << "coucou" << i << std::endl;
         int a = i + 3;
         (void) a;
     }
+    if (is_enabled)
+        debug.enable();
 }

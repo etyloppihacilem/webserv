@@ -25,14 +25,17 @@ Logger::Logger(std::ostream &os, std::string level, std::string color, size_t wi
     _no_force(no_force) {
     _dev_null.setstate(std::ios_base::badbit); // set /dev/null to be /dev/null
     width -= level.length();
-    _level = "[ ";
+    if (os.rdbuf() == std::cout.rdbuf() || os.rdbuf() == std::cerr.rdbuf())
+        _level = color + "[ ";
+    else
+        _level = "[ ";
     for (size_t i = 0; i < width; i++)
         _level += " ";
+    _level += level;
     if (os.rdbuf() == std::cout.rdbuf() || os.rdbuf() == std::cerr.rdbuf())
-        _level += color + level + _RESET;
+        _level += " ]" _RESET;
     else
-        _level += level;
-    _level += " ]";
+        _level += " ]";
     _os.copyfmt(os);
     _os.clear(os.rdstate());
     _os.basic_ios< char >::rdbuf(os.rdbuf());
@@ -94,7 +97,7 @@ void Logger::disable() {
 }
 
 bool Logger::is_enabled() {
-    if ((_force && !_no_force))
+    if (_force && !_no_force)
         log() << "This log is " << (_enabled ? "enabled" : "disabled") << ". (force)" << std::endl;
     return _enabled;
 }
