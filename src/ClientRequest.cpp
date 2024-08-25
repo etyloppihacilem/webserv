@@ -154,9 +154,12 @@ void ClientRequest::parse_target(const std::string &in, size_t pos) {
   Host is not yet defined.
   */
 void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_t end) {
+    if (end - begin > MAX_REQUEST_LINE) {
+        info.log() << "Max header line length exceeded, sending " << ContentTooLarge << std::endl;
+        throw HttpError(ContentTooLarge);
+    }
     size_t sep = in.find_first_of(":", begin);
     size_t ows = in.find_first_of(" \t", begin);
-
     if (ows < sep || sep > end || sep <= begin || sep == std::string::npos) {
         info.log() << "Bad header line, sending " << BadRequest << std::endl;
         throw HttpError(BadRequest);
