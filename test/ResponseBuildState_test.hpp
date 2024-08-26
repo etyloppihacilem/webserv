@@ -14,7 +14,6 @@
 #include "ClientRequest.hpp"
 #include "FakeRoute.hpp"
 #include "FakeServer.hpp"
-#include "HttpError.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
@@ -31,6 +30,7 @@
 #include <map>
 #include <ostream>
 #include <string>
+#include <sys/stat.h>
 #include <tuple>
 
 typedef enum e_strategies {
@@ -104,6 +104,8 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
             std::remove("www/test/upload.txt");
             std::remove("www/test/upload_a.md");
             std::remove("www/test/delete.png");
+            std::remove("www/test/upload/hihi.txt");
+            mkdir("www/test/upload", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
             {
                 std::fstream f;
                 f.open("www/test/delete.png", std::ios_base::out | std::ios_base::trunc);
@@ -189,6 +191,10 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
             _server._routes["/test"] = FakeRoute(
                 OK, true, false, false, false, false, "", "", "/test", "", "www/test", "", { GET, POST, DELETE },
                 { "lindex.html" }
+            );
+            _server._routes["/test/diff"] = FakeRoute(
+                OK, true, false, false, false, false, "", "", "/test/diff", "", "www/test", "www/test/upload",
+                { GET, POST, DELETE }, { "lindex.html" }
             );
             _server._routes["/space_corridor"] = FakeRoute(
                 TemporaryRedirect, false, false, false, true, false, "", "", "/space_corridor",

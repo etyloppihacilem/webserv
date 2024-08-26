@@ -32,15 +32,17 @@ class Location {
         bool               is_get() const;
         bool               is_post() const;
         bool               is_delete() const;
-        // bool        is_put() const;
+        // bool               is_put() const;
         bool               has_autoindex() const;
         bool               is_file() const;
         bool               is_cgi() const;
         bool               is_redirect() const;
+        bool               is_diff() const;
         HttpCode           get_status_code() const;
         HttpCode           get_default_error() const;
         const std::string &get_route() const;
         const std::string &get_path() const;
+        const std::string &get_upload_path() const;
         const std::string &get_route_path() const;
         const std::string &get_path_info() const;
 
@@ -59,11 +61,13 @@ class Location {
         bool        _is_file;
         bool        _is_cgi;
         bool        _is_redirect;
+        bool        _is_diff; ///< If uploadpath and rootdir differs
         HttpCode    _status_code;
         HttpCode    _default_error;
         std::string _route; ///< Route location in config
         std::string _cgi_path;
         std::string _path;
+        std::string _upload_path;
         std::string _route_path;
         std::string _path_info; ///< Everyting that is after the route path.
                                 /**<

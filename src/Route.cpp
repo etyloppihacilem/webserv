@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+// WARN: check with a mix between absolute and relative path !!!
+
 Route::Setter Route::fieldSetterList[COUNT_CONF_FIELD] = { 0,
                                                            0,
                                                            0,

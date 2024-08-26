@@ -180,7 +180,9 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
             throw HttpError(MethodNotAllowed);
         }
         debug.log() << "Choosing UploadStrategy" << std::endl;
-        _strategy = new UploadStrategy(*_request, location.get_path());
+        _strategy = new UploadStrategy< ServerClass, RouteClass >(
+            *_request, location.get_upload_path(), _server, location.is_diff()
+        );
     } else if (_request->get_method() == DELETE) {
         if (!location.is_delete()) {
             info.log() << "ResponseBuildState: DELETE method is not allowed in route '" << location.get_route()

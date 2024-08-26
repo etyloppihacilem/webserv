@@ -24,6 +24,7 @@
 #include "Logger.hpp"
 #include "RedirectStrategy.hpp"
 #include "ResponseBuildState.hpp"
+#include "Route.hpp"
 #include "UploadStrategy.hpp"
 #include "todo.hpp"
 #include "gmock/gmock.h"
@@ -172,13 +173,14 @@ std::vector< d_rbs > ResponseBuildData = {
         OK,
         {
             { "Content-Type", "text/html; charset=utf-8" },
-            { "Content-Length", "557" },
+            { "Content-Length", "630" },
         },
         true,
         "<head></head><body><h1>/test/</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr><tr><td>DIR</"
         "td><td><a href=\"/test/.\">.</a></td><td>0</td></tr><tr><td>DIR</td><td><a "
         "href=\"/test/..\">..</a></td><td>0</td></tr><tr><td>REG</td><td><a "
-        "href=\"/test/upload_a.md\">upload_a.md</a></td><td>23</td></tr><tr><td>REG</td><td><a "
+        "href=\"/test/upload_a.md\">upload_a.md</a></td><td>23</td></tr><tr><td>DIR</td><td><a "
+        "href=\"/test/upload\">upload</a></td><td>0</td></tr><tr><td>REG</td><td><a "
         "href=\"/test/test.txt\">test.txt</a></td><td>33</td></tr><tr><td>REG</td><td><a "
         "href=\"/test/delete.png\">delete.png</a></td><td>0</td></tr><tr><td>REG</td><td><a "
         "href=\"/test/index.html\">index.html</a></td><td>11</td></tr></table></body>",
@@ -215,6 +217,19 @@ std::vector< d_rbs > ResponseBuildData = {
         false,
         "/python",
     },
+    {
+        "upload_to_different_location",
+        "POST /test/diff/hihi.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+        tUploadStrategy,
+        Created,
+        {
+            { "Location", "/test/diff/upload/hihi.txt" },
+        },
+        false,
+        "",
+        true,
+        "/test/diff",
+    },
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -228,7 +243,6 @@ INSTANTIATE_TEST_SUITE_P(
 );
 
 TEST_P(ResponseBuildStateFixture, CorrectStrategyTest) {
-    // _strategy
     strategies strat = std::get< ttype >(GetParam());
     if (dynamic_cast< CGIStrategy * >(_strategy) != 0)
         EXPECT_EQ(strat, tCGIStrategy);
@@ -242,7 +256,7 @@ TEST_P(ResponseBuildStateFixture, CorrectStrategyTest) {
         EXPECT_EQ(strat, tGetIndexStrategy);
     else if (dynamic_cast< RedirectStrategy * >(_strategy) != 0)
         EXPECT_EQ(strat, tRedirectStrategy);
-    else if (dynamic_cast< UploadStrategy * >(_strategy) != 0)
+    else if (dynamic_cast< UploadStrategy< FakeServer, FakeRoute > * >(_strategy) != 0)
         EXPECT_EQ(strat, tUploadStrategy);
     else
         FAIL() << "Strategy was not found.";

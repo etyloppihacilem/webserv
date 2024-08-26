@@ -9,7 +9,12 @@
 ##################################################################################################################### */
 
 #include "Path.hpp"
+#include "Logger.hpp"
+#include <cstdlib>
+#include <new>
+#include <ostream>
 #include <string>
+#include <unistd.h>
 
 using std::string;
 
@@ -17,10 +22,69 @@ Path::Path() {}
 
 Path::~Path() {}
 
-Path::Path(const std::string &path) : _path(path) {}
+Path::Path(const std::string &path) : _path(path) {
+    make_absolute();
+    normalize();
+}
+
+void Path::make_absolute() {
+    if (*_path.begin() != '/') {
+        char *tmp_path = getcwd(0, 0); // allocating as big as necessary
+        if (!tmp_path) {
+            fatal.log() << "Recovery getcwd() failed, throwing bad_alloc" << std::endl;
+            throw std::bad_alloc();
+        }
+        std::string tmp;
+        tmp   = "/" + _path;
+        _path = tmp_path;
+        free(tmp_path);
+        _path += tmp;
+    }
+}
+
+void Path::normalize() {
+    size_t found;      // when item were replacing is found
+    size_t prev_level; // previous level to remove when ..
+    while ((found = _path.find("/../")) != _path.npos) {
+        if (found == 0) {
+            _path.replace(0, 3, "");
+            continue;
+        }
+        prev_level = _path.find_last_of("/", found - 1);
+        _path.replace(prev_level, (found + 3) - prev_level, "");
+    }
+    while ((found = _path.find("./")) != _path.npos)
+        _path.replace(found, 2, "");
+    while ((found = _path.find("//")) != _path.npos)
+        _path.replace(found, 2, "");
+}
 
 Path::Path(const Path &other) {
     (void) other;
+}
+
+bool Path::operator==(const Path &other) const {
+    return this->_path == other._path;
+}
+
+bool Path::operator!=(const Path &other) const {
+    return this->_path != other._path;
+}
+
+bool Path::operator>=(const Path &other) const {
+    return this->_path <= other._path;
+}
+
+bool Path::operator<=(const Path &other) const {
+    return this->_path >= other._path;
+}
+
+bool Path::operator>(const Path &other) const {
+    return this->_path < other._path;
+}
+
+bool Path::operator<(const Path &other) const {
+    return this->_path > other._path;
 }
 
 Path &Path::operator=(const Path &other) {
@@ -32,14 +96,16 @@ Path &Path::operator=(const Path &other) {
 
 Path &Path::operator=(const string &path) {
     this->_path = path;
+    make_absolute();
+    normalize();
     return *this;
 }
 
-Path Path::operator+(const Path &b) const {
-    Path ret(*this);
-    ret += b;
-    return ret;
-}
+// Path Path::operator+(const Path &b) const { // disabled because of new all absolute path storage
+//     Path ret(*this);                        // this would be a pain to reimplement...
+//     ret += b;
+//     return ret;
+// }
 
 Path Path::operator+(const std::string &b) const {
     Path ret(*this);
@@ -47,33 +113,33 @@ Path Path::operator+(const std::string &b) const {
     return ret;
 }
 
-Path &Path::operator+=(const Path &b) {
-    bool trailing = *this->_path.rbegin() == '/';
-    bool heading  = *b._path.begin() == '/';
-    if (trailing && heading) {
-        std::string tmp = this->_path;
-        this->_path.resize(this->_path.length() - 1);
-        this->_path += b._path;
-    }
-    else if (trailing || heading)
-        this->_path += b._path;
-    else
-        this->_path += "/" + b._path;
-    return *this;
+bool Path::in(const Path &other) const {
+    return (_path.find(other._path) == 0);
 }
 
-Path &Path::operator+=(const std::string &b) {
-    bool trailing = *this->_path.rbegin() == '/';
-    bool heading  = *b.begin() == '/';
+std::string Path::add_path(const std::string &a, const std::string &b) {
+    bool   trailing = *a.rbegin() == '/';
+    bool   heading  = *b.begin() == '/';
+    string ret      = a;
     if (trailing && heading) {
-        /*std::string tmp = this->_path;*/
-        this->_path.resize(this->_path.size() - 1);
-        this->_path += b;
-    }
-    else if (trailing || heading)
-        this->_path += b;
+        ret.resize(a.size() - 1);
+        ret += b;
+    } else if (trailing || heading)
+        ret += b;
     else
-        this->_path += "/" + b;
+        ret += "/" + b;
+    return ret;
+}
+
+//
+// Path &Path::operator+=(const Path &b) {
+//     this->_path = add_path(this->_path, b._path);
+//     return (*this);
+// }
+
+Path &Path::operator+=(const std::string &b) {
+    this->_path = add_path(this->_path, b);
+    normalize();
     return *this;
 }
 

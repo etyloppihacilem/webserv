@@ -36,6 +36,7 @@ Location< ServerClass, RouteClass >::Location() :
     _is_file(false),
     _is_cgi(false),
     _is_redirect(false),
+    _is_diff(false),
     _status_code(OK),
     _default_error(Forbidden) {}
 
@@ -48,6 +49,7 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
     _is_file(false),
     _is_cgi(false),
     _is_redirect(false),
+    _is_diff(false),
     _status_code(OK),
     _default_error(Forbidden) {
     struct stat buf;
@@ -66,7 +68,8 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
 
         const std::set< HttpMethod > &methods = route.getMethods();
 
-        _route = route.getLocation();
+        _is_diff = route.getRootDir() != route.getUploadPath();
+        _route   = route.getLocation();
         debug.log() << "Using route " << _route << std::endl;
         _is_get = std::find(methods.begin(), methods.end(), GET) != methods.end();
         debug.log() << "GET is enabled" << std::endl;
@@ -174,14 +177,20 @@ bool Location< ServerClass, RouteClass >::find_index(const RouteClass &route, st
 template < class ServerClass, class RouteClass >
 void Location< ServerClass, RouteClass >::build_path(const std::string &target, const RouteClass &route) {
     _path       = target;
+    _upload_path       = target;
     _path_info  = target;
     _route_path = route.getRootDir();
     if (*_route_path.rbegin() == '/')
         _route_path.resize(_route_path.length() - 1);
     if (_path[route.getLocation().length()] != '/' && _path != route.getLocation())
+    {
         _path.replace(0, route.getLocation().length() - 1, _route_path);
-    else
+        _upload_path.replace(0, route.getLocation().length() - 1, route.getUploadPath());
+    }
+    else {
         _path.replace(0, route.getLocation().length(), _route_path);
+        _upload_path.replace(0, route.getLocation().length(), route.getUploadPath());
+    }
     _path_info.replace(0, route.getLocation().length(), "");
 }
 
@@ -257,6 +266,11 @@ bool Location< ServerClass, RouteClass >::is_redirect() const {
 }
 
 template < class ServerClass, class RouteClass >
+bool Location< ServerClass, RouteClass >::is_diff() const {
+    return _is_diff;
+}
+
+template < class ServerClass, class RouteClass >
 HttpCode Location< ServerClass, RouteClass >::get_status_code() const {
     return _status_code;
 }
@@ -269,6 +283,11 @@ const std::string &Location< ServerClass, RouteClass >::get_route() const {
 template < class ServerClass, class RouteClass >
 const std::string &Location< ServerClass, RouteClass >::get_path() const {
     return _path;
+}
+
+template < class ServerClass, class RouteClass >
+const std::string &Location< ServerClass, RouteClass >::get_upload_path() const {
+    return _upload_path;
 }
 
 template < class ServerClass, class RouteClass >

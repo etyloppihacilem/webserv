@@ -30,18 +30,77 @@ TEST_F(PathTestSuite, AssignationString) {
     EXPECT_EQ(path.str(), "/usr/bin/python3");
 }
 
-TEST_F(PathTestSuite, ConcatenationPath) {
-    path += Path("/");
+TEST_F(PathTestSuite, ConcatenationString) {
+    path += "/";
     ASSERT_EQ(path.str(), "/");
-    path += Path("/usr");
+    path += "/usr";
     ASSERT_EQ(path.str(), "/usr");
-    path += Path("bin");
+    path += "bin";
     ASSERT_EQ(path.str(), "/usr/bin");
-    path += Path("sh/");
+    path += "sh/";
     ASSERT_EQ(path.str(), "/usr/bin/sh/");
-    path += Path("/builtin/");
+    path += "/builtin/";
     ASSERT_EQ(path.str(), "/usr/bin/sh/builtin/");
 }
 
-TEST_F(PathTestSuite, ConcatenationString) {
+extern bool filesystem_tests; // defined in main_test.cpp
+
+#ifndef WORKDIR
+# define WORKDIR ""
+#endif
+
+TEST_F(PathTestSuite, MakeAbsolute) {
+    if (filesystem_tests)
+        return; // not testing if no workdir
+    std::string workdir = WORKDIR;
+    ASSERT_EQ(Path("www/test").str(), std::string(WORKDIR "/www/test"));
+}
+
+TEST_F(PathTestSuite, EQ) {
+    path = "/a/b/c/d/e/f";
+    EXPECT_TRUE(path == Path("/a/b/c/d/e/f"));
+    EXPECT_FALSE(path == Path("/a/b/c/"));
+    EXPECT_FALSE(path == Path("/a/b/c/d/e/f/g"));
+}
+
+TEST_F(PathTestSuite, NE) {
+    path = "/a/b/c/d/e/f";
+    EXPECT_FALSE(path != Path("/a/b/c/d/e/f"));
+    EXPECT_TRUE(path != Path("/a/b/c/"));
+    EXPECT_TRUE(path != Path("/a/b/c/d/e/f/g"));
+}
+
+TEST_F(PathTestSuite, GT) {
+    path = "/a/b/c/d/e/f";
+    EXPECT_TRUE(path > Path("/a/b/c/d/e/f/g/h"));
+    EXPECT_FALSE(path > Path("/a/b"));
+    EXPECT_FALSE(path > Path("/a/b/c/d/e/f"));
+}
+
+TEST_F(PathTestSuite, LT) {
+    path = "/a/b/c/d/e/f";
+    EXPECT_FALSE(path < Path("/a/b/c/d/e/f/g/h"));
+    EXPECT_TRUE(path < Path("/a/b"));
+    EXPECT_FALSE(path < Path("/a/b/c/d/e/f"));
+}
+
+TEST_F(PathTestSuite, GE) {
+    path = "/a/b/c/d/e/f";
+    EXPECT_TRUE(path >= Path("/a/b/c/d/e/f/g/h"));
+    EXPECT_FALSE(path >= Path("/a/b"));
+    EXPECT_TRUE(path >= Path("/a/b/c/d/e/f"));
+}
+
+TEST_F(PathTestSuite, LE) {
+    path = "/a/b/c/d/e/f";
+    EXPECT_FALSE(path <= Path("/a/b/c/d/e/f/g/h"));
+    EXPECT_TRUE(path <= Path("/a/b"));
+    EXPECT_TRUE(path <= Path("/a/b/c/d/e/f"));
+}
+
+TEST_F(PathTestSuite, in) {
+    path = "/a/b/c/d/e/f";
+    EXPECT_TRUE(path.in(Path("/a/b/c/d")));
+    EXPECT_FALSE(path.in(Path("/x/b/c/d")));
+    EXPECT_FALSE(path.in(Path("/c/d")));
 }

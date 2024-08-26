@@ -40,7 +40,7 @@ class FakeRoute {
             const std::string                &_getUploadPath_,
             // const std::string              &_getRoutePath_,
             // const std::string              &_getUploadPath_,
-            const std::set< HttpMethod >  &_getMethods_,
+            const std::set< HttpMethod >     &_getMethods_,
             const std::vector< std::string > &_getIndexPage_
         ) :
             _getRedirCode(_getRedirCode_),
@@ -58,6 +58,8 @@ class FakeRoute {
             // _getRoutePath(_getRoutePath_),
             _getMethods(_getMethods_),
             _getIndexPage(_getIndexPage_) {
+                if (_getUploadPath == "")
+                    _getUploadPath = _getRootDir;
             // if (workdir != "") {
             //     if (*workdir.rbegin() == '/')
             //         workdir.resize(workdir.length() - 1);
@@ -112,7 +114,7 @@ class FakeRoute {
         std::string                _getRootDir;
         std::string                _getUploadPath;
         // std::string              _getRoutePath;
-        std::set< HttpMethod >  _getMethods;
+        std::set< HttpMethod >     _getMethods;
         std::vector< std::string > _getIndexPage;
 
         friend ResponseBuildStateFixture;

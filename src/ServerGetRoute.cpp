@@ -10,10 +10,13 @@
 
 #include "ServerGetRoute.hpp"
 #include "Logger.hpp"
+#include "Path.hpp"
 #include "Route.hpp"
 #include <cstddef>
+#include <map>
 #include <ostream>
 #include <string>
+#include <vector>
 
 template < class RouteClass >
 ServerGetRoute< RouteClass >::ServerGetRoute() {}
@@ -69,7 +72,7 @@ const RouteClass &ServerGetRoute< RouteClass >::getRoute(const std::string &path
 
     size_t      nextSlash = 0;
     std::string lastFound = "/";
-    std::string testing = "/";
+    std::string testing   = "/";
 
     while (hasRoute(testing)) {
         lastFound = testing;
@@ -82,6 +85,33 @@ const RouteClass &ServerGetRoute< RouteClass >::getRoute(const std::string &path
     }
 
     return _routes.at(lastFound); // will return "/" route if default
+}
+
+template < class RouteClass >
+std::string ServerGetRoute< RouteClass >::getUploadLocation(const std::string &path) const {
+    typename std::map< std::string, RouteClass >::const_iterator
+        it; // ig typename is required as RouteClass is a template
+    typename std::map< std::string, RouteClass >::const_iterator
+         best; // ig typename is required as RouteClass is a template
+    bool found = false;
+    Path ppath = path;
+    Path pbest;
+    for (it = _routes.begin(); it != _routes.end(); it++) {
+        Path pit = it->second.getRootDir();
+        if (ppath.in(pit)                                      // if path matches
+            && (!found                                         // if not found yet update bc best is not initialized yet
+                || pbest.str().length() < pit.str().length()   // and most precise on device
+                || (pbest.str().length() == pit.str().length() // and if equal on device
+                    && best->second.getLocation().length() < it->second.getLocation().length()))) // most precise URI
+        {
+            best  = it;
+            pbest = pit; // Path lib is needed because of absolute paths
+            found = true;
+        }
+    }
+    std::string ret = ppath.str();
+    ret.replace(0, pbest.str().length(), best->second.getLocation());
+    return found ? ret : "";
 }
 
 template class ServerGetRoute<>;

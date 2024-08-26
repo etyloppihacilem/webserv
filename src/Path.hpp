@@ -20,15 +20,28 @@ class Path {
         Path(const Path &);
         ~Path();
 
-        Path              &operator=(const Path &);
-        Path              &operator=(const std::string &);
-        Path               operator+(const Path &) const;
-        Path               operator+(const std::string &) const;
-        Path              &operator+=(const Path &);
-        Path              &operator+=(const std::string &);
+        static std::string add_path(const std::string &a, const std::string &b);
+
+        Path &operator=(const Path &);
+        Path &operator=(const std::string &);
+        Path  operator+(const std::string &) const;
+        Path &operator+=(const std::string &);
+        // Path               operator+(const Path &) const;
+        // Path              &operator+=(const Path &);
+
+        bool operator==(const Path &) const;
+        bool operator!=(const Path &) const;
+        bool operator>=(const Path &) const;
+        bool operator<=(const Path &) const;
+        bool operator>(const Path &) const;
+        bool operator<(const Path &) const;
+        bool in(const Path &) const; ///< Tells if this is inside other Path.
+
         const std::string &str() const;
+        void               normalize();
 
     private:
+        void        make_absolute();
         std::string _path;
 };
 

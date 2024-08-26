@@ -14,6 +14,8 @@
 #include "Body.hpp"
 #include "ClientRequest.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "Route.hpp"
+#include "Server.hpp"
 #include <cstddef>
 #include <fstream>
 #include <string>
@@ -23,9 +25,16 @@
 
   run build_response until file is written.
   */
+template < class ServerClass = Server, class RouteClass = Route > // template is there for testing purposes
 class UploadStrategy : public ResponseBuildingStrategy {
     public:
-        UploadStrategy(ClientRequest &request, const std::string &location, bool replace = false);
+        UploadStrategy(
+            ClientRequest     &request,
+            const std::string &location,
+            const ServerClass &server,
+            bool               diff,
+            bool               replace = false
+        );
         ~UploadStrategy();
 
         bool build_response();
@@ -34,12 +43,18 @@ class UploadStrategy : public ResponseBuildingStrategy {
     private:
         void init();
 
-        bool         _init;
-        std::fstream _file;
-        Body        *_body;
-        std::string  _target;
-        std::string  _location;
-        bool         _replace;
+        bool               _init;
+        const ServerClass &_server;
+        std::fstream       _file;
+        Body              *_body;
+        std::string        _target;
+        std::string        _location;
+        bool               _replace;
+        bool               _diff; ///< Upload path different than root dir
+#ifdef TESTING
+# include "gtest/gtest.h"
+        FRIEND_TEST(ResponseBuildStateFixture, CorrectStrategyTest);
+#endif
 };
 
 #endif // INCLUDE_SRC_UPLOADSTRATEGY_HPP_
