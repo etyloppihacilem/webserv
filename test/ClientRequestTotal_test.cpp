@@ -546,8 +546,7 @@ std::vector< TotalRequest > TotalRequestData = {
         GET,
         false,
         "",
-        {
-        },
+        {},
         ContentTooLarge,
         80,
         "",
@@ -555,7 +554,8 @@ std::vector< TotalRequest > TotalRequestData = {
     },
     {
         "Header_too_long",
-        "GET /helloworld.html HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fire" REQUEST_LINE_LIMIT_STRING"Testing/1.0\r\n\r\n",
+        "GET /helloworld.html HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fire" REQUEST_LINE_LIMIT_STRING
+        "Testing/1.0\r\n\r\n",
         "/helloworld.html",
         GET,
         false,
@@ -585,7 +585,23 @@ std::vector< TotalRequest > TotalRequestData = {
         80,
         "hihi=ahah",
         false,
-    }
+    },
+    {
+        "SmolBody",
+        "POST /test/diff/hihi.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+        "/test/diff/hihi.txt",
+        POST,
+        true,
+        "Coucou je suis heureux",
+        {
+            {"Host", "coucou"},
+            {"Content-Length", "22"}
+        },
+        OK,
+        80,
+        "",
+        false,
+    },
 };
 
 INSTANTIATE_TEST_SUITE_P(

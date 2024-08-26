@@ -20,8 +20,10 @@
 #include "ProcessState.hpp"
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "ServerConfFields.hpp"
 #include "StringUtils.hpp"
 #include "global_test.h"
+#include "todo.hpp"
 #include "gtest/gtest.h"
 #include <cstdio>
 #include <exception>
@@ -69,9 +71,6 @@ typedef std::tuple<
     >
     d_rbs;
 
-// TODO: in progress but check that everything that does not need a read is done in one call of every
-// epoll protected function.
-
 class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
     public:
         ResponseBuildStateFixture() : _state(0), _strategy(0), _request(0) {}
@@ -85,6 +84,7 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
                 std::string a = sanitize_HTTP_string(buf);
                 _request->parse_request_line(a); // as everything is in buff, no call to read_body() is never needed
                 _request->parse_headers(a);
+                _request->init_body(a);
             } catch (std::exception &e) {
                 FAIL() << "Could not build request." << e.what();
             }
@@ -95,7 +95,12 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
             } catch (std::exception &e) {
                 FAIL() << "Could not build state." << e.what();
             }
-            ASSERT_EQ(_state->process(), ready);
+            size_t i = 0; // to prevent infinite loop
+            while (_state->process() == waiting && i < MAX_BODY_SIZE / MAX_BODY_BUFFER)
+                i++;
+            if (i >= MAX_BODY_SIZE / MAX_BODY_BUFFER)
+                FAIL() << "Infinite loop in process detected.";
+            ASSERT_EQ(_state->get_state(), ready);
             _strategy = _state->get_response_strategy();
             ASSERT_NE(_strategy, (void *) 0);
         }

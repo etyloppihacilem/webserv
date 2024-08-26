@@ -27,6 +27,7 @@ class ResponseBuildingStrategy;
   */
 class BodyWriter {
     public:
+        BodyWriter();
         BodyWriter(ResponseBuildingStrategy &state);
         virtual ~BodyWriter() = 0;
 

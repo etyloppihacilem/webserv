@@ -42,8 +42,11 @@ UploadStrategy< ServerClass, RouteClass >::UploadStrategy(
     _replace(replace),
     _diff(diff) {
     (void) server;
-    if (request.have_body())
+    if (request.have_body()) {
+        debug.log() << "Upload created with body" << std::endl;
         _body = request.get_body();
+    }
+        debug.log() << "Upload created with no body" << std::endl;
 }
 
 template < class ServerClass, class RouteClass >
@@ -65,7 +68,9 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
     if (!_body && !_init) {
         init(); // creating file if not already there and init of headers and stuff
         _file.close();
-        return _built = true; // no body
+        _response.set_body("Empty (Success)");
+        debug.log() << "No body to upload, upload done." << std::endl;
+        return _built = true; // no body to upload
     }
     if (_built) {
         warn.log() << "UploadStrategy : trying to build response, but is already built." << std::endl;
@@ -77,6 +82,8 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
         _file << _body->pop();
     else {
         _file.close();
+        _response.set_body("Success");
+        debug.log() << "Upload done." << std::endl;
         _done  = true;
         _built = true;
     }
@@ -107,6 +114,7 @@ void UploadStrategy< ServerClass, RouteClass >::init() {
                     << Forbidden << std::endl;
         throw HttpError(Forbidden);
     }
+    debug.log() << "Successfully created file " << _target << std::endl;
     _init = true;
 }
 

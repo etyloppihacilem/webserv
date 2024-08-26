@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <string>
 
+BodyWriterLength::BodyWriterLength(const std::string &body_content) : BodyWriter(), _body(body_content) {}
+
 BodyWriterLength::BodyWriterLength(ResponseBuildingStrategy &state) : BodyWriter(state), _body() {
     size_t i = 0;
 

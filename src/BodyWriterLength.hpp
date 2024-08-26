@@ -19,6 +19,7 @@
 
 class BodyWriterLength : public BodyWriter {
     public:
+        BodyWriterLength(const std::string &body_content);
         BodyWriterLength(ResponseBuildingStrategy &state);
         ~BodyWriterLength();
 

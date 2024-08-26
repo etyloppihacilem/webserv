@@ -32,6 +32,7 @@ class Response {
         Response();
         ~Response();
 
+        void        set_body(const std::string &body_content, std::string content_type = "text/plain");
         void        set_body(ResponseBuildingStrategy *strategy);
         void        add_header(const std::string &field, const std::string &value);
         void        set_code(const HttpCode &code);

@@ -134,7 +134,7 @@ bool Response::is_done() const {
 std::string Response::generate_status_line() const {
     std::stringstream line;
 
-    line << "HTTP/1.1 " << _code << "\r\n"; // overload with HttpStatusCodes
+    line << "HTTP/1.1 " << _code << "\r\n"; // overload with HttpStatusCodes so message is automatically there
     return line.str();
 }
 
@@ -156,9 +156,25 @@ std::string Response::generate_header() const {
   Delete _body and sets it to 0
   */
 void Response::clean_body() {
+    if (_header.find("Content-Length") != _header.end())
+        _header.erase("Content-Length");
+    if (_header.find( "Transfer-Encoding") != _header.end())
+        _header.erase("Transfer-Encoding");
     if (_body)
         delete _body;
     _body = 0;
+}
+
+void Response::set_body(const std::string &body_content, std::string content_type) {
+    std::stringstream st;
+    clean_body();
+    debug.log() << "Sending manual body format: length" << std::endl;
+    _body = new BodyWriterLength(body_content);
+    st << _body->length();
+    debug.log() << "Response sending format: length." << std::endl;
+    _header["Content-Length"] = st.str();
+    debug.log() << "Manual body Content-Type: " << content_type << std::endl;
+    _header["Content-Type"] = content_type;
 }
 
 /**
@@ -172,18 +188,18 @@ void Response::set_body(ResponseBuildingStrategy *strategy) {
     clean_body();
     if (strategy->get_estimated_size() > MAX_BODY_BUFFER) {
         _body = new BodyWriterChunk(*strategy);
-        debug.log() << "Response sending format : chunk." << std::endl;
+        debug.log() << "Response sending format: chunk." << std::endl;
         _header["Transfer-Encoding"] = "chunk";
     } else {
         std::stringstream st;
         try {
             _body = new BodyWriterLength(*strategy);
             st << _body->length();
-            debug.log() << "Response sending format : chunk." << std::endl;
+            debug.log() << "Response sending format: length." << std::endl;
         } catch (std::bad_alloc &e) {
             _body                        = new BodyWriterChunk(*strategy);
             _header["Transfer-Encoding"] = "chunk";
-            warn.log() << "Response sending format : chunk (bad_alloc)." << std::endl;
+            warn.log() << "Response sending format: chunk (bad_alloc)." << std::endl;
             return;
         }
         _header["Content-Length"] = st.str();
