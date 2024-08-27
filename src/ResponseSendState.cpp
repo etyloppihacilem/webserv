@@ -47,14 +47,14 @@ t_state ResponseSendState::process() {
     }
     if (!response.is_done())
         response.build_response(_buffer, BUFFER_SIZE);
-    size_t written;
+    int written;
     written = write(_socket, _buffer.c_str(), (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()));
     if (written < 0) {
         error.log() << "Error while writing response to socket " << _socket << ": " << strerror(errno)
                     << ". Closing connexion" << std::endl;
         _state = s_error; // is_error means to close the connexion
     }
-    if (written < (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()))
+    if (static_cast<size_t>(written) < (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()))
         error.log() << "Partial write in socker " << _socket << ", content may be affected." << std::endl;
     _buffer = _buffer.substr(written, _buffer.length() - written);
     if (response.is_done() && _buffer.length() == 0) {
