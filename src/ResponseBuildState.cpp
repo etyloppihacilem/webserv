@@ -25,8 +25,8 @@
 #include "ProcessState.hpp"
 #include "RedirectStrategy.hpp"
 #include "ResponseBuildingStrategy.hpp"
-#include "Route.hpp"
 #include "Server.hpp"
+#include "ServerManager.hpp"
 #include "UploadStrategy.hpp"
 #include <exception>
 #include <map>
@@ -39,29 +39,35 @@
  This class is in charge of choosing the right strategy depending on the request.
  */
 template < class ServerClass, class RouteClass >
-ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(
-    int                socket,
-    ClientRequest     *request,
-    const ServerClass &server
-) :
+ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, ClientRequest *request, int port) :
     ProcessState(socket),
     _request(request),
-    _server(server),
+    _server(0),
     _strategy(0),
     _recovery(false),
     _code(OK) {
-    if (!_request) {
-        error.log() << "ResponseBuildState: Trying to build response without request." << std::endl;
-        throw HttpError(InternalServerError);
+    if (_request->gateway_checks(port)) {
+        Server &tmp = ServerManager::getInstance()->getServer(_request->get_header().at("Host"), port);
+        _server     = &tmp;
     }
-} // TODO:check where to free this once it is allocated
+    // init server here
+    if (!_request) {
+        error.log() << "ResponseBuildState: Trying to build response without request, sending " << InternalServerError
+                    << std::endl;
+        _recovery = true;
+        _request  = new ClientRequest(socket, InternalServerError, port); // belt suspenders ("ceinture bretelle")
+        _code     = InternalServerError;
+    }
+    if (!_server) {
+        error.log() << "ResponseBuildState: Trying to build non recovery response without server." << std::endl;
+        _recovery = true;
+        _request->set_status(InternalServerError); // belt suspenders ("ceinture bretelle")
+        _code = InternalServerError;
+    }
+}
 
 template < class ServerClass, class RouteClass >
-ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(
-    int                socket,
-    HttpCode           code,
-    const ServerClass &server
-) :
+ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, HttpCode code, ServerClass *server) :
     ProcessState(socket),
     _request(0),
     _server(server),
@@ -73,6 +79,9 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(
                     << "' code, wich is not an error code. Sending " << InternalServerError << "." << std::endl;
         _code = InternalServerError;
     }
+    debug.log() << "Initializing recovery response for " << code << std::endl;
+    if (!_server)
+        debug.log() << "No server provided for recovery, auto-generating page by default." << std::endl;
 } // TODO:check where to free this once it is allocated
 
 template < class ServerClass, class RouteClass >
@@ -131,10 +140,15 @@ ResponseBuildingStrategy *ResponseBuildState< ServerClass, RouteClass >::get_res
 /**
   This function build the right strategy for a given ClientRequest.
   */
-template < class ServerClass, class RouteClass >
+template < class ServerClass, class RouteClass > // OPTI: refactor this this is sooo bad
 void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
     if (isError(_request->get_status())) {
-        const std::map< HttpCode, std::string > &error_pages = _server.getErrorPages();
+        if (!_server) {
+            debug.log() << "Sending " << _request->get_status() << " with generated page" << std::endl;
+            _strategy = new ErrorStrategy(_request->get_status()); // page not found
+            return;
+        }
+        const std::map< HttpCode, std::string > &error_pages = _server->getErrorPages();
 
         std::map< HttpCode, std::string >::const_iterator it = error_pages.find(_request->get_status());
 
@@ -147,8 +161,13 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
         }
         return;
     }
+    if (!_server) {
+        error.log() << "Trying to instantiate non error response without server, sending " << InternalServerError
+                    << std::endl;
+        throw HttpError(InternalServerError); // throw is valid here and will be cached
+    }
 
-    Location< ServerClass, RouteClass > location(_request->get_target(), _server);
+    Location< ServerClass, RouteClass > location(_request->get_target(), *_server);
 
     if (location.is_redirect()) {
         debug.log() << "Choosing RedirectStrategy" << std::endl;
@@ -181,7 +200,7 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
         }
         debug.log() << "Choosing UploadStrategy" << std::endl;
         _strategy = new UploadStrategy< ServerClass, RouteClass >(
-            *_request, location.get_upload_path(), _server, location.is_diff()
+            *_request, location.get_upload_path(), *_server, location.is_diff()
         );
     } else if (_request->get_method() == DELETE) {
         if (!location.is_delete()) {
@@ -197,7 +216,7 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
                     << std::endl;
         throw HttpError(InternalServerError);
     }
-} // 27 not that bad - 27 wth are u even talking about, more like 53 !!
+} // 27 not that bad - 27 wth are u even talking about, more like 53 + 21 = 74 !!%#@
 
 /**
   Build error strategy for a given http code.

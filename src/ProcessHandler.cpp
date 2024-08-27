@@ -70,7 +70,7 @@ void ProcessHandler::transition_to_rbs() {
     ClientRequest *request;
     request = read_state->get_client_request();
     clean_state();
-    _state = new ResponseBuildState<>(_socket, request); // construction of ResponseBuildState
+    _state = new ResponseBuildState<>(_socket, request, _port); // construction of ResponseBuildState
 }
 
 void ProcessHandler::transition_to_rss() {
@@ -80,7 +80,7 @@ void ProcessHandler::transition_to_rss() {
                        "_state is now sending "
                     << InternalServerError << " using recovery ResponseBuildState." << std::endl;
         clean_state();
-        _state = new ResponseBuildState<>(_socket, InternalServerError, server);
+        _state = new ResponseBuildState<>(_socket, InternalServerError);
         return;
     }
     ResponseBuildingStrategy *strategy = response_build_state->get_response_strategy();

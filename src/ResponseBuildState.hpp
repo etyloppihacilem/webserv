@@ -15,7 +15,6 @@
 #include "ClientRequest.hpp"
 #include "HttpStatusCodes.hpp"
 #include "ProcessState.hpp"
-#include "Response.hpp"
 #include "Route.hpp"
 #include "Server.hpp"
 
@@ -26,11 +25,11 @@
 template < class ServerClass = Server, class RouteClass = Route > // template is there for testing purposes
 class ResponseBuildState : public ProcessState {
     public:
-        ResponseBuildState(int socket, ClientRequest *request, const ServerClass &server);
+        ResponseBuildState(int socket, ClientRequest *request, int port);
         ResponseBuildState(
-            int                socket,
-            HttpCode           code,
-            const ServerClass &server
+            int          socket,
+            HttpCode     code,
+            ServerClass *server = 0
         ); // equivalent of calling recovery on ErrorBuildingStrategy
         ~ResponseBuildState();
 
@@ -44,7 +43,7 @@ class ResponseBuildState : public ProcessState {
         void init_strategy(HttpCode code);
 
         ClientRequest            *_request;
-        const ServerClass        &_server;
+        const ServerClass        *_server;
         ResponseBuildingStrategy *_strategy;
         bool                      _recovery;
         HttpCode                  _code;
