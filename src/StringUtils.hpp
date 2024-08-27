@@ -23,5 +23,6 @@ std::string  extract_basename(const std::string &s);
 std::string &sanitize_HTTP_string(std::string &s, size_t len);
 std::string  sanitize_HTTP_string(const std::string &s);
 std::string  sanitize_HTTP_string(const char *s);
+void         replace_all(std::string &str, const std::string &to_find, const std::string &to_replace);
 
 #endif // INCLUDE_SRC_STRINGUTILS_HPP_

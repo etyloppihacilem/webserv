@@ -111,3 +111,12 @@ std::string sanitize_HTTP_string(const char *s) {
     std::string tmp = std::string(s);
     return sanitize_HTTP_string(tmp, 0);
 }
+
+void replace_all(std::string &str, const std::string &to_find, const std::string &to_replace) {
+    size_t elem = str.find(to_find, 0);
+
+    while (elem != std::string::npos) {
+        str.replace(elem, to_find.length(), to_replace);
+        elem = str.find(to_find, 0);
+    }
+}

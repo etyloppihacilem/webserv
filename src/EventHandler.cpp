@@ -10,6 +10,6 @@
 
 #include "EventHandler.hpp"
 
-EventHandler::EventHandler(int socket, int port) : _socket(socket), _port(port) {}
+EventHandler::EventHandler(int socket) : _socket(socket){}
 
 EventHandler::~EventHandler() {}

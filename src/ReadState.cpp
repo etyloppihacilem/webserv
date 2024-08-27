@@ -22,7 +22,7 @@
 #include <ostream>
 #include <unistd.h>
 
-ReadState::ReadState(int socket) : ProcessState(socket), _buffer(), _request(0), _parse_state(rs_line) {}
+ReadState::ReadState(int socket, int port) : ProcessState(socket), _buffer(), _request(0), _parse_state(rs_line), _port(port) {}
 
 ReadState::~ReadState() {
     if (_request)
@@ -82,6 +82,9 @@ t_state ReadState::process_buffer(char *buffer) {
                 if (_request->parse_headers(_buffer)) {
                     if (isError(_request->get_status()))
                         return _state = ready;
+                    debug.log() << "Processing gateway checks." << std::endl;
+                    if (!_request->gateway_checks(_port))
+                        return _state = ready; // error
                     debug.log() << "Parsing body if any." << std::endl;
                     _parse_state = body;
                 }

@@ -18,7 +18,7 @@
 
 class ReadState : public ProcessState {
     public:
-        ReadState(int socket);
+        ReadState(int socket, int port);
         ~ReadState();
 
         t_state process();
@@ -34,6 +34,7 @@ class ReadState : public ProcessState {
         /**< buffer is supposed clean at the end of a successful parsing on it. */
         ClientRequest *_request; ///< ClientRequest that is built
         internal_state _parse_state;
+        int _port;
 
 #ifdef TESTING
         FRIEND_TEST(ReadStateSuite, FindMethod);

@@ -17,6 +17,7 @@
 #include "HttpStatusCodes.hpp"
 #include "HttpUtils.hpp"
 #include "Logger.hpp"
+#include "ServerManager.hpp"
 #include "StringUtils.hpp"
 #include <cstddef>
 #include <ios>
@@ -77,12 +78,20 @@ HttpMethod ClientRequest::parse_method(const std::string &method, size_t end) {
     throw HttpError(NotImplemented);
 }
 
-static void replace_all(std::string &str, const std::string &to_find, const std::string &to_replace) {
-    size_t elem = str.find(to_find, 0);
-
-    while (elem != std::string::npos) {
-        str.replace(elem, to_find.length(), to_replace);
-        elem = str.find(to_find, 0);
+bool ClientRequest::gateway_checks(int port) {
+    if (port != _port) {
+        info.log() << "Request was recieved on port " << port << " but wanted port " << _port << ", sending "
+                   << BadGateway << std::endl;
+        _status = BadGateway;
+        return false;
+    }
+    try {
+        Server &s = ServerManager::getInstance()->getServer(_header["Host"], _port);
+    } catch (ServerManager::ServerNotFoundWarn &e) {
+        info.log() << "Host " << _header["Host"] << " is not listening on " << _port << " or does not exist, sending "
+                   << BadGateway << std::endl;
+        _status = BadGateway;
+        return false;
     }
 }
 

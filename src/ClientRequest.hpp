@@ -28,23 +28,27 @@ class ClientRequest {
         ClientRequest(int socket, HttpCode code, int port);
         ~ClientRequest();
 
+        bool parse_request_line(std::string &in);
+        bool parse_headers(std::string &in);
+        bool init_body(std::string &buffer);
+        bool gateway_checks(int port); ///< Returns true on success
         // bool        parse(const std::string &in);
-        bool        parse_request_line(std::string &in);
-        bool        parse_headers(std::string &in);
-        bool        init_body(std::string &buffer);
-        void        save_mem();
+
+        void set_status(HttpCode code);
+
         std::string get_target() const;
         HttpMethod  get_method();
         Body       *get_body();
-        // std::map<std::string, std::string>  &get_parameters();
         bool        have_body() const;
         HttpCode    get_status() const;
         int         get_socket() const;
         int         get_port() const;
         std::string get_query_string() const;
-        void        set_status(HttpCode code);
 
-        const std::map<std::string, std::string> &get_header();
+        const std::map< std::string, std::string > &get_header();
+        // std::map<std::string, std::string>  &get_parameters();
+
+        void save_mem();
 
     private:
         HttpMethod parse_method(const std::string &method, size_t end);
@@ -55,21 +59,21 @@ class ClientRequest {
         void       parse_header_line(const std::string &in, size_t begin, size_t end);
         void       parse_port();
 
-        int                                _socket;
-        HttpMethod                         _method; ///< Method used for request
-        std::string                        _target; ///< Target of request
-        std::map<std::string, std::string> _header; ///< Map containing headers
-        // std::map<std::string, std::string>  _parameters;    ///< Parameters from request
-        bool                               _body_exists; ///< True if there's a body in this request.
+        int                                  _socket;
+        HttpMethod                           _method;      ///< Method used for request
+        std::string                          _target;      ///< Target of request
+        std::map< std::string, std::string > _header;      ///< Map containing headers
+        bool                                 _body_exists; ///< True if there's a body in this request.
         /**< Determined by the presence of Content-Length or Transfer-Encoding headers in request.*/
-        Body                              *_body;          ///< Pointer on body object if present
-        HttpCode                           _status;        ///< Status of request (not 200 if error)
-        bool                               _absolute_form; ///< True if request is in absolute form.
-        int                                _port;          ///< Port of the request.
-        std::string                        _query_string;
+        Body                                *_body;          ///< Pointer on body object if present
+        HttpCode                             _status;        ///< Status of request (not 200 if error)
+        bool                                 _absolute_form; ///< True if request is in absolute form.
+        int                                  _port;          ///< Port of the request.
+        std::string                          _query_string;
         /**< Absolute form means having the Host value in the request line and having no 'Host' header.
              Any 'Host' headers found while in absolute form is discarded.
         */
+        // std::map<std::string, std::string>  _parameters;    ///< Parameters from request
 
 #ifdef TESTING
         FRIEND_TEST(ClientRequestTestSuite, ParseMethodTestExpectedOK);

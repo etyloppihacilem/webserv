@@ -22,7 +22,7 @@
 #include "ServerManager.hpp"
 #include <ostream>
 
-ProcessHandler::ProcessHandler(int socket_fd, int port) : EventHandler(socket_fd, port), _state(0) {}
+ProcessHandler::ProcessHandler(int socket_fd, int port) : EventHandler(socket_fd), _port(port), _state(0) {}
 
 ProcessHandler::~ProcessHandler() {
     if (_state) {
@@ -33,7 +33,7 @@ ProcessHandler::~ProcessHandler() {
 
 void ProcessHandler::handle() {
     if (!_state)
-        _state = new ReadState(_socket);
+        _state = new ReadState(_socket, _port);
     if (_state->process() == ready) {
         // passer au state suivant parce qu'il vient de finir.
         if (dynamic_cast< ReadState * >(_state) != 0)
@@ -59,26 +59,22 @@ void ProcessHandler::clean_state() {
 
 void ProcessHandler::transition_to_rbs() {
     ReadState *read_state; // to cast
-    // TODO: server to clean
-    Server     server;
     if ((read_state = dynamic_cast< ReadState * >(_state)) == 0) {
         error.log() << "Transition to ResponseBuildState from a state that is not ReadState. Aborting. Current _state "
                        "is now sending "
                     << InternalServerError << " using recovery ResponseBuildState." << std::endl;
-        clean_state();
-        _state = new ResponseBuildState<>(_socket, InternalServerError, server);
+		clean_state();
+		_state = new ResponseBuildState<>(_socket, InternalServerError);
         return;
     }
     ClientRequest *request;
     request = read_state->get_client_request();
     clean_state();
-    _state = new ResponseBuildState<>(_socket, request, server); // construction of ResponseBuildState
+    _state = new ResponseBuildState<>(_socket, request); // construction of ResponseBuildState
 }
 
 void ProcessHandler::transition_to_rss() {
     ResponseBuildState<> *response_build_state; // to cast
-    // TODO: server to clean
-    Server                server;
     if ((response_build_state = dynamic_cast< ResponseBuildState<> * >(_state)) == 0) {
         error.log() << "Transition to ResponseSendState from a state that is not ResponseBuildState. Aborting. Current "
                        "_state is now sending "

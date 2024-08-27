@@ -22,7 +22,7 @@
   */
 class ProcessHandler : public EventHandler {
     public:
-        ProcessHandler(int socket_fd, int port);
+        ProcessHandler(int socket_fd, Server &server);
         ~ProcessHandler();
 
         void handle();
@@ -32,6 +32,7 @@ class ProcessHandler : public EventHandler {
         void transition_to_rbs(); ///< Transition to response building state;
         void transition_to_rss(); ///< Transition to response sending state;
 
+        int _port;
         ProcessState *_state;
 };
 

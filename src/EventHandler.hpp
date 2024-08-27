@@ -22,8 +22,7 @@ class EventHandler {
         virtual void handle() = 0; ///< Run this in loop
 
     protected:
-        int _socket;
-        int _port;
+        int    _socket;
         // time_t _last_activity;
 };
 
