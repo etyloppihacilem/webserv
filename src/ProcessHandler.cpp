@@ -53,8 +53,9 @@ void ProcessHandler::handle() {
 }
 
 void ProcessHandler::clean_state() {
-    delete this->_state;
-    this->_state = 0; // needed bc in case of bad_alloc, _state should be 0
+    if (_state)
+        delete _state;
+    _state = 0; // needed bc in case of bad_alloc, _state should be 0
 }
 
 void ProcessHandler::transition_to_rbs() {
