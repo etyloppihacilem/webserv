@@ -13,6 +13,7 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include "ServerConfFields.hpp"
 #include "todo.hpp"
 #include <cctype>
 #include <cstddef>
@@ -93,16 +94,19 @@ std::string &BodyChunk::get() {
             _eoc = true;
         _total += to_save;
     }
+    if (_total > MAX_BODY_SIZE) {
+        info.log() << "Body is too large (chunks), " << _total << " bytes were read, sending " << ContentTooLarge
+                   << std::endl;
+        throw HttpError(ContentTooLarge);
+    }
     return _body;
 }
 
 std::string BodyChunk::pop() {
     if (_done)
         return "";
-
     std::string ret = "";
-
-    _uniform = false;
+    _uniform        = false;
     read_body();
     while (_trailing && !_done) {
         size_t sp;
@@ -134,6 +138,11 @@ std::string BodyChunk::pop() {
         if ((_bytes_remaining -= to_save) == 0)
             _eoc = true;
         _total += to_save;
+    }
+    if (_total > MAX_BODY_SIZE) {
+        info.log() << "Body is too large (chunks), " << _total << " bytes were read, sending " << ContentTooLarge
+                   << std::endl;
+        throw HttpError(ContentTooLarge);
     }
     return ret;
 }

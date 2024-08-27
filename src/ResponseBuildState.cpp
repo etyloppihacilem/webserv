@@ -82,7 +82,7 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, Ht
     debug.log() << "Initializing recovery response for " << code << std::endl;
     if (!_server)
         debug.log() << "No server provided for recovery, auto-generating page by default." << std::endl;
-} // TODO:check where to free this once it is allocated
+}
 
 template < class ServerClass, class RouteClass >
 ResponseBuildState< ServerClass, RouteClass >::~ResponseBuildState() {

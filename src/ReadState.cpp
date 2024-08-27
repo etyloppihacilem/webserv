@@ -22,7 +22,12 @@
 #include <ostream>
 #include <unistd.h>
 
-ReadState::ReadState(int socket, int port) : ProcessState(socket), _buffer(), _request(0), _parse_state(rs_line), _port(port) {}
+ReadState::ReadState(int socket, int port) :
+    ProcessState(socket),
+    _buffer(),
+    _request(0),
+    _parse_state(rs_line),
+    _port(port) {}
 
 ReadState::~ReadState() {
     if (_request)
@@ -77,7 +82,7 @@ t_state ReadState::process_buffer(char *buffer) {
                 if (!_request->parse_request_line(_buffer))
                     return _state = ready; // ready to return error
                 debug.log() << "Parsing headers." << std::endl;
-                _parse_state = headers;    // next state
+                _parse_state = headers; // next state
             } else if (_parse_state == headers) {
                 if (_request->parse_headers(_buffer)) {
                     if (isError(_request->get_status()))
@@ -94,9 +99,9 @@ t_state ReadState::process_buffer(char *buffer) {
             _buffer = "";
             shrink_to_fit(_buffer); // because it is large
             info.log() << "MAX_REQUEST_LINE was reached while parsing "
-                       << (_parse_state == rs_line ? "request_line" : "headers") << ", sending " << EntityTooLarge
-                       << std::endl;
-            return_error(EntityTooLarge);
+                       << (_parse_state == rs_line ? "request_line" : "headers") << ", sending "
+                       << (_parse_state == rs_line ? URITooLong : RequestHeaderFieldsTooLarge) << std::endl;
+            return_error(_parse_state == rs_line ? URITooLong : RequestHeaderFieldsTooLarge);
         }
         if (_parse_state == body) {
             _request->init_body(_buffer);
@@ -110,8 +115,8 @@ t_state ReadState::process_buffer(char *buffer) {
 t_state ReadState::return_error(HttpCode code) {
     if (_request)
         delete _request;
-    _request      = new ClientRequest(_socket, code, 80); // TODO: trouver si le port est necessaire et
-    return _state = ready;                                // mettre le bon le cas echeant.
+    _request      = new ClientRequest(_socket, code, _port);
+    return _state = ready;
 }
 
 /**

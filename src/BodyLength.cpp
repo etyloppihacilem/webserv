@@ -13,6 +13,7 @@
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include "ServerConfFields.hpp"
 #include "todo.hpp"
 #include <cctype>
 #include <cstddef>
@@ -38,7 +39,10 @@ BodyLength::BodyLength(int socket, std::string &buffer, std::string length) :
         throw HttpError(BadRequest); // other invalid length
     }
     _total = _length;
-    // TODO: implementer MaxBodySize
+    if (_total > MAX_BODY_SIZE){
+        info.log() << "Body is too large (" << _total << " bytes), sending " << ContentTooLarge << std::endl;
+        throw HttpError(ContentTooLarge);
+    }
 }
 
 BodyLength::~BodyLength() {}

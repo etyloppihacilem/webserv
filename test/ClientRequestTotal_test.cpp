@@ -547,7 +547,7 @@ std::vector< TotalRequest > TotalRequestData = {
         false,
         "",
         {},
-        ContentTooLarge,
+        URITooLong,
         80,
         "",
         false,
@@ -563,7 +563,7 @@ std::vector< TotalRequest > TotalRequestData = {
         {
             { "Host", "127.0.0.1" },
         },
-        ContentTooLarge,
+        RequestHeaderFieldsTooLarge,
         80,
         "",
         false,
@@ -594,8 +594,8 @@ std::vector< TotalRequest > TotalRequestData = {
         true,
         "Coucou je suis heureux",
         {
-            {"Host", "coucou"},
-            {"Content-Length", "22"}
+            { "Host", "coucou" },
+            { "Content-Length", "22" },
         },
         OK,
         80,

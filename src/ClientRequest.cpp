@@ -165,7 +165,7 @@ void ClientRequest::parse_target(const std::string &in, size_t pos) {
 void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_t end) {
     if (end - begin > MAX_REQUEST_LINE) {
         info.log() << "Max header line length exceeded, sending " << ContentTooLarge << std::endl;
-        throw HttpError(ContentTooLarge);
+        throw HttpError(RequestHeaderFieldsTooLarge);
     }
     size_t sep = in.find_first_of(":", begin);
     size_t ows = in.find_first_of(" \t", begin);

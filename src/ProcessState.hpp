@@ -35,7 +35,6 @@ class ProcessState {
         t_state         get_state() const;
 
     protected:
-        // TODO:handler manifestement mais osef
         int           _socket;
         t_state       _state;
         // EventHandler *_handler;
