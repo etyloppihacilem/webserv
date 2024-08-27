@@ -1,16 +1,25 @@
 #ifndef INCLUDE_SRC_SERVERMANAGER_HPP_
 #define INCLUDE_SRC_SERVERMANAGER_HPP_
 
+#include "EventHandler.hpp"
 #include "Server.hpp"
+#include "ServerReactor.hpp"
 #include <exception>
 #include <string>
 #include <vector>
 
 class ServerManager {
     public:
-        static ServerManager *getInstance(const std::string &configFile);
-        void                  deleteInstance();
+        static ServerManager *getInstance(const std::string &configFile = "");
+        static void           deleteInstance();
         ~ServerManager();
+
+        void addClient(int socket_fd, int port);
+        void ignoreClient(int socket_fd);
+        void deleteClient(int socket_fd);
+        void listenToClient(int socket_fd, EventHandler &handler);
+        void talkToClient(int socket_fd, EventHandler &handler);
+        void run(void);
 
         Server &getServer(const std::string &serverName, int port);
         Server &getServer(int port);
@@ -41,10 +50,11 @@ class ServerManager {
 
         void operator=(const ServerManager &other) { (void) other; }
 
+        std::vector< Server > parseConfFile(const std::string &configFile);
+
         static ServerManager *_instance;
         std::vector< Server > _servers;
-
-        // ServerReactor _reactor;
+        ServerReactor         _reactor;
 };
 
 #endif // INCLUDE_SRC_SERVERMANAGER_HPP_

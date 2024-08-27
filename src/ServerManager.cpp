@@ -1,4 +1,5 @@
 #include "ServerManager.hpp"
+#include "EventHandler.hpp"
 #include "Logger.hpp"
 #include "Server.hpp"
 #include "ServerConfFields.hpp"
@@ -9,6 +10,7 @@
 #include <exception>
 #include <fstream>
 #include <ostream>
+#include <regex.h>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -33,10 +35,6 @@ void ServerManager::deleteInstance() {
     }
 }
 
-ServerManager::~ServerManager() {
-    this->deleteInstance();
-}
-
 std::string readConfFile(std::ifstream &configStream) {
     std::string buff;
     std::string fileContent;
@@ -59,7 +57,11 @@ std::string cleanConfFile(std::string fileContent) {
     return fileContent;
 }
 
-ServerManager::ServerManager(const std::string &configFile) {
+std::vector< Server > ServerManager::parseConfFile(const std::string &configFile) {
+    std::vector< Server > servers;
+    if (configFile.empty())
+        return servers;
+
     if (extract_extension(configFile) != "conf") {
         error.log() << configFile << ": file is not in the expected format [ *.conf ]." << std::endl;
         throw FailToInitServerError();
@@ -77,20 +79,58 @@ ServerManager::ServerManager(const std::string &configFile) {
             StringTokenizer tokenizedServer = tokenizeServer(tokenizedServers);
             Server          newServer(tokenizedServer);
             // TODO: check that server cannot use hostname and port twice.
-            _servers.push_back(newServer);
+            servers.push_back(newServer);
         } catch (ServerConfError &e) {
             throw FailToInitServerError();
         }
     }
-    // TODO start Reactor from here
+    return servers;
+}
+
+ServerManager::ServerManager(const std::string &configFile) :
+    _servers(parseConfFile(configFile)),
+    _reactor(this->_servers) {}
+
+ServerManager::~ServerManager() {
+    this->deleteInstance();
+}
+
+void ServerManager::addClient(int socket_fd, int port) {
+    this->_reactor.addClient(socket_fd, port);
+}
+
+void ServerManager::ignoreClient(int socket_fd) {
+    this->_reactor.ignoreClient(socket_fd);
+}
+
+void ServerManager::deleteClient(int socket_fd) {
+    this->_reactor.deleteClient(socket_fd);
+}
+
+void ServerManager::listenToClient(int socket_fd, EventHandler &handler) {
+    this->_reactor.listenToClient(socket_fd, handler);
+}
+
+void ServerManager::talkToClient(int socket_fd, EventHandler &handler) {
+    this->_reactor.talkToClient(socket_fd, handler);
 }
 
 Server &ServerManager::getServer(const std::string &serverName, int port) {
-    for (std::vector< Server >::iterator it = _servers.begin(); it < _servers.end(); ++it)
+    for (std::vector< Server >::iterator it = this->_servers.begin(); it != this->_servers.end(); ++it)
         if (it->hasServeName(serverName) && it->getPort() == port)
             return *it;
 
     std::stringstream portStr;
     portStr << port;
     throw ServerNotFoundWarn(serverName + portStr.str());
+}
+
+Server &ServerManager::getServer(int port) {
+    for (std::vector< Server >::iterator it = this->_servers.begin(); it != this->_servers.end(); ++it)
+        if (it->getPort() == port)
+            return *it;
+
+    std::stringstream portStr;
+    portStr << port;
+    throw ServerNotFoundWarn(portStr.str());
 }
