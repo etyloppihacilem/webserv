@@ -46,11 +46,12 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, Cl
     _strategy(0),
     _recovery(false),
     _code(OK) {
+#ifndef TESTING
     if (_request->gateway_checks(port)) {
-        Server &tmp = ServerManager::getInstance()->getServer(_request->get_header().at("Host"), port);
-        _server     = &tmp;
+        ServerClass &tmp = ServerManager::getInstance()->getServer(_request->get_header().at("Host"), port);
+        _server          = &tmp;
     }
-    // init server here
+#endif
     if (!_request) {
         error.log() << "ResponseBuildState: Trying to build response without request, sending " << InternalServerError
                     << std::endl;
@@ -58,12 +59,14 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, Cl
         _request  = new ClientRequest(socket, InternalServerError, port); // belt suspenders ("ceinture bretelle")
         _code     = InternalServerError;
     }
+#ifndef TESTING
     if (!_server) {
         error.log() << "ResponseBuildState: Trying to build non recovery response without server." << std::endl;
         _recovery = true;
         _request->set_status(InternalServerError); // belt suspenders ("ceinture bretelle")
         _code = InternalServerError;
     }
+#endif
 }
 
 template < class ServerClass, class RouteClass >

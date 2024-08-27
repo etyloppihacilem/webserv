@@ -72,7 +72,7 @@ class TotalRequestFixture : public ::testing::TestWithParam< TotalRequest > {
             if (i != raw.length())
                 GTEST_FATAL_FAILURE_("Partial write in pipe");
             close(_fd[1]);
-            _test     = new ReadState(_fd[0]);
+            _test     = new ReadState(_fd[0], std::get< tport >(GetParam()));
             _fd_check = _fd[0];
 
             if (std::get< tname >(GetParam()) == "Bad_line_terminator_r")

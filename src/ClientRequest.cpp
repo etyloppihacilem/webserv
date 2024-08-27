@@ -17,6 +17,7 @@
 #include "HttpStatusCodes.hpp"
 #include "HttpUtils.hpp"
 #include "Logger.hpp"
+#include "Server.hpp"
 #include "ServerManager.hpp"
 #include "StringUtils.hpp"
 #include <cstddef>
@@ -85,14 +86,18 @@ bool ClientRequest::gateway_checks(int port) {
         _status = BadGateway;
         return false;
     }
+#ifndef TESTING
     try {
         Server &s = ServerManager::getInstance()->getServer(_header["Host"], _port);
+        (void)s; // this was meant to test existence
     } catch (ServerManager::ServerNotFoundWarn &e) {
         info.log() << "Host " << _header["Host"] << " is not listening on " << _port << " or does not exist, sending "
                    << BadGateway << std::endl;
         _status = BadGateway;
         return false;
     }
+#endif
+    return true;
 }
 
 /**

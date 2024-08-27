@@ -16,13 +16,14 @@
   */
 class EventHandler {
     public:
-        EventHandler(int socket, int port);
+        EventHandler(int socket_fd, int port);
         virtual ~EventHandler() = 0;
 
         virtual void handle() = 0; ///< Run this in loop
 
     protected:
-        int    _socket;
+        int _socket_fd;
+        int _port;
         // time_t _last_activity;
 };
 

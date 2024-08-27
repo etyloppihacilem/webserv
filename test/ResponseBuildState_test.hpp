@@ -91,7 +91,8 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
             if (_request->get_status() != OK)
                 FAIL() << "_request has error ! (" << _request->get_status() << ")";
             try {
-                _state = new ResponseBuildState< FakeServer, FakeRoute >(0, _request, _server);
+                _state = new ResponseBuildState< FakeServer, FakeRoute >(0, _request, 80);
+                _state->_server = &_server;
             } catch (std::exception &e) {
                 FAIL() << "Could not build state." << e.what();
             }

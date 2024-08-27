@@ -43,10 +43,11 @@ class ResponseBuildState : public ProcessState {
         void init_strategy(HttpCode code);
 
         ClientRequest            *_request;
-        const ServerClass        *_server;
+        ServerClass              *_server;
         ResponseBuildingStrategy *_strategy;
         bool                      _recovery;
         HttpCode                  _code;
+        friend class ResponseBuildStateFixture;
 };
 
 #endif // INCLUDE_SRC_RESPONSEBUILDSTATE_HPP_

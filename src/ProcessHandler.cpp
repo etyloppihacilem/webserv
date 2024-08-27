@@ -22,7 +22,7 @@
 #include "ServerManager.hpp"
 #include <ostream>
 
-ProcessHandler::ProcessHandler(int socket_fd, int port) : EventHandler(socket_fd), _port(port), _state(0) {}
+ProcessHandler::ProcessHandler(int socket_fd, int port) : EventHandler(socket_fd, port), _state(0) {}
 
 ProcessHandler::~ProcessHandler() {
     if (_state) {
@@ -33,7 +33,7 @@ ProcessHandler::~ProcessHandler() {
 
 void ProcessHandler::handle() {
     if (!_state)
-        _state = new ReadState(_socket, _port);
+        _state = new ReadState(_socket_fd, _port);
     if (_state->process() == ready) {
         // passer au state suivant parce qu'il vient de finir.
         if (dynamic_cast< ReadState * >(_state) != 0)
@@ -47,7 +47,7 @@ void ProcessHandler::handle() {
     }
     if (_state->get_state() == s_error) {
         // TODO: Close connexion here
-        ServerManager::getInstance()->deleteClient(this->_socket);
+        ServerManager::getInstance()->deleteClient(this->_socket_fd);
         return;
     }
 }
@@ -63,14 +63,14 @@ void ProcessHandler::transition_to_rbs() {
         error.log() << "Transition to ResponseBuildState from a state that is not ReadState. Aborting. Current _state "
                        "is now sending "
                     << InternalServerError << " using recovery ResponseBuildState." << std::endl;
-		clean_state();
-		_state = new ResponseBuildState<>(_socket, InternalServerError);
+        clean_state();
+        _state = new ResponseBuildState<>(_socket_fd, InternalServerError);
         return;
     }
     ClientRequest *request;
     request = read_state->get_client_request();
     clean_state();
-    _state = new ResponseBuildState<>(_socket, request, _port); // construction of ResponseBuildState
+    _state = new ResponseBuildState<>(_socket_fd, request, _port); // construction of ResponseBuildState
 }
 
 void ProcessHandler::transition_to_rss() {
@@ -80,12 +80,12 @@ void ProcessHandler::transition_to_rss() {
                        "_state is now sending "
                     << InternalServerError << " using recovery ResponseBuildState." << std::endl;
         clean_state();
-        _state = new ResponseBuildState<>(_socket, InternalServerError);
+        _state = new ResponseBuildState<>(_socket_fd, InternalServerError);
         return;
     }
     ResponseBuildingStrategy *strategy = response_build_state->get_response_strategy();
     clean_state();
-    _state = new ResponseSendState(_socket, strategy);
-// TODO: change status of epoll in this functio to test 
-    ServerManager::getInstance()->talkToClient(_socket, *this);
+    _state = new ResponseSendState(_socket_fd, strategy);
+    // TODO: change status of epoll in this functio to test
+    ServerManager::getInstance()->talkToClient(_socket_fd, *this);
 }

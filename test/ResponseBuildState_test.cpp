@@ -226,8 +226,8 @@ std::vector< d_rbs > ResponseBuildData = {
         Created,
         {
             { "Location", "/test/diff/upload/hihi.txt" },
-            { "Content-Length", "7"},
-            { "Content-Type", "text/plain"},
+            { "Content-Length", "7" },
+            { "Content-Type", "text/plain" },
         },
         true,
         "Success",
@@ -328,19 +328,8 @@ TEST(ResponseBuildStateSuite, NoRequest) {
     typedef ResponseBuildState< FakeServer, FakeRoute > template_test;
     FakeServer                                          server;
     error.disable();
-    EXPECT_THROW(
-        {
-            try {
-                template_test test(0, 0, server);
-            } catch (HttpError &e) {
-                EXPECT_EQ(e.get_code(), InternalServerError);
-                throw;
-            } catch (std::exception &e) {
-                throw;
-            }
-        },
-        HttpError
-    );
+    template_test test(0, 0, 80);
+    EXPECT_EQ(test.get_request()->get_status(), InternalServerError);
     error.enable();
 }
 
