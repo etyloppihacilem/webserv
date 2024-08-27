@@ -14,6 +14,7 @@
 #include <ios>
 #include <ostream>
 
+//TODO: add signal handling for SIGINT(interrupt) and SIGPIPE(ignore)
 int main(int ac, char **av) {
     (void) ac;
     (void) av;

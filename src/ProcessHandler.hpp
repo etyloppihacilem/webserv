@@ -13,7 +13,6 @@
 
 #include "EventHandler.hpp"
 #include "ProcessState.hpp"
-#include "Server.hpp"
 
 /**
   This class is handling all ProcessStates.
@@ -23,14 +22,16 @@
   */
 class ProcessHandler : public EventHandler {
     public:
-        ProcessHandler(int socket, Server &server);
+        ProcessHandler(int socket_fd, int port);
         ~ProcessHandler();
 
         void handle();
 
     private:
-        void          transition_to_rbs(); ///< Transition to response building state;
-        void          transition_to_rss(); ///< Transition to response sending state;
+        void clean_state();
+        void transition_to_rbs(); ///< Transition to response building state;
+        void transition_to_rss(); ///< Transition to response sending state;
+
         ProcessState *_state;
 };
 

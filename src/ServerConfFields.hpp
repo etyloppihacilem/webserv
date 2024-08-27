@@ -11,8 +11,11 @@
 #define MAX_FIELD_SIZE 20
 #define MIN_ROOTLESS_PORT 1024
 #define MAX_PORT 65535
-#define MAX_BODY_SIZE INT_MAX
+#define MAX_BODY_SIZE #INT_MAX
+#define EPOLL_INIT_CONNECTION 100
+#define MAX_SERVER_BACKLOG 100
 #define MAX_CLIENT_CONNECTION 5
+#define MAX_TOTAL_CONNECTION 1020
 #define CONNECTION_TIMEOUT 180 // second
 #define REQUEST_TIMEOUT 60     // second
 #define INPUT_TIMEOUT 15       // second
@@ -31,7 +34,7 @@ enum ConfField {
     location             = 2,
     error_page           = 3,
     server_name          = 4,
-    listen               = 5,
+    listen_f               = 5,
     root                 = 6,
     index_f              = 7, // because it does not work on a mac
     autoindex            = 8,
@@ -89,7 +92,7 @@ inline ConfField isServerConfField(const ConfField code) {
         case 4:
             return server_name;
         case 5:
-            return listen;
+            return listen_f;
         case 6:
             return root;
         case 7:

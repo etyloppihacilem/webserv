@@ -17,21 +17,23 @@
 #include <string>
 #include <vector>
 
-Server::Setter Server::fieldSetterList[COUNT_CONF_FIELD] = { 0,
-                                                             0,
-                                                             0,
-                                                             &Server::addErrorPage,
-                                                             &Server::setServerName,
-                                                             &Server::setPort,
-                                                             &Server::setRootDir,
-                                                             &Server::setIndexPage,
-                                                             &Server::setAutoindex,
-                                                             &Server::setMethods,
-                                                             &Server::setMaxBodySize,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0 };
+Server::Setter Server::fieldSetterList[COUNT_CONF_FIELD] = {
+    0,
+    0,
+    0,
+    &Server::addErrorPage,
+    &Server::setServerName,
+    &Server::setPort,
+    &Server::setRootDir,
+    &Server::setIndexPage,
+    &Server::setAutoindex,
+    &Server::setMethods,
+    &Server::setMaxBodySize,
+    0,
+    0,
+    0,
+    0,
+};
 
 HttpMethod Server::initMethod[1] = { GET };
 
@@ -144,7 +146,7 @@ bool Server::hasServeNameSet() const {
 }
 
 bool Server::hasListenSet() const {
-    return _isFieldSet[listen];
+    return _isFieldSet[listen_f];
 }
 
 bool Server::hasRootSet() const {

@@ -11,21 +11,19 @@
 #ifndef INCLUDE_SRC_EVENTHANDLER_HPP_
 #define INCLUDE_SRC_EVENTHANDLER_HPP_
 
-#include "Server.hpp"
-
 /**
   Base class to handlers (ProcessHandler and AcceptHandler)
   */
 class EventHandler {
     public:
-        EventHandler(int socket, Server &server);
+        EventHandler(int socket, int port);
         virtual ~EventHandler() = 0;
 
         virtual void handle() = 0; ///< Run this in loop
 
     protected:
-        int    _socket;
-        Server &_server;
+        int _socket;
+        int _port;
         // time_t _last_activity;
 };
 
