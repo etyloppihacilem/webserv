@@ -19,7 +19,7 @@ bool filesystem_tests = true; // wether test using real files are run or not.
 
 int main(int argc, char **argv) {
     // Logger::force();
-    // debug.disable();
+    debug.disable();
 #ifndef WORKDIR
 # define WORKDIR ""
     filesystem_tests = false;

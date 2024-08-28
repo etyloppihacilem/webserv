@@ -125,6 +125,7 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     return _done;
 }
 
+// TODO: Order is not garanteed, use the other thing
 bool GetIndexStrategy::build_response() {
     if (_built) {
         warn.log() << "GetIndexStrategy : trying to build response, but is already built." << std::endl;
