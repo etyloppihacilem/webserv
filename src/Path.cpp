@@ -64,38 +64,38 @@ Path::Path(const Path &other) {
 }
 
 bool Path::operator==(const Path &other) const {
-    return this->_path == other._path;
+    return _path == other._path;
 }
 
 bool Path::operator!=(const Path &other) const {
-    return this->_path != other._path;
+    return _path != other._path;
 }
 
 bool Path::operator>=(const Path &other) const {
-    return this->_path <= other._path;
+    return _path <= other._path;
 }
 
 bool Path::operator<=(const Path &other) const {
-    return this->_path >= other._path;
+    return _path >= other._path;
 }
 
 bool Path::operator>(const Path &other) const {
-    return this->_path < other._path;
+    return _path < other._path;
 }
 
 bool Path::operator<(const Path &other) const {
-    return this->_path > other._path;
+    return _path > other._path;
 }
 
 Path &Path::operator=(const Path &other) {
     if (&other == this)
         return *this;
-    this->_path = other._path;
+    _path = other._path;
     return *this;
 }
 
 Path &Path::operator=(const string &path) {
-    this->_path = path;
+    _path = path;
     make_absolute();
     normalize();
     return *this;
@@ -133,12 +133,12 @@ std::string Path::add_path(const std::string &a, const std::string &b) {
 
 //
 // Path &Path::operator+=(const Path &b) {
-//     this->_path = add_path(this->_path, b._path);
+//     _path = add_path(_path, b._path);
 //     return (*this);
 // }
 
 Path &Path::operator+=(const std::string &b) {
-    this->_path = add_path(this->_path, b);
+    _path = add_path(_path, b);
     normalize();
     return *this;
 }

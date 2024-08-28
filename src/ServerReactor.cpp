@@ -4,9 +4,9 @@
 #include "Logger.hpp"
 #include "ProcessHandler.hpp"
 #include "Server.hpp"
-#include "ServerConfFields.hpp"
 #include <asm-generic/socket.h>
 #include <cerrno>
+#include <csignal>
 #include <cstring>
 #include <fcntl.h>
 #include <netinet/in.h>
@@ -19,6 +19,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+
+extern sig_atomic_t g_signal;
 
 ServerReactor::ServerReactor(void) : _epoll_fd(-1) {}
 
@@ -73,35 +75,35 @@ void ServerReactor::initNetwork(const std::vector< Server > &servers) {
         event.data.fd  = initServerSocket(it->getPort());
         event.data.ptr = new AcceptHandler(event.data.fd, it->getPort());
         errno          = 0;
-        if (epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, event.data.fd, &event) == -1) {
+        if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, event.data.fd, &event) == -1) {
             delete static_cast< EventHandler * >(event.data.ptr);
             close(event.data.fd);
-            throw std::runtime_error("ServerReactor: epoll_ctl: " + std::string(std::strerror(errno)));
+            throw std::runtime_error("ServerReactor: epoll_ctl_add: " + std::string(std::strerror(errno)));
         }
 
         listeningPort.insert(it->getPort());
-        this->_eventHandlers.insert(static_cast< EventHandler * >(event.data.ptr));
+        _eventHandlers.insert(static_cast< EventHandler * >(event.data.ptr));
     }
 }
 
 ServerReactor::ServerReactor(const std::vector< Server > &servers) : _epoll_fd(-1) {
-    if ((this->_epoll_fd = epoll_create(EPOLL_INIT_CONNECTION)) == -1) {
+    if ((_epoll_fd = epoll_create(EPOLL_INIT_CONNECTION)) == -1) {
         error.log();
         throw std::runtime_error("ServerReactor: epoll_create: " + std::string(std::strerror(errno)));
     }
-    (void) servers;
+    initNetwork(servers);
 }
 
 ServerReactor::~ServerReactor(void) {
-    close(this->_epoll_fd);
+    close(_epoll_fd);
 
-    for (std::set< EventHandler * >::iterator it = this->_eventHandlers.begin(); it != this->_eventHandlers.end(); ++it)
+    for (std::set< EventHandler * >::iterator it = _eventHandlers.begin(); it != _eventHandlers.end(); ++it)
         delete *it;
 }
 
 int ServerReactor::addClient(int socket_fd, int port) {
 
-    if (this->_eventHandlers.size() >= MAX_TOTAL_CONNECTION) {
+    if (_eventHandlers.size() >= MAX_TOTAL_CONNECTION) {
         warn.log() << "ServerReactor: addClient: max connection reached." << std::endl;
         return -1;
     }
@@ -111,30 +113,64 @@ int ServerReactor::addClient(int socket_fd, int port) {
     event.data.fd  = socket_fd;
     event.data.ptr = new ProcessHandler(event.data.fd, port);
     errno          = 0;
-    if (epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, event.data.fd, &event) == -1) {
+    if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, event.data.fd, &event) == -1) {
         delete static_cast< EventHandler * >(event.data.ptr);
         close(event.data.fd);
-        throw std::runtime_error("ServerReactor: epoll_ctl: " + std::string(std::strerror(errno)));
+        throw std::runtime_error("ServerReactor: epoll_ctl_add: " + std::string(std::strerror(errno)));
     }
 
-    this->_eventHandlers.insert(static_cast< EventHandler * >(event.data.ptr));
+    _eventHandlers.insert(static_cast< EventHandler * >(event.data.ptr));
     return 0;
 }
 
-void ServerReactor::ignoreClient(int socket_fd) {
-    (void) socket_fd;
-}
-
 void ServerReactor::deleteClient(int socket_fd) {
-    (void) socket_fd;
+    errno = 0;
+    if (epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, socket_fd, 0) == -1)
+        throw std::runtime_error("ServerReactor: epoll_ctl_del: " + std::string(std::strerror(errno)));
 }
 
 void ServerReactor::listenToClient(int socket_fd, EventHandler &handler) {
-    (void) socket_fd;
-    (void) handler;
+    struct epoll_event event;
+    event.events   = EPOLLIN | EPOLLERR | EPOLLHUP;
+    event.data.fd  = socket_fd;
+    event.data.ptr = &handler;
+    errno          = 0;
+    if (epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, event.data.fd, &event) == -1)
+        throw std::runtime_error("ServerReactor: epoll_ctl_mod: " + std::string(std::strerror(errno)));
 }
 
 void ServerReactor::talkToClient(int socket_fd, EventHandler &handler) {
-    (void) socket_fd;
-    (void) handler;
+    struct epoll_event event;
+    event.events   = EPOLLOUT | EPOLLERR | EPOLLHUP;
+    event.data.fd  = socket_fd;
+    event.data.ptr = &handler;
+    errno          = 0;
+    if (epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, event.data.fd, &event) == -1)
+        throw std::runtime_error("ServerReactor: epoll_ctl_mod: " + std::string(std::strerror(errno)));
+}
+
+void ServerReactor::run() {
+
+    struct epoll_event events[MAX_TOTAL_CONNECTION];
+    int                event_count;
+
+    while (g_signal == false) {
+        errno = 0;
+        if ((event_count = epoll_wait(_epoll_fd, events, MAX_TOTAL_CONNECTION, 16000)) == -1) {
+            if (errno == EINTR)
+                return;
+            error.log() << "ServerReactor: epoll_wait: " << std::string(std::strerror(errno)) << std::endl;
+        }
+
+        for (int i = 0; i < event_count; ++i) {
+            if (_eventHandlers.find(static_cast< EventHandler * >(events[i].data.ptr)) == _eventHandlers.end())
+                continue;
+            info.log() << "ServerReactor: event on socket "
+                       << static_cast< EventHandler * >(events[i].data.ptr)->getSocketFd() << std::endl;
+            static_cast< EventHandler * >(events[i].data.ptr)->handle();
+        }
+        if (event_count == 0)
+            for (std::set< EventHandler * >::iterator it = _eventHandlers.begin(); it != _eventHandlers.end(); ++it)
+                (*it)->checkTimeout();
+    }
 }

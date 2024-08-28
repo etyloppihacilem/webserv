@@ -11,10 +11,12 @@
 #include "Logger.hpp"
 #include "global_test.h"
 #include "gtest/gtest.h"
+#include <csignal>
 #include <filesystem>
 #include <ostream>
 #include <string>
 
+volatile sig_atomic_t g_signal= false;
 bool filesystem_tests = true; // wether test using real files are run or not.
 
 int main(int argc, char **argv) {

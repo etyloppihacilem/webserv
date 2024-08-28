@@ -9,7 +9,24 @@
 ##################################################################################################################### */
 
 #include "EventHandler.hpp"
+#include <cerrno>
+#include <cstring>
+#include <ctime>
 
 EventHandler::EventHandler(int socket_fd, int port) : _socket_fd(socket_fd), _port(port) {}
 
 EventHandler::~EventHandler() {}
+
+int EventHandler::getSocketFd(void) const {
+    return _socket_fd;
+}
+
+void EventHandler::checkTimeout(void) {
+    if ((time(NULL) - _last_activity) > getTimeout()) {
+        timeout();
+    }
+}
+
+void EventHandler::updateLastsActivity(void) {
+    _last_activity = time(NULL);
+}

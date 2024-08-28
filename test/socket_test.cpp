@@ -14,7 +14,7 @@ TEST(SocketTestSuite, TestProgram) {
         http_server_test();
         exit(0);
     }
-    sleep(1);
+    sleep(2);
     http_client_test("127.0.0.1");
 
 }

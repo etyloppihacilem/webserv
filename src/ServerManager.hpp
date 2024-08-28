@@ -15,7 +15,6 @@ class ServerManager {
         ~ServerManager();
 
         void addClient(int socket_fd, int port);
-        void ignoreClient(int socket_fd);
         void deleteClient(int socket_fd);
         void listenToClient(int socket_fd, EventHandler &handler);
         void talkToClient(int socket_fd, EventHandler &handler);

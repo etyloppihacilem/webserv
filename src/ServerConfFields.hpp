@@ -11,16 +11,7 @@
 #define MAX_FIELD_SIZE 20
 #define MIN_ROOTLESS_PORT 1024
 #define MAX_PORT 65535
-#define EPOLL_INIT_CONNECTION 100
-#define MAX_SERVER_BACKLOG 100
 #define MAX_BODY_SIZE 2147483648
-#define MAX_CLIENT_CONNECTION 5
-#define MAX_TOTAL_CONNECTION 1020
-#define CONNECTION_TIMEOUT 180 // second
-#define REQUEST_TIMEOUT 60     // second
-#define INPUT_TIMEOUT 15       // second
-#define OUTPUT_TIMEOUT 180     // second
-#define CGI_TIMEOUT 180        // second
 
 typedef std::pair< std::string, StringTokenizer > Field;
 typedef std::vector< std::string >                ValueList;
@@ -34,7 +25,7 @@ enum ConfField {
     location             = 2,
     error_page           = 3,
     server_name          = 4,
-    listen_f               = 5,
+    listen_f             = 5,
     root                 = 6,
     index_f              = 7, // because it does not work on a mac
     autoindex            = 8,

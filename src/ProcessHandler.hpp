@@ -13,6 +13,7 @@
 
 #include "EventHandler.hpp"
 #include "ProcessState.hpp"
+#include <ctime>
 
 /**
   This class is handling all ProcessStates.
@@ -25,7 +26,10 @@ class ProcessHandler : public EventHandler {
         ProcessHandler(int socket_fd, int port);
         ~ProcessHandler();
 
+        time_t getTimeout() const;
+
         void handle();
+        void timeout();
 
     private:
         void clean_state();

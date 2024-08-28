@@ -19,6 +19,7 @@
 #include "ResponseBuildingStrategy.hpp"
 #include "ResponseSendState.hpp"
 #include "ServerManager.hpp"
+#include <ctime>
 #include <ostream>
 
 ProcessHandler::ProcessHandler(int socket_fd, int port) : EventHandler(socket_fd, port), _state(0) {}
@@ -28,6 +29,19 @@ ProcessHandler::~ProcessHandler() {
         debug.log() << "ProcessHandler deletes ProcessState" << std::endl;
         delete _state;
     }
+}
+
+time_t ProcessHandler::getTimeout() const {
+    //TODO: refactor with _timeout value being retrieve from the state.
+    if (_state == 0)
+        return CONNECTION_TIMEOUT;
+    if (dynamic_cast<ReadState *>(_state) != 0)
+        return REQUEST_TIMEOUT;
+    if (dynamic_cast< ResponseBuildState<> *>(_state) != 0)
+        return INPUT_TIMEOUT;
+    if (dynamic_cast< ResponseSendState *>(_state))
+        return OUTPUT_TIMEOUT;
+    return CONNECTION_TIMEOUT;
 }
 
 void ProcessHandler::handle() {
@@ -46,9 +60,14 @@ void ProcessHandler::handle() {
     }
     if (_state->get_state() == s_error) {
         // TODO: Close connexion here
-        ServerManager::getInstance()->deleteClient(this->_socket_fd);
+        ServerManager::getInstance()->deleteClient(_socket_fd);
         return;
     }
+}
+
+void ProcessHandler::timeout() {
+    warn.log() << "Client timeout" << std::endl;
+    ServerManager::getInstance()->deleteClient(_socket_fd);
 }
 
 void ProcessHandler::clean_state() {

@@ -6,6 +6,11 @@
 #include <set>
 #include <vector>
 
+#define EPOLL_INIT_CONNECTION 100
+#define MAX_SERVER_BACKLOG 100
+#define MAX_CLIENT_CONNECTION 5
+#define MAX_TOTAL_CONNECTION 512 // or 1000 but risky to access file rssources.
+
 class ServerReactor {
     public:
         ServerReactor();
@@ -16,7 +21,6 @@ class ServerReactor {
         void initNetwork(const std::vector< Server > &servers);
 
         int  addClient(int socket_fd, int port);
-        void ignoreClient(int socket_fd);
         void deleteClient(int socket_fd);
         void listenToClient(int socket_fd, EventHandler &handler);
         void talkToClient(int socket_fd, EventHandler &handler);

@@ -90,7 +90,7 @@ Server::Server(StringTokenizer &tokenizedServer) :
         }
     }
     for (std::vector< Field >::iterator it = locationList.begin(); it < locationList.end(); ++it)
-        this->addRoute(*it);
+        addRoute(*it);
     if (!hasRoute("/"))
         _routes["/"] = Route(*this);
 

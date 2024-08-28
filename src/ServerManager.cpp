@@ -89,34 +89,34 @@ std::vector< Server > ServerManager::parseConfFile(const std::string &configFile
 
 ServerManager::ServerManager(const std::string &configFile) :
     _servers(parseConfFile(configFile)),
-    _reactor(this->_servers) {}
+    _reactor(_servers) {}
 
 ServerManager::~ServerManager() {
-    this->deleteInstance();
+    deleteInstance();
 }
 
 void ServerManager::addClient(int socket_fd, int port) {
-    this->_reactor.addClient(socket_fd, port);
-}
-
-void ServerManager::ignoreClient(int socket_fd) {
-    this->_reactor.ignoreClient(socket_fd);
+    _reactor.addClient(socket_fd, port);
 }
 
 void ServerManager::deleteClient(int socket_fd) {
-    this->_reactor.deleteClient(socket_fd);
+    _reactor.deleteClient(socket_fd);
 }
 
 void ServerManager::listenToClient(int socket_fd, EventHandler &handler) {
-    this->_reactor.listenToClient(socket_fd, handler);
+    _reactor.listenToClient(socket_fd, handler);
 }
 
 void ServerManager::talkToClient(int socket_fd, EventHandler &handler) {
-    this->_reactor.talkToClient(socket_fd, handler);
+    _reactor.talkToClient(socket_fd, handler);
+}
+
+void ServerManager::run() {
+    _reactor.run();
 }
 
 Server &ServerManager::getServer(const std::string &serverName, int port) {
-    for (std::vector< Server >::iterator it = this->_servers.begin(); it != this->_servers.end(); ++it)
+    for (std::vector< Server >::iterator it = _servers.begin(); it != _servers.end(); ++it)
         if (it->hasServeName(serverName) && it->getPort() == port)
             return *it;
 
@@ -126,7 +126,7 @@ Server &ServerManager::getServer(const std::string &serverName, int port) {
 }
 
 Server &ServerManager::getServer(int port) {
-    for (std::vector< Server >::iterator it = this->_servers.begin(); it != this->_servers.end(); ++it)
+    for (std::vector< Server >::iterator it = _servers.begin(); it != _servers.end(); ++it)
         if (it->getPort() == port)
             return *it;
 
