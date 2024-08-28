@@ -83,13 +83,8 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
             switch (errno) {
                 case ENOENT:
                 case ENOTDIR:
-                    if (!_is_post) { // post could create a non existing resource.
-                        info.log() << "Location: resource '" << target
-                                   << "' not found and POST method is not allowed, sending " << NotFound << std::endl;
-                        throw HttpError(NotFound); // there's nothing to be found
-                    }
-                    _autoindex = route.hasAutoindexSet(); // if nothing else found
-                    return;                               // we do not know if it is a dir
+                    _is_file = true; // it's a file if it doesnt exist
+                    return;
                 case EACCES:
                     info.log() << "Location: resource '" << target << "' " << strerror(errno) << ", sending "
                                << Forbidden << std::endl;
@@ -103,8 +98,9 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
                                 << route.getLocation() << "'" << strerror(errno) << ", sending " << InternalServerError
                                 << std::endl;
                     throw HttpError(InternalServerError);
-            }
+            } // default throws so nothing gets out of there
         }
+        debug.log() << "Target '" << target << "' exists." << std::endl;
         if (S_ISDIR(buf.st_mode)) { // in case target is a directory
             debug.log() << "Target is a directory" << std::endl;
             if (find_index(route, buf)) // if index file is found

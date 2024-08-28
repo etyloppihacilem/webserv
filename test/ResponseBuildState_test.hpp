@@ -73,25 +73,26 @@ typedef std::tuple<
 
 class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
     public:
-        ResponseBuildStateFixture() : _state(0), _strategy(0), _request(0) {}
+        ResponseBuildStateFixture() : _state(0), _strategy(0), _request(0), _readbuff(0) {}
 
         void SetUp() override {
             if (std::get< tclean >(GetParam()))
                 clean();
             std::string buf = std::get< tdata >(GetParam());
             try {
-                _request      = new ClientRequest(0);
-                std::string a = sanitize_HTTP_string(buf);
-                _request->parse_request_line(a); // as everything is in buff, no call to read_body() is never needed
-                _request->parse_headers(a);
-                _request->init_body(a);
+                _request  = new ClientRequest(0);
+                _readbuff = new std::string(sanitize_HTTP_string(buf));
+                _request->parse_request_line(*_readbuff
+                ); // as everything is in buff, no call to read_body() is never needed
+                _request->parse_headers(*_readbuff);
+                _request->init_body(*_readbuff);
             } catch (std::exception &e) {
                 FAIL() << "Could not build request." << e.what();
             }
             if (_request->get_status() != OK)
                 FAIL() << "_request has error ! (" << _request->get_status() << ")";
             try {
-                _state = new ResponseBuildState< FakeServer, FakeRoute >(0, _request, 80);
+                _state          = new ResponseBuildState< FakeServer, FakeRoute >(0, _request, 80);
                 _state->_server = &_server;
             } catch (std::exception &e) {
                 FAIL() << "Could not build state." << e.what();
@@ -132,6 +133,8 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
         }
 
         void TearDown() override {
+            if (_readbuff)
+                delete _readbuff;
             if (_state)
                 delete _state;
             if (_request)
@@ -214,6 +217,7 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
         ResponseBuildState< FakeServer, FakeRoute > *_state;
         ResponseBuildingStrategy                    *_strategy;
         ClientRequest                               *_request;
+        std::string                                 *_readbuff;
 };
 
 #endif // INCLUDE_TEST_RESPONSEBUILDSTATE_TEST_HPP_

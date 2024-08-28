@@ -34,8 +34,10 @@ class ResponseBuildState : public ProcessState {
         ~ResponseBuildState();
 
         t_state                   process();
-        ClientRequest            *get_request();
-        ResponseBuildingStrategy *get_response_strategy(); // OPTI: check wich one is not in use
+
+        ResponseBuildingStrategy *get_response_strategy();
+        HttpCode get_status() const;
+
         void                      save_mem();
 
     private:

@@ -337,6 +337,9 @@ bool ClientRequest::init_body(std::string &buffer) {
         } else
             debug.log() << "No body in request." << std::endl;
     }
+    debug.log() << "Body initiated, cleaning buffer." << std::endl;
+    buffer = "";
+    shrink_to_fit(buffer);
     return _body_exists;
 }
 

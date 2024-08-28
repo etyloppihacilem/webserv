@@ -329,7 +329,7 @@ TEST(ResponseBuildStateSuite, NoRequest) {
     FakeServer                                          server;
     error.disable();
     template_test test(0, 0, 80);
-    EXPECT_EQ(test.get_request()->get_status(), InternalServerError);
+    EXPECT_EQ(test.get_status(), InternalServerError);
     error.enable();
 }
 

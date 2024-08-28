@@ -54,11 +54,13 @@ size_t BodyLength::read_body() {
     if (_done)
         return 0;
 
-    char   buf[BUFFER_SIZE + 1] = { 0 }; // the whole buffer is set to 0
+    char   buf[BUFFER_SIZE + 1]; // the whole buffer is set to 0
     size_t size_read;
 
-    size_read     = read(_socket, buf, (_length - _read_length > BUFFER_SIZE) ? BUFFER_SIZE : _length - _read_length);
-    _buffer      += std::string(buf);
+    for (size_t i = 0; i < BUFFER_SIZE + 1; i++)
+        buf[i] = 0;
+    size_read     = read(_socket, buf, (_length - _read_length >= BUFFER_SIZE) ? BUFFER_SIZE : _length - _read_length);
+    _buffer.insert(_buffer.length(), buf); // FIXIT: invalid write
     _read_length += size_read;
     if (_length <= _read_length)
         _done = true;

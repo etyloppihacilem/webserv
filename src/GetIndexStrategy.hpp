@@ -35,12 +35,15 @@ class GetIndexStrategy : public ResponseBuildingStrategy {
         void save_mem();
 
     private:
+        void        clean_dir_list();
         std::string generateLine(char *name, struct stat *st);
         std::string getType(mode_t mode);
 
         std::string _location;    ///< Location of the directory to scan
         std::string _target;      ///< Target to the directory to scan
-        DIR        *_dir;         ///< Pointer on dir
+        dir_item  **_dir_list;    ///< List of directry entries.
+        int         _index;       ///< where we are generating content
+        int         _len;         ///< Number of files
         bool        _init_done;   ///< Tells if header of response is sent.
         bool        _deinit_done; ///< Tells if footer of response is sent.
 };

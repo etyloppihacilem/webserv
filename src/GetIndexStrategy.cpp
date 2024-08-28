@@ -32,7 +32,9 @@ GetIndexStrategy::GetIndexStrategy(const std::string &location, const std::strin
     ResponseBuildingStrategy(),
     _location(location),
     _target(target),
-    _dir(0),
+    _dir_list(0),
+    _index(0),
+    _len(0),
     _init_done(false),
     _deinit_done(false) {
     if (*_target.rbegin() != '/')
@@ -40,8 +42,18 @@ GetIndexStrategy::GetIndexStrategy(const std::string &location, const std::strin
 }
 
 GetIndexStrategy::~GetIndexStrategy() {
-    if (_dir)
-        closedir(_dir);
+    clean_dir_list();
+}
+
+void GetIndexStrategy::clean_dir_list() {
+    if (_dir_list) {
+        for (; _index < _len; _index++)
+            free(_dir_list[_index]);
+        free(_dir_list);
+        _dir_list = 0;
+    }
+    _index = 0;
+    _len   = 0;
 }
 
 /**
@@ -92,24 +104,27 @@ std::string GetIndexStrategy::generateLine(char *name, struct stat *st) {
 }
 
 bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
-    if (_done || !_dir)
+    if (_done)
         return _done;
-    if (!_init_done) {
-        if (*_location.rbegin() != '/')
-            _location += "/";
-        buffer += "<head></head><body><h1>" + _target + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
+    if (!_dir_list) {
+        error.log() << "Dir list not initiated or already cleaned, sending " << InternalServerError << std::endl;
+        throw HttpError(InternalServerError);
     }
+    if (!_init_done)
+        buffer += "<head></head><body><h1>" + _target + "</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr>";
 
-    dir_item   *item;
+    dir_item   *item = 0;
     std::string name;
     struct stat st;
 
-    while ((item = readdir(_dir)) && buffer.length() < size) {
+    while (_index < _len && buffer.size() < size) {
+        item = _dir_list[_index];
         name = generateLine(item->d_name, &st);
         std::stringstream stream;
         stream << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _target << item->d_name << "\">" << name
                << "</a></td><td>" << (S_ISREG(st.st_mode) ? st.st_size : 0) << "</td></tr>";
         buffer += stream.str();
+        free(_dir_list[_index++]);
     }
     if (errno == EBADF) {
         warn.log() << "GetIndexStrategy: Bad directory descriptor for '" << _location << "', sending "
@@ -118,9 +133,7 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     }
     if (buffer.length() < size && !_deinit_done) {
         buffer += "</table></body>";
-        closedir(_dir);
-        _dir  = 0;
-        _done = true;
+        _done   = true;
     }
     return _done;
 }
@@ -131,28 +144,9 @@ bool GetIndexStrategy::build_response() {
         warn.log() << "GetIndexStrategy : trying to build response, but is already built." << std::endl;
         return _built;
     }
-    { // different scope to free stack at the end
-        int size_temp = 0;
-        {
-            DIR *dirp;
-
-            if ((dirp = opendir(_location.c_str())) == 0)
-                size_temp = -1;
-            while (size_temp > 0 && readdir(dirp))
-                size_temp++;
-            closedir(dirp);
-        }
-
-        if (size_temp < 0)
-            _estimated_size = MAX_BODY_BUFFER + 1; // if an error occur, it is mostly because of
-                                                   // memory, so using least buffer stuff
-        else
-            _estimated_size = 148 + (133 * size_temp);
-    }
-    _dir = opendir(_location.c_str());
-    if (!_dir) {
+    // TODO: estimate size
+    if ((_len = scandir(_location.c_str(), &_dir_list, NULL, alphasort)) < 0) {
         switch (errno) {
-
             case EACCES:
                 info.log() << "GetIndexStrategy: cannot open directory '" << _location
                            << "' permission denied, sending " << Forbidden << std::endl;
@@ -165,7 +159,8 @@ bool GetIndexStrategy::build_response() {
                 throw std::bad_alloc(); // to begin memory recovery procedure
             default:
                 warn.log() << "GetIndexStrategy: cannot open directory '" << _location << "' " << strerror(errno)
-                           << ", sending " << InternalServerError << std::endl << std::endl;
+                           << ", sending " << InternalServerError << std::endl
+                           << std::endl;
                 throw HttpError(InternalServerError);
         }
     }

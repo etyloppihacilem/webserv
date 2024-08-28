@@ -39,7 +39,7 @@ class Body {
 
     protected:
         int          _socket;  ///< File descriptor of the incoming socket
-        std::string &_buffer;  ///< Buffer of ClientRequest object
+        std::string  _buffer;  ///< Buffer of ClientRequest object
         bool         _done;    ///< Is true if body is done being read
         bool         _uniform; ///< Used to protect get() usage if pop() or clean() are used
         std::string  _body;    ///< Whole body if get() is used, always empty if pop() is in use.

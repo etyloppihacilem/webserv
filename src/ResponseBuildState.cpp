@@ -46,26 +46,26 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, Cl
     _strategy(0),
     _recovery(false),
     _code(OK) {
+    if (!_request) {
+        error.log() << "ResponseBuildState: Trying to build response without request, sending " << InternalServerError
+                    << std::endl;
+        _recovery = true;
+        _code     = InternalServerError;
+    } else
+        _code = _request->get_status();
 #ifndef TESTING
     if (_request->gateway_checks(port)) {
         ServerClass &tmp = ServerManager::getInstance()->getServer(_request->get_header().at("Host"), port);
         _server          = &tmp;
     }
-#endif
-    if (!_request) {
-        error.log() << "ResponseBuildState: Trying to build response without request, sending " << InternalServerError
-                    << std::endl;
-        _recovery = true;
-        _request  = new ClientRequest(socket, InternalServerError, port); // belt suspenders ("ceinture bretelle")
-        _code     = InternalServerError;
-    }
-#ifndef TESTING
     if (!_server) {
         error.log() << "ResponseBuildState: Trying to build non recovery response without server." << std::endl;
         _recovery = true;
         _request->set_status(InternalServerError); // belt suspenders ("ceinture bretelle")
         _code = InternalServerError;
     }
+#else
+    (void) port;
 #endif
 }
 
@@ -106,7 +106,7 @@ t_state ResponseBuildState< ServerClass, RouteClass >::process() {
                 init_strategy();
             _strategy->build_response();
         } catch (HttpError &e) {
-            _request->set_status(e.get_code()); // max 3 try
+            _code = e.get_code(); // max 3 try
             if (_strategy) {
                 delete _strategy;
                 _strategy = 0;
@@ -121,11 +121,20 @@ t_state ResponseBuildState< ServerClass, RouteClass >::process() {
     return _strategy->is_built() ? (_state = ready) : (_state = waiting);
 }
 
-template < class ServerClass, class RouteClass >
-ClientRequest *ResponseBuildState< ServerClass, RouteClass >::get_request() {
-    return _request;
+template <class ServerClass, class RouteClass >
+HttpCode ResponseBuildState<ServerClass, RouteClass>::get_status() const {
+    return _code;
 }
 
+// DEPRECATED AS THERE MAY BE NO REQUEST
+// template < class ServerClass, class RouteClass >
+// ClientRequest *ResponseBuildState< ServerClass, RouteClass >::get_request() {
+//     if (!_request)
+//         debug.log() << "ResponseBuildState get_request() called but object has no request." << std::endl;
+//     return _request;
+// }
+
+// DEPRECATED AS THERE MAY BE NO REQUEST
 template < class ServerClass, class RouteClass >
 ResponseBuildingStrategy *ResponseBuildState< ServerClass, RouteClass >::get_response_strategy() {
     ResponseBuildingStrategy *ret = _strategy;
@@ -145,22 +154,22 @@ ResponseBuildingStrategy *ResponseBuildState< ServerClass, RouteClass >::get_res
   */
 template < class ServerClass, class RouteClass > // OPTI: refactor this this is sooo bad
 void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
-    if (isError(_request->get_status())) {
+    if (_recovery || isError(_code)) {
         if (!_server) {
-            debug.log() << "Sending " << _request->get_status() << " with generated page" << std::endl;
-            _strategy = new ErrorStrategy(_request->get_status()); // page not found
+            debug.log() << "Sending " << _code << " with generated page" << std::endl;
+            _strategy = new ErrorStrategy(_code); // page not found
             return;
         }
         const std::map< HttpCode, std::string > &error_pages = _server->getErrorPages();
 
-        std::map< HttpCode, std::string >::const_iterator it = error_pages.find(_request->get_status());
+        std::map< HttpCode, std::string >::const_iterator it = error_pages.find(_code);
 
         if (it == error_pages.end()) {
-            debug.log() << "Sending " << _request->get_status() << " with generated page" << std::endl;
-            _strategy = new ErrorStrategy(_request->get_status()); // page not found
+            debug.log() << "Sending " << _code << " with generated page" << std::endl;
+            _strategy = new ErrorStrategy(_code); // page not found
         } else {                                                   // page found
-            debug.log() << "Sending " << _request->get_status() << " with file " << it->second << std::endl;
-            _strategy = new GetFileStrategy(mime_types, it->second, _request->get_status());
+            debug.log() << "Sending " << _code << " with file " << it->second << std::endl;
+            _strategy = new GetFileStrategy(mime_types, it->second, _code);
         }
         return;
     }
