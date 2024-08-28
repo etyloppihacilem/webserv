@@ -16,7 +16,6 @@
 #include <map>
 #include <ostream>
 #include <string>
-#include <vector>
 
 template < class RouteClass >
 ServerGetRoute< RouteClass >::ServerGetRoute() {}

@@ -17,7 +17,6 @@
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "ResponseBuildingStrategy.hpp"
-#include "StringUtils.hpp"
 #include "todo.hpp"
 #include <cstddef>
 #include <cstdlib>

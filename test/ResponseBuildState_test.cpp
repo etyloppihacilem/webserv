@@ -19,25 +19,19 @@
 #include "FakeServer.hpp"
 #include "GetFileStrategy.hpp"
 #include "GetIndexStrategy.hpp"
-#include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "RedirectStrategy.hpp"
 #include "ResponseBuildState.hpp"
-#include "Route.hpp"
 #include "UploadStrategy.hpp"
 #include "todo.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include <cstddef>
-#include <exception>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-
-// TODO: implementer maxBodySize
-// TODO: implementer UploadPath
 
 FakeServer ResponseBuildStateFixture::_server;
 

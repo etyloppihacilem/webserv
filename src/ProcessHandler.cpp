@@ -18,7 +18,6 @@
 #include "ResponseBuildState.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "ResponseSendState.hpp"
-#include "Server.hpp"
 #include "ServerManager.hpp"
 #include <ostream>
 

@@ -13,7 +13,6 @@
 #include "Logger.hpp"
 #include "gtest/gtest.h"
 #include <cstddef>
-#include <ostream>
 #include <string>
 #include <unistd.h>
 

@@ -1,4 +1,3 @@
-#include "Logger.hpp"
 #include "ServerConfFields.hpp"
 #include "ServerConfTokenize.hpp"
 #include "StringTokenizer.hpp"

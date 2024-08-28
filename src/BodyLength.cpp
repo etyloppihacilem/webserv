@@ -60,7 +60,7 @@ size_t BodyLength::read_body() {
     for (size_t i = 0; i < BUFFER_SIZE + 1; i++)
         buf[i] = 0;
     size_read     = read(_socket, buf, (_length - _read_length >= BUFFER_SIZE) ? BUFFER_SIZE : _length - _read_length);
-    _buffer.insert(_buffer.length(), buf); // FIXIT: invalid write
+    _buffer.insert(_buffer.length(), buf);
     _read_length += size_read;
     if (_length <= _read_length)
         _done = true;

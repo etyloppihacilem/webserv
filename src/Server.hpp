@@ -7,7 +7,6 @@
 #include "ServerConfFields.hpp"
 #include "ServerGetRoute.hpp"
 #include "StringTokenizer.hpp"
-#include <exception>
 #include <map>
 #include <set>
 #include <string>
