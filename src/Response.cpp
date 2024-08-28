@@ -158,7 +158,7 @@ std::string Response::generate_header() const {
 void Response::clean_body() {
     if (_header.find("Content-Length") != _header.end())
         _header.erase("Content-Length");
-    if (_header.find( "Transfer-Encoding") != _header.end())
+    if (_header.find("Transfer-Encoding") != _header.end())
         _header.erase("Transfer-Encoding");
     if (_body)
         delete _body;

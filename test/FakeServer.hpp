@@ -20,7 +20,7 @@
 class ResponseBuildStateFixture;
 class LocationTestFixture;
 
-class FakeServer : public ServerGetRoute<FakeRoute> {
+class FakeServer : public ServerGetRoute< FakeRoute > {
     public:
         FakeServer() {}
 

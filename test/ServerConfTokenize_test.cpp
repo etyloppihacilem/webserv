@@ -6,12 +6,9 @@
 
 class ServerConfTokenizeTestSuite : public ::testing::Test {
     protected:
-        ServerConfTokenizeTestSuite() {
-        /*error.disable();*/
-    }
-        ~ServerConfTokenizeTestSuite() {
-        /*error.enable();*/
-    }
+        ServerConfTokenizeTestSuite() { /*error.disable();*/ }
+
+        ~ServerConfTokenizeTestSuite() { /*error.enable();*/ }
 };
 
 class ServerConfTokenizeFileTestSuite : public ServerConfTokenizeTestSuite {
@@ -61,10 +58,19 @@ class ServerConfTokenizeServerTestSuite : public ServerConfTokenizeTestSuite {
             server_OK("server|{|server_name|localhost;|listen|80;|location|/|{|upload_path|/upload;|}|}", '|'),
             server_KO_server("titi|{|server_name|localhost;|listen|80;|location|/|{|upload_path|/upload;|}|}", '|'),
             server_KO_openBrace("server|server_name|localhost;|listen|80;|location|/|{|upload_path|/upload;|}|}", '|'),
-            server_KO_openBrace2("server{|server_name|localhost;|listen|80;|location|/|{|upload_path|/upload;|}|}", '|'),
-            server_KO_openBrace3("server|{server_name|localhost;|listen|80;|location|/|{|upload_path|/upload;|}|}", '|'),
+            server_KO_openBrace2(
+                "server{|server_name|localhost;|listen|80;|location|/|{|upload_path|/upload;|}|}",
+                '|'
+            ),
+            server_KO_openBrace3(
+                "server|{server_name|localhost;|listen|80;|location|/|{|upload_path|/upload;|}|}",
+                '|'
+            ),
             server_KO_closeBrace("server|{|server_name|localhost;|listen|80;|location|/|{|upload_path|/upload;|}", '|'),
-            server_KO_closeBrace2("server|{|server_name|localhost;|listen|80;|location|/|{|upload_path|/upload;|error_page|404|}", '|') {}
+            server_KO_closeBrace2(
+                "server|{|server_name|localhost;|listen|80;|location|/|{|upload_path|/upload;|error_page|404|}",
+                '|'
+            ) {}
 
         StringTokenizer server_OK;
         StringTokenizer server_KO_server;
@@ -141,16 +147,16 @@ TEST_F(ServerConfTokenizeLocationTestSuite, KO_closeBrace) {
 }
 
 class ServerConfTokenizeFieldTestSuite : public ServerConfTokenizeTestSuite {
-protected:
-    ServerConfTokenizeFieldTestSuite() :
-    field_OK("listen|8080;", '|'),
-    field_OK_manyValues("index|index.html|index.php|index.py|index.js", '|'),
-    field_KO_empty("autoindex", '|') {}
+    protected:
+        ServerConfTokenizeFieldTestSuite() :
+            field_OK("listen|8080;", '|'),
+            field_OK_manyValues("index|index.html|index.php|index.py|index.js", '|'),
+            field_KO_empty("autoindex", '|') {}
 
-    StringTokenizer field_OK;
-    StringTokenizer field_OK_manyValues;
-    StringTokenizer field_KO_empty;
-    // StringTokenizer field_KO_missingColonEndl;
+        StringTokenizer field_OK;
+        StringTokenizer field_OK_manyValues;
+        StringTokenizer field_KO_empty;
+        // StringTokenizer field_KO_missingColonEndl;
 };
 
 TEST_F(ServerConfTokenizeFieldTestSuite, OK_Suite) {

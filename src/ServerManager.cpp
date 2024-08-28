@@ -87,9 +87,7 @@ std::vector< Server > ServerManager::parseConfFile(const std::string &configFile
     return servers;
 }
 
-ServerManager::ServerManager(const std::string &configFile) :
-    _servers(parseConfFile(configFile)),
-    _reactor(_servers) {}
+ServerManager::ServerManager(const std::string &configFile) : _servers(parseConfFile(configFile)), _reactor(_servers) {}
 
 ServerManager::~ServerManager() {
     deleteInstance();

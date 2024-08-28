@@ -61,7 +61,7 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, Cl
     if (!_server) {
         error.log() << "ResponseBuildState: Trying to build non recovery response without server." << std::endl;
         _recovery = true;
-        _code = InternalServerError;
+        _code     = InternalServerError;
     }
 #else
     (void) port;
@@ -120,8 +120,8 @@ t_state ResponseBuildState< ServerClass, RouteClass >::process() {
     return _strategy->is_built() ? (_state = ready) : (_state = waiting);
 }
 
-template <class ServerClass, class RouteClass >
-HttpCode ResponseBuildState<ServerClass, RouteClass>::get_status() const {
+template < class ServerClass, class RouteClass >
+HttpCode ResponseBuildState< ServerClass, RouteClass >::get_status() const {
     return _code;
 }
 
@@ -166,7 +166,7 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
         if (it == error_pages.end()) {
             debug.log() << "Sending " << _code << " with generated page" << std::endl;
             _strategy = new ErrorStrategy(_code); // page not found
-        } else {                                                   // page found
+        } else {                                  // page found
             debug.log() << "Sending " << _code << " with file " << it->second << std::endl;
             _strategy = new GetFileStrategy(mime_types, it->second, _code);
         }

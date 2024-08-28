@@ -15,7 +15,7 @@
 #include "ClientRequest_test.hpp"
 #include "gtest/gtest.h"
 
-class ClientRequestTestTarget : public testing::TestWithParam<t_test_target> {
+class ClientRequestTestTarget : public testing::TestWithParam< t_test_target > {
     public:
         ClientRequestTestTarget() : test(0) {}
 
@@ -23,7 +23,7 @@ class ClientRequestTestTarget : public testing::TestWithParam<t_test_target> {
         ClientRequest test;
 };
 
-class ClientRequestTestParseHeader : public testing::TestWithParam<t_test_target> {
+class ClientRequestTestParseHeader : public testing::TestWithParam< t_test_target > {
     public:
         ClientRequestTestParseHeader() : test(0) {}
 
@@ -31,7 +31,7 @@ class ClientRequestTestParseHeader : public testing::TestWithParam<t_test_target
         ClientRequest test;
 };
 
-class ClientRequestTestInitHeader : public testing::TestWithParam<s_test_messages> {
+class ClientRequestTestInitHeader : public testing::TestWithParam< s_test_messages > {
     public:
         ClientRequestTestInitHeader() : test(0) {}
 

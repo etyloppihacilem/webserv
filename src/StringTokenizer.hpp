@@ -11,7 +11,7 @@ class StringTokenizer {
         ~StringTokenizer();
 
         const std::string &remainingString();
-        char        delimiter();
+        char               delimiter();
 
         bool        hasMoreTokens();
         std::size_t countTokens();

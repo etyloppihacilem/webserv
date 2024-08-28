@@ -74,7 +74,7 @@ MimeTypes::~MimeTypes() {}
   If the extension is unknown, text/plain is returned.
   */
 std::string MimeTypes::get_type(const std::string &extension) const {
-    std::map<std::string, std::string>::const_iterator it = _types.find(extension);
+    std::map< std::string, std::string >::const_iterator it = _types.find(extension);
 
     if (it == _types.end()) {
         warn.log() << "MimeTypes.get_type(" << extension << ") while extension is not in mime table." << std::endl;

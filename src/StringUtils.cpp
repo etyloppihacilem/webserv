@@ -82,12 +82,12 @@ std::string &sanitize_HTTP_string(std::string &s, size_t len) {
         len = s.length();
     if ((len_rn = s.find("\n\n")) == s.npos)
         len_rn = len;
-    while ((found = s.find("\r\n", found)) != s.npos && found < len_rn){
+    while ((found = s.find("\r\n", found)) != s.npos && found < len_rn) {
         s.replace(found, 2, "\n");
         if (found != 0 && s.find("\n\n", found - 1) == found - 1)
-            break ; // double \n found, not sanitizing further (bc body)
-        len--; // because overall length is reduce by 1 by replacing...
-        len_rn--; // in case \n\n is already present
+            break; // double \n found, not sanitizing further (bc body)
+        len--;     // because overall length is reduce by 1 by replacing...
+        len_rn--;  // in case \n\n is already present
     }
     found = 0;
     if ((len_rn = s.find("\n\n")) == s.npos)

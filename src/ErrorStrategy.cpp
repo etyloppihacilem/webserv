@@ -51,8 +51,8 @@ void ErrorStrategy::generateErrorPage(std::string &buffer) {
     try {
         std::stringstream st;
 
-        st << "<head><title>" << static_cast<int>(_code)
-           << " Error</title></head><body><h1>Error: " << static_cast<int>(_code) << " " << status_string(_code)
+        st << "<head><title>" << static_cast< int >(_code)
+           << " Error</title></head><body><h1>Error: " << static_cast< int >(_code) << " " << status_string(_code)
            << "</h1><div>This error page was "
            << "automatically generated.</div></body>";
         buffer += st.str();

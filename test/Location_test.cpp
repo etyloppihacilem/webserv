@@ -21,10 +21,10 @@
 std::string FakeRoute::workdir = ""; // default, do not change here
 
 TEST(LocationTestSuite, BuildPathTest) {
-    Location<FakeServer, FakeRoute> loc;
-    FakeRoute                       route;
-    std::string                     original_target = "/index.html";
-    std::string                     target          = "/target" + original_target;
+    Location< FakeServer, FakeRoute > loc;
+    FakeRoute                         route;
+    std::string                       original_target = "/index.html";
+    std::string                       target          = "/target" + original_target;
 
     route._getRootDir  = "routeDirTEST";
     route._getLocation = "/target";
@@ -35,10 +35,10 @@ TEST(LocationTestSuite, BuildPathTest) {
 }
 
 TEST(LocationTestSuite, BuildPathRedirectTest) {
-    Location<FakeServer, FakeRoute> loc;
-    std::string                     redirect = "coucou";
-    std::string                     target   = "/index.html";
-    FakeRoute                       route;
+    Location< FakeServer, FakeRoute > loc;
+    std::string                       redirect = "coucou";
+    std::string                       target   = "/index.html";
+    FakeRoute                         route;
     route._getLocation = "/target";
     // with absolute redirection
     loc.build_path(target, route, redirect);

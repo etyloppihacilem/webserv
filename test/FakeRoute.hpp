@@ -58,8 +58,8 @@ class FakeRoute {
             // _getRoutePath(_getRoutePath_),
             _getMethods(_getMethods_),
             _getIndexPage(_getIndexPage_) {
-                if (_getUploadPath == "")
-                    _getUploadPath = _getRootDir;
+            if (_getUploadPath == "")
+                _getUploadPath = _getRootDir;
             // if (workdir != "") {
             //     if (*workdir.rbegin() == '/')
             //         workdir.resize(workdir.length() - 1);

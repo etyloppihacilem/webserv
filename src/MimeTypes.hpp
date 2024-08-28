@@ -36,8 +36,8 @@ class MimeTypes {
         bool        is_done() const;
 
     private:
-        bool                               _done;  ///< Tells if object is build without mistakes
-        std::map<std::string, std::string> _types; ///< Stores mime types <extension>:<mimetype>
+        bool                                 _done;  ///< Tells if object is build without mistakes
+        std::map< std::string, std::string > _types; ///< Stores mime types <extension>:<mimetype>
 };
 
 extern MimeTypes mime_types; // global

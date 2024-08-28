@@ -35,8 +35,8 @@ class ProcessState {
         t_state         get_state() const;
 
     protected:
-        int           _socket;
-        t_state       _state;
+        int     _socket;
+        t_state _state;
         // EventHandler *_handler;
 };
 

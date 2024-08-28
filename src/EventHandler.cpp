@@ -22,9 +22,8 @@ int EventHandler::getSocketFd(void) const {
 }
 
 void EventHandler::checkTimeout(void) {
-    if ((time(NULL) - _last_activity) > getTimeout()) {
+    if ((time(NULL) - _last_activity) > getTimeout())
         timeout();
-    }
 }
 
 void EventHandler::updateLastsActivity(void) {

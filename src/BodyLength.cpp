@@ -35,11 +35,12 @@ BodyLength::BodyLength(int socket, std::string &buffer, std::string length) :
     std::stringstream tmp(length);
 
     if (!(tmp >> _length)) {
-        info.log() << "BodyLength: Converting length '" << length << "' to number failed, sending " << BadRequest << std::endl;
+        info.log() << "BodyLength: Converting length '" << length << "' to number failed, sending " << BadRequest
+                   << std::endl;
         throw HttpError(BadRequest); // other invalid length
     }
     _total = _length;
-    if (_total > MAX_BODY_SIZE){
+    if (_total > MAX_BODY_SIZE) {
         info.log() << "Body is too large (" << _total << " bytes), sending " << ContentTooLarge << std::endl;
         throw HttpError(ContentTooLarge);
     }
@@ -59,7 +60,7 @@ size_t BodyLength::read_body() {
 
     for (size_t i = 0; i < BUFFER_SIZE + 1; i++)
         buf[i] = 0;
-    size_read     = read(_socket, buf, (_length - _read_length >= BUFFER_SIZE) ? BUFFER_SIZE : _length - _read_length);
+    size_read = read(_socket, buf, (_length - _read_length >= BUFFER_SIZE) ? BUFFER_SIZE : _length - _read_length);
     _buffer.insert(_buffer.length(), buf);
     _read_length += size_read;
     if (_length <= _read_length)
@@ -80,8 +81,8 @@ std::string BodyLength::pop() {
     _uniform = false;
     _body    = "";
     read_body();
-    tmp     += _buffer;
-    _buffer  = "";
+    tmp    += _buffer;
+    _buffer = "";
     return tmp;
 }
 

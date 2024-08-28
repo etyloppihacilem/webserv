@@ -38,12 +38,12 @@ class Body {
         void                 save_mem();      ///< Used to save memory in case of heap going missing
 
     protected:
-        int          _socket;  ///< File descriptor of the incoming socket
-        std::string  _buffer;  ///< Buffer of ClientRequest object
-        bool         _done;    ///< Is true if body is done being read
-        bool         _uniform; ///< Used to protect get() usage if pop() or clean() are used
-        std::string  _body;    ///< Whole body if get() is used, always empty if pop() is in use.
-        size_t       _total;   ///< Size read or to be read (in case BodyLength)
+        int         _socket;  ///< File descriptor of the incoming socket
+        std::string _buffer;  ///< Buffer of ClientRequest object
+        bool        _done;    ///< Is true if body is done being read
+        bool        _uniform; ///< Used to protect get() usage if pop() or clean() are used
+        std::string _body;    ///< Whole body if get() is used, always empty if pop() is in use.
+        size_t      _total;   ///< Size read or to be read (in case BodyLength)
 };
 
 #endif // INCLUDE_SRC_BODY_HPP_

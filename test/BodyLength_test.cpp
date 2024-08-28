@@ -120,7 +120,7 @@ TEST(BodyLengthTestSuite, get) {
     write(fd[1], buf, 130);
     for (size_t i = 1; i - 1 <= 130 / BUFFER_SIZE; i++) {
         tmp2 = tmp1.substr(0, i * BUFFER_SIZE);
-        res = test.get();
+        res  = test.get();
         EXPECT_EQ(tmp2, res);
         EXPECT_EQ((size_t) i * BUFFER_SIZE > 130 ? 130 : (size_t) i * BUFFER_SIZE, test._read_length);
     }
@@ -145,7 +145,7 @@ TEST(BodyLengthTestSuite, pop) {
     write(fd[1], buf, 130);
     for (size_t i = 1; i - 1 <= 130 / BUFFER_SIZE; i++) {
         tmp2 = tmp1.substr((i - 1) * BUFFER_SIZE, BUFFER_SIZE);
-        res = test.pop();
+        res  = test.pop();
         EXPECT_EQ(tmp2, res);
         EXPECT_EQ((size_t) i * BUFFER_SIZE > 130 ? 130 : (size_t) i * BUFFER_SIZE, test._read_length);
     }

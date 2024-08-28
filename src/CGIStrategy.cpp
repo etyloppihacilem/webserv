@@ -44,14 +44,14 @@ bool CGIStrategy::build_response() {
 
     if (_request->have_body()) { // WARN: check for infinite loop risk. Test with both body types.
         body = _request->get_body();
-        if (dynamic_cast<BodyChunk *>(body)) // if body is chunk
-            while (body->is_done())          // retrieving whole body. TODO: body cannot be read without a epoll
+        if (dynamic_cast< BodyChunk * >(body)) // if body is chunk
+            while (body->is_done())            // retrieving whole body. TODO: body cannot be read without a epoll
                 body->get();
         size = body->length();
         (void) size; // TODO: delete this
     }
 
-    std::map<std::string, std::string> env;
+    std::map< std::string, std::string > env;
 
     // program separation
     if (pipe(_pipin) < 0) {
@@ -91,7 +91,7 @@ bool CGIStrategy::build_response() {
     return _built == true;
 }
 
-void CGIStrategy::fill_env(std::map<std::string, std::string> &env, size_t size) {
+void CGIStrategy::fill_env(std::map< std::string, std::string > &env, size_t size) {
     env["CONTENT_TYPE"] = "";
     if (size) {
         std::stringstream st;
@@ -112,7 +112,7 @@ void CGIStrategy::fill_env(std::map<std::string, std::string> &env, size_t size)
     env["SERVER_SOFTWAR"]    = SERVER_SOFTWARE;
 }
 
-char **CGIStrategy::generate_env(const std::map<std::string, std::string> &env) const {
+char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env) const {
     char **ret = 0;
 
     if (!(ret = new (std::nothrow) char *[env.size() + 1])) {
@@ -123,7 +123,7 @@ char **CGIStrategy::generate_env(const std::map<std::string, std::string> &env) 
 
     size_t i = 0;
 
-    for (std::map<std::string, std::string>::const_iterator it = env.begin(); it != env.end(); it++) {
+    for (std::map< std::string, std::string >::const_iterator it = env.begin(); it != env.end(); it++) {
         std::string tmp = it->first + "=" + it->second;
 
         if (!(ret[i] = strdup(tmp.c_str()))) { // bad alloc

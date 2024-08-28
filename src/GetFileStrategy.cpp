@@ -81,8 +81,8 @@ bool GetFileStrategy::build_response() {
     } // saving stack
     _file.open(_location.c_str(), std::fstream::binary | std::ios_base::in);
     if (!_file.is_open()) {
-        error.log() << "GetFileStrategy: Undetected error opening file " << _location << ". Sending " << InternalServerError
-                    << std::endl;
+        error.log() << "GetFileStrategy: Undetected error opening file " << _location << ". Sending "
+                    << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     }
     _response.set_body(this);

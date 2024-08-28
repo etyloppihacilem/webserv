@@ -46,7 +46,7 @@ UploadStrategy< ServerClass, RouteClass >::UploadStrategy(
         debug.log() << "Upload created with body" << std::endl;
         _body = request.get_body();
     }
-        debug.log() << "Upload created with no body" << std::endl;
+    debug.log() << "Upload created with no body" << std::endl;
 }
 
 template < class ServerClass, class RouteClass >

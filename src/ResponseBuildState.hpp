@@ -33,12 +33,12 @@ class ResponseBuildState : public ProcessState {
         ); // equivalent of calling recovery on ErrorBuildingStrategy
         ~ResponseBuildState();
 
-        t_state                   process();
+        t_state process();
 
         ResponseBuildingStrategy *get_response_strategy();
-        HttpCode get_status() const;
+        HttpCode                  get_status() const;
 
-        void                      save_mem();
+        void save_mem();
 
     private:
         void init_strategy();

@@ -78,7 +78,7 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
         debug.log() << "DELETE is enabled" << std::endl;
         // _is_put  = std::find(methods.begin(), methods.end(), PUT) != methods.end(); // not implemented yet
         // debug.log() << "PUT is enabled." << std::endl;
-        if (stat(_path.c_str(), &buf) != 0) {
+        if (stat(_path.c_str(), &buf) != 0)
             switch (errno) {
                 case ENOENT:
                 case ENOTDIR:
@@ -98,7 +98,6 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
                                 << std::endl;
                     throw HttpError(InternalServerError);
             } // default throws so nothing gets out of there
-        }
         debug.log() << "Target '" << target << "' exists." << std::endl;
         if (S_ISDIR(buf.st_mode)) { // in case target is a directory
             debug.log() << "Target is a directory" << std::endl;
@@ -171,18 +170,16 @@ bool Location< ServerClass, RouteClass >::find_index(const RouteClass &route, st
   */
 template < class ServerClass, class RouteClass >
 void Location< ServerClass, RouteClass >::build_path(const std::string &target, const RouteClass &route) {
-    _path       = target;
-    _upload_path       = target;
-    _path_info  = target;
-    _route_path = route.getRootDir();
+    _path        = target;
+    _upload_path = target;
+    _path_info   = target;
+    _route_path  = route.getRootDir();
     if (*_route_path.rbegin() == '/')
         _route_path.resize(_route_path.length() - 1);
-    if (_path[route.getLocation().length()] != '/' && _path != route.getLocation())
-    {
+    if (_path[route.getLocation().length()] != '/' && _path != route.getLocation()) {
         _path.replace(0, route.getLocation().length() - 1, _route_path);
         _upload_path.replace(0, route.getLocation().length() - 1, route.getUploadPath());
-    }
-    else {
+    } else {
         _path.replace(0, route.getLocation().length(), _route_path);
         _upload_path.replace(0, route.getLocation().length(), route.getUploadPath());
     }

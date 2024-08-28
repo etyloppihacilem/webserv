@@ -27,8 +27,8 @@ class RedirectStrategy : public ResponseBuildingStrategy {
             HttpCode           code = MovedPermanently ///< Code to redirect (MovedPermanently 301 as default)
         );
         RedirectStrategy(
-            const std::string &location, ///< Location to redirect to
-            const std::string &query_string, ///< Query string to redirect to, should not start with ?
+            const std::string &location,               ///< Location to redirect to
+            const std::string &query_string,           ///< Query string to redirect to, should not start with ?
             HttpCode           code = MovedPermanently ///< Code to redirect (MovedPermanently 301 as default)
         );
         ~RedirectStrategy();

@@ -23,8 +23,7 @@
 
 ResponseSendState::ResponseSendState(int socket, ResponseBuildingStrategy *strategy) :
     ProcessState(socket),
-    _strategy(strategy)
- {
+    _strategy(strategy) {
     if (!strategy) {
         error.log() << "ResponseSendState: no strategy provided, closing connexion" << std::endl;
         _state = s_error;
@@ -54,7 +53,7 @@ t_state ResponseSendState::process() {
                     << ". Closing connexion" << std::endl;
         _state = s_error; // is_error means to close the connexion
     }
-    if (static_cast<size_t>(written) < (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()))
+    if (static_cast< size_t >(written) < (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()))
         error.log() << "Partial write in socker " << _socket << ", content may be affected." << std::endl;
     _buffer = _buffer.substr(written, _buffer.length() - written);
     if (response.is_done() && _buffer.length() == 0) {

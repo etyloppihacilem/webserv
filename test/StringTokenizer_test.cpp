@@ -124,8 +124,11 @@ TEST_F(StringTokenizerTestSuite, nextTokenOfSeparator) {
     EXPECT_EQ(TokenList1.remainingString(), "");
     EXPECT_EQ(AdvancedTokenList1.nextToken('{'), "server");
     EXPECT_EQ(AdvancedTokenList1.countTokens(), 19ul);
-    EXPECT_EQ(AdvancedTokenList1.remainingString(), "listen|80;|server_name|127.0.0.6;|root|www;|methods|GET;|index|index.html;|location|/"
-        "images|{|methods|GET;|autoindex|on;|}|}");
+    EXPECT_EQ(
+        AdvancedTokenList1.remainingString(),
+        "listen|80;|server_name|127.0.0.6;|root|www;|methods|GET;|index|index.html;|location|/"
+        "images|{|methods|GET;|autoindex|on;|}|}"
+    );
     EXPECT_EQ(
         AdvancedTokenList1.nextToken('}'),
         "listen|80;|server_name|127.0.0.6;|root|www;|methods|GET;|index|index.html;|location|/"

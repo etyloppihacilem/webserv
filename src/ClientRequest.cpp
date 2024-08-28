@@ -89,7 +89,7 @@ bool ClientRequest::gateway_checks(int port) {
 #ifndef TESTING
     try {
         Server &s = ServerManager::getInstance()->getServer(_header["Host"], _port);
-        (void)s; // this was meant to test existence
+        (void) s; // this was meant to test existence
     } catch (ServerManager::ServerNotFoundWarn &e) {
         info.log() << "Host " << _header["Host"] << " is not listening on " << _port << " or does not exist, sending "
                    << BadGateway << std::endl;

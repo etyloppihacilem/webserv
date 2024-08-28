@@ -114,7 +114,7 @@ Path Path::operator+(const std::string &b) const {
 }
 
 bool Path::in(const Path &other) const {
-    return (_path.find(other._path) == 0);
+    return _path.find(other._path) == 0;
 }
 
 std::string Path::add_path(const std::string &a, const std::string &b) {

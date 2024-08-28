@@ -28,8 +28,8 @@ class CGIStrategy : public ResponseBuildingStrategy {
         void save_mem();
 
     private:
-        void   fill_env(std::map<std::string, std::string> &env, size_t size);
-        char **generate_env(const std::map<std::string, std::string> &env) const;
+        void   fill_env(std::map< std::string, std::string > &env, size_t size);
+        char **generate_env(const std::map< std::string, std::string > &env) const;
 
         std::string    _location;
         ClientRequest *_request;

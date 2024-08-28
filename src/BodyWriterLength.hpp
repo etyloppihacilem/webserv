@@ -28,7 +28,7 @@ class BodyWriterLength : public BodyWriter {
         void        save_mem(); // save_mem should be put on every object to save memory if needed
 
     private:
-        std::string _body;      ///< Body content.
+        std::string _body; ///< Body content.
 };
 
 #endif // INCLUDE_SRC_BODYWRITERLENGTH_HPP_

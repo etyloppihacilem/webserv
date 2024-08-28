@@ -3,10 +3,8 @@
 #include <string>
 #include <unistd.h>
 
-
 void http_client_test(const std::string &hostname);
 void http_server_test(void);
-
 
 TEST(SocketTestSuite, TestProgram) {
 
@@ -16,5 +14,4 @@ TEST(SocketTestSuite, TestProgram) {
     }
     sleep(2);
     http_client_test("127.0.0.1");
-
 }

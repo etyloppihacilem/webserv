@@ -23,7 +23,7 @@ std::vector< std::string > setFieldServerName(const ValueList &values) {
                 continue;
             } else {
                 ret.push_back(*it);
-                continue ;
+                continue;
             }
             warn.log() << "server_name: " << *it << ", is not a a valid IP address." << std::endl;
             continue;
@@ -170,7 +170,7 @@ HttpCode setFieldErrorPageCode(const ValueList &values) {
     return HttpCode(ret);
 }
 
-// TODO: to remove 
+// TODO: to remove
 std::string setFieldErrorPagePath(const ValueList &values) {
     if (values.size() != 2) {
         logInvalidValuesCount(error_page, values);
@@ -178,7 +178,8 @@ std::string setFieldErrorPagePath(const ValueList &values) {
     }
 
     if (extract_extension(values[1]) == "") {
-        warn.log() << "error_page: " << values[0] << " " << values[1] << ", is not a valid absolute path to file." << std::endl;
+        warn.log() << "error_page: " << values[0] << " " << values[1] << ", is not a valid absolute path to file."
+                   << std::endl;
         throw ServerConfWarn();
     }
 
@@ -190,16 +191,16 @@ std::string setFieldLocationPath(const std::string &value) {
         warn.log() << "location: " << value << ", is not a valid absolute path to folder." << std::endl;
         throw ServerConfWarn();
     }
-    
+
     std::string ret(value);
-    if (ret != "/" && ret.at(ret.size() -1) == '/') {
+    if (ret != "/" && ret.at(ret.size() - 1) == '/') {
         info.log() << "location: " << value << ", trailing slash has been removed." << std::endl;
         ret.erase(ret.size() - 1, 1);
     }
     return ret;
 }
 
-// TODO: to remove 
+// TODO: to remove
 std::string setFieldUploadPath(const ValueList &values) {
     if (values.size() != 1) {
         logInvalidValuesCount(upload_path, values);
@@ -211,7 +212,7 @@ std::string setFieldUploadPath(const ValueList &values) {
         throw ServerConfWarn();
     }
 
-    //TODO: to keep
+    // TODO: to keep
     return add_trailing_slash(values[0]);
 }
 
@@ -246,7 +247,7 @@ HttpCode setFieldRewriteCode(const ValueList &values) {
     return HttpCode(ret);
 }
 
-// TODO: to remove 
+// TODO: to remove
 std::string setFieldCgiPath(const ValueList &values) {
     if (values.size() != 1) {
         logInvalidValuesCount(cgi_path, values);
@@ -258,7 +259,7 @@ std::string setFieldCgiPath(const ValueList &values) {
         throw ServerConfWarn();
     }
 
-    //TODO: to keep
+    // TODO: to keep
     return add_trailing_slash(values[0]);
 }
 

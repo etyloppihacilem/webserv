@@ -32,14 +32,14 @@ ProcessHandler::~ProcessHandler() {
 }
 
 time_t ProcessHandler::getTimeout() const {
-    //TODO: refactor with _timeout value being retrieve from the state.
+    // TODO: refactor with _timeout value being retrieve from the state.
     if (_state == 0)
         return CONNECTION_TIMEOUT;
-    if (dynamic_cast<ReadState *>(_state) != 0)
+    if (dynamic_cast< ReadState * >(_state) != 0)
         return REQUEST_TIMEOUT;
-    if (dynamic_cast< ResponseBuildState<> *>(_state) != 0)
+    if (dynamic_cast< ResponseBuildState<> * >(_state) != 0)
         return INPUT_TIMEOUT;
-    if (dynamic_cast< ResponseSendState *>(_state))
+    if (dynamic_cast< ResponseSendState * >(_state))
         return OUTPUT_TIMEOUT;
     return CONNECTION_TIMEOUT;
 }

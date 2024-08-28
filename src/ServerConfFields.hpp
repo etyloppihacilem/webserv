@@ -11,7 +11,7 @@
 #define MAX_FIELD_SIZE 20
 #define MIN_ROOTLESS_PORT 1024
 #define MAX_PORT 65535
-#define MAX_BODY_SIZE 2147483648
+#define MAX_BODY_SIZE 2'147'483'648
 
 typedef std::pair< std::string, StringTokenizer > Field;
 typedef std::vector< std::string >                ValueList;

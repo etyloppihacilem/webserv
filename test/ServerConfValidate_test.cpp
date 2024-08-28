@@ -1,7 +1,6 @@
 #include "ServerConfValidate.hpp"
 #include "gtest/gtest.h"
 
-
 TEST(ServerConfValidateTestSuite, isValidHostName) {
     EXPECT_TRUE(isValidHostname("localhost"));
     EXPECT_TRUE(isValidHostname("localhost.160"));

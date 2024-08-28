@@ -48,10 +48,10 @@ class Response {
         std::string generate_header() const;
         void        clean_body();
 
-        HttpCode                             _code;     ///< HttpStatusCodes of response
-        std::map< std::string, std::string > _header;   ///< Header map
-        BodyWriter                          *_body;     ///< Body of response (if any)
-        internal_state                       _state;    ///< To know what is left to generate
+        HttpCode                             _code;   ///< HttpStatusCodes of response
+        std::map< std::string, std::string > _header; ///< Header map
+        BodyWriter                          *_body;   ///< Body of response (if any)
+        internal_state                       _state;  ///< To know what is left to generate
 #ifdef TESTING
         FRIEND_TEST(ResponseTestSuite, generate_status_line);
         FRIEND_TEST(ResponseBuildStateFixture, CorrectHeaders);
