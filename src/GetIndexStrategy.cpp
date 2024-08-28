@@ -14,11 +14,11 @@
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "StringUtils.hpp"
-#include "todo.hpp"
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <dirent.h>
+#include <fcntl.h>
 #include <new>
 #include <ostream>
 #include <sstream>
@@ -26,6 +26,7 @@
 #include <strings.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 // location ending in /
 GetIndexStrategy::GetIndexStrategy(const std::string &location, const std::string &target) :
@@ -92,13 +93,14 @@ std::string GetIndexStrategy::getType(mode_t mode) {
   Returns name value or an error message to display.
   */
 std::string GetIndexStrategy::generateLine(char *name, struct stat *st) {
-    std::string path = _location + std::string(name);
+    std::string path = _location + (*_location.rbegin() != '/' ? "/" : "") + std::string(name);
     //+ (*_location.rbegin() != '/' ? "/" : "") // not suppsed to be needed 265 103!!!
 
     if (!stat(path.c_str(), st))
         return name;
     else {
         bzero(st, sizeof(struct stat));
+        warn.log() << "GetIndexStrategy: could not stat item at '" << path << "' " << strerror(errno) << std::endl;
         return "Could not access file.";
     }
 }
@@ -119,6 +121,7 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
 
     while (_index < _len && buffer.size() < size) {
         item = _dir_list[_index];
+        debug.log() << "GetIndexStrategy: found and listing " << item->d_name << std::endl;
         name = generateLine(item->d_name, &st);
         std::stringstream stream;
         stream << "<tr><td>" << getType(st.st_mode) << "</td><td><a href=\"" << _target << item->d_name << "\">" << name
@@ -145,7 +148,8 @@ bool GetIndexStrategy::build_response() {
         return _built;
     }
     // TODO: estimate size
-    if ((_len = scandir(_location.c_str(), &_dir_list, NULL, alphasort)) < 0) {
+    int dir_fd = open(_location.c_str(), O_DIRECTORY | O_RDONLY);
+    if (dir_fd < 0) {
         switch (errno) {
             case EACCES:
                 info.log() << "GetIndexStrategy: cannot open directory '" << _location
@@ -155,8 +159,6 @@ bool GetIndexStrategy::build_response() {
                 info.log() << "GetIndexStrategy: cannot open directory '" << _location << "' " << strerror(errno)
                            << ", sending " << NotFound << std::endl;
                 throw HttpError(NotFound);
-            case ENOMEM:
-                throw std::bad_alloc(); // to begin memory recovery procedure
             default:
                 warn.log() << "GetIndexStrategy: cannot open directory '" << _location << "' " << strerror(errno)
                            << ", sending " << InternalServerError << std::endl
@@ -164,6 +166,27 @@ bool GetIndexStrategy::build_response() {
                 throw HttpError(InternalServerError);
         }
     }
+    if ((_len = scandirat(dir_fd, ".", &_dir_list, NULL, alphasort)) < 0) {
+        close(dir_fd);
+        switch (errno) {
+            case EACCES:
+                info.log() << "GetIndexStrategy: cannot scan directory '" << _location
+                           << "' permission denied, sending " << Forbidden << std::endl;
+                throw HttpError(Forbidden);
+            case ENOENT:
+                info.log() << "GetIndexStrategy: cannot scan directory '" << _location << "' " << strerror(errno)
+                           << ", sending " << NotFound << std::endl;
+                throw HttpError(NotFound);
+            case ENOMEM:
+                throw std::bad_alloc(); // to begin memory recovery procedure
+            default:
+                warn.log() << "GetIndexStrategy: cannot scan directory '" << _location << "' " << strerror(errno)
+                           << ", sending " << InternalServerError << std::endl
+                           << std::endl;
+                throw HttpError(InternalServerError);
+        }
+    }
+    close(dir_fd);
     _response.add_header("Content-Type", "text/html; charset=utf-8");
     _response.set_body(this);
     if (*_location.rbegin() != '/')

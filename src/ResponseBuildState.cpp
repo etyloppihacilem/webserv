@@ -61,7 +61,6 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, Cl
     if (!_server) {
         error.log() << "ResponseBuildState: Trying to build non recovery response without server." << std::endl;
         _recovery = true;
-        _request->set_status(InternalServerError); // belt suspenders ("ceinture bretelle")
         _code = InternalServerError;
     }
 #else

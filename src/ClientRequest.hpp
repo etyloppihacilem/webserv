@@ -34,8 +34,6 @@ class ClientRequest {
         bool gateway_checks(int port); ///< Returns true on success
         // bool        parse(const std::string &in);
 
-        void set_status(HttpCode code);
-
         std::string get_target() const;
         HttpMethod  get_method();
         Body       *get_body();

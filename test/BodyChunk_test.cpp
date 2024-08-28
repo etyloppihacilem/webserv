@@ -55,8 +55,9 @@ TEST(BodyChunkTestSuite, is_hex) {
 }
 
 TEST(BodyChunkTestSuite, init_chunk) {
-    std::string buffer = "ca32\r\ncoucou";
-    BodyChunk   test(0, buffer);
+    std::string  tmp = "ca32\r\ncoucou";
+    BodyChunk    test(0, tmp);
+    std::string &buffer = test._buffer;
 
     warn.disable();
     EXPECT_EQ(test._bytes_remaining, (size_t) 0);
@@ -76,11 +77,12 @@ TEST(BodyChunkTestSuite, init_chunk) {
 }
 
 TEST(BodyChunkTestSuite, init_chunk_end) {
-    std::string buffer
+    std::string tmp
         = "16\r\nCoucou je suis heureux\r\n41\r\n"
           " de pouvoir tester le comportement d'un body_length et de compren\r\n2b\r\n"
           "dre comment pouvoir lire de facon certaine.\r\n\r\n";
-    BodyChunk test(0, buffer);
+    BodyChunk    test(0, tmp);
+    std::string &buffer = test._buffer;
 
     warn.disable();
     test._bytes_remaining = 0;
@@ -101,19 +103,23 @@ TEST(BodyChunkTestSuite, init_chunk_end) {
 }
 
 TEST(BodyChunkTestSuite, init_chunk_bad) {
+    info.disable();
     std::string buffer
         = "zxswABC\r\n"
           "2a\r\n";
     BodyChunk test(0, buffer);
 
     EXPECT_THROW(test.init_chunk(), HttpError);
+    info.enable();
 }
 
 TEST(BodyChunkTestSuite, init_chunk_none) {
+    info.disable();
     std::string buffer = "zxsw\r\n";
     BodyChunk   test(0, buffer);
 
     EXPECT_THROW(test.init_chunk(), HttpError);
+    info.enable();
 }
 
 // suspended because of change of approach for reading with chunks

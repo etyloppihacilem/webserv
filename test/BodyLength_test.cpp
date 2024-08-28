@@ -11,6 +11,7 @@
 #include "BodyLength.hpp"
 #include "HttpError.hpp"
 #include "HttpStatusCodes.hpp"
+#include "Logger.hpp"
 #include "todo.hpp"
 #include "gtest/gtest.h"
 #include <cstddef>
@@ -26,13 +27,13 @@ TEST(BodyLengthTestSuite, Constructor) {
     BodyLength test(0, buffer, "1234");
 
     EXPECT_EQ(test._buffer, buffer);
-    EXPECT_EQ(&test._buffer, &buffer);
     EXPECT_EQ(test.is_done(), false);
     EXPECT_EQ(test._length, (size_t) 1234);
     EXPECT_EQ(test._read_length, (size_t) buffer.length());
 }
 
 TEST(BodyLengthTestSuite, BadConstructor) {
+    info.disable();
     std::string buffer = "Coucou je suis heureux";
 
     EXPECT_THROW(
@@ -74,6 +75,7 @@ TEST(BodyLengthTestSuite, BadConstructor) {
         },
         HttpError
     );
+    info.enable();
 }
 
 TEST(BodyLengthTestSuite, read_body) {
@@ -87,15 +89,14 @@ TEST(BodyLengthTestSuite, read_body) {
     if (pipe(fd) < 0)
         GTEST_FATAL_FAILURE_("Pipe creation failed");
 
-    std::string buffer = "";
-    BodyLength  test(fd[0], buffer, "130");
+    std::string nothing;
+    BodyLength  test(fd[0], nothing, "130");
 
     write(fd[1], buf, 130);
     for (size_t i = 1; i - 1 <= 130 / BUFFER_SIZE; i++) {
         tmp2 = tmp1.substr(0, i * BUFFER_SIZE);
         test.read_body();
         EXPECT_EQ(tmp2, test._buffer);
-        EXPECT_EQ(tmp2, buffer);
         EXPECT_EQ((size_t) i * BUFFER_SIZE > 130 ? 130 : (size_t) i * BUFFER_SIZE, test._read_length);
     }
     EXPECT_TRUE(test.is_done());
