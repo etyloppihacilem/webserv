@@ -141,13 +141,11 @@ bool GetIndexStrategy::fill_buffer(std::string &buffer, size_t size) {
     return _done;
 }
 
-// TODO: Order is not garanteed, use the other thing
 bool GetIndexStrategy::build_response() {
     if (_built) {
         warn.log() << "GetIndexStrategy : trying to build response, but is already built." << std::endl;
         return _built;
     }
-    // TODO: estimate size
     int dir_fd = open(_location.c_str(), O_DIRECTORY | O_RDONLY);
     if (dir_fd < 0) {
         switch (errno) {
@@ -187,6 +185,7 @@ bool GetIndexStrategy::build_response() {
         }
     }
     close(dir_fd);
+    _estimated_size = 148 + (133 * _len);
     _response.add_header("Content-Type", "text/html; charset=utf-8");
     _response.set_body(this);
     if (*_location.rbegin() != '/')
