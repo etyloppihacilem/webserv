@@ -74,7 +74,7 @@ void ProcessHandler::handle() {
             _state = 0;
         }
     }
-    if (_state->get_state() == s_error) {
+    if (_state && _state->get_state() == s_error) {
         // TODO: Close connexion here
         ServerManager::getInstance()->deleteClient(_socket_fd, *this);
         return;
