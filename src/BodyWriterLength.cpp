@@ -50,11 +50,12 @@ std::string BodyWriterLength::generate(size_t size /** is discarded because not 
         _done = true;
     std::string ret = _body.substr(0, (size > _body.length() ? _body.length() : size));
     _body.replace(0, (size > _body.length() ? _body.length() : size), "");
+    _length += ret.length();
     return ret;
 }
 
 size_t BodyWriterLength::length() const {
-    return _body.length();
+    return _length + _body.length();
 }
 
 void BodyWriterLength::save_mem() {

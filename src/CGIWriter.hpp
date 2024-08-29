@@ -35,7 +35,6 @@ class CGIWriter : public BodyWriter {
         size_t      _total;
         bool        _init; ///< Wether init needs to be done
         bool        _cgi_done;
-        size_t      _length;
 };
 
 #endif // INCLUDE_SRC_CGIWRITER_HPP_

@@ -290,22 +290,17 @@ TEST_P(ResponseBuildStateFixture, BodyValue) {
         return;
     BodyWriter *bodywriter = _strategy->get_response().get_body();
     std::string body;
-    if (dynamic_cast< BodyWriterChunk * >(bodywriter) != 0) {
-        while (!bodywriter->is_done())
-            body += bodywriter->generate();
-    } else if (dynamic_cast< BodyWriterLength * >(bodywriter) != 0) {
-        body = bodywriter->generate();
-    } else {
-        FAIL() << "Unknown body type.";
-        return;
-    }
+    while (!bodywriter->is_done())
+        body += bodywriter->generate();
     const map &test_headers = _strategy->get_response()._header;
-    if (test_headers.find("Content-Length") != test_headers.end()) {
-        std::stringstream st;
-        st << test_headers.find("Content-Length")->second;
-        size_t len;
-        st >> len;
-        EXPECT_EQ(bodywriter->length(), len);
+    if (dynamic_cast< BodyWriterLength * >(bodywriter) != 0) {
+        if (test_headers.find("Content-Length") != test_headers.end()) {
+            std::stringstream st;
+            st << test_headers.find("Content-Length")->second;
+            size_t len;
+            st >> len;
+            EXPECT_EQ(bodywriter->length(), len);
+        }
     }
     const std::string &correct = std::get< tbody >(GetParam());
     EXPECT_EQ(body, correct);

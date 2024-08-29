@@ -27,7 +27,6 @@ class BodyWriterChunk : public BodyWriter {
         void        save_mem();
 
     private:
-        size_t _length;
 };
 
 #endif // INCLUDE_SRC_BODYWRITERCHUNK_HPP_

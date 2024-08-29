@@ -11,9 +11,9 @@
 #include "BodyWriter.hpp"
 #include <ostream>
 
-BodyWriter::BodyWriter() : _done(false), _strategy(0) {}
+BodyWriter::BodyWriter() : _done(false), _strategy(0), _length(0) {}
 
-BodyWriter::BodyWriter(ResponseBuildingStrategy &strategy) : _done(false), _strategy(&strategy) {}
+BodyWriter::BodyWriter(ResponseBuildingStrategy &strategy) : _done(false), _strategy(&strategy), _length(0) {}
 
 BodyWriter::~BodyWriter() {}
 

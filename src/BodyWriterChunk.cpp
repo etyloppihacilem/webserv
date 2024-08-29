@@ -18,7 +18,7 @@
 #include <sstream>
 #include <string>
 
-BodyWriterChunk::BodyWriterChunk(ResponseBuildingStrategy &strategy) : BodyWriter(strategy), _length(0) {}
+BodyWriterChunk::BodyWriterChunk(ResponseBuildingStrategy &strategy) : BodyWriter(strategy) {}
 
 BodyWriterChunk::~BodyWriterChunk() {}
 
