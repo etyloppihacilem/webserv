@@ -69,6 +69,7 @@ void ProcessHandler::handle() {
         if (dynamic_cast< ResponseBuildState<> * >(_state) != 0)
             transition_to_rss();
         else if (dynamic_cast< ResponseSendState * >(_state) != 0) {
+            ServerManager::getInstance()->listenToClient(_socket_fd, *this);
             delete _state;
             _state = 0;
         }
