@@ -12,6 +12,7 @@
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 AcceptHandler::AcceptHandler(int socket, int port) : EventHandler(socket, port) {
     debug.log() << "AcceptHandler: created on socket " << _socket_fd << " for port " << _port << "." << std::endl;
@@ -19,6 +20,7 @@ AcceptHandler::AcceptHandler(int socket, int port) : EventHandler(socket, port) 
 
 AcceptHandler::~AcceptHandler() {
     debug.log() << "AcceptHandler: deleted on socket " << _socket_fd << " for port " << _port << "." << std::endl;
+    close(_socket_fd);
 }
 
 time_t AcceptHandler::getTimeout() const {
@@ -42,5 +44,5 @@ void AcceptHandler::handle() {
 
 void AcceptHandler::timeout() {
     warn.log() << "Client timeout" << std::endl;
-    ServerManager::getInstance()->deleteClient(_socket_fd);
+    ServerManager::getInstance()->deleteClient(_socket_fd, *this);
 }

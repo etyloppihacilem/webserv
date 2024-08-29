@@ -144,7 +144,7 @@ template < class ServerClass, class RouteClass >
 ResponseBuildingStrategy *ResponseBuildState< ServerClass, RouteClass >::get_response_strategy() {
     ResponseBuildingStrategy *ret = _strategy;
     if (_strategy == 0)
-        error.log() << "ResponseBuildState: Getting a non existing ResponseBuildingStrategy." << std::endl;
+        error.log() << "ResponseBuildState: Getting no ResponseBuildingStrategy." << std::endl;
     if (_state != ready)
         warn.log() << "ResponseBuildState: getting ResponseBuildingStrategy that is not totally generated. As a result,"
                       " it will not be removed from ResponseBuildState object and may be deleted at its destruction."

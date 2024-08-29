@@ -15,7 +15,7 @@ class ServerManager {
         ~ServerManager();
 
         void addClient(int socket_fd, int port, std::string client_IP);
-        void deleteClient(int socket_fd);
+        void deleteClient(int socket_fd, EventHandler &handler);
         void listenToClient(int socket_fd, EventHandler &handler);
         void talkToClient(int socket_fd, EventHandler &handler);
         void run(void);

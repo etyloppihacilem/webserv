@@ -89,8 +89,8 @@ void ServerManager::addClient(int socket_fd, int port, std::string client_IP) {
     _reactor.addClient(socket_fd, port, client_IP);
 }
 
-void ServerManager::deleteClient(int socket_fd) {
-    _reactor.deleteClient(socket_fd);
+void ServerManager::deleteClient(int socket_fd, EventHandler &handler) {
+    _reactor.deleteClient(socket_fd, handler);
 }
 
 void ServerManager::listenToClient(int socket_fd, EventHandler &handler) {

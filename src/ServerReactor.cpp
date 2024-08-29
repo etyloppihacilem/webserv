@@ -3,6 +3,7 @@
 #include "EventHandler.hpp"
 #include "Logger.hpp"
 #include "ProcessHandler.hpp"
+#include "ProcessState.hpp"
 #include "Server.hpp"
 #include <asm-generic/socket.h>
 #include <cerrno>
@@ -83,7 +84,7 @@ void ServerReactor::initNetwork(const std::vector< Server > &servers) {
 
         listeningPort.insert(it->getPort());
         _eventHandlers.insert(static_cast< EventHandler * >(event.data.ptr));
-         info.log() << "ServerReactor: port " << it->getPort() << " is open for client connection." << std::endl;
+        info.log() << "ServerReactor: port " << it->getPort() << " is open for client connection." << std::endl;
     }
 }
 
@@ -124,15 +125,19 @@ int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
 }
 
 // NOTE: for info should we pass the client IP?
-void ServerReactor::deleteClient(int socket_fd) {
+void ServerReactor::deleteClient(int socket_fd, EventHandler &handler) {
     info.log() << "ServerReactor: Delete client socket " << socket_fd << std::endl;
     errno = 0;
     if (epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, socket_fd, 0) == -1)
         throw std::runtime_error("ServerReactor: epoll_ctl_del: " + std::string(std::strerror(errno)));
+    std::set<EventHandler *>::iterator it = _eventHandlers.find(&handler);
+    delete *it;
+    _eventHandlers.erase(it);
+
 }
 
 void ServerReactor::listenToClient(int socket_fd, EventHandler &handler) {
-    debug.log() << "ServerReactor: socket " << socket_fd << " is waiting for EPOLLIN event." << std::endl; 
+    debug.log() << "ServerReactor: socket " << socket_fd << " is waiting for EPOLLIN event." << std::endl;
     struct epoll_event event;
     event.events   = EPOLLIN | EPOLLERR | EPOLLHUP;
     event.data.ptr = &handler;
@@ -142,7 +147,7 @@ void ServerReactor::listenToClient(int socket_fd, EventHandler &handler) {
 }
 
 void ServerReactor::talkToClient(int socket_fd, EventHandler &handler) {
-    debug.log() << "ServerReactor: socket " << socket_fd << " is waiting for EPOLLOUT event." << std::endl; 
+    debug.log() << "ServerReactor: socket " << socket_fd << " is waiting for EPOLLOUT event." << std::endl;
     struct epoll_event event;
     event.events   = EPOLLOUT | EPOLLERR | EPOLLHUP;
     event.data.ptr = &handler;
@@ -170,9 +175,12 @@ void ServerReactor::run() {
                 continue;
             static_cast< EventHandler * >(events[i].data.ptr)->handle();
         }
-        if (event_count == 0)
+        if (event_count == 0) {
+            info.log() << "ServerReactor: Check for timout!" << std::endl;
             for (std::set< EventHandler * >::iterator it = _eventHandlers.begin(); it != _eventHandlers.end(); ++it)
                 (*it)->checkTimeout();
+            debug.log() << "ServerReactor: timeout check done." << std::endl;
+        }
     }
 }
 

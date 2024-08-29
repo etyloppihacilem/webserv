@@ -22,6 +22,7 @@
 #include <ctime>
 #include <ostream>
 #include <string>
+#include <unistd.h>
 
 ProcessHandler::ProcessHandler(int socket_fd, int port, std::string client_IP) :
     EventHandler(socket_fd, port),
@@ -38,6 +39,7 @@ ProcessHandler::~ProcessHandler() {
     }
     debug.log() << "ProcessHandler: deleted client " << _client_IP << " on " << _socket_fd << " from " << _port << "."
                 << std::endl;
+    close(_socket_fd);
 }
 
 time_t ProcessHandler::getTimeout() const {
@@ -73,14 +75,14 @@ void ProcessHandler::handle() {
     }
     if (_state->get_state() == s_error) {
         // TODO: Close connexion here
-        ServerManager::getInstance()->deleteClient(_socket_fd);
+        ServerManager::getInstance()->deleteClient(_socket_fd, *this);
         return;
     }
 }
 
 void ProcessHandler::timeout() {
     warn.log() << "Client timeout" << std::endl;
-    ServerManager::getInstance()->deleteClient(_socket_fd);
+    ServerManager::getInstance()->deleteClient(_socket_fd, *this);
 }
 
 void ProcessHandler::clean_state() {
