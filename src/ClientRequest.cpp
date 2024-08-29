@@ -202,8 +202,8 @@ void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_
         _header[key] += ", " + in.substr(sep, (end + 1) - sep);
         debug.log() << "Parsed header line " << key << "+: " << _header[key] << std::endl;
     } else {
-        debug.log() << "Parsed header line " << key << " : " << _header[key] << std::endl;
         _header[key] = in.substr(sep, (end + 1) - sep);
+        debug.log() << "Parsed header line " << key << " : " << _header[key] << std::endl;
     }
 }
 

@@ -66,7 +66,7 @@ void ProcessHandler::handle() {
         }
         if (dynamic_cast< ResponseBuildState<> * >(_state) != 0)
             transition_to_rss();
-        if (dynamic_cast< ResponseSendState * >(_state) != 0) {
+        else if (dynamic_cast< ResponseSendState * >(_state) != 0) {
             delete _state;
             _state = 0;
         }

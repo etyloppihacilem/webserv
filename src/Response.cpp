@@ -116,7 +116,7 @@ bool Response::build_response(std::string &buffer, size_t size) {
         warn.log() << "Response already done generating" << std::endl;
         return true;
     }
-    while (buffer.length() < size) {
+    while (buffer.length() < size && _state != finished) {
         if (_state == rs_line) {
             debug.log() << "Generating status line" << std::endl;
             buffer = generate_status_line();

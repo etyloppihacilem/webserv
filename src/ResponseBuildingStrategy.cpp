@@ -9,12 +9,16 @@
 ############################################################################# */
 
 #include "ResponseBuildingStrategy.hpp"
+#include "Logger.hpp"
 #include "Response.hpp"
 #include <cstddef>
+#include <ostream>
 
 ResponseBuildingStrategy::ResponseBuildingStrategy() : _response(), _built(false), _done(false), _estimated_size(0) {}
 
-ResponseBuildingStrategy::~ResponseBuildingStrategy() {}
+ResponseBuildingStrategy::~ResponseBuildingStrategy() {
+    debug.log() << "Strategy is deleting response." << std::endl;
+}
 
 /**
   To get the response. _response can only be used when is_done() returns true.

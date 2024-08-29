@@ -32,7 +32,7 @@ ResponseSendState::ResponseSendState(int socket, ResponseBuildingStrategy *strat
 
 ResponseSendState::~ResponseSendState() {
     if (_strategy) {
-        debug.log() << "ResponseSendState deletes Response." << std::endl;
+        debug.log() << "ResponseSendState deletes Strategy." << std::endl;
         delete _strategy;
     }
 }
@@ -47,6 +47,7 @@ t_state ResponseSendState::process() {
     if (!response.is_done())
         response.build_response(_buffer, BUFFER_SIZE);
     int written;
+    // written = write(1, _buffer.c_str(), (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()));
     written = write(_socket, _buffer.c_str(), (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()));
     if (written < 0) {
         error.log() << "Error while writing response to socket " << _socket << ": " << strerror(errno)
