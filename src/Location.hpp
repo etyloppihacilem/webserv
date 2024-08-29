@@ -76,6 +76,7 @@ class Location {
                                                              ^^^^^^^^^^
                                   ```
                                   */
+        // TODO: check CGI resolve path if path_info
 #ifdef TESTING
         FRIEND_TEST(LocationTestSuite, BuildPathTest);
         FRIEND_TEST(LocationTestSuite, BuildPathRedirectTest);

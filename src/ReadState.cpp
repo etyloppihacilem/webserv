@@ -20,14 +20,15 @@
 #include <cstddef>
 #include <cstring>
 #include <ostream>
+#include <string>
 #include <unistd.h>
 
-ReadState::ReadState(int socket, int port) :
+ReadState::ReadState(int socket, int port, const std::string &ip) :
     ProcessState(socket),
     _buffer(),
     _request(0),
     _parse_state(rs_line),
-    _port(port) {}
+    _port(port), _ip(ip) {}
 
 ReadState::~ReadState() {
     if (_request)
@@ -71,7 +72,7 @@ t_state ReadState::process_buffer(char *buffer) {
     sanitize_HTTP_string(_buffer, 0);
     if (_state == waiting) {
         if (_request == 0) {
-            _request = new ClientRequest(_socket);
+            _request = new ClientRequest(_socket, _ip);
             debug.log() << "Parsing request line." << std::endl;
         }
         // length check

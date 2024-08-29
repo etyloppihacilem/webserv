@@ -43,12 +43,14 @@ BodyWriterLength::~BodyWriterLength() {}
   Return whole body.
   */
 std::string BodyWriterLength::generate(size_t size /** is discarded because not needed in BodyWriterLength */) {
-    (void) size;
     if (_done)
         warn.log() << "Body already recovered. Risk of loosing body data if save_mem procedures are initiated."
                    << std::endl;
-    _done = true;
-    return _body;
+    if (size > _body.length())
+        _done = true;
+    std::string ret = _body.substr(0, (size > _body.length() ? _body.length() : size));
+    _body.replace(0, (size > _body.length() ? _body.length() : size), "");
+    return ret;
 }
 
 size_t BodyWriterLength::length() const {

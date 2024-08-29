@@ -185,7 +185,7 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
         _strategy = new RedirectStrategy(location.get_path(), _request->get_query_string(), location.get_status_code());
     } else if (location.is_cgi()) {
         debug.log() << "Choosing CGIStrategy" << std::endl;
-        _strategy = new CGIStrategy(location.get_path(), _request);
+        _strategy = new CGIStrategy(location.get_path(), _request, location.get_path_info());
     } else if (_request->get_method() == GET) {
         if (!location.is_get()) {
             info.log() << "ResponseBuildState: GET method is not allowed in route '" << location.get_route()

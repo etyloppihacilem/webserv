@@ -141,8 +141,8 @@ InsertTrailingCommas: None
 IntegerLiteralSeparator:
   Binary:          4
   BinaryMinDigits: 8
-  Decimal:         3
-  DecimalMinDigits: 9
+  Decimal:         0
+  DecimalMinDigits: 0
   Hex:             0
   HexMinDigits:    0
 JavaScriptQuotes: Leave

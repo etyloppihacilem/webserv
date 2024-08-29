@@ -24,7 +24,7 @@
 
 class ClientRequest {
     public:
-        ClientRequest(int socket);
+        ClientRequest(int socket, const std::string &ip);
         ClientRequest(int socket, HttpCode code, int port);
         ~ClientRequest();
 
@@ -34,14 +34,15 @@ class ClientRequest {
         bool gateway_checks(int port); ///< Returns true on success
         // bool        parse(const std::string &in);
 
-        std::string get_target() const;
-        HttpMethod  get_method();
-        Body       *get_body();
-        bool        have_body() const;
-        HttpCode    get_status() const;
-        int         get_socket() const;
-        int         get_port() const;
-        std::string get_query_string() const;
+        std::string        get_target() const;
+        HttpMethod         get_method();
+        Body              *get_body();
+        bool               have_body() const;
+        HttpCode           get_status() const;
+        int                get_socket() const;
+        int                get_port() const;
+        const std::string &get_query_string() const;
+        const std::string &get_ip() const;
 
         const std::map< std::string, std::string > &get_header();
         // std::map<std::string, std::string>  &get_parameters();
@@ -68,6 +69,7 @@ class ClientRequest {
         bool                                 _absolute_form; ///< True if request is in absolute form.
         int                                  _port;          ///< Port of the request.
         std::string                          _query_string;
+        std::string                          _ip;
         /**< Absolute form means having the Host value in the request line and having no 'Host' header.
              Any 'Host' headers found while in absolute form is discarded.
         */

@@ -27,7 +27,7 @@
 #include <sstream>
 #include <string>
 
-ClientRequest::ClientRequest(int socket) :
+ClientRequest::ClientRequest(int socket, const std::string &ip) :
     _socket(socket),
     _method(none),
     _target(),
@@ -36,7 +36,8 @@ ClientRequest::ClientRequest(int socket) :
     _body(0),
     _status(OK),
     _absolute_form(false),
-    _port(80) {}
+    _port(80),
+    _ip(ip) {}
 
 ClientRequest::ClientRequest(int socket, HttpCode code, int port) :
     _socket(socket),
@@ -424,8 +425,12 @@ void ClientRequest::parse_parameters() {
     debug.log() << "Parsed query string: " << _query_string << std::endl;
 }
 
-std::string ClientRequest::get_query_string() const {
+const std::string &ClientRequest::get_query_string() const {
     return _query_string;
+}
+
+const std::string &ClientRequest::get_ip() const {
+    return _ip;
 }
 
 /**

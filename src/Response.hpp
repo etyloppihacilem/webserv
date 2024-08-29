@@ -34,8 +34,11 @@ class Response {
 
         void        set_body(const std::string &body_content, std::string content_type = "text/plain");
         void        set_body(ResponseBuildingStrategy *strategy);
+        void        set_cgi(ResponseBuildingStrategy *strategy);
+        ///< To tell response to process CGI reading when bodywriter is called
         void        add_header(const std::string &field, const std::string &value);
-        void        set_code(const HttpCode &code);
+        void        set_code(HttpCode code);
+        void        set_code(std::string code); // not a reference
         HttpCode    get_code() const;
         bool        build_response(std::string &buffer, size_t size);
         bool        is_done() const;
@@ -52,6 +55,7 @@ class Response {
         std::map< std::string, std::string > _header; ///< Header map
         BodyWriter                          *_body;   ///< Body of response (if any)
         internal_state                       _state;  ///< To know what is left to generate
+        bool                                 _is_cgi;
 #ifdef TESTING
         FRIEND_TEST(ResponseTestSuite, generate_status_line);
         FRIEND_TEST(ResponseBuildStateFixture, CorrectHeaders);

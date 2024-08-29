@@ -17,7 +17,9 @@
 # define BUFFER_SIZE 1024 // 1 KiB arbitrary too but bigger
 #endif
 
-#define SERVER_SOFTWARE "webserve/0.1"
+#define PIPE_BUFFER_SIZE 512 // bc 1KiB is already pipe max
+
+#define SERVER_SOFTWARE "webserve/0.1" // TODO: change to jeon
 
 #define MAX_BODY_BUFFER 1048576 // 1MiB
 

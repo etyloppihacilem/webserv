@@ -18,7 +18,7 @@
 
 class ReadState : public ProcessState {
     public:
-        ReadState(int socket, int port);
+        ReadState(int socket, int port, const std::string &ip);
         ~ReadState();
 
         t_state process();
@@ -35,6 +35,7 @@ class ReadState : public ProcessState {
         ClientRequest *_request; ///< ClientRequest that is built
         internal_state _parse_state;
         int            _port;
+        std::string    _ip;
 
 #ifdef TESTING
         FRIEND_TEST(ReadStateSuite, FindMethod);

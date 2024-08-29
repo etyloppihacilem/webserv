@@ -12,6 +12,7 @@
 #include "BodyWriter.hpp"
 #include "BodyWriterChunk.hpp"
 #include "BodyWriterLength.hpp"
+#include "CGIWriter.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "ProcessState.hpp"
@@ -23,7 +24,7 @@
 #include <sstream>
 #include <string>
 
-Response::Response() : _code(OK), _header(), _body(0), _state(rs_line) {
+Response::Response() : _code(OK), _header(), _body(0), _state(rs_line), _is_cgi(false) {
     add_header("Server", SERVER_SOFTWARE); // adding server name, this is not MUST but SHOULD in RFC
 }
 
@@ -56,8 +57,30 @@ void Response::add_header(const std::string &field, const std::string &value) {
 /**
   Sets response code.
   */
-void Response::set_code(const HttpCode &code) {
+void Response::set_code(HttpCode code) {
     _code = code;
+}
+
+/**
+  To parse CGI code
+  */
+void Response::set_code(std::string code) {
+    size_t end = code.find_first_of(" \t");
+    if (end != code.npos)
+        code.resize(end);
+    std::stringstream st;
+    st << code;
+    int tmp;
+    if (!(st >> tmp)) {
+        error.log() << "Could not parse response code from string, sending " << InternalServerError << std::endl;
+        _code = InternalServerError;
+    }
+    if (status_string(tmp) != "")
+        _code = static_cast< HttpCode >(tmp);
+    else {
+        error.log() << tmp << " is not a valid HttpCode, sending " << InternalServerError << std::endl;
+        _code = InternalServerError;
+    }
 }
 
 /**
@@ -110,7 +133,7 @@ bool Response::build_response(std::string &buffer, size_t size) {
             }
         } else if (_state == body) {
             if (!_body->is_done())
-                buffer += _body->generate();
+                buffer += _body->generate(BUFFER_SIZE);
             if (_body->is_done()) {
                 debug.log() << "Body is done generating" << std::endl;
                 _state = finished;
@@ -177,14 +200,27 @@ void Response::set_body(const std::string &body_content, std::string content_typ
     _header["Content-Type"] = content_type;
 }
 
+void Response::set_cgi(ResponseBuildingStrategy *strategy) {
+    if (!strategy) {
+        error.log() << "Trying to set response CGI without strategy. Aborting." << std::endl;
+        return;
+    }
+    clean_body();
+    debug.log() << "Setting response with CGI." << std::endl;
+    _body = new CGIWriter(*strategy);
+    _body->generate(); // this will initiate response headers EXCEPT connection !!
+}
+
 /**
   Builds body from a ResponseBuildingStrategy object.
 
   BodyWriter object uses the ResponseBuildingStrategy.fill_buffer() method to send body chunked or by length.
   */
 void Response::set_body(ResponseBuildingStrategy *strategy) {
-    if (!strategy)
+    if (!strategy) {
+        error.log() << "Trying to set response body without strategy. Aborting." << std::endl;
         return;
+    }
     clean_body();
     if (strategy->get_estimated_size() > MAX_BODY_BUFFER) {
         _body = new BodyWriterChunk(*strategy);

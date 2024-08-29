@@ -69,7 +69,8 @@ size_t BodyLength::read_body() {
 }
 
 std::string &BodyLength::get() {
-    read_body();
+    if (!_done)
+        read_body();
     _body  += _buffer;
     _buffer = "";
     return _body;
@@ -80,7 +81,8 @@ std::string BodyLength::pop() {
 
     _uniform = false;
     _body    = "";
-    read_body();
+    if (!_done)
+        read_body();
     tmp    += _buffer;
     _buffer = "";
     return tmp;
