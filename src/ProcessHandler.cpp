@@ -59,8 +59,10 @@ void ProcessHandler::handle() {
         _state = new ReadState(_socket_fd, _port, _client_IP);
     if (_state->process() == ready) {
         // passer au state suivant parce qu'il vient de finir.
-        if (dynamic_cast< ReadState * >(_state) != 0)
+        if (dynamic_cast< ReadState * >(_state) != 0) {
             transition_to_rbs();
+            _state->process();
+        }
         if (dynamic_cast< ResponseBuildState<> * >(_state) != 0)
             transition_to_rss();
         if (dynamic_cast< ResponseSendState * >(_state) != 0) {
@@ -96,10 +98,12 @@ void ProcessHandler::transition_to_rbs() {
         _state = new ResponseBuildState<>(_socket_fd, InternalServerError);
         return;
     }
+    debug.log() << "ProcessHandler: transitionning from ReadState to ResponseBuildState." << std::endl;
     ClientRequest *request;
     request = read_state->get_client_request();
     clean_state();
     _state = new ResponseBuildState<>(_socket_fd, request, _port); // construction of ResponseBuildState
+    debug.log() << "ProcessHandler: transitionning done." << std::endl;
 }
 
 void ProcessHandler::transition_to_rss() {
@@ -112,9 +116,11 @@ void ProcessHandler::transition_to_rss() {
         _state = new ResponseBuildState<>(_socket_fd, InternalServerError);
         return;
     }
+    debug.log() << "ProcessHandler: transitionning from ReadState to ResponseBuildState." << std::endl;
     ResponseBuildingStrategy *strategy = response_build_state->get_response_strategy();
     clean_state();
     _state = new ResponseSendState(_socket_fd, strategy);
     // TODO: change status of epoll in this functio to test
     ServerManager::getInstance()->talkToClient(_socket_fd, *this);
+    debug.log() << "ProcessHandler: transitionning done." << std::endl;
 }

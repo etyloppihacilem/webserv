@@ -19,7 +19,9 @@
 #include <sstream>
 #include <string>
 
-ErrorStrategy::ErrorStrategy(HttpCode code) : ResponseBuildingStrategy(), _code(code) {}
+ErrorStrategy::ErrorStrategy(HttpCode code) : ResponseBuildingStrategy(), _code(code) {
+    debug.log() << "ErrorStrategy: auto generating error page for " << _code << std::endl;
+}
 
 ErrorStrategy::~ErrorStrategy() {}
 
@@ -32,6 +34,7 @@ bool ErrorStrategy::build_response() {
     _estimated_size = 0; // choose BodyWriterLength
     _response.set_code(_code);
     _response.set_body(this); // to init response body.
+    debug.log() << "ErrorStrategy: response built." << std::endl;
     return _built = true;
 }
 

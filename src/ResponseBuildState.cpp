@@ -59,9 +59,13 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, Cl
         _server          = &tmp;
     }
     if (!_server) {
-        error.log() << "ResponseBuildState: Trying to build non recovery response without server." << std::endl;
+        debug.log() << "ResponseBuildState: Trying to build non recovery response without server." << std::endl;
         _recovery = true;
-        _code     = InternalServerError;
+        if (!isError(_code)) {
+            _code = InternalServerError;
+            debug.log() << "Recovery was therefor activated with " << _code << " (default)" << std::endl;
+        } else
+            debug.log() << "Recovery was therefor activated with " << _code << std::endl;
     }
 #else
     (void) port;
@@ -97,6 +101,8 @@ t_state ResponseBuildState< ServerClass, RouteClass >::process() {
     if (_recovery) {
         init_strategy(_code);
         _strategy->build_response();
+        if (!_strategy->is_built())
+            warn.log() << "Recovery strategy is not build in one build_response call." << std::endl;
         return _strategy->is_built() ? (_state = ready) : (_state = waiting);
     }
     try { // handling of bad_alloc out of scope
@@ -237,7 +243,7 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy(HttpCode code)
     if (!isError(code))
         warn.log() << "Generating error for non error code " << code << std::endl;
     try {
-        debug.log() << "Generating error page for " << code << std::endl;
+        debug.log() << "Initiating error page generation for " << code << std::endl;
         _strategy = new ErrorStrategy(code);
     } catch (std::exception &e) {
         throw e; // do not try to send response after this, only close connection.
