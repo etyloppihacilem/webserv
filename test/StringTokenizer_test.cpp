@@ -1,3 +1,4 @@
+#include "Logger.hpp"
 #include "StringTokenizer.hpp"
 #include "gtest/gtest.h"
 #include <cstddef>
@@ -67,7 +68,11 @@ class StringTokenizerTestSuite : public ::testing::Test {
                 "images|{|methods|GET;|autoindex|on;|}|}",
                 '|'
             ),
-            AdvancedTokenList2("methods|GET;|autoindex|on;", '|') {}
+            AdvancedTokenList2("methods|GET;|autoindex|on;", '|') {
+            error.disable();
+        }
+
+        ~StringTokenizerTestSuite() { error.enable(); }
 
         StringTokenizer TokenList1;
         StringTokenizer TokenList2;

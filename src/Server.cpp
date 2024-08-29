@@ -199,7 +199,6 @@ void Server::setMaxBodySize(const ValueList &values) {
 
 void Server::addRoute(Field &locationContent) {
     std::string locationTarget = setFieldLocationPath(locationContent.first);
-    // TODO: clean_trailing_slash of location and log if so.
     if (_routes.find(locationTarget) == _routes.end())
         _routes[locationTarget] = Route(locationContent.first, locationContent.second, *this);
     else
@@ -210,7 +209,7 @@ void Server::addRoute(Field &locationContent) {
 void Server::addErrorPage(const ValueList &values) {
     HttpCode errorCode = setFieldErrorPageCode(values);
     if (_errorPages.find(errorCode) == _errorPages.end())
-        _errorPages[errorCode] = setFieldErrorPagePath(values);
+        _errorPages[errorCode] = values[1];
     else
         warn.log() << "error_page: " << errorCode << ": is a redifinition of the error page, input ignored."
                    << std::endl;

@@ -1,3 +1,4 @@
+#include "Logger.hpp"
 #include "ServerConfFields.hpp"
 #include "ServerConfTokenize.hpp"
 #include "StringTokenizer.hpp"
@@ -6,9 +7,15 @@
 
 class ServerConfTokenizeTestSuite : public ::testing::Test {
     protected:
-        ServerConfTokenizeTestSuite() { /*error.disable();*/ }
+        ServerConfTokenizeTestSuite() {
+            error.disable();
+            warn.disable();
+        }
 
-        ~ServerConfTokenizeTestSuite() { /*error.enable();*/ }
+        ~ServerConfTokenizeTestSuite() {
+            error.enable();
+            warn.disable();
+        }
 };
 
 class ServerConfTokenizeFileTestSuite : public ServerConfTokenizeTestSuite {

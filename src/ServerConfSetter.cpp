@@ -170,7 +170,6 @@ HttpCode setFieldErrorPageCode(const ValueList &values) {
     return HttpCode(ret);
 }
 
-// TODO: to remove
 std::string setFieldErrorPagePath(const ValueList &values) {
     if (values.size() != 2) {
         logInvalidValuesCount(error_page, values);
@@ -187,7 +186,7 @@ std::string setFieldErrorPagePath(const ValueList &values) {
 }
 
 std::string setFieldLocationPath(const std::string &value) {
-    if (!isValidAbsolutePath(value) || extract_extension(value) != "") {
+    if (!isValidAbsolutePath(value)) {
         warn.log() << "location: " << value << ", is not a valid absolute path to folder." << std::endl;
         throw ServerConfWarn();
     }
@@ -200,19 +199,14 @@ std::string setFieldLocationPath(const std::string &value) {
     return ret;
 }
 
-// TODO: to remove
 std::string setFieldUploadPath(const ValueList &values) {
     if (values.size() != 1) {
         logInvalidValuesCount(upload_path, values);
         throw ServerConfWarn();
     }
-
-    if (extract_extension(values[0]) != "") {
-        warn.log() << "upload_path: " << values[0] << ", is not a valid folder absolute path." << std::endl;
+    if (values[0].empty())
         throw ServerConfWarn();
-    }
 
-    // TODO: to keep
     return add_trailing_slash(values[0]);
 }
 
@@ -247,19 +241,14 @@ HttpCode setFieldRewriteCode(const ValueList &values) {
     return HttpCode(ret);
 }
 
-// TODO: to remove
 std::string setFieldCgiPath(const ValueList &values) {
     if (values.size() != 1) {
         logInvalidValuesCount(cgi_path, values);
         throw ServerConfWarn();
     }
-
-    if (!isValidAbsolutePath(values[0]) || extract_extension(values[0]) != "") {
-        warn.log() << "cgi_path: " << values[0] << ", is not a valid folder absolute path." << std::endl;
+    if (values[0].empty())
         throw ServerConfWarn();
-    }
 
-    // TODO: to keep
     return add_trailing_slash(values[0]);
 }
 

@@ -2,6 +2,7 @@
 #include "EventHandler.hpp"
 #include "Logger.hpp"
 #include "ServerManager.hpp"
+#include <arpa/inet.h>
 #include <cerrno>
 #include <cstring>
 #include <ctime>
@@ -29,7 +30,9 @@ void AcceptHandler::handle() {
         warn.log() << "accept: " << std::string(std::strerror(errno)) << std::endl;
         return;
     }
-    ServerManager::getInstance()->addClient(client_fd, _port);
+    char s[INET_ADDRSTRLEN];
+    inet_ntop(socket_addr.sin_family, (struct sockaddr *) &socket_addr, s, sizeof s);
+    ServerManager::getInstance()->addClient(client_fd, _port, std::string(s));
 }
 
 void AcceptHandler::timeout() {

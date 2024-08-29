@@ -16,7 +16,6 @@ bool                       setFieldAutoindex(const ValueList &values);
 std::set< HttpMethod >     setFieldMethods(const ValueList &values);
 int                        setFieldMaxBodySize(const ValueList &values);
 HttpCode                   setFieldErrorPageCode(const ValueList &values);
-std::string                setFieldErrorPagePath(const ValueList &values);
 std::string                setFieldLocationPath(const std::string &values);
 std::string                setFieldUploadPath(const ValueList &values);
 HttpCode                   setFieldRewriteCode(const ValueList &values);

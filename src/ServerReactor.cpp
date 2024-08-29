@@ -101,7 +101,7 @@ ServerReactor::~ServerReactor(void) {
         delete *it;
 }
 
-int ServerReactor::addClient(int socket_fd, int port) {
+int ServerReactor::addClient(int socket_fd, int port, std::string client_IP) {
 
     if (_eventHandlers.size() >= MAX_TOTAL_CONNECTION) {
         warn.log() << "ServerReactor: addClient: max connection reached." << std::endl;
@@ -111,7 +111,7 @@ int ServerReactor::addClient(int socket_fd, int port) {
     struct epoll_event event;
     event.events   = EPOLLIN | EPOLLERR | EPOLLHUP;
     event.data.fd  = socket_fd;
-    event.data.ptr = new ProcessHandler(event.data.fd, port);
+    event.data.ptr = new ProcessHandler(event.data.fd, port, client_IP);
     errno          = 0;
     if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, event.data.fd, &event) == -1) {
         delete static_cast< EventHandler * >(event.data.ptr);

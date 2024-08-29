@@ -1,5 +1,6 @@
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
+#include "Logger.hpp"
 #include "Route.hpp"
 #include "Server.hpp"
 #include "StringTokenizer.hpp"
@@ -12,9 +13,16 @@
 
 class RouteTestSuite : public ::testing::Test {
     protected:
-        RouteTestSuite() { /*error.disable();*/ a = Route(server); }
+        RouteTestSuite() {
+            warn.disable();
+            info.disable();
+            a = Route(server);
+        }
 
-        ~RouteTestSuite() { /*error.enable();*/ }
+        ~RouteTestSuite() {
+            warn.enable();
+            info.enable();
+        }
 
         Route           a;
         Server          server;
@@ -148,8 +156,8 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidCgi) {
 
 TEST_F(RouteTestSuite, ParametrizeConstructorOnlyInvalid) {
     input = StringTokenizer(
-        "root|/oupsie?;|index|toto;|methods|PUT;|autoindex|true;|upload_path|toto.hmtl;|rewrite|200|/redir/"
-        "toto.html;|cgi_path|90()kfj;|file_ext|titi;",
+        "root|/oupsie?;|index|toto;|methods|PUT;|autoindex|true;|upload_path|;|rewrite|200|/redir/"
+        "toto.html;|cgi_path|;|file_ext|titi;",
         '|'
     );
     a = Route("/", input, server);

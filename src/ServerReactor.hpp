@@ -4,6 +4,7 @@
 #include "EventHandler.hpp"
 #include "Server.hpp"
 #include <set>
+#include <string>
 #include <vector>
 
 #define EPOLL_INIT_CONNECTION 100
@@ -20,7 +21,7 @@ class ServerReactor {
         int  initServerSocket(int port);
         void initNetwork(const std::vector< Server > &servers);
 
-        int  addClient(int socket_fd, int port);
+        int  addClient(int socket_fd, int port, std::string client_IP);
         void deleteClient(int socket_fd);
         void listenToClient(int socket_fd, EventHandler &handler);
         void talkToClient(int socket_fd, EventHandler &handler);

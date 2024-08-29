@@ -14,6 +14,7 @@
 #include "EventHandler.hpp"
 #include "ProcessState.hpp"
 #include <ctime>
+#include <string>
 
 /**
   This class is handling all ProcessStates.
@@ -23,7 +24,7 @@
   */
 class ProcessHandler : public EventHandler {
     public:
-        ProcessHandler(int socket_fd, int port);
+        ProcessHandler(int socket_fd, int port, std::string client_IP);
         ~ProcessHandler();
 
         time_t getTimeout() const;
@@ -37,6 +38,7 @@ class ProcessHandler : public EventHandler {
         void transition_to_rss(); ///< Transition to response sending state;
 
         ProcessState *_state;
+        std::string   _client_IP;
 };
 
 #endif // INCLUDE_SRC_PROCESSHANDLER_HPP_

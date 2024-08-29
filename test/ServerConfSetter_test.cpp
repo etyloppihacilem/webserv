@@ -1,5 +1,6 @@
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
+#include "Logger.hpp"
 #include "ServerConfFields.hpp"
 #include "ServerConfSetter.hpp"
 #include "gtest/gtest.h"
@@ -11,9 +12,15 @@
 
 class ServerConfSetterTestSuite : public ::testing::Test {
     protected:
-        ServerConfSetterTestSuite() { /*error.disable();*/ }
+        ServerConfSetterTestSuite() {
+            warn.disable();
+            info.disable();
+        }
 
-        ~ServerConfSetterTestSuite() { /*error.enable();*/ }
+        ~ServerConfSetterTestSuite() {
+            warn.enable();
+            info.disable();
+        }
 };
 
 // SetRootDir_Begin
@@ -168,28 +175,6 @@ TEST_F(ServerConfSetterTestSuite, SetFieldErrorPageCode_isValidErrorCode) {
 
 // SetFieldErrorPageCode_End
 
-// SetFieldErrorPagePath_Begin
-TEST_F(ServerConfSetterTestSuite, SetFieldErrorPagePath_wrongValueCount) {
-    EXPECT_THROW(setFieldErrorPagePath({}), ServerConfWarn);
-    EXPECT_THROW(setFieldErrorPagePath({ "404", "NotFound.html", "tooMany" }), ServerConfWarn);
-}
-
-TEST_F(ServerConfSetterTestSuite, SetFieldErrorPagePath_isNotValidFilePath) {
-    EXPECT_THROW(setFieldErrorPagePath({ "" }), ServerConfWarn);
-    EXPECT_THROW(setFieldErrorPagePath({ "toto.html" }), ServerConfWarn);
-    EXPECT_THROW(setFieldErrorPagePath({ "200", "Error/Continue" }), ServerConfWarn);
-    EXPECT_THROW(setFieldErrorPagePath({ "200", "/Error/Continue" }), ServerConfWarn);
-    EXPECT_THROW(setFieldErrorPagePath({ "200", "/Error/.html" }), ServerConfWarn);
-}
-
-TEST_F(ServerConfSetterTestSuite, SetFieldErrorPagePath_isValidFilePath) {
-    EXPECT_EQ(setFieldErrorPagePath({ "404", "/Error/NotFound.html" }), "/Error/NotFound.html");
-    EXPECT_EQ(setFieldErrorPagePath({ "500", "/Error/InternalServerError.html" }), "/Error/InternalServerError.html");
-    EXPECT_EQ(setFieldErrorPagePath({ "900", "/Error/RandomError.html" }), "/Error/RandomError.html");
-}
-
-// SetFieldErrorPagePath_End
-
 // SetFieldLocation_Begin
 TEST_F(ServerConfSetterTestSuite, SetFieldLocationPath_isNotValidFolderPath) {
     EXPECT_THROW(setFieldLocationPath(""), ServerConfWarn);
@@ -212,12 +197,12 @@ TEST_F(ServerConfSetterTestSuite, SetFieldUploadPath_wrongValueCount) {
 
 TEST_F(ServerConfSetterTestSuite, SetFieldUploadPath_isNotValidFolderPath) {
     EXPECT_THROW(setFieldUploadPath({ "" }), ServerConfWarn);
-    EXPECT_THROW(setFieldUploadPath({ "images" }), ServerConfWarn);
-    EXPECT_THROW(setFieldUploadPath({ "/images/upload.html" }), ServerConfWarn);
 }
 
 TEST_F(ServerConfSetterTestSuite, SetFieldUploadPath_isValidFolderPath) {
     EXPECT_EQ(setFieldUploadPath({ "/" }), "/");
+    EXPECT_EQ(setFieldUploadPath({ "images" }), "images/");
+    EXPECT_EQ(setFieldUploadPath({ "/images/cgi.d" }), "/images/cgi.d/");
     EXPECT_EQ(setFieldUploadPath({ "/images" }), "/images/");
     EXPECT_EQ(setFieldUploadPath({ "/images/upload" }), "/images/upload/");
     EXPECT_EQ(setFieldUploadPath({ "/images/upload/" }), "/images/upload/");
@@ -264,12 +249,12 @@ TEST_F(ServerConfSetterTestSuite, SetFieldCgiPath_wrongValueCount) {
 
 TEST_F(ServerConfSetterTestSuite, SetFieldCgiPath_isNotValidFolderPath) {
     EXPECT_THROW(setFieldCgiPath({ "" }), ServerConfWarn);
-    EXPECT_THROW(setFieldCgiPath({ "images" }), ServerConfWarn);
-    EXPECT_THROW(setFieldCgiPath({ "/images/cgi.html" }), ServerConfWarn);
 }
 
 TEST_F(ServerConfSetterTestSuite, SetFieldCgiPath_isValidFolderPath) {
     EXPECT_EQ(setFieldCgiPath({ "/" }), "/");
+    EXPECT_EQ(setFieldCgiPath({ "images" }), "images/");
+    EXPECT_EQ(setFieldCgiPath({ "/images/cgi.d" }), "/images/cgi.d/");
     EXPECT_EQ(setFieldCgiPath({ "/images" }), "/images/");
     EXPECT_EQ(setFieldCgiPath({ "/images/cgi" }), "/images/cgi/");
     EXPECT_EQ(setFieldCgiPath({ "/images/cgi/" }), "/images/cgi/");

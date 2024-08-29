@@ -21,8 +21,12 @@
 #include "ServerManager.hpp"
 #include <ctime>
 #include <ostream>
+#include <string>
 
-ProcessHandler::ProcessHandler(int socket_fd, int port) : EventHandler(socket_fd, port), _state(0) {}
+ProcessHandler::ProcessHandler(int socket_fd, int port, std::string client_IP) :
+    EventHandler(socket_fd, port),
+    _state(0),
+    _client_IP(client_IP) {}
 
 ProcessHandler::~ProcessHandler() {
     if (_state) {

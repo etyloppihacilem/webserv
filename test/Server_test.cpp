@@ -15,9 +15,16 @@
 
 class ServerTestSuite : public ::testing::Test {
     protected:
-        ServerTestSuite() { /*error.disable();*/ a = Server(); }
+        ServerTestSuite() {
+            warn.disable();
+            info.disable();
+            a = Server();
+        }
 
-        ~ServerTestSuite() { /*error.enable();*/ }
+        ~ServerTestSuite() {
+            warn.enable();
+            info.enable();
+        }
 
         Server          a;
         StringTokenizer input;
