@@ -35,10 +35,10 @@ std::string readConfFile(std::ifstream &configStream) {
 
     while (std::getline(configStream, buff)) {
         if (buff.empty())
-            fileContent += " ";
+            continue ;
         if (buff.find("#") != std::string::npos)
             continue;
-        fileContent += buff;
+        fileContent += " " + buff;
     }
     return fileContent;
 }

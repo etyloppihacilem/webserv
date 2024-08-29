@@ -21,7 +21,7 @@ enum HttpMethod {
     GET  = 0,
     POST,
     DELETE,
-    // PUT, // just in case
+    PUT, // just in case
 };
 
 #define COUNT_METHOD 3
@@ -34,8 +34,8 @@ inline std::string method_string(const int &code) {
             return "POST";
         case DELETE:
             return "DELETE";
-        // case PUT:
-        //     return "PUT";
+        case PUT:
+            return "PUT";
         default:
             return std::string();
     }

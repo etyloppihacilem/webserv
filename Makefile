@@ -141,8 +141,19 @@ format:
 clangd: # configure clangd for tests
 	bash ./script/clangd_generator.sh
 
-mac_clean:# supprime les fichiers dupliqués sur mac
+mac_clean: # supprime les fichiers dupliqués sur mac
 	@find . -type f -name "* [2-9]*" -print -delete
+
+eval_tester: # setup ubuntu_tester
+	@chmod 755 ubuntu_tester ubuntu_cgi_tester
+	@mkdir YoupiBanane
+	@touch YoupiBanane/youpi.bad_extension
+	@touch YoupiBanane/youpi.bla
+	@mkdir YoupiBanane/nop
+	@touch YoupiBanane/nop/youpi.bad_extension
+	@touch YoupiBanane/nop/other.pouic
+	@mkdir YoupiBanane/Yeah
+	@touch YoupiBanane/Yeah/not_happy.bad_extension
 
 file: # Print list of source and object files
 	@printf "${MAGENTA}.cpp:		${GRAY}${SRCS}${RESET}\n"
