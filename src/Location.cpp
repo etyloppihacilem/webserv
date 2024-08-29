@@ -292,6 +292,11 @@ const std::string &Location< ServerClass, RouteClass >::get_path_info() const {
     return _path_info;
 }
 
+template < class ServerClass, class RouteClass >
+const std::string &Location< ServerClass, RouteClass >::get_cgi_path() const {
+    return _cgi_path;
+}
+
 template class Location<>; // force compilation for this template (defaults)
 
 #ifdef TESTING

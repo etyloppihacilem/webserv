@@ -37,10 +37,16 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-CGIStrategy::CGIStrategy(const std::string &location, ClientRequest *request, const std::string &path_info) :
+CGIStrategy::CGIStrategy(
+    const std::string &location,
+    ClientRequest     *request,
+    const std::string &path_info,
+    const std::string &cgi_path
+) :
     ResponseBuildingStrategy(),
     _location(location),
     _path_info(path_info),
+    _cgi_path(cgi_path),
     _request(request),
     _body(0),
     _child(0),
@@ -142,14 +148,42 @@ void CGIStrategy::launch_CGI(size_t size) {
         info.log() << "CGIStrategy: Child " << pid << " running." << std::endl;
         _state = running;
     } else { // child
-        char **c_env = generate_env(env);
         close(_pipin[1]);
         close(_pipout[0]);
-        if (dup2(_pipin[0], 0) < 0)
+        if (dup2(_pipin[0], 0) < 0) {
             error.log() << "Cannot redirect stdin into child." << std::endl;
-        if (dup2(_pipout[1], 1) < 0)
+            close(_pipin[0]);
+            close(_pipout[1]);
+            _exit(1);
+        }
+        if (dup2(_pipout[1], 1) < 0) {
             error.log() << "Cannot redirect stdout into child." << std::endl;
-        // execve(c_env);
+            close(_pipin[0]);
+            close(_pipout[1]);
+            _exit(1);
+        }
+        char **args = new (std::nothrow) char *[2];
+        args[0]     = strdup(_location.c_str());
+        if (!args || !args[0]) {
+            if (args)
+                free(args);
+            error.log() << "Cannot creat arg string. Aborting." << std::endl;
+            close(_pipin[0]);
+            close(_pipout[1]);
+            _exit(1);
+        }
+        args[1]      = 0;
+        char **c_env = generate_env(env);
+        if (!c_env) {
+            free(args[0]);
+            free(args);
+            error.log() << "Cannot creat arg string. Aborting." << std::endl;
+            close(_pipin[0]);
+            close(_pipout[1]);
+            _exit(1);
+        }
+        char *cmd = strdup(_cgi_path.c_str());
+        execve(cmd, args, c_env);
         close(_pipin[0]);
         close(_pipout[1]);
         error.log() << "CGIStrategy: Execve failed to run " << "" << std::endl; // logging is on stderr
@@ -258,8 +292,8 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
 bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way to force chunk
     if (_done)
         return _done;
-    char buf[PIPE_BUFFER_SIZE + 1] = { 0 };
-    int  rd;
+    char   buf[PIPE_BUFFER_SIZE + 1] = { 0 };
+    int    rd;
     size_t original = buffer.size();
 
     while (buffer.size() - original < size && !_done) {
@@ -270,8 +304,7 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
             error.log() << "Error reading in pipe from CGI child. Aborting." << std::endl;
             return _done = true;
         }
-        if (std::string(buf).find(EOF) != std::string::npos)
-        {
+        if (std::string(buf).find(EOF) != std::string::npos) {
             kill_child();
             close(_pipout[0]);
             _done = true;

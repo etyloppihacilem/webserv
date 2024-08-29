@@ -29,7 +29,12 @@ typedef enum s_cgistate {
 
 class CGIStrategy : public ResponseBuildingStrategy {
     public:
-        CGIStrategy(const std::string &location, ClientRequest *_request, const std::string &path_info);
+        CGIStrategy(
+            const std::string &location,
+            ClientRequest     *_request,
+            const std::string &path_info,
+            const std::string &cgi_path
+        );
         ~CGIStrategy();
 
         bool build_response();
@@ -47,6 +52,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
 
         std::string    _location;
         std::string    _path_info;
+        std::string    _cgi_path;
         std::string    _cgi_response;
         ClientRequest *_request;
         Body          *_body;

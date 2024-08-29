@@ -45,6 +45,7 @@ class Location {
         const std::string &get_upload_path() const;
         const std::string &get_route_path() const;
         const std::string &get_path_info() const;
+        const std::string &get_cgi_path() const;
 
     private:
         Location(); // for testing purposes only
