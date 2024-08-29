@@ -28,6 +28,10 @@ class ServerReactor {
 
         void run();
 
+#ifdef TESTING
+        std::set< EventHandler *> &getEventHandler();
+#endif
+
     private:
         int                        _epoll_fd;
         std::set< EventHandler * > _eventHandlers;

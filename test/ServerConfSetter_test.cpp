@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include <climits>
 #include <gmock/gmock.h>
+#include <ostream>
 #include <set>
 #include <string>
 #include <vector>
@@ -165,12 +166,12 @@ TEST_F(ServerConfSetterTestSuite, SetFieldErrorPageCode_isNotValidErrorCode) {
     EXPECT_THROW(setFieldErrorPageCode({ "-123", "toto" }), ServerConfWarn);
     EXPECT_THROW(setFieldErrorPageCode({ "100", "/Error/Continue.html" }), ServerConfWarn);
     EXPECT_THROW(setFieldErrorPageCode({ "200", "/Error/OK.html" }), ServerConfWarn);
+    EXPECT_THROW(setFieldErrorPageCode({ "900", "/Error/RandomError.html" }), ServerConfWarn);
 }
 
 TEST_F(ServerConfSetterTestSuite, SetFieldErrorPageCode_isValidErrorCode) {
     EXPECT_EQ(setFieldErrorPageCode({ "404", "/Error/NotFound.html" }), NotFound);
     EXPECT_EQ(setFieldErrorPageCode({ "500", "/Error/InternalServerError.html" }), InternalServerError);
-    EXPECT_EQ(setFieldErrorPageCode({ "900", "/Error/RandomError.html" }), 900);
 }
 
 // SetFieldErrorPageCode_End

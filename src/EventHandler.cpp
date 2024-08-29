@@ -13,12 +13,16 @@
 #include <cstring>
 #include <ctime>
 
-EventHandler::EventHandler(int socket_fd, int port) : _socket_fd(socket_fd), _port(port) {}
+EventHandler::EventHandler(int socket_fd, int port) : _socket_fd(socket_fd), _port(port), _last_activity(time(NULL)) {}
 
 EventHandler::~EventHandler() {}
 
 int EventHandler::getSocketFd(void) const {
     return _socket_fd;
+}
+
+int EventHandler::getPort(void) const {
+    return _port;
 }
 
 void EventHandler::checkTimeout(void) {

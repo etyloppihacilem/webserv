@@ -70,12 +70,12 @@ void ServerReactor::initNetwork(const std::vector< Server > &servers) {
             continue;
         }
 
+        int                server_fd = initServerSocket(it->getPort());
         struct epoll_event event;
         event.events   = EPOLLIN | EPOLLERR | EPOLLHUP;
-        event.data.fd  = initServerSocket(it->getPort());
-        event.data.ptr = new AcceptHandler(event.data.fd, it->getPort());
+        event.data.ptr = new AcceptHandler(server_fd, it->getPort());
         errno          = 0;
-        if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, event.data.fd, &event) == -1) {
+        if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, server_fd, &event) == -1) {
             delete static_cast< EventHandler * >(event.data.ptr);
             close(event.data.fd);
             throw std::runtime_error("ServerReactor: epoll_ctl_add: " + std::string(std::strerror(errno)));
@@ -101,7 +101,7 @@ ServerReactor::~ServerReactor(void) {
         delete *it;
 }
 
-int ServerReactor::addClient(int socket_fd, int port, std::string client_IP) {
+int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
 
     if (_eventHandlers.size() >= MAX_TOTAL_CONNECTION) {
         warn.log() << "ServerReactor: addClient: max connection reached." << std::endl;
@@ -110,10 +110,9 @@ int ServerReactor::addClient(int socket_fd, int port, std::string client_IP) {
 
     struct epoll_event event;
     event.events   = EPOLLIN | EPOLLERR | EPOLLHUP;
-    event.data.fd  = socket_fd;
-    event.data.ptr = new ProcessHandler(event.data.fd, port, client_IP);
+    event.data.ptr = new ProcessHandler(client_fd, port, client_IP);
     errno          = 0;
-    if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, event.data.fd, &event) == -1) {
+    if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, client_fd, &event) == -1) {
         delete static_cast< EventHandler * >(event.data.ptr);
         close(event.data.fd);
         throw std::runtime_error("ServerReactor: epoll_ctl_add: " + std::string(std::strerror(errno)));
@@ -174,3 +173,9 @@ void ServerReactor::run() {
                 (*it)->checkTimeout();
     }
 }
+
+#ifdef TESTING
+std::set< EventHandler * > &ServerReactor::getEventHandler() {
+    return _eventHandlers;
+}
+#endif

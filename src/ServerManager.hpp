@@ -41,6 +41,9 @@ class ServerManager {
 
                 virtual ~FailToInitServerError() throw() {}
         };
+#ifdef TESTING
+        ServerReactor &getReactor();
+#endif
 
     private:
         ServerManager(const std::string &configFile);

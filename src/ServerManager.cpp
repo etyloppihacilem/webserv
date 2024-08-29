@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <exception>
 #include <fstream>
+#include <iostream>
 #include <ostream>
 #include <regex.h>
 #include <sstream>
@@ -18,21 +19,14 @@
 ServerManager *ServerManager::_instance = 0;
 
 ServerManager *ServerManager::getInstance(const std::string &configFile) {
-    if (_instance == 0) {
-        try {
-            _instance = new ServerManager(configFile);
-        } catch (std::exception &e) {
-            _instance = 0;
-        }
-    }
-    return _instance;
+    if (ServerManager::_instance == 0)
+        ServerManager::_instance = new ServerManager(configFile);
+    return ServerManager::_instance;
 }
 
 void ServerManager::deleteInstance() {
-    if (_instance != 0) {
-        delete _instance;
-        _instance = 0;
-    }
+    delete ServerManager::_instance;
+    ServerManager::_instance = 0;
 }
 
 std::string readConfFile(std::ifstream &configStream) {
@@ -41,8 +35,8 @@ std::string readConfFile(std::ifstream &configStream) {
 
     while (std::getline(configStream, buff)) {
         if (buff.empty())
-            continue;
-        if (buff[0] == '#')
+            fileContent += " ";
+        if (buff.find("#") != std::string::npos)
             continue;
         fileContent += buff;
     }
@@ -89,9 +83,7 @@ std::vector< Server > ServerManager::parseConfFile(const std::string &configFile
 
 ServerManager::ServerManager(const std::string &configFile) : _servers(parseConfFile(configFile)), _reactor(_servers) {}
 
-ServerManager::~ServerManager() {
-    deleteInstance();
-}
+ServerManager::~ServerManager() {}
 
 void ServerManager::addClient(int socket_fd, int port, std::string client_IP) {
     _reactor.addClient(socket_fd, port, client_IP);
@@ -132,3 +124,9 @@ Server &ServerManager::getServer(int port) {
     portStr << port;
     throw ServerNotFoundWarn(portStr.str());
 }
+
+#ifdef TESTING
+ServerReactor &ServerManager::getReactor() {
+    return _reactor;
+}
+#endif

@@ -158,7 +158,7 @@ HttpCode setFieldErrorPageCode(const ValueList &values) {
         throw ServerConfWarn();
     }
 
-    if (!isError(ret)) {
+    if (status_string(ret) == "" || !isError(ret)) {
         warn.log() << "error_page: " << values[0] << ", is not a valid error code." << std::endl;
         throw ServerConfWarn();
     }
@@ -167,7 +167,7 @@ HttpCode setFieldErrorPageCode(const ValueList &values) {
                    << std::endl;
     }
 
-    return HttpCode(ret);
+    return static_cast<HttpCode>(ret);
 }
 
 std::string setFieldErrorPagePath(const ValueList &values) {
@@ -238,7 +238,7 @@ HttpCode setFieldRewriteCode(const ValueList &values) {
         ret = 307; // temporary redirect by default if redirection is not an existing http code.
     }
 
-    return HttpCode(ret);
+    return static_cast<HttpCode>(ret);
 }
 
 std::string setFieldCgiPath(const ValueList &values) {

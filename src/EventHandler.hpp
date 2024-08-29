@@ -29,6 +29,7 @@ class EventHandler {
         virtual ~EventHandler(void) = 0;
 
         int            getSocketFd(void) const;
+        int             getPort(void) const;
         virtual time_t getTimeout(void) const = 0;
 
         virtual void handle(void)  = 0; // Run this in loop
