@@ -80,7 +80,7 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
                 clean();
             std::string buf = std::get< tdata >(GetParam());
             try {
-                _request  = new ClientRequest(0);
+                _request  = new ClientRequest(0, "");
                 _readbuff = new std::string(sanitize_HTTP_string(buf));
                 _request->parse_request_line(*_readbuff
                 ); // as everything is in buff, no call to read_body() is never needed

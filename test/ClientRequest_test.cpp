@@ -27,7 +27,7 @@
  * LSP is wrong
  * */
 TEST(ClientRequestTestSuite, ParseMethodTestExpectedOK) {
-    ClientRequest test(0);
+    ClientRequest test(0, "");
 
     EXPECT_EQ(test.parse_method("GET", 3), GET);
     EXPECT_EQ(test.parse_method("POST", 4), POST);
@@ -38,7 +38,7 @@ TEST(ClientRequestTestSuite, ParseMethodTestExpectedOK) {
 }
 
 TEST(ClientRequestTestSuite, ParseMethodTestExpectedFail) {
-    ClientRequest test(0);
+    ClientRequest test(0, "");
 
     EXPECT_THROW(
         {
@@ -217,7 +217,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST(ClientRequestTestSuite, ParseHeaderLineTestHost) {
     std::string   header   = "Host: www.example.com";
     std::string   header_2 = "Host: www.coucou.com";
-    ClientRequest test(0);
+    ClientRequest test(0, "");
 
     EXPECT_NO_THROW(test.parse_header_line(header, 0, header.length()));
     EXPECT_EQ(test._header["Host"], "www.example.com");
@@ -310,7 +310,7 @@ INSTANTIATE_TEST_SUITE_P(
 );
 
 TEST(ClientRequestTestSuite, decode_target) {
-    ClientRequest test(0);
+    ClientRequest test(0, "");
 
     // with nothing
     test._target = "Coucou je suis heureux";
@@ -331,7 +331,7 @@ TEST(ClientRequestTestSuite, decode_target) {
 }
 
 TEST(ClientRequestTestSuite, decode_target_loop) {
-    ClientRequest test(0);
+    ClientRequest test(0, "");
     test._target = "coucou%2520super";
     test.decode_target();
     EXPECT_EQ(test._target, "coucou%20super");
@@ -376,7 +376,7 @@ TEST(ClientRequestTestSuite, decode_target_loop) {
 } */
 
 TEST(ClientRequestTestSuite, parse_parameters) {
-    ClientRequest test(0);
+    ClientRequest test(0, "");
     std::string   param;
 
     // with nothing
@@ -405,7 +405,7 @@ TEST(ClientRequestTestSuite, parse_parameters) {
 }
 
 TEST(ClientRequestTestSuite, parse_port) {
-    ClientRequest test(0);
+    ClientRequest test(0, "");
 
     EXPECT_THROW(
         {

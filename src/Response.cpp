@@ -24,7 +24,7 @@
 #include <sstream>
 #include <string>
 
-Response::Response() : _code(OK), _header(), _body(0), _state(rs_line), _is_cgi(false) {
+Response::Response() : _code(OK), _header(), _body(0), _state(rs_line) {
     add_header("Server", SERVER_SOFTWARE); // adding server name, this is not MUST but SHOULD in RFC
 }
 

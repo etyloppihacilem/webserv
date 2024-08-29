@@ -39,9 +39,8 @@ CGIWriter::~CGIWriter() {}
 
 // Generate should be called once before it will send body to init response headers.
 std::string CGIWriter::generate(size_t size) {
-    if (_done) {
+    if (_done)
         return "";
-    }
     if (_init) {
         init();
         return "";
@@ -100,10 +99,18 @@ void CGIWriter::init() {
     _init = false; // init done
 }
 
+void CGIWriter::send_error(HttpCode code) {
+    if (!isError(code))
+        warn.log() << "Trying to send CGI error with " << code << ", which is not an error code, sending "
+                   << InternalServerError << std::endl;
+    _response.set_code(code);
+    _response.set_body("CGI error.");
+}
+
 size_t CGIWriter::length() const { // tbh i can't remember why this method exists
     return _total;
 }
 
-void save_mem() {
+void CGIWriter::save_mem() {
     ; // TODO: code this
 }

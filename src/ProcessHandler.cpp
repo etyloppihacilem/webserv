@@ -50,7 +50,7 @@ time_t ProcessHandler::getTimeout() const {
 
 void ProcessHandler::handle() {
     if (!_state)
-        _state = new ReadState(_socket_fd, _port);
+        _state = new ReadState(_socket_fd, _port, _client_IP);
     if (_state->process() == ready) {
         // passer au state suivant parce qu'il vient de finir.
         if (dynamic_cast< ReadState * >(_state) != 0)
