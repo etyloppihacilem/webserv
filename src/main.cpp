@@ -15,6 +15,7 @@
 #include <csignal>
 #include <exception>
 #include <ios>
+#include <iostream>
 #include <ostream>
 #include <signal.h>
 #include <string>
@@ -23,6 +24,8 @@ volatile sig_atomic_t g_signal = false;
 
 void sigint_handler(int signum) {
     g_signal = true;
+    std::cerr << std::endl;
+    info.log() << "ServerReactor: JEON stop listening." << std::endl;
     (void) signum;
 }
 

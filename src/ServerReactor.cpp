@@ -66,7 +66,7 @@ void ServerReactor::initNetwork(const std::vector< Server > &servers) {
     std::set< int > listeningPort;
     for (std::vector< Server >::const_iterator it = servers.begin(); it != servers.end(); ++it) {
         if (listeningPort.find(it->getPort()) != listeningPort.end()) {
-            warn.log() << "ServerReactor: initNetwork: " << it->getPort() << " is already use." << std::endl;
+            warn.log() << "ServerReactor: initNetwork: " << it->getPort() << " is already in use." << std::endl;
             continue;
         }
 
@@ -83,6 +83,7 @@ void ServerReactor::initNetwork(const std::vector< Server > &servers) {
 
         listeningPort.insert(it->getPort());
         _eventHandlers.insert(static_cast< EventHandler * >(event.data.ptr));
+         info.log() << "ServerReactor: port " << it->getPort() << " is open for client connection." << std::endl;
     }
 }
 
@@ -102,7 +103,7 @@ ServerReactor::~ServerReactor(void) {
 }
 
 int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
-
+    info.log() << "ServerReactor: New connection on client socket " << client_fd << " from " << client_IP << std::endl;
     if (_eventHandlers.size() >= MAX_TOTAL_CONNECTION) {
         warn.log() << "ServerReactor: addClient: max connection reached." << std::endl;
         return -1;
@@ -122,7 +123,9 @@ int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
     return 0;
 }
 
+// NOTE: for info should we pass the client IP?
 void ServerReactor::deleteClient(int socket_fd) {
+    info.log() << "ServerReactor: Delete client socket " << socket_fd << std::endl;
     errno = 0;
     if (epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, socket_fd, 0) == -1)
         throw std::runtime_error("ServerReactor: epoll_ctl_del: " + std::string(std::strerror(errno)));
@@ -153,6 +156,7 @@ void ServerReactor::run() {
     struct epoll_event events[MAX_TOTAL_CONNECTION];
     int                event_count;
 
+    info.log() << "ServerReactor: JEON is listening..." << std::endl;
     while (g_signal == false) {
         errno = 0;
         if ((event_count = epoll_wait(_epoll_fd, events, MAX_TOTAL_CONNECTION, 16000)) == -1) {
