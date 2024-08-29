@@ -19,7 +19,7 @@
 
 #define PIPE_BUFFER_SIZE 512 // bc 1KiB is already pipe max
 
-#define SERVER_SOFTWARE "webserve/0.1" // TODO: change to jeon
+#define SERVER_SOFTWARE "jeon/0.1"
 
 #define MAX_BODY_BUFFER 1048576 // 1MiB
 
