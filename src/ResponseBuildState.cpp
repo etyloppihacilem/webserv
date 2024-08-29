@@ -94,6 +94,8 @@ template < class ServerClass, class RouteClass >
 ResponseBuildState< ServerClass, RouteClass >::~ResponseBuildState() {
     if (_strategy)
         delete _strategy;
+    if (_request)
+        delete _request;
 }
 
 template < class ServerClass, class RouteClass >
