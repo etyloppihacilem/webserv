@@ -116,7 +116,7 @@ void ProcessHandler::transition_to_rss() {
         _state = new ResponseBuildState<>(_socket_fd, InternalServerError);
         return;
     }
-    debug.log() << "ProcessHandler: transitionning from ReadState to ResponseBuildState." << std::endl;
+    debug.log() << "ProcessHandler: transitionning from ResponseBuildState to ResponseSendState." << std::endl;
     ResponseBuildingStrategy *strategy = response_build_state->get_response_strategy();
     clean_state();
     _state = new ResponseSendState(_socket_fd, strategy);

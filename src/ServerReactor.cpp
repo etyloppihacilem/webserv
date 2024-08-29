@@ -132,22 +132,22 @@ void ServerReactor::deleteClient(int socket_fd) {
 }
 
 void ServerReactor::listenToClient(int socket_fd, EventHandler &handler) {
+    debug.log() << "ServerReactor: socket " << socket_fd << " is waiting for EPOLLIN event." << std::endl; 
     struct epoll_event event;
     event.events   = EPOLLIN | EPOLLERR | EPOLLHUP;
-    event.data.fd  = socket_fd;
     event.data.ptr = &handler;
     errno          = 0;
-    if (epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, event.data.fd, &event) == -1)
+    if (epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, socket_fd, &event) == -1)
         throw std::runtime_error("ServerReactor: epoll_ctl_mod: " + std::string(std::strerror(errno)));
 }
 
 void ServerReactor::talkToClient(int socket_fd, EventHandler &handler) {
+    debug.log() << "ServerReactor: socket " << socket_fd << " is waiting for EPOLLOUT event." << std::endl; 
     struct epoll_event event;
     event.events   = EPOLLOUT | EPOLLERR | EPOLLHUP;
-    event.data.fd  = socket_fd;
     event.data.ptr = &handler;
     errno          = 0;
-    if (epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, event.data.fd, &event) == -1)
+    if (epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, socket_fd, &event) == -1)
         throw std::runtime_error("ServerReactor: epoll_ctl_mod: " + std::string(std::strerror(errno)));
 }
 
@@ -168,8 +168,6 @@ void ServerReactor::run() {
         for (int i = 0; i < event_count; ++i) {
             if (_eventHandlers.find(static_cast< EventHandler * >(events[i].data.ptr)) == _eventHandlers.end())
                 continue;
-            info.log() << "ServerReactor: event on socket "
-                       << static_cast< EventHandler * >(events[i].data.ptr)->getSocketFd() << std::endl;
             static_cast< EventHandler * >(events[i].data.ptr)->handle();
         }
         if (event_count == 0)

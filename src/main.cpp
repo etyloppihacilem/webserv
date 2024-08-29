@@ -50,8 +50,10 @@ int main(int ac, char **av) {
         ServerManager::deleteInstance();
         return 0;
     } catch (ServerManager::FailToInitServerError &e) {
+        error.log() << e.what() << std::endl;
         return 2;
     } catch (std::exception &e) {
+        error.log() << e.what() << std::endl;
         return 1;
     } catch (...) {
         fatal.log() << "Caught unexpected error!" << std::endl;
