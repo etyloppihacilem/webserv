@@ -27,8 +27,8 @@ ProcessHandler::ProcessHandler(int socket_fd, int port, std::string client_IP) :
     EventHandler(socket_fd, port),
     _state(0),
     _client_IP(client_IP) {
-    debug.log() << "ProcessHandler: created on socket " << _socket_fd << " from port " << _port << " by " << client_IP << "."
-                << std::endl;
+    debug.log() << "ProcessHandler: created on socket " << _socket_fd << " from port " << _port << " by " << client_IP
+                << "." << std::endl;
 }
 
 ProcessHandler::~ProcessHandler() {
@@ -36,7 +36,8 @@ ProcessHandler::~ProcessHandler() {
         debug.log() << "ProcessHandler deletes ProcessState" << std::endl;
         delete _state;
     }
-    debug.log() << "ProcessHandler: deleted client " << _client_IP << " on " << _socket_fd << " from " << _port << "." << std::endl;
+    debug.log() << "ProcessHandler: deleted client " << _client_IP << " on " << _socket_fd << " from " << _port << "."
+                << std::endl;
 }
 
 time_t ProcessHandler::getTimeout() const {

@@ -13,6 +13,7 @@
 #include "MemoryHandler.hpp"
 #include "ServerManager.hpp"
 #include <csignal>
+#include <cstdlib>
 #include <exception>
 #include <ios>
 #include <iostream>
@@ -23,8 +24,11 @@
 volatile sig_atomic_t g_signal = false;
 
 void sigint_handler(int signum) {
-    g_signal = true;
+    g_signal += true;
     std::cerr << std::endl;
+    if (g_signal > true) {
+        fatal.log() << "Goodbye..." << std::endl;
+        exit(64);}
     info.log() << "ServerReactor: JEON stop listening." << std::endl;
     (void) signum;
 }
