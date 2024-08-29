@@ -125,6 +125,7 @@ bool Response::build_response(std::string &buffer, size_t size) {
             debug.log() << "Generating headers" << std::endl;
             buffer += generate_header();
             if (_body) {
+                buffer += "\r\n"; // to separate body from the rest
                 debug.log() << "Generating body" << std::endl;
                 _state = body;
             } else {
