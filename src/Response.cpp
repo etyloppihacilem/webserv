@@ -26,6 +26,7 @@
 
 Response::Response() : _code(OK), _header(), _body(0), _state(rs_line) {
     add_header("Server", SERVER_SOFTWARE); // adding server name, this is not MUST but SHOULD in RFC
+    _header["Connection"] = "keep-alive";
 }
 
 // TODO:connection header is not there yet !!!!
@@ -59,6 +60,10 @@ void Response::add_header(const std::string &field, const std::string &value) {
   */
 void Response::set_code(HttpCode code) {
     _code = code;
+    if (isError(_code))
+        _header["Connection"] = "close";
+    else
+        _header["Connection"] = "keep-alive";
 }
 
 /**
@@ -81,6 +86,10 @@ void Response::set_code(std::string code) {
         error.log() << tmp << " is not a valid HttpCode, sending " << InternalServerError << std::endl;
         _code = InternalServerError;
     }
+    if (isError(_code))
+        _header["Connection"] = "close";
+    else
+        _header["Connection"] = "keep-alive";
 }
 
 /**
