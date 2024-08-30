@@ -13,6 +13,7 @@
 
 #include "Body.hpp"
 #include "ClientRequest.hpp"
+#include "Logger.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include <cstddef>
@@ -42,13 +43,14 @@ class CGIStrategy : public ResponseBuildingStrategy {
         void save_mem();
 
     private:
-        void   fill_env(std::map< std::string, std::string > &env, size_t size);
-        char **generate_env(const std::map< std::string, std::string > &env) const;
-        void   init_CGI();
-        void   de_chunk();
-        void   launch_CGI(size_t size);
-        void   feed_CGI();
-        void   kill_child();
+        static Logger babyphone;
+        void          fill_env(std::map< std::string, std::string > &env, size_t size);
+        char        **generate_env(const std::map< std::string, std::string > &env) const;
+        void          init_CGI();
+        void          de_chunk();
+        void          launch_CGI(size_t size);
+        void          feed_CGI();
+        void          kill_child();
 
         std::string    _location;
         std::string    _path_info;

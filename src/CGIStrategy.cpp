@@ -20,6 +20,7 @@
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include <cctype>
+#include <cerrno>
 #include <csignal>
 #include <cstddef>
 #include <cstdio>
@@ -36,6 +37,8 @@
 #include <strings.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+Logger CGIStrategy::babyphone("./child.log", "CHILD", 8);
 
 CGIStrategy::CGIStrategy(
     const std::string &location,
@@ -57,7 +60,7 @@ CGIStrategy::CGIStrategy(
                     << std::endl;
         throw HttpError(InternalServerError);
     }
-    if (!_request->have_body())
+    if (_request->have_body())
         _body = _request->get_body();
 }
 
@@ -76,7 +79,7 @@ bool CGIStrategy::build_response() {
     if (_state == loading_body) // listen event
         de_chunk();
     if (_state == launch)
-        launch_CGI(_body->length());
+        launch_CGI(_body ? _body->length() : 0); // or segfault bc there is no body !!!
     if (_state == running)
         feed_CGI();
     return _built;
@@ -131,9 +134,10 @@ void CGIStrategy::de_chunk() {
 
 void CGIStrategy::launch_CGI(size_t size) {
     // program separation
-    pid_t                                pid = fork();
+    debug.log() << "Preparing to launch CGI " << _cgi_path << " with script " << _location << std::endl;
     std::map< std::string, std::string > env;
     fill_env(env, size);
+    pid_t                                pid = fork();
     if (pid < 0) {
         close(_pipin[0]);
         close(_pipin[1]);
@@ -151,13 +155,13 @@ void CGIStrategy::launch_CGI(size_t size) {
         close(_pipin[1]);
         close(_pipout[0]);
         if (dup2(_pipin[0], 0) < 0) {
-            error.log() << "Cannot redirect stdin into child." << std::endl;
+            babyphone.log() << "Cannot redirect stdin into child." << std::endl;
             close(_pipin[0]);
             close(_pipout[1]);
             _exit(1);
         }
         if (dup2(_pipout[1], 1) < 0) {
-            error.log() << "Cannot redirect stdout into child." << std::endl;
+            babyphone.log() << "Cannot redirect stdout into child." << std::endl;
             close(_pipin[0]);
             close(_pipout[1]);
             _exit(1);
@@ -167,7 +171,7 @@ void CGIStrategy::launch_CGI(size_t size) {
         if (!args || !args[0]) {
             if (args)
                 free(args);
-            error.log() << "Cannot creat arg string. Aborting." << std::endl;
+            babyphone.log() << "Cannot creat arg string. Aborting." << std::endl;
             close(_pipin[0]);
             close(_pipout[1]);
             _exit(1);
@@ -177,7 +181,7 @@ void CGIStrategy::launch_CGI(size_t size) {
         if (!c_env) {
             free(args[0]);
             free(args);
-            error.log() << "Cannot creat arg string. Aborting." << std::endl;
+            babyphone.log() << "Cannot creat arg string. Aborting." << std::endl;
             close(_pipin[0]);
             close(_pipout[1]);
             _exit(1);
@@ -186,7 +190,7 @@ void CGIStrategy::launch_CGI(size_t size) {
         execve(cmd, args, c_env);
         close(_pipin[0]);
         close(_pipout[1]);
-        error.log() << "CGIStrategy: Execve failed to run " << "" << std::endl; // logging is on stderr
+        babyphone.log() << "CGIStrategy: Execve failed to run " << strerror(errno) << std::endl; // logging is on stderr
         free(c_env);
         _exit(1); // _exit with underscore does not flush STDIO
         // WARN: Check if this is memory safe.
@@ -267,7 +271,7 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
     char **ret = 0;
 
     if (!(ret = new (std::nothrow) char *[env.size() + 1])) {
-        error.log() << "CGIStrategy: env alloc failed. CGI env will not be generated." << std::endl;
+        babyphone.log() << "CGIStrategy: env alloc failed. CGI env will not be generated." << std::endl;
         return 0;
     }
     bzero(ret, env.size() + 1);
@@ -276,9 +280,9 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
 
     for (std::map< std::string, std::string >::const_iterator it = env.begin(); it != env.end(); it++) {
         std::string tmp = it->first + "=" + it->second;
-
+        babyphone.log() << "Adding to CGI env " << tmp << std::endl;
         if (!(ret[i] = strdup(tmp.c_str()))) { // bad alloc
-            error.log() << "CGIStrategy: env alloc partially failed. CGI env will not be generated." << std::endl;
+            babyphone.log() << "CGIStrategy: env alloc partially failed. CGI env will not be generated." << std::endl;
             for (size_t j = 0; j <= env.size(); j++)
                 if (ret[j])
                     delete[] ret[j];

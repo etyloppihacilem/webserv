@@ -35,6 +35,12 @@ class Logger : public std::ostream {
             size_t        width    = 0,      ///< Width to align level
             bool          no_force = false   ///< Remove force option for this log stream
         );
+        Logger(
+            const std::string &filename,          ///< Out file
+            std::string        level    = "FILE", ///< Level to display
+            size_t             width    = 0,      ///< Width to align level
+            bool               no_force = false   ///< Remove force option for this log stream
+        );
         ~Logger();
 
         // void               log(const char *format, ...);
@@ -50,10 +56,12 @@ class Logger : public std::ostream {
     private:
         static std::ofstream _dev_null; ///< dev_null for disable
         static bool          _force;    ///< force log even if disabled
-        std::string          _level;    ///< Log level
+        std::string          _level;    ///< Log level"
         std::ofstream        _os;       ///< Out stream
+        std::fstream         _file;
         bool                 _enabled;  ///< Tells if test is enabled
         bool                 _no_force; ///< force log even if disabled
+        bool                 _is_file;
 };
 
 std::ostream &operator<<(std::ostream &os, const HttpCode code);

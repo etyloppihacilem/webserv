@@ -22,7 +22,8 @@
 
 Logger::Logger(std::ostream &os, std::string level, std::string color, size_t width, bool no_force) :
     _enabled(true),
-    _no_force(no_force) {
+    _no_force(no_force),
+    _is_file(false) {
     _dev_null.setstate(std::ios_base::badbit); // set /dev/null to be /dev/null
     width -= level.length();
     if (os.rdbuf() == std::cout.rdbuf() || os.rdbuf() == std::cerr.rdbuf())
@@ -41,7 +42,34 @@ Logger::Logger(std::ostream &os, std::string level, std::string color, size_t wi
     _os.basic_ios< char >::rdbuf(os.rdbuf());
 }
 
-Logger::~Logger() {}
+Logger::Logger(const std::string &filename, std::string level, size_t width, bool no_force) :
+    _enabled(true),
+    _no_force(no_force),
+    _is_file(false) {
+    _dev_null.setstate(std::ios_base::badbit); // set /dev/null to be /dev/null
+    width -= level.length();
+    _level = "[ ";
+    for (size_t i = 0; i < width; i++)
+        _level += " ";
+    _level += level;
+    _level += " ]";
+    _file.open(filename.c_str(), std::ios_base::out | std::ios_base::trunc);
+    if (_file.is_open()) {
+        _is_file = true;
+        _os.copyfmt(_file);
+        _os.clear(_file.rdstate());
+        _os.basic_ios< char >::rdbuf(_file.rdbuf());
+    } else {
+        _os.copyfmt(std::cerr);
+        _os.clear(std::cerr.rdstate());
+        _os.basic_ios< char >::rdbuf(std::cerr.rdbuf());
+    }
+}
+
+Logger::~Logger() {
+    if (_is_file)
+        _file.close();
+}
 
 /**
   Print a log message. Same syntax as printf, with format string and variadic parameters. Does add a \n at the end.

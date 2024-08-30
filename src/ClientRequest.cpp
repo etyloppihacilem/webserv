@@ -462,7 +462,7 @@ HttpMethod ClientRequest::get_method() {
 
 Body *ClientRequest::get_body() {
     if (!_body_exists)
-        warn.log() << "Getting a request body that does not exists." << std::endl;
+        error.log() << "Getting a request body that does not exists." << std::endl;
     if (_status != OK)
         warn.log() << "Getting body of a request with non " << OK << " status code: " << _status << std::endl;
     return _body;

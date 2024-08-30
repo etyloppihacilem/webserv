@@ -26,3 +26,4 @@ error_pages
 error_pages/**
 error_pages_ok
 error_pages_ok/**
+child.log
