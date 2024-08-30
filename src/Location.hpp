@@ -52,6 +52,10 @@ class Location {
         void build_path(const std::string &target, const RouteClass &route, const std::string &redirect);
         void setup_cgi(const RouteClass &route);
         bool find_index(const RouteClass &route, struct stat &buf);
+        void stat_file(const std::string &target, struct stat &buf);
+        void set_redir(const std::string &target, const RouteClass &route);
+        bool check_cgi_glob(const std::string &target, const ServerClass &server);
+        void init_cgi_glob(const std::string &target, const RouteClass &route);
 
         // bool        _is_put;
         bool                   _autoindex;
@@ -62,19 +66,19 @@ class Location {
         std::set< HttpMethod > _methods;
         HttpCode               _status_code;
         HttpCode               _default_error;
-        std::string            _route; ///< Route location in config
-        std::string            _cgi_path;
-        std::string            _path;
-        std::string            _upload_path;
-        std::string            _route_path;
-        std::string            _path_info; ///< Everyting that is after the route path.
-                                           /**<
-                                             ```
-                                             /test/cgi.bin/monscript.cgi/path_info
-                                                                        ^^^^^^^^^^
-                                             ```
-                                             */
-                                           // TODO: check CGI resolve path if path_info
+        std::string            _route;       ///< Route location in config
+        std::string            _cgi_path;    ///< Where is the executable
+        std::string            _path;        ///< path to file (or script)
+        std::string            _upload_path; ///< path to upload files
+        std::string            _route_path;  ///< path to route root dir
+        std::string            _path_info;   ///< Everyting that is after the route path.
+                                             /**<
+                                               ```
+                                               /test/cgi.bin/monscript.cgi/path_info
+                                                                          ^^^^^^^^^^
+                                               ```
+                                               */
+                                             // TODO: check CGI resolve path if path_info
 #ifdef TESTING
         FRIEND_TEST(LocationTestSuite, BuildPathTest);
         FRIEND_TEST(LocationTestSuite, BuildPathRedirectTest);

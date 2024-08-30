@@ -61,7 +61,7 @@ bool ServerGetRoute< RouteClass >::hasRoute(const std::string &path) const {
 
 template < class RouteClass >
 const RouteClass &ServerGetRoute< RouteClass >::getCGIRoute(const std::string &path) const {
-    debug.log() << "Checking if " << path << "does contain any cgi specific extensions." << std::endl;
+    debug.log() << "Checking if " << path << " does contain any cgi specific extensions." << std::endl;
     size_t      nextSlash = (path.length() > 1 ? path.find("/", 1) : 0);
     std::string testing   = path.substr(0, nextSlash);
     while (nextSlash != path.npos) {

@@ -45,45 +45,20 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
     _status_code(OK),
     _default_error(Forbidden) {
     struct stat buf;
-
+    if (check_cgi_glob(target, server))
+        return;
     try {
         const RouteClass &route = server.getRoute(target);
+        _route                  = route.getLocation();
+        debug.log() << "Using route " << _route << std::endl;
         if (route.hasRedirSet()) {
-            debug.log() << "Using route " << route.getLocation() << " to redirect" << std::endl;
-            _status_code = route.getRedirCode();
-            _is_redirect = true;
-            build_path(target, route, route.getRedirPage());
-            debug.log() << "Redirection location: " << _path << std::endl;
+            set_redir(target, route);
             return;
         }
         build_path(target, route);
-
         _is_diff = route.getRootDir() != route.getUploadPath();
-        _route   = route.getLocation();
-        debug.log() << "Using route " << _route << std::endl;
         _methods = route.getMethods();
-        // _is_put  = std::find(methods.begin(), methods.end(), PUT) != methods.end(); // not implemented yet
-        // debug.log() << "PUT is enabled." << std::endl;
-        if (stat(_path.c_str(), &buf) != 0)
-            switch (errno) {
-                case ENOENT:
-                case ENOTDIR:
-                    _is_file = true; // it's a file if it doesnt exist
-                    return;
-                case EACCES:
-                    info.log() << "Location: resource '" << target << "' " << strerror(errno) << ", sending "
-                               << Forbidden << std::endl;
-                    throw HttpError(Forbidden);
-                case ENAMETOOLONG:
-                    info.log() << "Location: resource '" << target << "' " << strerror(errno) << ", sending "
-                               << Forbidden << std::endl;
-                    throw HttpError(URITooLong);
-                default:
-                    error.log() << "Location: resource '" << target << "' at location '" << _path << "' using route '"
-                                << route.getLocation() << "'" << strerror(errno) << ", sending " << InternalServerError
-                                << std::endl;
-                    throw HttpError(InternalServerError);
-            } // default throws so nothing gets out of there
+        stat_file(target, buf);
         debug.log() << "Target '" << target << "' exists." << std::endl;
         if (S_ISDIR(buf.st_mode)) { // in case target is a directory
             debug.log() << "Target is a directory" << std::endl;
@@ -110,6 +85,73 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
 
 template < class ServerClass, class RouteClass >
 Location< ServerClass, RouteClass >::~Location() {}
+
+template < class ServerClass, class RouteClass >
+void Location< ServerClass, RouteClass >::stat_file(const std::string &target, struct stat &buf) {
+    if (stat(_path.c_str(), &buf) != 0)
+        switch (errno) {
+            case ENOENT:
+            case ENOTDIR:
+                _is_file = true; // it's a file if it doesnt exist
+                return;
+            case EACCES:
+                info.log() << "Location: resource '" << target << "' " << strerror(errno) << ", sending " << Forbidden
+                           << std::endl;
+                throw HttpError(Forbidden);
+            case ENAMETOOLONG:
+                info.log() << "Location: resource '" << target << "' " << strerror(errno) << ", sending " << Forbidden
+                           << std::endl;
+                throw HttpError(URITooLong);
+            default:
+                error.log() << "Location: resource '" << target << "' at location '" << _path << "' " << strerror(errno)
+                            << ", sending " << InternalServerError << std::endl;
+                throw HttpError(InternalServerError);
+        } // default throws so nothing gets out of there
+}
+
+template < class ServerClass, class RouteClass >
+void Location< ServerClass, RouteClass >::set_redir(const std::string &target, const RouteClass &route) {
+    debug.log() << "Using route " << route.getLocation() << " to redirect" << std::endl;
+    _status_code = route.getRedirCode();
+    _is_redirect = true;
+    build_path(target, route, route.getRedirPage());
+    debug.log() << "Redirection location: " << _path << std::endl;
+}
+
+template < class ServerClass, class RouteClass >
+bool Location< ServerClass, RouteClass >::check_cgi_glob(const std::string &target, const ServerClass &server) {
+    try {
+        const RouteClass &route = server.getCGIRoute(target); // TODO: change type, is there for LSP
+        debug.log() << "Using CGI glob route " << route.getLocation() << std::endl;
+        init_cgi_glob(target, route);
+        return true;
+    } catch (Server::RouteNotFoundWarn &e) {
+        return false;
+    }
+    return false;
+}
+
+template < class ServerClass, class RouteClass >
+void Location< ServerClass, RouteClass >::init_cgi_glob(
+    const std::string &target,
+    const RouteClass  &route
+) { // TODO: change type
+    _is_cgi         = true;
+    _methods        = route.getMethods();
+    _route          = route.getLocation();
+    _cgi_path       = route.getRootDir();
+    std::string ext = route.getCgiExtension();
+    size_t      sep;
+    size_t      next_slash;
+    do {
+        sep        = target.find(ext, 0) + ext.length();
+        next_slash = target.find("/", sep);
+    } while (next_slash != 0 && next_slash != target.npos);
+    _cgi_path   = route.getCgiPath();
+    _path       = target.substr(0, sep);
+    _route_path = route.getRootDir();
+    _path_info  = target.substr(sep, target.length() - sep);
+}
 
 /**
   Function used to find index in a repository.
@@ -203,11 +245,6 @@ void Location< ServerClass, RouteClass >::setup_cgi(const RouteClass &route) {
     _cgi_path = route.getCgiPath();
 }
 
-// template <class ServerClass, class RouteClass>
-// bool Location<ServerClass, RouteClass>::is_put() const {
-//      return _is_put;
-//  }
-
 template < class ServerClass, class RouteClass >
 bool Location< ServerClass, RouteClass >::has_autoindex() const {
     return _autoindex;
@@ -269,7 +306,7 @@ const std::string &Location< ServerClass, RouteClass >::get_cgi_path() const {
 }
 
 template < class ServerClass, class RouteClass >
-bool Location<ServerClass, RouteClass>::has_method(HttpMethod method) const {
+bool Location< ServerClass, RouteClass >::has_method(HttpMethod method) const {
     return _methods.find(method) != _methods.end();
 }
 
