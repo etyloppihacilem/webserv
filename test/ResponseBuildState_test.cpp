@@ -271,6 +271,8 @@ TEST_P(ResponseBuildStateFixture, CorrectHeaders) {
     const map                                   &test_headers = _strategy->get_response()._header;
 
     correct["Server"] = SERVER_SOFTWARE;
+    ASSERT_NE(test_headers.find("Connection"), test_headers.end());
+    correct["Connection"] = test_headers.at("Connection");
 
     map::const_iterator test_item;
     map::const_iterator correct_item;

@@ -57,7 +57,7 @@ std::vector< Server > ServerManager::parseConfFile(const std::string &configFile
         return servers;
 
     if (extract_extension(configFile) != "conf") {
-        error.log() << configFile << ": file is not in the expected format [ *.conf ]." << std::endl;
+        error.log() << configFile << ": filenam has not the correct extension [ *.conf ]." << std::endl;
         throw FailToInitServerError();
     }
 

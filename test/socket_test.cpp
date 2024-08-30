@@ -38,4 +38,3 @@ TEST(SocketTestSuite, checkSocketConstruction) {
     }
     ServerManager::deleteInstance();
 }
->>>>>>> 989f27b (Test ServerReactor init)
