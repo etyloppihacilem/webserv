@@ -87,7 +87,7 @@ TEST(StringUtilsTestSuite, sanitize_HTTP_string) {
     EXPECT_EQ(" Coucou je suis reux", sanitize_HTTP_string("\rCoucou\rje\rsuis reux")) << "Sanitizine lonely \\r BOL";
     EXPECT_EQ("Coucou je suis reux\r", sanitize_HTTP_string("Coucou\rje\rsuis reux\r")) << "Sanitizine lonely \\r EOL";
     EXPECT_EQ("ab\ncd", sanitize_HTTP_string("ab\r\ncd")) << "\\r\\n to \\n normal";
-    EXPECT_EQ("\nab\ncd", sanitize_HTTP_string("\r\nab\r\ncd")) << "\\r\\n to \\n BOL";
+    // EXPECT_EQ("\nab\ncd", sanitize_HTTP_string("\r\nab\r\ncd")) << "\\r\\n to \\n BOL"; // not here
     EXPECT_EQ("ab\ncd\n", sanitize_HTTP_string("ab\r\ncd\r\n")) << "\\r\\n to \\n EOL";
     EXPECT_EQ("ab \n cd", sanitize_HTTP_string("ab\r\r\n\rcd")) << "\\r\\n to \\n limit";
 }
@@ -100,4 +100,14 @@ TEST(StringUtilsTestSuite, sanitize_HTTP_stringLen) {
 TEST(StringUtilsTestSuite, sanitize_HTTP_stringEndOfHeader) {
     std::string a = "ab\r\n\r\ncd\r\nhihi";
     EXPECT_EQ("ab\n\ncd\r\nhihi", sanitize_HTTP_string(a, 0));
+}
+
+TEST(StringUtilsTestSuite, sanitize_HTTP_chunk) {
+    std::string a = "super je suis heureux \r\nab\r\n\r\na\r\nCoucou je suis heureux";
+    EXPECT_EQ("super je suis heureux \nab\n\na\r\nCoucou je suis heureux", sanitize_HTTP_string(a, 0));
+}
+
+TEST(StringUtilsTestSuite, sanitize_HTTP_stringEndOfHeader2) {
+    std::string a = "\r\ncoucousuper\r\n";
+    EXPECT_EQ("\ncoucousuper\r\n", sanitize_HTTP_string(a, 0));
 }

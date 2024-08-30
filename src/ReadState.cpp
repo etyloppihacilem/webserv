@@ -77,8 +77,10 @@ t_state ReadState::process_buffer(char *buffer) {
         }
         // length check
         while (_parse_state != body && (eol = _buffer.find("\n")) != _buffer.npos) {
-            if (_parse_state == rs_line && eol == 0)
+            if (_parse_state == rs_line && eol == 0) {
                 _buffer = _buffer.substr(1, _buffer.length() - 1); // to discard leading lines of request
+                sanitize_HTTP_string(_buffer, 0);
+            }
             else if (_parse_state == rs_line) {
                 if (!_request->parse_request_line(_buffer))
                     return _state = ready; // ready to return error

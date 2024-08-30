@@ -62,51 +62,18 @@ std::string &BodyChunk::get() {
     }
     if (_done)
         return _body;
-    // read_body(); // is now public to call only in an event
-    while (_trailing && !_done) {
-        size_t sp;
-
-        if (_trailing) {
-            sp = _buffer.find("\r\n", 0);
-            if (sp == _buffer.npos)
-                _trailing = true;
-            else {
-                _buffer   = _buffer.substr(sp + 2, _buffer.length() - (sp + 2)); // skipping trailer section
-                _trailing = false;
-                _done     = true;
-            }
-        }
-        return _body;
-    }
-    if (!_bytes_remaining && _buffer.find("\r\n") != _buffer.npos) {
-        init_chunk();
-        if (_done)
-            return _body;
-    }
-    if (_bytes_remaining && _buffer.length() > 0) {
-        // read_body();
-
-        size_t to_save = (_bytes_remaining > _buffer.length() ? _buffer.length() : _bytes_remaining);
-
-        _body  += _buffer.substr(0, to_save);
-        _buffer = _buffer.substr(to_save, _buffer.length() - to_save);
-        if ((_bytes_remaining -= to_save) == 0)
-            _eoc = true;
-        _total += to_save;
-    }
-    if (_total > MAX_BODY_SIZE) {
-        info.log() << "Body is too large (chunks), " << _total << " bytes were read, sending " << ContentTooLarge
-                   << std::endl;
-        throw HttpError(ContentTooLarge);
-    }
-    return _body;
+    return _body += parse_body();
 }
 
 std::string BodyChunk::pop() {
     if (_done)
         return "";
-    std::string ret = "";
     _uniform        = false;
+    return parse_body();
+}
+
+std::string BodyChunk::parse_body() {
+    std::string ret = "";
     read_body();
     while (_trailing && !_done) {
         size_t sp;

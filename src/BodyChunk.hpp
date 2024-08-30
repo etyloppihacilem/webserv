@@ -43,6 +43,7 @@ class BodyChunk : public Body {
         size_t       read_body();
 
     private:
+        std::string parse_body();
         void init_chunk();
         bool is_hex(int c);
 

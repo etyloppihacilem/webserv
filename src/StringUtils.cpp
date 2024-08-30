@@ -83,6 +83,8 @@ std::string &sanitize_HTTP_string(std::string &s, size_t len) {
     if ((len_rn = s.find("\n\n")) == s.npos)
         len_rn = len;
     while ((found = s.find("\r\n", found)) != s.npos && found < len_rn) {
+        if (s[0] == '\n') // \n at begining means end of headers and no sanitation further
+            return s;
         s.replace(found, 2, "\n");
         if (found != 0 && s.find("\n\n", found - 1) == found - 1)
             break; // double \n found, not sanitizing further (bc body)

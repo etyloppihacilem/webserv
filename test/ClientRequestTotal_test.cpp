@@ -631,8 +631,7 @@ std::vector< TotalRequest > TotalRequestData = {
         "/process.html",
         PUT,
         true,
-        "Coucou je suis heureux et c'est le premier body que nous allons pouvoir trouver"
-        " dans ces tests...",
+        "Coucou je suis heureux et c'est le premier body que nous allons pouvoir trouver dans ces tests...",
         {
             { "Host", "127.0.0.1" },
             { "Name", "fireTesting/1.0" },
@@ -714,7 +713,7 @@ TEST_P(TotalRequestFixture, BodyTest) {
         return;
     }
     while (!body->is_done() && i++ < MAX_REQUEST_LINE) {
-        body->read_body();
+        // body->read_body();
         body->get();
     }
     if (i >= MAX_REQUEST_LINE)
