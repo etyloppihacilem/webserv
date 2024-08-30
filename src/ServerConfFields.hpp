@@ -109,6 +109,8 @@ inline ConfField isRouteConfField(const ConfField code) {
             return methods;
         case 9:
             return autoindex;
+        case 10:
+            return client_max_body_size;
         case 11:
             return rewrite;
         case 12:

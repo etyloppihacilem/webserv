@@ -37,6 +37,7 @@ TEST_F(RouteTestSuite, DefaultConstructor) {
     EXPECT_EQ(true, a.getAutoindex());
     std::set< HttpMethod > expected({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
+    EXPECT_EQ(a.getMaxBodySize(), 1000000);
     EXPECT_EQ("www/", a.getUploadPath());
     EXPECT_EQ(OK, a.getRedirCode());
     EXPECT_EQ("", a.getRedirPage());
@@ -46,6 +47,7 @@ TEST_F(RouteTestSuite, DefaultConstructor) {
     EXPECT_EQ(false, a.hasIndexPageSet());
     EXPECT_EQ(false, a.hasAutoindexSet());
     EXPECT_EQ(false, a.hasMethodsSet());
+    EXPECT_EQ(false, a.hasMaxBodySizeSet());
     EXPECT_EQ(false, a.hasUploadSet());
     EXPECT_EQ(false, a.hasRedirSet());
     EXPECT_EQ(false, a.hasCgiPathSet());
@@ -62,6 +64,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidBasic) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expected({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
+    EXPECT_EQ(a.getMaxBodySize(), 1000000);
     EXPECT_EQ("www/images/", a.getUploadPath());
     EXPECT_EQ(OK, a.getRedirCode());
     EXPECT_EQ("", a.getRedirPage());
@@ -71,6 +74,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidBasic) {
     EXPECT_EQ(false, a.hasIndexPageSet());
     EXPECT_EQ(true, a.hasAutoindexSet());
     EXPECT_EQ(true, a.hasMethodsSet());
+    EXPECT_EQ(false, a.hasMaxBodySizeSet());
     EXPECT_EQ(false, a.hasUploadSet());
     EXPECT_EQ(false, a.hasRedirSet());
     EXPECT_EQ(false, a.hasCgiPathSet());
@@ -78,7 +82,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidBasic) {
 }
 
 TEST_F(RouteTestSuite, ParametrizeConstructorValidUpload) {
-    input = StringTokenizer("methods|PUT|POST;|index|index.html;|autoindex|on;|upload_path|/uploads;", '|');
+    input = StringTokenizer("methods|PUT|POST;|index|index.html;|autoindex|on;|upload_path|/uploads;|client_max_body_size|160;", '|');
     a     = Route("/", input, server);
     EXPECT_EQ("/", a.getLocation());
     EXPECT_EQ("www/", a.getRootDir());
@@ -87,6 +91,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidUpload) {
     EXPECT_EQ(true, a.getAutoindex());
     std::set< HttpMethod > expected({ PUT, POST });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
+    EXPECT_EQ(a.getMaxBodySize(), 160);
     EXPECT_EQ("/uploads/", a.getUploadPath());
     EXPECT_EQ(OK, a.getRedirCode());
     EXPECT_EQ("", a.getRedirPage());
@@ -96,6 +101,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidUpload) {
     EXPECT_EQ(true, a.hasIndexPageSet());
     EXPECT_EQ(true, a.hasAutoindexSet());
     EXPECT_EQ(true, a.hasMethodsSet());
+    EXPECT_EQ(true, a.hasMaxBodySizeSet());
     EXPECT_EQ(true, a.hasUploadSet());
     EXPECT_EQ(false, a.hasRedirSet());
     EXPECT_EQ(false, a.hasCgiPathSet());
@@ -112,6 +118,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidRewrite) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expected({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
+    EXPECT_EQ(a.getMaxBodySize(), 1000000);
     EXPECT_EQ("www/YouHaveBeenRedirect/", a.getUploadPath());
     EXPECT_EQ(MovedPermanently, a.getRedirCode());
     EXPECT_EQ("/redir/newLocation.html", a.getRedirPage());
@@ -121,6 +128,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidRewrite) {
     EXPECT_EQ(false, a.hasIndexPageSet());
     EXPECT_EQ(true, a.hasAutoindexSet());
     EXPECT_EQ(true, a.hasMethodsSet());
+    EXPECT_EQ(false, a.hasMaxBodySizeSet());
     EXPECT_EQ(false, a.hasUploadSet());
     EXPECT_EQ(true, a.hasRedirSet());
     EXPECT_EQ(false, a.hasCgiPathSet());
@@ -139,6 +147,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidCgi) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expected({ GET, POST });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
+    EXPECT_EQ(a.getMaxBodySize(), 1000000);
     EXPECT_EQ("cgi-bin/", a.getUploadPath());
     EXPECT_EQ(OK, a.getRedirCode());
     EXPECT_EQ("", a.getRedirPage());
@@ -148,6 +157,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidCgi) {
     EXPECT_EQ(false, a.hasIndexPageSet());
     EXPECT_EQ(true, a.hasAutoindexSet());
     EXPECT_EQ(true, a.hasMethodsSet());
+    EXPECT_EQ(false, a.hasMaxBodySizeSet());
     EXPECT_EQ(false, a.hasUploadSet());
     EXPECT_EQ(false, a.hasRedirSet());
     EXPECT_EQ(true, a.hasCgiPathSet());
@@ -157,7 +167,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidCgi) {
 TEST_F(RouteTestSuite, ParametrizeConstructorOnlyInvalid) {
     input = StringTokenizer(
         "root|/oupsie?;|index|toto;|methods|LOST;|autoindex|true;|upload_path|;|rewrite|200|/redir/"
-        "toto.html;|cgi_path|;|file_ext|titi;",
+        "toto.html;|cgi_path|;|file_ext|titi;|client_max_body_size|-14;",
         '|'
     );
     a = Route("/", input, server);
@@ -168,6 +178,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorOnlyInvalid) {
     EXPECT_EQ(true, a.getAutoindex());
     std::set< HttpMethod > expected({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
+    EXPECT_EQ(a.getMaxBodySize(), 1000000);
     EXPECT_EQ("www/", a.getUploadPath());
     EXPECT_EQ(OK, a.getRedirCode());
     EXPECT_EQ("", a.getRedirPage());
@@ -177,6 +188,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorOnlyInvalid) {
     EXPECT_EQ(false, a.hasIndexPageSet());
     EXPECT_EQ(false, a.hasAutoindexSet());
     EXPECT_EQ(false, a.hasMethodsSet());
+    EXPECT_EQ(false, a.hasMaxBodySizeSet());
     EXPECT_EQ(false, a.hasUploadSet());
     EXPECT_EQ(false, a.hasRedirSet());
     EXPECT_EQ(false, a.hasCgiPathSet());

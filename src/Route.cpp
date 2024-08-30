@@ -27,7 +27,7 @@ Route::Setter Route::fieldSetterList[COUNT_CONF_FIELD] = {
     &Route::setIndexPage,
     &Route::setAutoindex,
     &Route::setMethods,
-    0,
+    &Route::setMaxBodySize,
     &Route::setUpload,
     &Route::setRedirection,
     &Route::setCgiPath,
@@ -42,6 +42,7 @@ Route::Route(Server &server) :
     _indexPage(server.getIndexPage()),
     _autoindex(server.getAutoindex()),
     _methods(server.getMethods()),
+    _maxBodySize(server.getMaxBodySize()),
     _uploadPath(_rootDir),
     _redirCode(OK),
     _redirPage(""),
@@ -55,6 +56,7 @@ Route::Route(const std::string &locationPath, StringTokenizer &tokenizedLocation
     _indexPage(server.getIndexPage()),
     _autoindex(server.getAutoindex()),
     _methods(server.getMethods()),
+    _maxBodySize(server.getMaxBodySize()),
     _uploadPath(server.getRootDir()),
     _redirCode(OK),
     _redirPage(""),
@@ -105,6 +107,10 @@ std::set< HttpMethod > Route::getMethods() const {
     return _methods;
 }
 
+int Route::getMaxBodySize() const {
+    return _maxBodySize;
+}
+
 std::vector< std::string > Route::getIndexPage() const {
     return _indexPage;
 }
@@ -149,6 +155,10 @@ bool Route::hasMethodsSet() const {
     return _isFieldSet[methods];
 }
 
+bool Route::hasMaxBodySizeSet() const {
+    return _isFieldSet[client_max_body_size];
+}
+
 bool Route::hasUploadSet() const {
     return _isFieldSet[upload_path];
 }
@@ -179,6 +189,10 @@ void Route::setAutoindex(const ValueList &values) {
 
 void Route::setMethods(const ValueList &values) {
     _methods = setFieldMethods(values);
+}
+
+void Route::setMaxBodySize(const ValueList &values) {
+    _maxBodySize = setFieldMaxBodySize(values);
 }
 
 void Route::setUpload(const ValueList &values) {

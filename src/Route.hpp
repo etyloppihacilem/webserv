@@ -27,6 +27,7 @@ class Route {
         std::vector< std::string > getIndexPage() const;
         bool                       getAutoindex() const;
         std::set< HttpMethod >     getMethods() const;
+        int                        getMaxBodySize() const;
         std::string                getUploadPath() const;
         HttpCode                   getRedirCode() const;
         std::string                getRedirPage() const;
@@ -37,6 +38,7 @@ class Route {
         bool hasIndexPageSet() const;
         bool hasAutoindexSet() const;
         bool hasMethodsSet() const;
+        bool hasMaxBodySizeSet() const;
         bool hasUploadSet() const;
         bool hasRedirSet() const;
         bool hasCgiPathSet() const;
@@ -48,6 +50,7 @@ class Route {
         std::vector< std::string > _indexPage;
         bool                       _autoindex;
         std::set< HttpMethod >     _methods;
+        int                        _maxBodySize;
         std::string                _uploadPath;
         HttpCode                   _redirCode;
         std::string                _redirPage;
@@ -59,6 +62,7 @@ class Route {
         void setIndexPage(const ValueList &);
         void setAutoindex(const ValueList &);
         void setMethods(const ValueList &);
+        void setMaxBodySize(const ValueList &);
         void setUpload(const ValueList &);
         void setRedirection(const ValueList &);
         void setCgiPath(const ValueList &);
