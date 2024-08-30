@@ -254,11 +254,10 @@ TEST_F(ServerConfSetterTestSuite, SetFieldCgiPath_isNotValidFolderPath) {
 
 TEST_F(ServerConfSetterTestSuite, SetFieldCgiPath_isValidFolderPath) {
     EXPECT_EQ(setFieldCgiPath({ "/" }), "/");
-    EXPECT_EQ(setFieldCgiPath({ "images" }), "images/");
-    EXPECT_EQ(setFieldCgiPath({ "/images/cgi.d" }), "/images/cgi.d/");
-    EXPECT_EQ(setFieldCgiPath({ "/images" }), "/images/");
-    EXPECT_EQ(setFieldCgiPath({ "/images/cgi" }), "/images/cgi/");
-    EXPECT_EQ(setFieldCgiPath({ "/images/cgi/" }), "/images/cgi/");
+    EXPECT_EQ(setFieldCgiPath({ "images" }), "images");
+    EXPECT_EQ(setFieldCgiPath({ "/images/cgi.d" }), "/images/cgi.d");
+    EXPECT_EQ(setFieldCgiPath({ "/images" }), "/images");
+    EXPECT_EQ(setFieldCgiPath({ "/images/cgi" }), "/images/cgi");
 }
 
 // SetFieldCgiPath_End

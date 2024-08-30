@@ -168,7 +168,7 @@ TEST_F(ServerTestSuite, ParametrizeConstructorServerWithLocation) {
     EXPECT_TRUE(a.hasRoute("/"));
     ASSERT_TRUE(a.hasRoute("/python"));
     Route r = a.getRoute("/python");
-    EXPECT_EQ("/usr/bin/python3/", r.getCgiPath());
+    EXPECT_EQ("/usr/bin/python3", r.getCgiPath());
     EXPECT_EQ("cgi-bin/", r.getRootDir());
     EXPECT_EQ("py", r.getCgiExtension());
     expectedMethods = { GET, POST };

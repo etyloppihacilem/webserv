@@ -34,7 +34,7 @@ class EventHandler {
 
         virtual void handle(void)  = 0; // Run this in loop
         virtual void timeout(void) = 0;
-        void         checkTimeout(void);
+        bool         checkTimeout(void);
         void         updateLastsActivity(void);
 
     protected:

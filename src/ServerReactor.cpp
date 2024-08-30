@@ -130,10 +130,13 @@ void ServerReactor::deleteClient(int socket_fd, EventHandler &handler) {
     errno = 0;
     if (epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, socket_fd, 0) == -1)
         throw std::runtime_error("ServerReactor: epoll_ctl_del: " + std::string(std::strerror(errno)));
-    std::set<EventHandler *>::iterator it = _eventHandlers.find(&handler);
-    delete *it;
-    _eventHandlers.erase(it);
 
+    if (handler.checkTimeout() == false)
+    {
+        std::set< EventHandler * >::iterator it = _eventHandlers.find(&handler);
+        delete *it;
+        _eventHandlers.erase(it);
+    }
 }
 
 void ServerReactor::listenToClient(int socket_fd, EventHandler &handler) {
@@ -176,9 +179,19 @@ void ServerReactor::run() {
             static_cast< EventHandler * >(events[i].data.ptr)->handle();
         }
         if (event_count == 0) {
-            info.log() << "ServerReactor: Check for timout!" << std::endl;
+            info.log() << "ServerReactor: Check for timout! (handler count = " << _eventHandlers.size() << ")."
+                       << std::endl;
+            std::vector< std::set< EventHandler * >::iterator > deleteHandler;
             for (std::set< EventHandler * >::iterator it = _eventHandlers.begin(); it != _eventHandlers.end(); ++it)
-                (*it)->checkTimeout();
+                if ((*it)->checkTimeout() == true) {
+                    (*it)->timeout();
+                    deleteHandler.push_back(it);
+                }
+            for (std::vector< std::set< EventHandler * >::iterator >::iterator it = deleteHandler.begin();
+                 it != deleteHandler.end(); ++it) {
+                delete **it;
+                _eventHandlers.erase(*it);
+            }
             debug.log() << "ServerReactor: timeout check done." << std::endl;
         }
     }

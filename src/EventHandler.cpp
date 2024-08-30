@@ -25,9 +25,11 @@ int EventHandler::getPort(void) const {
     return _port;
 }
 
-void EventHandler::checkTimeout(void) {
-    if ((time(NULL) - _last_activity) > getTimeout())
-        timeout();
+bool EventHandler::checkTimeout(void) {
+    if ((time(NULL) - _last_activity) > getTimeout()) {
+        return true;
+    }
+    return false;
 }
 
 void EventHandler::updateLastsActivity(void) {

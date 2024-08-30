@@ -43,6 +43,5 @@ void AcceptHandler::handle() {
 }
 
 void AcceptHandler::timeout() {
-    warn.log() << "Client timeout" << std::endl;
-    ServerManager::getInstance()->deleteClient(_socket_fd, *this);
+    updateLastsActivity();
 }

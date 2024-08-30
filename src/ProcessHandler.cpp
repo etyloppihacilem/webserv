@@ -82,7 +82,8 @@ void ProcessHandler::handle() {
 }
 
 void ProcessHandler::timeout() {
-    warn.log() << "Client timeout" << std::endl;
+    warn.log() << "Client " << _client_IP << " on socket " << _socket_fd << " on port " << _port << " timed out! ("
+               << getTimeout() << "s)" << std::endl;
     ServerManager::getInstance()->deleteClient(_socket_fd, *this);
 }
 
