@@ -251,7 +251,7 @@ std::string setFieldCgiPath(const ValueList &values) {
     if (values[0].empty())
         throw ServerConfWarn();
 
-    return add_trailing_slash(values[0]);
+    return values[0];
 }
 
 std::string setFieldFileExt(const ValueList &values) {
