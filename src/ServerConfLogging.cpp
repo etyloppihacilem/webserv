@@ -20,7 +20,7 @@ void logParsingStarted(ConfField fieldCode, const std::string &content, const st
 }
 
 void logParsingEnded(ConfField fieldCode) {
-    info.log() << ConfFieldString(fieldCode) << " ... parsing ended." << std::endl;
+    debug.log() << ConfFieldString(fieldCode) << " ... parsing ended." << std::endl;
 }
 
 void logMissingFirstToken(ConfField fieldCode, const std::string &loggingInfo) {

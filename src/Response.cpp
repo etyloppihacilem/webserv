@@ -59,7 +59,7 @@ void Response::add_header(const std::string &field, const std::string &value) {
   */
 void Response::set_code(HttpCode code) {
     _code = code;
-    if (isError(_code))
+    if (isError(_code) || isRedirection(_code))
         _header["Connection"] = "close";
     else
         _header["Connection"] = "keep-alive";
@@ -85,7 +85,7 @@ void Response::set_code(std::string code) {
         error.log() << tmp << " is not a valid HttpCode, sending " << InternalServerError << std::endl;
         _code = InternalServerError;
     }
-    if (isError(_code))
+    if (isError(_code) || isRedirection(_code))
         _header["Connection"] = "close";
     else
         _header["Connection"] = "keep-alive";
@@ -133,7 +133,7 @@ bool Response::build_response(std::string &buffer, size_t size) {
             debug.log() << "Generating headers" << std::endl;
             buffer += generate_header();
             if (_body) {
-                buffer += "\r\n"; // to separate body from the rest
+                buffer += "\r\n"; // to end headers
                 debug.log() << "Generating body" << std::endl;
                 _state = body;
             } else {

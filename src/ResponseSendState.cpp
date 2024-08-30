@@ -48,8 +48,9 @@ t_state ResponseSendState::process() {
     if (_sent) {
         debug.log() << "Response is sent." << std::endl;
         _state = ready;
-        if (isError(response.get_code())) {
-            info.log() << "Closing connexion because of error code " << response.get_code() << std::endl;
+        if (isError(response.get_code()) || isRedirection(response.get_code())) {
+            info.log() << "Closing connexion because of " << (isError(response.get_code()) ? "error" : "redirection")
+                       << " code " << response.get_code() << std::endl;
             _state = s_error;
         }
         return _state;

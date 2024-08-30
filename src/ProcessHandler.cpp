@@ -72,6 +72,7 @@ void ProcessHandler::handle() {
             ServerManager::getInstance()->listenToClient(_socket_fd, *this);
             delete _state;
             _state = 0;
+            debug.log() << "End of life of state." << std::endl;
         }
     }
     if (_state && _state->get_state() == s_error) {
