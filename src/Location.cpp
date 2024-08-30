@@ -15,6 +15,7 @@
 #include "Logger.hpp"
 #include "Route.hpp"
 #include "Server.hpp"
+#include "ServerGetRoute.hpp"
 #include "StringUtils.hpp"
 #include <cerrno>
 #include <cstring>
@@ -75,7 +76,7 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
                 setup_cgi(route);
             }
         }
-    } catch (Server::RouteNotFoundWarn &e) {
+    } catch (typename ServerGetRoute<RouteClass>::RouteNotFoundWarn &e) {
         fatal.log() << "Location: Route not found. Should NEVER happen, this means Server object is broken and "
                        "default Route '/' do not exist. Sending "
                     << InternalServerError << std::endl;
@@ -125,7 +126,7 @@ bool Location< ServerClass, RouteClass >::check_cgi_glob(const std::string &targ
         debug.log() << "Using CGI glob route " << route.getLocation() << std::endl;
         init_cgi_glob(target, route);
         return true;
-    } catch (Server::RouteNotFoundWarn &e) {
+    } catch (typename ServerGetRoute<RouteClass>::RouteNotFoundWarn &e) {
         return false;
     }
     return false;
