@@ -40,6 +40,8 @@ class CGIStrategy : public ResponseBuildingStrategy {
 
         bool build_response();
         bool fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void set_length(bool len);
+        bool get_length() const;
         void save_mem();
 
     private:
@@ -50,7 +52,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         void          de_chunk();
         void          launch_CGI(size_t size);
         void          feed_CGI();
-        void          kill_child();
+        void          kill_child(bool k = true);
 
         std::string    _location;
         std::string    _path_info;
@@ -58,11 +60,12 @@ class CGIStrategy : public ResponseBuildingStrategy {
         std::string    _cgi_response;
         ClientRequest *_request;
         Body          *_body;
-        int            _pipin[2]; // in the pov of the CGI script
-        int            _pipout[2];
+        int            _mosi[2]; // master out slave in
+        int            _miso[2]; // master in slave out
         pid_t          _child;
         cgistate       _state; ///< When body is ready to be
         bool           _was_dechunked;
+        bool           _is_length;
 };
 
 #endif // INCLUDE_SRC_CGISTRATEGY_HPP_

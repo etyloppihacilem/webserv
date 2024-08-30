@@ -12,6 +12,7 @@
 #include "BodyWriter.hpp"
 #include "BodyWriterChunk.hpp"
 #include "BodyWriterLength.hpp"
+#include "CGIStrategy.hpp"
 #include "CGIWriter.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
@@ -143,7 +144,7 @@ bool Response::build_response(std::string &buffer, size_t size) {
         } else if (_state == body) {
             if (!_body->is_done())
                 buffer += _body->generate(BUFFER_SIZE);
-            if (_body->is_done()) {
+            if (_body->is_done()) { // no else bc need to check after first if
                 debug.log() << "Body is done generating" << std::endl;
                 _state = finished;
             }
@@ -218,6 +219,13 @@ void Response::set_cgi(ResponseBuildingStrategy *strategy) {
     debug.log() << "Setting response with CGI." << std::endl;
     _body = new CGIWriter(*strategy);
     _body->generate(); // this will initiate response headers EXCEPT connection !!
+    if (_header.find("Content-Length") == _header.end())
+        _header["Transfer-Encoding"] = "chunk";
+    CGIStrategy * tmp = dynamic_cast<CGIStrategy *>(strategy);
+    if (tmp)
+        tmp->set_length(true);
+    else
+        error.log() << "CGI is set with no CGIStrategy Strategy." << std::endl;
 }
 
 /**

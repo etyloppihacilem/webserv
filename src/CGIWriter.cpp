@@ -39,28 +39,48 @@ CGIWriter::~CGIWriter() {}
 
 // Generate should be called once before it will send body to init response headers.
 std::string CGIWriter::generate(size_t size) {
-    if (_done)
+    if (_done) {
+        warn.log() << "CGI body generating was already done." << std::endl;
         return "";
+    }
     if (_init) {
         init();
         return "";
     }
-    do {
-        _cgi_done = _strategy->fill_buffer(_buffer, PIPE_BUFFER_SIZE);
-    } while (_buffer.length() < size && !_cgi_done);
+    debug.log() << "CGI writer filling buffer of " << size << " byte(s) (currently " << _buffer.length() << " byte(s))"
+                << std::endl;
+    if (!_cgi_done)
+        do {
+            _cgi_done = _strategy->fill_buffer(_buffer, PIPE_BUFFER_SIZE);
+        } while (_buffer.length() < size && !_cgi_done);
     std::string temp = _buffer.substr(0, (size > _buffer.length() ? _buffer.length() : size));
     _buffer.replace(0, (size > _buffer.length() ? _buffer.length() : size), "");
     std::stringstream st;
     st << std::hex << temp.size();
-    _length += temp.length();
-    temp     = st.str() + "\r\n" + temp + (_done ? "\r\n0\r\n\r\n" : "\r\n");
-    return "";
+    _length         += temp.length();
+    CGIStrategy *tmp = dynamic_cast< CGIStrategy * >(_strategy);
+    if (tmp) {
+        if (!tmp->get_length())
+            temp = st.str() + "\r\n" + temp + (_done ? "\r\n0\r\n\r\n" : "\r\n");
+    } else {
+        temp = st.str() + "\r\n" + temp + (_done ? "\r\n0\r\n\r\n" : "\r\n");
+        error.log() << "CGIWriter is set with no CGIStrategy Strategy. Sending with Chunk by default." << std::endl;
+    }
+    if (_buffer.length() == 0)
+        _done = true;
+    return temp;
 }
 
 void CGIWriter::init() {
-    do {
-        _cgi_done = _strategy->fill_buffer(_buffer, PIPE_BUFFER_SIZE);
-    } while (sanitize_HTTP_string(_buffer).find("\n\n") != _buffer.npos && !_cgi_done);
+    if (!_init) {
+        warn.log() << "CGI init already done, aborting" << std::endl;
+        return;
+    }
+    debug.log() << "Initiating CGI headers" << std::endl;
+    if (!_cgi_done)
+        do {
+            _cgi_done = _strategy->fill_buffer(_buffer, PIPE_BUFFER_SIZE);
+        } while (sanitize_HTTP_string(_buffer, 0).find("\n\n") != _buffer.npos && !_cgi_done);
     size_t found;
     if ((found = _buffer.find("Status:")) != _buffer.npos) {
         size_t end = _buffer.find("\n", found);

@@ -16,6 +16,7 @@
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
+#include "Path.hpp"
 #include "Response.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
@@ -26,6 +27,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <map>
 #include <new>
 #include <ostream>
@@ -54,7 +56,8 @@ CGIStrategy::CGIStrategy(
     _body(0),
     _child(0),
     _state(init),
-    _was_dechunked(false) {
+    _was_dechunked(false),
+    _is_length(false) {
     if (!_request) {
         error.log() << "Trying to instantiate CGIStrategy without request, sending " << InternalServerError
                     << std::endl;
@@ -103,13 +106,13 @@ void CGIStrategy::init_CGI() {
         debug.log() << "CGI request with no body." << std::endl;
         _state = launch;
     }
-    if (pipe(_pipin) < 0) {
+    if (pipe(_miso) < 0) {
         error.log() << "CGIStrategy: Could not open pipe, sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     }
-    if (pipe(_pipout) < 0) {
-        close(_pipin[0]);
-        close(_pipin[1]);
+    if (pipe(_mosi) < 0) {
+        close(_miso[0]);
+        close(_miso[1]);
         error.log() << "CGIStrategy: Could not open pipe, sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     }
@@ -134,64 +137,79 @@ void CGIStrategy::de_chunk() {
 
 void CGIStrategy::launch_CGI(size_t size) {
     // program separation
-    debug.log() << "Preparing to launch CGI " << _cgi_path << " with script " << _location << std::endl;
+    std::string absolute_location = Path(_location).str();
+    debug.log() << "Preparing to launch CGI " << _cgi_path << " with script " << absolute_location << std::endl;
     std::map< std::string, std::string > env;
     fill_env(env, size);
-    pid_t                                pid = fork();
+    pid_t pid = fork();
     if (pid < 0) {
-        close(_pipin[0]);
-        close(_pipin[1]);
-        close(_pipout[0]);
-        close(_pipout[1]);
+        close(_miso[0]);
+        close(_miso[1]);
+        close(_mosi[0]);
+        close(_mosi[1]);
         error.log() << "CGIStrategy: Could not open pipe, sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     } else if (pid) { // parent
         _child = pid;
-        close(_pipin[0]);
-        close(_pipout[1]);
+        close(_mosi[0]);
+        close(_miso[1]);
         info.log() << "CGIStrategy: Child " << pid << " running." << std::endl;
         _state = running;
     } else { // child
-        close(_pipin[1]);
-        close(_pipout[0]);
-        if (dup2(_pipin[0], 0) < 0) {
+        close(_mosi[1]);
+        close(_miso[0]);
+        if (dup2(_mosi[0], 0) < 0) {
             babyphone.log() << "Cannot redirect stdin into child." << std::endl;
-            close(_pipin[0]);
-            close(_pipout[1]);
+            close(_mosi[0]);
+            close(_miso[1]);
             _exit(1);
         }
-        if (dup2(_pipout[1], 1) < 0) {
+        if (dup2(_miso[1], 1) < 0) {
             babyphone.log() << "Cannot redirect stdout into child." << std::endl;
-            close(_pipin[0]);
-            close(_pipout[1]);
+            close(_mosi[0]);
+            close(_miso[1]);
             _exit(1);
         }
-        char **args = new (std::nothrow) char *[2];
-        args[0]     = strdup(_location.c_str());
+        char **args = new (std::nothrow) char *[3];
+        args[1]     = strdup(absolute_location.c_str());
         if (!args || !args[0]) {
             if (args)
                 free(args);
             babyphone.log() << "Cannot creat arg string. Aborting." << std::endl;
-            close(_pipin[0]);
-            close(_pipout[1]);
+            close(_mosi[0]);
+            close(_miso[1]);
             _exit(1);
         }
-        args[1]      = 0;
+        args[2]      = 0;
         char **c_env = generate_env(env);
-        if (!c_env) {
+        if (!c_env) { // nothing gets past this line
             free(args[0]);
             free(args);
             babyphone.log() << "Cannot creat arg string. Aborting." << std::endl;
-            close(_pipin[0]);
-            close(_pipout[1]);
+            close(_mosi[0]);
+            close(_miso[1]);
             _exit(1);
         }
         char *cmd = strdup(_cgi_path.c_str());
+        args[0] = cmd;
+        // const char *cmd = "/usr/bin/python3";
+        if (!cmd) {
+            free(c_env);
+            free(args[0]);
+            free(args);
+            babyphone.log() << "Cannot create arg string. Aborting." << std::endl;
+            close(_mosi[0]);
+            close(_miso[1]);
+            _exit(1);
+        }
+        babyphone.log() << "Running execve(" << cmd << ", " << args[0] << ", env)" << std::endl;
         execve(cmd, args, c_env);
-        close(_pipin[0]);
-        close(_pipout[1]);
         babyphone.log() << "CGIStrategy: Execve failed to run " << strerror(errno) << std::endl; // logging is on stderr
+        close(_mosi[0]);
+        close(_miso[1]);
         free(c_env);
+        free(args[0]);
+        free(args);
         _exit(1); // _exit with underscore does not flush STDIO
         // WARN: Check if this is memory safe.
     }
@@ -203,11 +221,11 @@ void CGIStrategy::feed_CGI() {
         int          ret;
         do {
             ret = write(
-                _pipin[1], content.c_str(), (PIPE_BUFFER_SIZE <= content.length() ? PIPE_BUFFER_SIZE : content.length())
+                _mosi[1], content.c_str(), (PIPE_BUFFER_SIZE <= content.length() ? PIPE_BUFFER_SIZE : content.length())
             );
             if (ret < 0) {
-                close(_pipin[1]);
-                close(_pipout[0]);
+                close(_mosi[1]);
+                close(_miso[0]);
                 error.log() << "CGIStrategy: error while writing in pipe to script, sending " << InternalServerError
                             << std::endl;
                 throw HttpError(InternalServerError);
@@ -218,13 +236,14 @@ void CGIStrategy::feed_CGI() {
                 content = "";
         } while (_was_dechunked && content.length() > 0);
         if (content.length() == 0) {
-            close(_pipin[1]);
+            close(_mosi[1]);
             debug.log() << "Request is done being fed to CGI" << std::endl;
             _built = true;
         }
     } else {
         debug.log() << "Request has no body, CGI is done being initiated." << std::endl;
-        close(_pipin[1]);
+        close(_mosi[1]);
+        _response.set_cgi(this);
         _built = true;
     }
 }
@@ -301,31 +320,46 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
     size_t original = buffer.size();
 
     while (buffer.size() - original < size && !_done) {
-        rd = read(_pipout[0], buf, PIPE_BUFFER_SIZE);
+        rd = read(_miso[0], buf, PIPE_BUFFER_SIZE);
         if (rd < 0) {
-            close(_pipout[0]);
-            kill_child();
+            close(_miso[0]);
+            kill_child(true); // true
             error.log() << "Error reading in pipe from CGI child. Aborting." << std::endl;
             return _done = true;
         }
-        if (std::string(buf).find(EOF) != std::string::npos) {
-            kill_child();
-            close(_pipout[0]);
-            _done = true;
+        if (rd == 0) {
+            if (_child) {
+                debug.log() << "Done reading from CGI pipe, waiting for child." << std::endl;
+                kill_child(false);
+            } else {
+                debug.log() << "Done reading from CGI pipe, closing child." << std::endl;
+                close(_miso[0]);
+                _done = true;
+            }
         }
+        debug.log() << "Read " << rd << " byte(s) from CGI pipe." << std::endl;
         buffer.insert(0, buf);
     }
     return _done;
 }
 
-void CGIStrategy::kill_child() {
+void CGIStrategy::kill_child(bool k) {
     if (!_child) {
         warn.log() << "Trying to kill child when there is no child running." << std::endl;
         return;
     }
-    kill(_child, SIGKILL);
+    if (k)
+        kill(_child, SIGKILL);
     waitpid(_child, 0, 0); // just to make sure
     _child = 0;
+}
+
+void CGIStrategy::set_length(bool len) {
+    _is_length = len;
+}
+
+bool CGIStrategy::get_length() const {
+    return _is_length;
 }
 
 void CGIStrategy::save_mem() {
