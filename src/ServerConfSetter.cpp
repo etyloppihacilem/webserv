@@ -265,5 +265,5 @@ std::string setFieldFileExt(const ValueList &values) {
         throw ServerConfWarn();
     }
 
-    return values[0];
+    return values[0].substr(1);
 }

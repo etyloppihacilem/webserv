@@ -17,6 +17,7 @@
 #include <map>
 #include <ostream>
 #include <string>
+#include <sys/wait.h>
 
 template < class RouteClass >
 ServerGetRoute< RouteClass >::ServerGetRoute() {}
@@ -63,20 +64,24 @@ template < class RouteClass >
 const RouteClass &ServerGetRoute< RouteClass >::getCGIRoute(const std::string &path) const {
     debug.log() << "Checking if " << path << " does contain any cgi specific extensions." << std::endl;
     typename std::map< std::string, RouteClass >::const_iterator it;
-    size_t      nextSlash = (path.length() > 1 ? path.find("/", 1) : 0);
-    std::string testing   = path.substr(0, nextSlash);
-    while (nextSlash != path.npos) {
-        std::string ext = extract_extension(testing);
+    /*size_t      nextSlash = (path.length() > 1 ? path.find("/", 1) : 0);*/
+    /*std::string testing   = path.substr(0, nextSlash);*/
+    /*std::string ext       = extract_extension(testing);*/
+    size_t      nextSlash = 0;
+    std::string testing   = "/";
+    std::string ext = "";
+    do {
+        nextSlash = path.find('/', nextSlash + 1);
+        testing   = path;
+        if (nextSlash != path.npos)
+            testing.resize(nextSlash);
+        ext = extract_extension(testing);
         if (ext != "") { // has extension
             for (it = _routes.begin(); it != _routes.end(); ++it)
                 if (ext == it->second.getCgiExtension())
                     return it->second;
         }
-        nextSlash = path.find('/', nextSlash + 1);
-        testing   = path;
-        if (nextSlash != std::string::npos)
-            testing.resize(nextSlash);
-    }
+    } while (nextSlash != path.npos);
     throw RouteNotFoundWarn(path); // if not found
 }
 

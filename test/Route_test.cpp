@@ -152,7 +152,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidCgi) {
     EXPECT_EQ(OK, a.getRedirCode());
     EXPECT_EQ("", a.getRedirPage());
     EXPECT_EQ("/usr/bin/python3/", a.getCgiPath());
-    EXPECT_EQ(".py", a.getCgiExtension());
+    EXPECT_EQ("py", a.getCgiExtension());
     EXPECT_EQ(true, a.hasRootSet());
     EXPECT_EQ(false, a.hasIndexPageSet());
     EXPECT_EQ(true, a.hasAutoindexSet());

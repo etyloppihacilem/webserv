@@ -22,6 +22,17 @@
 #include <exception>
 #include <string>
 
+class ClientRequestTestSuite : public ::testing::Test {
+    protected:
+        ClientRequestTestSuite() {
+            info.disable();
+        }
+
+        ~ClientRequestTestSuite() {
+            info.enable();
+        }
+};
+
 /*
  * Can access private elements of ClientRequest.
  * LSP is wrong

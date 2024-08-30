@@ -170,7 +170,7 @@ TEST_F(ServerTestSuite, ParametrizeConstructorServerWithLocation) {
     Route r = a.getRoute("/python");
     EXPECT_EQ("/usr/bin/python3/", r.getCgiPath());
     EXPECT_EQ("cgi-bin/", r.getRootDir());
-    EXPECT_EQ(".py", r.getCgiExtension());
+    EXPECT_EQ("py", r.getCgiExtension());
     expectedMethods = { GET, POST };
     EXPECT_THAT(r.getMethods(), ::testing::ContainerEq(expectedMethods));
     EXPECT_EQ(false, r.getAutoindex());

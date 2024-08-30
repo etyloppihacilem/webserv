@@ -8,11 +8,13 @@
 
 ##################################################################################################################### */
 
- #include "gtest/gtest.h"
- #include "Logger.hpp"
+#include "Logger.hpp"
+#include "Route.hpp"
 #include "Server.hpp"
 #include "ServerConfFields.hpp"
+#include "ServerGetRoute.hpp"
 #include "StringTokenizer.hpp"
+#include "gtest/gtest.h"
 
 // TEST_P(ResponseBuildStateFixture, speed_test) {
 //     for (size_t i = 0; i < 100000; i++) {
@@ -35,7 +37,6 @@
 //     }
 // }
 
-
 class ServerRouteTestSuite : public ::testing::Test {
     protected:
         ServerRouteTestSuite() {
@@ -46,9 +47,11 @@ class ServerRouteTestSuite : public ::testing::Test {
             a.addRoute(location);
             location = Field("/star_trek/redir/to/star_citizen", StringTokenizer("", '|'));
             a.addRoute(location);
-            location = Field("/test", StringTokenizer("upload_path|/upload;", '|'));
+            location = Field("/test", StringTokenizer("upload_path|/upload;|file_ext|.bla;", '|'));
             a.addRoute(location);
             location = Field("/test/diff", StringTokenizer("upload_path|/upload_diff;", '|'));
+            a.addRoute(location);
+            location = Field("/test/diff/deepdiff", StringTokenizer("upload_path|/upload_diff;|file_ext|.diff;", '|'));
             a.addRoute(location);
             location = Field("/space_travel", StringTokenizer("", '|'));
             a.addRoute(location);
@@ -57,7 +60,7 @@ class ServerRouteTestSuite : public ::testing::Test {
         ~ServerRouteTestSuite() { info.enable(); }
 
         Server a;
-        Field location;
+        Field  location;
 };
 
 TEST_F(ServerRouteTestSuite, hasRoute_KO) {
@@ -75,13 +78,14 @@ TEST_F(ServerRouteTestSuite, hasRoute_OK) {
     EXPECT_TRUE(a.hasRoute("/star_trek/redir/to/star_citizen"));
 }
 
-//TODO:
-/**/
-/*TEST_F(ServerRouteTestSuite, getRoute_KO) {*/
-/*    target        */
-/*}*/
-
 TEST_F(ServerRouteTestSuite, getRoute_KO) {
+    EXPECT_EQ(a.getRoute("/nothere").getLocation(), "/");
+    EXPECT_EQ(a.getRoute("/emptyy").getLocation(), "/");
+    EXPECT_EQ(a.getRoute("/space_travel.d").getLocation(), "/");
+    EXPECT_EQ(a.getRoute("/*/diff").getLocation(), "/");
+}
+
+TEST_F(ServerRouteTestSuite, getRoute_OK) {
     EXPECT_EQ(a.getRoute("/test/upload.txt").getLocation(), "/test");
     EXPECT_EQ(a.getRoute("/test/delete.png").getLocation(), "/test");
     EXPECT_EQ(a.getRoute("/test/diff/delete.png").getLocation(), "/test/diff");
@@ -89,4 +93,23 @@ TEST_F(ServerRouteTestSuite, getRoute_KO) {
     EXPECT_EQ(a.getRoute("/space_travel/search/ici?ici=coucou").getLocation(), "/space_travel");
 }
 
-// TODO: getCGIRoute
+TEST_F(ServerRouteTestSuite, getCGIRoute_KO) {
+    EXPECT_THROW(a.getCGIRoute("/test/index.html").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/test/upload.txt").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/test/delete.png").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/emptyy").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/space_travel.d").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/*/diff.txt").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/test/diff/delete.png").getLocation(), ServerGetRoute<Route>::RouteNotFoundWarn);
+}
+
+TEST_F(ServerRouteTestSuite, getCGIRoute_OK) {
+    EXPECT_EQ(a.getCGIRoute("/test/delete.bla").getLocation(), "/test");
+    EXPECT_EQ(a.getCGIRoute("/test/diff/delete.bla").getLocation(), "/test");
+    EXPECT_EQ(a.getCGIRoute("/test/diff/deepdiff/delete.bla").getLocation(), "/test");
+    EXPECT_EQ(a.getCGIRoute("/space_travel.bla/some/thing").getLocation(), "/test");
+    EXPECT_EQ(a.getCGIRoute("/test/delete.diff").getLocation(), "/test/diff/deepdiff");
+    EXPECT_EQ(a.getCGIRoute("/test/diff/delete.diff").getLocation(), "/test/diff/deepdiff");
+    EXPECT_EQ(a.getCGIRoute("/test/diff/deepdiff/delete.diff").getLocation(), "/test/diff/deepdiff");
+    EXPECT_EQ(a.getCGIRoute("/space_travel.diff/search/ici?ici=coucou").getLocation(), "/test/diff/deepdiff");
+}

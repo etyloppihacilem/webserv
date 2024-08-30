@@ -278,8 +278,8 @@ TEST_F(ServerConfSetterTestSuite, SetFieldFileExt_isNotValidExtension) {
 }
 
 TEST_F(ServerConfSetterTestSuite, SetFieldFileExt_isValidExtension) {
-    EXPECT_EQ(setFieldFileExt({ ".html" }), ".html");
-    EXPECT_EQ(setFieldFileExt({ ".php" }), ".php");
+    EXPECT_EQ(setFieldFileExt({ ".html" }), "html");
+    EXPECT_EQ(setFieldFileExt({ ".php" }), "php");
 }
 
 // SetFieldFileExt_End
