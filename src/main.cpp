@@ -20,6 +20,7 @@
 #include <ostream>
 #include <signal.h>
 #include <string>
+#include "header.h"
 
 volatile sig_atomic_t g_signal = false;
 
@@ -37,6 +38,17 @@ void sigpipe_handler(int signum) {
     (void) signum;
 }
 
+static void header() {
+    info.log() << "        " << a << std::endl;
+    info.log() << "        " << b << std::endl;
+    info.log() << "        " << c << std::endl;
+    info.log() << "        " << d << std::endl;
+    info.log() << "        " << e << std::endl;
+
+    info.log() << "            Just Enough" << std::endl;
+    info.log() << "                  Of NGINX" << std::endl;
+}
+
 int main(int ac, char **av) {
     if (ac != 2) {
         error.log() << "Hint: ./webserv {config_file} " << std::endl;
@@ -46,6 +58,7 @@ int main(int ac, char **av) {
 #ifndef DEBUG
     debug.disable();
 #endif
+    header();
     try {
         signal(SIGINT, sigint_handler);
         signal(SIGPIPE, sigpipe_handler);
