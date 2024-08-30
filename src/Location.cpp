@@ -121,7 +121,7 @@ void Location< ServerClass, RouteClass >::set_redir(const std::string &target, c
 template < class ServerClass, class RouteClass >
 bool Location< ServerClass, RouteClass >::check_cgi_glob(const std::string &target, const ServerClass &server) {
     try {
-        const RouteClass &route = server.getCGIRoute(target); // TODO: change type, is there for LSP
+        const RouteClass &route = server.getCGIRoute(target);
         debug.log() << "Using CGI glob route " << route.getLocation() << std::endl;
         init_cgi_glob(target, route);
         return true;
@@ -132,10 +132,7 @@ bool Location< ServerClass, RouteClass >::check_cgi_glob(const std::string &targ
 }
 
 template < class ServerClass, class RouteClass >
-void Location< ServerClass, RouteClass >::init_cgi_glob(
-    const std::string &target,
-    const RouteClass  &route
-) { // TODO: change type
+void Location< ServerClass, RouteClass >::init_cgi_glob(const std::string &target, const RouteClass &route) {
     _is_cgi         = true;
     _methods        = route.getMethods();
     _route          = route.getLocation();

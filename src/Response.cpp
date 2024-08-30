@@ -29,8 +29,7 @@ Response::Response() : _code(OK), _header(), _body(0), _state(rs_line) {
     _header["Connection"] = "keep-alive";
 }
 
-// TODO:connection header is not there yet !!!!
-// Logic should be :
+// Logic of connection header be :
 //  - in case of error (error code 4xx or 5xx) : connection close;
 //  - else : connection keep-alive
 // check how to close timeout connection
