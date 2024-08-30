@@ -29,7 +29,7 @@
 
 ClientRequest::ClientRequest(int socket, const std::string &ip) :
     _socket(socket),
-    _method(none),
+    _method(GET),
     _target(),
     _header(),
     _body_exists(),
@@ -41,7 +41,7 @@ ClientRequest::ClientRequest(int socket, const std::string &ip) :
 
 ClientRequest::ClientRequest(int socket, HttpCode code, int port) :
     _socket(socket),
-    _method(none),
+    _method(GET),
     _target(),
     _header(),
     _body_exists(),
@@ -59,22 +59,15 @@ ClientRequest::~ClientRequest() {
 }
 
 HttpMethod ClientRequest::parse_method(const std::string &method, size_t end) {
-    if (method.length() < 2 || end > MAX_METHOD) {
+    if (method.length() < MIN_METHOD_SIZE || end > MAX_METHOD) {
         info.log() << "Method '" << method.substr(0, end) << "' not implemented, sending " << NotImplemented
                    << std::endl;
         throw HttpError(NotImplemented);
     }
-    if (method[0] == 'G' && method.find(method_string(GET)) == 0 && end == 3) {
-        debug.log() << "Request with method GET" << std::endl;
-        return GET;
-    }
-    if (method[0] == 'P' && method.find(method_string(POST)) == 0 && end == 4) {
-        debug.log() << "Request with method POST" << std::endl;
-        return POST;
-    }
-    if (method[0] == 'D' && method.find(method_string(DELETE)) == 0 && end == 6) {
-        debug.log() << "Request with method DELETE" << std::endl;
-        return DELETE;
+    for (int i = GET; i != last; i++) {
+        HttpMethod testing = static_cast<HttpMethod>(i);
+        if (method.find(method_string(testing)) == 0 && end == method_string(testing).length())
+            return testing;
     }
     info.log() << "Method '" << method.substr(0, end) << "' not implemented, sending " << NotImplemented << std::endl;
     throw HttpError(NotImplemented);
@@ -257,7 +250,7 @@ bool ClientRequest::parse_request_line(std::string &in) {
     try {
         _method = parse_method(in, sp);
     } catch (HttpError &e) {
-        _method = none;
+        // _method = last;
         _status = e.get_code();
         return false;
     }

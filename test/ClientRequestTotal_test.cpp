@@ -88,7 +88,7 @@ std::vector< TotalRequest > TotalRequestData = {
         "No_Headers",
         "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n",
         "",
-        none,
+        GET,
         false,
         "",
         {},
@@ -101,7 +101,7 @@ std::vector< TotalRequest > TotalRequestData = {
         "No_Headers2",
         "GET /helloworld.html?hihi=ahah HTTP/1.1\r\n\r\n\r\n",
         "",
-        none,
+        GET,
         false,
         "",
         {},
@@ -114,7 +114,7 @@ std::vector< TotalRequest > TotalRequestData = {
         "Wrong_Method",
         "PET /helloworld.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n\r\n",
         "",
-        none,
+        GET,
         false,
         "",
         {},
@@ -600,6 +600,47 @@ std::vector< TotalRequest > TotalRequestData = {
         OK,
         80,
         "",
+        false,
+    },
+    {
+        "PutLength",
+        "PUT /process.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n"
+        "Content-Length: 97\r\n\r\nCoucou je suis heureux et c'est le premier body que nous allons pouvoir trouver"
+        " dans ces tests...NOTBODY",
+        "/process.html",
+        PUT,
+        true,
+        "Coucou je suis heureux et c'est le premier body que nous allons pouvoir trouver"
+        " dans ces tests...",
+        {
+            { "Host", "127.0.0.1" },
+            { "Name", "fireTesting/1.0" },
+            { "Content-Length", "97" },
+        },
+        OK,
+        80,
+        "hihi=ahah",
+        false,
+    },
+    {
+        "PutChunk",
+        "PUT /process.html?hihi=ahah HTTP/1.1\r\nHost: 127.0.0.1\r\nName: fireTesting/1.0\r\n"
+        "Transfer-Encoding: chunk\r\n\r\na\r\nCoucou je \r\n32\r\nsuis heureux et c'est le premier body que nous "
+        "all\r\n13\r\nons pouvoir trouver"
+        "\r\n12\r\n dans ces tests...\r\n0\r\n\r\nNOTBODY",
+        "/process.html",
+        PUT,
+        true,
+        "Coucou je suis heureux et c'est le premier body que nous allons pouvoir trouver"
+        " dans ces tests...",
+        {
+            { "Host", "127.0.0.1" },
+            { "Name", "fireTesting/1.0" },
+            { "Transfer-Encoding", "chunk" },
+        },
+        OK,
+        80,
+        "hihi=ahah",
         false,
     },
 };

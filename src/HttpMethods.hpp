@@ -17,14 +17,14 @@
 #define MAX_METHOD_SIZE 8
 
 enum HttpMethod {
-    none = -1,
     GET  = 0,
     POST,
     DELETE,
     PUT, // just in case
+    last,
 };
 
-#define COUNT_METHOD 3
+#define COUNT_METHOD 4
 
 inline std::string method_string(const int &code) {
     switch (code) {
