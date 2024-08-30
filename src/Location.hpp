@@ -55,7 +55,7 @@ class Location {
         bool stat_file(const std::string &target, struct stat &buf);
         void set_redir(const std::string &target, const RouteClass &route);
         bool check_cgi_glob(const std::string &target, const ServerClass &server);
-        void init_cgi_glob(const std::string &target, const RouteClass &route);
+        bool init_cgi_glob(const std::string &target, const RouteClass &route);
 
         // bool        _is_put;
         bool                   _autoindex;

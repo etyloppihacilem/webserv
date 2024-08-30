@@ -131,8 +131,7 @@ bool Location< ServerClass, RouteClass >::check_cgi_glob(const std::string &targ
     try {
         const RouteClass &route = server.getCGIRoute(target);
         debug.log() << "Using CGI glob route " << route.getLocation() << std::endl;
-        init_cgi_glob(target, route);
-        return true;
+        return init_cgi_glob(target, route);
     } catch (typename ServerGetRoute< RouteClass >::RouteNotFoundWarn &e) {
         return false;
     }
@@ -140,22 +139,28 @@ bool Location< ServerClass, RouteClass >::check_cgi_glob(const std::string &targ
 }
 
 template < class ServerClass, class RouteClass >
-void Location< ServerClass, RouteClass >::init_cgi_glob(const std::string &target, const RouteClass &route) {
+bool Location< ServerClass, RouteClass >::init_cgi_glob(const std::string &target, const RouteClass &route) {
     _is_cgi         = true;
     _methods        = route.getMethods();
     _route          = route.getLocation();
     _cgi_path       = route.getRootDir();
     std::string ext = route.getCgiExtension();
-    size_t      sep;
-    size_t      next_slash;
+    size_t      sep = 0;
+    size_t      next_slash = 0;
     do {
-        sep        = target.find(ext, 0) + ext.length();
+        sep        = target.find(ext, sep) + ext.length();
         next_slash = target.find("/", sep);
-    } while (next_slash != 0 && next_slash != target.npos);
+    } while (sep != target.npos && next_slash != 0 && next_slash != target.npos);
+    if (sep == target.npos)
+    {
+        error.log() << "CGI glob cannot find requested script in target " << target << std::endl;
+        return false;
+    }
     _cgi_path   = route.getCgiPath();
     _path       = target.substr(0, sep);
     _route_path = route.getRootDir();
     _path_info  = target.substr(sep, target.length() - sep);
+    return true;
 }
 
 /**
