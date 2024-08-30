@@ -59,7 +59,8 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
         build_path(target, route);
         _is_diff = route.getRootDir() != route.getUploadPath();
         _methods = route.getMethods();
-        stat_file(target, buf);
+        if (stat_file(target, buf))
+            return;
         debug.log() << "Target '" << target << "' exists." << std::endl;
         if (S_ISDIR(buf.st_mode)) { // in case target is a directory
             debug.log() << "Target is a directory" << std::endl;
@@ -91,14 +92,15 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
 template < class ServerClass, class RouteClass >
 Location< ServerClass, RouteClass >::~Location() {}
 
+// return on true
 template < class ServerClass, class RouteClass >
-void Location< ServerClass, RouteClass >::stat_file(const std::string &target, struct stat &buf) {
+bool Location< ServerClass, RouteClass >::stat_file(const std::string &target, struct stat &buf) {
     if (stat(_path.c_str(), &buf) != 0)
         switch (errno) {
             case ENOENT:
             case ENOTDIR:
                 _is_file = true; // it's a file if it doesnt exist
-                return;
+                return true;
             case EACCES:
                 info.log() << "Location: resource '" << target << "' " << strerror(errno) << ", sending " << Forbidden
                            << std::endl;
@@ -112,6 +114,7 @@ void Location< ServerClass, RouteClass >::stat_file(const std::string &target, s
                             << ", sending " << InternalServerError << std::endl;
                 throw HttpError(InternalServerError);
         } // default throws so nothing gets out of there
+    return false;
 }
 
 template < class ServerClass, class RouteClass >
