@@ -12,6 +12,7 @@
 #include "Logger.hpp"
 #include "Path.hpp"
 #include "Route.hpp"
+#include "StringUtils.hpp"
 #include <cstddef>
 #include <map>
 #include <ostream>
@@ -57,6 +58,21 @@ bool ServerGetRoute< RouteClass >::hasRoute(const std::string &path) const {
 //
 //     return _routes.at(lastFound); // will return "/" route if default
 // }
+
+template < class RouteClass >
+const RouteClass &ServerGetRoute< RouteClass >::getCGIRoute(const std::string &path) const {
+    debug.log() << "Checking if " << path << "does contain any cgi specific extensions." << std::endl;
+    size_t      nextSlash = (path.length() > 1 ? path.find("/", 1) : 0);
+    std::string testing   = path.substr(0, nextSlash);
+    while (nextSlash != path.npos) {
+        std::string ext = extract_extension(testing);
+        if (ext == "") // no extension
+            continue;
+       // condition extract_extension(testing)
+        // when found call init and return
+    }
+    throw ;// if not found
+}
 
 template < class RouteClass >
 const RouteClass &ServerGetRoute< RouteClass >::getRoute(const std::string &path) const {

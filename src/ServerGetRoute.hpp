@@ -22,6 +22,7 @@ class ServerGetRoute {
         ServerGetRoute();
         ~ServerGetRoute();
 
+        const RouteClass &getCGIRoute(const std::string &path) const;
         const RouteClass &getRoute(const std::string &path) const;
         // const RouteClass &getRoute2(const std::string &path) const;
         std::string       getUploadLocation(const std::string &path) const;
