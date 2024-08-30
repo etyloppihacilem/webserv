@@ -108,9 +108,9 @@ TEST_F(ServerConfSetterTestSuite, SetFieldMethods_isNotValidValues) {
 }
 
 TEST_F(ServerConfSetterTestSuite, SetFieldMethods_isValidValues) {
-    std::set< HttpMethod > expected = { GET, POST, DELETE };
+    std::set< HttpMethod > expected = { GET, PUT, POST, DELETE };
     std::set< HttpMethod > result;
-    ASSERT_NO_THROW(result = setFieldMethods({ "GET", "POST", "DELETE" }));
+    ASSERT_NO_THROW(result = setFieldMethods({ "GET", "PUT", "POST", "DELETE" }));
     EXPECT_EQ(result.size(), expected.size());
 }
 

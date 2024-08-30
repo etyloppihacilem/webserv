@@ -78,14 +78,14 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidBasic) {
 }
 
 TEST_F(RouteTestSuite, ParametrizeConstructorValidUpload) {
-    input = StringTokenizer("methods|GET|POST;|index|index.html;|autoindex|on;|upload_path|/uploads;", '|');
+    input = StringTokenizer("methods|PUT|POST;|index|index.html;|autoindex|on;|upload_path|/uploads;", '|');
     a     = Route("/", input, server);
     EXPECT_EQ("/", a.getLocation());
     EXPECT_EQ("www/", a.getRootDir());
     std::vector< std::string > expectedIndex({ "index.html" });
     EXPECT_THAT(a.getIndexPage(), ::testing::ContainerEq(expectedIndex));
     EXPECT_EQ(true, a.getAutoindex());
-    std::set< HttpMethod > expected({ GET, POST });
+    std::set< HttpMethod > expected({ PUT, POST });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
     EXPECT_EQ("/uploads/", a.getUploadPath());
     EXPECT_EQ(OK, a.getRedirCode());
@@ -156,7 +156,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidCgi) {
 
 TEST_F(RouteTestSuite, ParametrizeConstructorOnlyInvalid) {
     input = StringTokenizer(
-        "root|/oupsie?;|index|toto;|methods|PUT;|autoindex|true;|upload_path|;|rewrite|200|/redir/"
+        "root|/oupsie?;|index|toto;|methods|LOST;|autoindex|true;|upload_path|;|rewrite|200|/redir/"
         "toto.html;|cgi_path|;|file_ext|titi;",
         '|'
     );
