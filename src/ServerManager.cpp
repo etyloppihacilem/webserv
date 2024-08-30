@@ -7,7 +7,6 @@
 #include "StringTokenizer.hpp"
 #include "StringUtils.hpp"
 #include <algorithm>
-#include <exception>
 #include <fstream>
 #include <iostream>
 #include <ostream>
@@ -35,7 +34,7 @@ std::string readConfFile(std::ifstream &configStream) {
 
     while (std::getline(configStream, buff)) {
         if (buff.empty())
-            continue ;
+            continue;
         if (buff.find("#") != std::string::npos)
             continue;
         fileContent += " " + buff;
@@ -49,6 +48,15 @@ std::string cleanConfFile(std::string fileContent) {
     std::replace(fileContent.begin(), fileContent.end(), '\n', '|');
     std::replace(fileContent.begin(), fileContent.end(), '\r', '|');
     return fileContent;
+}
+
+bool doesServerExist(const std::vector< Server > &servers, const Server &newServer) {
+    for (std::vector< Server >::const_iterator it = servers.begin(); it != servers.end(); ++it) {
+        if (it->getPort() == newServer.getPort())
+            if (std::equal(it->getServerName().begin(), it->getServerName().end(), newServer.getServerName().begin()))
+                return true;
+    }
+    return false;
 }
 
 std::vector< Server > ServerManager::parseConfFile(const std::string &configFile) {
@@ -72,8 +80,8 @@ std::vector< Server > ServerManager::parseConfFile(const std::string &configFile
         try {
             StringTokenizer tokenizedServer = tokenizeServer(tokenizedServers);
             Server          newServer(tokenizedServer);
-            // TODO: check that server cannot use hostname and port twice.
-            servers.push_back(newServer);
+            if (!doesServerExist(servers, newServer))
+                servers.push_back(newServer);
         } catch (ServerConfError &e) {
             throw FailToInitServerError();
         }
@@ -105,8 +113,8 @@ void ServerManager::run() {
     _reactor.run();
 }
 
-Server &ServerManager::getServer(const std::string &serverName, int port) {
-    for (std::vector< Server >::iterator it = _servers.begin(); it != _servers.end(); ++it)
+const Server &ServerManager::getServer(const std::string &serverName, int port) const {
+    for (std::vector< Server >::const_iterator it = _servers.begin(); it != _servers.end(); ++it)
         if (it->hasServeName(serverName) && it->getPort() == port)
             return *it;
 
@@ -115,8 +123,8 @@ Server &ServerManager::getServer(const std::string &serverName, int port) {
     throw ServerNotFoundWarn(serverName + portStr.str());
 }
 
-Server &ServerManager::getServer(int port) {
-    for (std::vector< Server >::iterator it = _servers.begin(); it != _servers.end(); ++it)
+const Server &ServerManager::getServer(int port) const {
+    for (std::vector< Server >::const_iterator it = _servers.begin(); it != _servers.end(); ++it)
         if (it->getPort() == port)
             return *it;
 

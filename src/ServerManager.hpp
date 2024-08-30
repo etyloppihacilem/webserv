@@ -20,8 +20,8 @@ class ServerManager {
         void talkToClient(int socket_fd, EventHandler &handler);
         void run(void);
 
-        Server &getServer(const std::string &serverName, int port);
-        Server &getServer(int port);
+        const Server &getServer(const std::string &serverName, int port) const;
+        const Server &getServer(int port) const;
 
         class ServerNotFoundWarn : public std::exception {
             public:

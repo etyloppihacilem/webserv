@@ -43,7 +43,7 @@ ProcessHandler::~ProcessHandler() {
 }
 
 time_t ProcessHandler::getTimeout() const {
-    // TODO: refactor with _timeout value being retrieve from the state.
+    // NOTE: refactor with _timeout value being retrieve from the state.
     if (_state == 0)
         return CONNECTION_TIMEOUT;
     if (dynamic_cast< ReadState * >(_state) != 0)
@@ -123,7 +123,6 @@ void ProcessHandler::transition_to_rss() {
     ResponseBuildingStrategy *strategy = response_build_state->get_response_strategy();
     clean_state();
     _state = new ResponseSendState(_socket_fd, strategy);
-    // TODO: change status of epoll in this functio to test
     ServerManager::getInstance()->talkToClient(_socket_fd, *this);
     debug.log() << "ProcessHandler: transitionning done." << std::endl;
 }

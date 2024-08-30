@@ -55,7 +55,7 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, Cl
         _code = _request->get_status();
 #ifndef TESTING
     if (_request->gateway_checks(port)) {
-        ServerClass &tmp = ServerManager::getInstance()->getServer(_request->get_header().at("Host"), port);
+        const ServerClass &tmp = ServerManager::getInstance()->getServer(_request->get_header().at("Host"), port);
         _server          = &tmp;
     }
     if (!_server) {

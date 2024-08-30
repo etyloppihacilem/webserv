@@ -5,7 +5,7 @@
 #include <string>
 #include <tuple>
 
-// OPTI: could refactor ParamTestSuite, overcomplicated for what is needed.
+// NOTE: could refactor ParamTestSuite, overcomplicated for what is needed.
 typedef std::string Name;
 typedef std::string Input;
 typedef char        Delim;
