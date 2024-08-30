@@ -74,9 +74,13 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
                 debug.log() << "Route has cgi " << route.getCgiPath() << " and target correct extension "
                             << route.getCgiExtension() << std::endl;
                 setup_cgi(route);
+            } else {
+                if (route.hasCgiExtensionSet())
+                    debug.log() << target << " has wrong extension for CGI, CGI is not enabled." << std::endl;
+                debug.log() << "No CGI enabled." << std::endl;
             }
         }
-    } catch (typename ServerGetRoute<RouteClass>::RouteNotFoundWarn &e) {
+    } catch (typename ServerGetRoute< RouteClass >::RouteNotFoundWarn &e) {
         fatal.log() << "Location: Route not found. Should NEVER happen, this means Server object is broken and "
                        "default Route '/' do not exist. Sending "
                     << InternalServerError << std::endl;
@@ -126,7 +130,7 @@ bool Location< ServerClass, RouteClass >::check_cgi_glob(const std::string &targ
         debug.log() << "Using CGI glob route " << route.getLocation() << std::endl;
         init_cgi_glob(target, route);
         return true;
-    } catch (typename ServerGetRoute<RouteClass>::RouteNotFoundWarn &e) {
+    } catch (typename ServerGetRoute< RouteClass >::RouteNotFoundWarn &e) {
         return false;
     }
     return false;
