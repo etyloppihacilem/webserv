@@ -15,9 +15,11 @@
   This class is meant to interpret a target and convert it to a location, giving what is allowed to do or not.
   */
 
+#include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Route.hpp"
 #include "Server.hpp"
+#include <set>
 #include <string>
 #ifdef TESTING
 # include "gtest/gtest.h"
@@ -29,10 +31,6 @@ class Location {
         Location(const std::string &target, const ServerClass &server);
         ~Location();
 
-        bool               is_get() const;
-        bool               is_post() const;
-        bool               is_delete() const;
-        // bool               is_put() const;
         bool               has_autoindex() const;
         bool               is_file() const;
         bool               is_cgi() const;
@@ -46,6 +44,7 @@ class Location {
         const std::string &get_route_path() const;
         const std::string &get_path_info() const;
         const std::string &get_cgi_path() const;
+        bool               has_method(HttpMethod method) const;
 
     private:
         Location(); // for testing purposes only
@@ -54,30 +53,28 @@ class Location {
         void setup_cgi(const RouteClass &route);
         bool find_index(const RouteClass &route, struct stat &buf);
 
-        bool        _is_get;
-        bool        _is_post;
-        bool        _is_delete;
         // bool        _is_put;
-        bool        _autoindex;
-        bool        _is_file;
-        bool        _is_cgi;
-        bool        _is_redirect;
-        bool        _is_diff; ///< If uploadpath and rootdir differs
-        HttpCode    _status_code;
-        HttpCode    _default_error;
-        std::string _route; ///< Route location in config
-        std::string _cgi_path;
-        std::string _path;
-        std::string _upload_path;
-        std::string _route_path;
-        std::string _path_info; ///< Everyting that is after the route path.
-                                /**<
-                                  ```
-                                  /test/cgi.bin/monscript.cgi/path_info
-                                                             ^^^^^^^^^^
-                                  ```
-                                  */
-        // TODO: check CGI resolve path if path_info
+        bool                   _autoindex;
+        bool                   _is_file;
+        bool                   _is_cgi;
+        bool                   _is_redirect;
+        bool                   _is_diff; ///< If uploadpath and rootdir differs
+        std::set< HttpMethod > _methods;
+        HttpCode               _status_code;
+        HttpCode               _default_error;
+        std::string            _route; ///< Route location in config
+        std::string            _cgi_path;
+        std::string            _path;
+        std::string            _upload_path;
+        std::string            _route_path;
+        std::string            _path_info; ///< Everyting that is after the route path.
+                                           /**<
+                                             ```
+                                             /test/cgi.bin/monscript.cgi/path_info
+                                                                        ^^^^^^^^^^
+                                             ```
+                                             */
+                                           // TODO: check CGI resolve path if path_info
 #ifdef TESTING
         FRIEND_TEST(LocationTestSuite, BuildPathTest);
         FRIEND_TEST(LocationTestSuite, BuildPathRedirectTest);

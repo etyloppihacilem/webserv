@@ -16,7 +16,6 @@
 #include "Route.hpp"
 #include "Server.hpp"
 #include "StringUtils.hpp"
-#include <algorithm>
 #include <cerrno>
 #include <cstring>
 #include <features.h>
@@ -28,9 +27,6 @@
 
 template < class ServerClass, class RouteClass >
 Location< ServerClass, RouteClass >::Location() :
-    _is_get(false),
-    _is_post(false),
-    _is_delete(false),
     _autoindex(false),
     _is_file(false),
     _is_cgi(false),
@@ -41,9 +37,6 @@ Location< ServerClass, RouteClass >::Location() :
 
 template < class ServerClass, class RouteClass >
 Location< ServerClass, RouteClass >::Location(const std::string &target, const ServerClass &server) :
-    _is_get(false),
-    _is_post(false),
-    _is_delete(false),
     _autoindex(false),
     _is_file(false),
     _is_cgi(false),
@@ -65,17 +58,10 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
         }
         build_path(target, route);
 
-        const std::set< HttpMethod > &methods = route.getMethods();
-
         _is_diff = route.getRootDir() != route.getUploadPath();
         _route   = route.getLocation();
         debug.log() << "Using route " << _route << std::endl;
-        _is_get = std::find(methods.begin(), methods.end(), GET) != methods.end();
-        debug.log() << "GET is enabled" << std::endl;
-        _is_post = std::find(methods.begin(), methods.end(), POST) != methods.end();
-        debug.log() << "POST is enabled" << std::endl;
-        _is_delete = std::find(methods.begin(), methods.end(), DELETE) != methods.end();
-        debug.log() << "DELETE is enabled" << std::endl;
+        _methods = route.getMethods();
         // _is_put  = std::find(methods.begin(), methods.end(), PUT) != methods.end(); // not implemented yet
         // debug.log() << "PUT is enabled." << std::endl;
         if (stat(_path.c_str(), &buf) != 0)
@@ -217,21 +203,6 @@ void Location< ServerClass, RouteClass >::setup_cgi(const RouteClass &route) {
     _cgi_path = route.getCgiPath();
 }
 
-template < class ServerClass, class RouteClass >
-bool Location< ServerClass, RouteClass >::is_get() const {
-    return _is_get;
-}
-
-template < class ServerClass, class RouteClass >
-bool Location< ServerClass, RouteClass >::is_post() const {
-    return _is_post;
-}
-
-template < class ServerClass, class RouteClass >
-bool Location< ServerClass, RouteClass >::is_delete() const {
-    return _is_delete;
-}
-
 // template <class ServerClass, class RouteClass>
 // bool Location<ServerClass, RouteClass>::is_put() const {
 //      return _is_put;
@@ -295,6 +266,11 @@ const std::string &Location< ServerClass, RouteClass >::get_path_info() const {
 template < class ServerClass, class RouteClass >
 const std::string &Location< ServerClass, RouteClass >::get_cgi_path() const {
     return _cgi_path;
+}
+
+template < class ServerClass, class RouteClass >
+bool Location<ServerClass, RouteClass>::has_method(HttpMethod method) const {
+    return _methods.find(method) != _methods.end();
 }
 
 template class Location<>; // force compilation for this template (defaults)

@@ -191,15 +191,14 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
     if (location.is_redirect()) {
         debug.log() << "Choosing RedirectStrategy" << std::endl;
         _strategy = new RedirectStrategy(location.get_path(), _request->get_query_string(), location.get_status_code());
+    } else if (!location.has_method(_request->get_method())) {
+        info.log() << "ResponseBuildState: " << _request->get_method() << " method is not allowed in route '"
+                   << location.get_route() << "', sending " << MethodNotAllowed << std::endl;
+        throw HttpError(MethodNotAllowed);
     } else if (location.is_cgi()) {
         debug.log() << "Choosing CGIStrategy" << std::endl;
         _strategy = new CGIStrategy(location.get_path(), _request, location.get_path_info(), location.get_cgi_path());
     } else if (_request->get_method() == GET) {
-        if (!location.is_get()) {
-            info.log() << "ResponseBuildState: GET method is not allowed in route '" << location.get_route()
-                       << "', sending " << MethodNotAllowed << std::endl;
-            throw HttpError(MethodNotAllowed);
-        }
         if (location.is_file()) {
             debug.log() << "Choosing GetFileStrategy" << std::endl;
             _strategy = new GetFileStrategy(mime_types, location.get_path());
@@ -211,22 +210,12 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
                        << std::endl;
             throw HttpError(Forbidden);
         }
-    } else if (_request->get_method() == POST) {
-        if (!location.is_post()) {
-            info.log() << "ResponseBuildState: POST method is not allowed in route '" << location.get_route()
-                       << "', sending " << MethodNotAllowed << std::endl;
-            throw HttpError(MethodNotAllowed);
-        }
+    } else if (_request->get_method() == POST || _request->get_method() == PUT) {
         debug.log() << "Choosing UploadStrategy" << std::endl;
         _strategy = new UploadStrategy< ServerClass, RouteClass >(
-            *_request, location.get_upload_path(), *_server, location.is_diff()
+            *_request, location.get_upload_path(), *_server, location.is_diff(), (_request->get_method() == PUT)
         );
     } else if (_request->get_method() == DELETE) {
-        if (!location.is_delete()) {
-            info.log() << "ResponseBuildState: DELETE method is not allowed in route '" << location.get_route()
-                       << "', sending " << MethodNotAllowed << std::endl;
-            throw HttpError(MethodNotAllowed);
-        }
         debug.log() << "Choosing DeleteStrategy" << std::endl;
         _strategy = new DeleteStrategy(location.get_path());
     }
