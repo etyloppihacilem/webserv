@@ -18,6 +18,7 @@
 #include "Logger.hpp"
 #include "Response.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "ServerManager.hpp"
 #include "todo.hpp"
 #include <cctype>
 #include <cerrno>
@@ -171,7 +172,7 @@ void CGIStrategy::launch_CGI(size_t size) {
         close(_miso[1]);
         char **args = new (std::nothrow) char *[3];
         args[1]     = strdup(_location.c_str());
-        if (!args || !args[0]) {
+        if (!args || !args[1]) {
             if (args)
                 free(args);
             babyphone.log() << "Cannot creat arg string. Aborting." << std::endl;
@@ -196,7 +197,7 @@ void CGIStrategy::launch_CGI(size_t size) {
             _exit(1);
         }
         babyphone.log() << "Running execve(" << cmd << ", " << args[1] << ", env)" << std::endl;
-        std::cout << "Inside: I am inside\r\n";
+        ServerManager::getInstance()->deleteInstance(); // TS-14
         execve(cmd, args, c_env);
         babyphone.log() << "CGIStrategy: Execve failed to run " << strerror(errno) << std::endl; // logging is on stderr
         free(c_env);

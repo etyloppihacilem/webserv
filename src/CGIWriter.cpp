@@ -27,7 +27,8 @@ CGIWriter::CGIWriter(ResponseBuildingStrategy &strategy) :
     BodyWriter(strategy),
     _response(strategy.get_response()),
     _total(0),
-    _init(true) {
+    _init(true),
+    _cgi_done(false) {
     if (dynamic_cast< CGIStrategy * >(&strategy) == 0) {
         error.log() << "Trying to instantiate CGIWriter with non CGIStrategy strategy, sending " << InternalServerError
                     << std::endl;
