@@ -7,6 +7,7 @@
 #include "ServerConfFields.hpp"
 #include "ServerGetRoute.hpp"
 #include "StringTokenizer.hpp"
+#include <cstddef>
 #include <map>
 #include <set>
 #include <string>
@@ -28,11 +29,11 @@ class Server : public ServerGetRoute<> {
 
         const std::vector< std::string >        &getServerName() const;
         int                                      getPort() const;
-        const std::string                             &getRootDir() const;
+        const std::string                       &getRootDir() const;
         const std::vector< std::string >        &getIndexPage() const;
         bool                                     getAutoindex() const;
         const std::set< HttpMethod >            &getMethods() const;
-        int                                      getMaxBodySize() const;
+        std::size_t                              getMaxBodySize() const;
         const std::map< HttpCode, std::string > &getErrorPages() const;
 
         bool hasServeName(const std::string &serverName) const;
@@ -52,7 +53,7 @@ class Server : public ServerGetRoute<> {
         std::vector< std::string >        _indexPage;
         bool                              _autoindex;
         std::set< HttpMethod >            _methods;
-        int                               _maxBodySize;
+        std::size_t                       _maxBodySize;
         std::map< HttpCode, std::string > _errorPages;
         std::vector< bool >               _isFieldSet;
 

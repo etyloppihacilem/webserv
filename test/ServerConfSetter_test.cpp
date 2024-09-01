@@ -5,6 +5,7 @@
 #include "ServerConfSetter.hpp"
 #include "gtest/gtest.h"
 #include <climits>
+#include <cstddef>
 #include <gmock/gmock.h>
 #include <ostream>
 #include <set>
@@ -142,8 +143,8 @@ TEST_F(ServerConfSetterTestSuite, SetFieldMaxBodySize_isNotValidValue) {
 }
 
 TEST_F(ServerConfSetterTestSuite, SetFieldMaxBodySize_isValidValue) {
-    EXPECT_EQ(setFieldMaxBodySize({ "1000000" }), 1000000);
-    EXPECT_EQ(setFieldMaxBodySize({ "2147483647" }), INT_MAX);
+    EXPECT_EQ(setFieldMaxBodySize({ "1000000" }), 1000000ul);
+    EXPECT_EQ(setFieldMaxBodySize({ "2147483647" }), static_cast<std::size_t>(INT_MAX));
 }
 
 // SetFieldMaxBodySize_End

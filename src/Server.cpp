@@ -11,6 +11,7 @@
 #include "StringTokenizer.hpp"
 #include "StringUtils.hpp"
 #include <algorithm>
+#include <cstddef>
 #include <map>
 #include <ostream>
 #include <set>
@@ -43,7 +44,7 @@ Server::Server() :
     _port(8080),
     _rootDir("www"),
     _indexPage(1, "index.html"),
-    _autoindex(true),
+    _autoindex(false),
     _methods(initMethod, initMethod + 1),
     _maxBodySize(1000000),
     _errorPages(),
@@ -57,7 +58,7 @@ Server::Server(StringTokenizer &tokenizedServer) :
     _port(8080),
     _rootDir("www"),
     _indexPage(1, "index.html"),
-    _autoindex(true),
+    _autoindex(false),
     _methods(initMethod, initMethod + 1),
     _maxBodySize(1000000),
     _errorPages(),
@@ -93,7 +94,7 @@ Server::Server(StringTokenizer &tokenizedServer) :
         addRoute(*it);
     if (!hasRoute("/"))
         _routes["/"] = Route(*this);
-
+    
     logParsingEnded(server);
 }
 
@@ -123,7 +124,7 @@ const std::set< HttpMethod > &Server::getMethods() const {
     return _methods;
 }
 
-int Server::getMaxBodySize() const {
+std::size_t Server::getMaxBodySize() const {
     return _maxBodySize;
 }
 

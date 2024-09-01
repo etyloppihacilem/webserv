@@ -9,6 +9,7 @@
 #include "ServerConfTokenize.hpp"
 #include "StringTokenizer.hpp"
 #include "StringUtils.hpp"
+#include <cstddef>
 #include <ostream>
 #include <set>
 #include <string>
@@ -111,7 +112,7 @@ const std::set< HttpMethod > &Route::getMethods() const {
     return _methods;
 }
 
-int Route::getMaxBodySize() const {
+std::size_t Route::getMaxBodySize() const {
     return _maxBodySize;
 }
 

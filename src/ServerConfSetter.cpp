@@ -7,6 +7,8 @@
 #include "ServerConfValidate.hpp"
 #include "StringUtils.hpp"
 #include <climits>
+#include <cstddef>
+#include <limits>
 #include <ostream>
 #include <set>
 #include <sstream>
@@ -124,26 +126,26 @@ std::set< HttpMethod > setFieldMethods(const ValueList &values) {
     return ret;
 }
 
-int setFieldMaxBodySize(const ValueList &values) {
+std::size_t setFieldMaxBodySize(const ValueList &values) {
     if (values.size() != 1) {
         logInvalidValuesCount(client_max_body_size, values);
         throw ServerConfWarn();
     }
 
     std::stringstream tmp(values[0]);
-    int               ret;
+    long long         ret;
     tmp >> ret;
     if (tmp.fail() || !tmp.eof()) {
         logInvalidIntConvertion(client_max_body_size, values[0]);
         throw ServerConfWarn();
     }
 
-    if (ret < 1 || ret > INT_MAX) {
+    if (ret < 1 || static_cast< std::size_t >(ret) > std::numeric_limits<std::size_t>::max()) {
         warn.log() << "max_body_size: " << values[0] << ", is not a valid size number." << std::endl;
         throw ServerConfWarn();
     }
 
-    return ret;
+    return static_cast<std::size_t>(ret);
 }
 
 HttpCode setFieldErrorPageCode(const ValueList &values) {
@@ -169,7 +171,7 @@ HttpCode setFieldErrorPageCode(const ValueList &values) {
                    << std::endl;
     }
 
-    return static_cast<HttpCode>(ret);
+    return static_cast< HttpCode >(ret);
 }
 
 std::string setFieldErrorPagePath(const ValueList &values) {
@@ -240,7 +242,7 @@ HttpCode setFieldRewriteCode(const ValueList &values) {
         ret = 307; // temporary redirect by default if redirection is not an existing http code.
     }
 
-    return static_cast<HttpCode>(ret);
+    return static_cast< HttpCode >(ret);
 }
 
 std::string setFieldCgiPath(const ValueList &values) {

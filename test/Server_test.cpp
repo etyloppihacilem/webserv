@@ -36,10 +36,10 @@ TEST_F(ServerTestSuite, DefaultConstructor) {
     EXPECT_EQ("www", a.getRootDir());
     EXPECT_EQ(1ul, a.getIndexPage().size());
     EXPECT_EQ("index.html", a.getIndexPage()[0]);
-    EXPECT_EQ(true, a.getAutoindex());
+    EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expectedMethods({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expectedMethods));
-    EXPECT_EQ(1000000, a.getMaxBodySize());
+    EXPECT_EQ(1000000ul, a.getMaxBodySize());
     std::map< HttpCode, std::string > expectedError({});
     EXPECT_THAT(a.getErrorPages(), ::testing::ContainerEq(expectedError));
     EXPECT_TRUE(a.hasRoute("/"));
@@ -66,10 +66,10 @@ TEST_F(ServerTestSuite, ParametrizeConstructorWithErrorPage) {
     EXPECT_EQ("www42", a.getRootDir());
     std::vector< std::string > expectedIndex({ "test.html" });
     EXPECT_THAT(a.getIndexPage(), ::testing::ContainerEq(expectedIndex));
-    EXPECT_EQ(true, a.getAutoindex());
+    EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expectedMethods({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expectedMethods));
-    EXPECT_EQ(1000, a.getMaxBodySize());
+    EXPECT_EQ(1000ul, a.getMaxBodySize());
     std::map< HttpCode, std::string > expectedError({ { NotFound, "/error_pages/404.html" },
                                                       { InternalServerError, "/error_pages/500.html" } });
     EXPECT_THAT(a.getErrorPages(), ::testing::ContainerEq(expectedError));
@@ -97,7 +97,7 @@ TEST_F(ServerTestSuite, ParametrizeConstructorServer1) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expectedMethods({ DELETE });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expectedMethods));
-    EXPECT_EQ(1000000, a.getMaxBodySize());
+    EXPECT_EQ(1000000ul, a.getMaxBodySize());
     std::map< HttpCode, std::string > expectedError({});
     EXPECT_THAT(a.getErrorPages(), ::testing::ContainerEq(expectedError));
     EXPECT_TRUE(a.hasRoute("/"));
@@ -123,10 +123,10 @@ TEST_F(ServerTestSuite, ParametrizeConstructorServer2) {
     EXPECT_EQ("www", a.getRootDir());
     std::vector< std::string > expectedIndex({ "index.html", "star_citizen/home.html" });
     EXPECT_THAT(a.getIndexPage(), ::testing::ContainerEq(expectedIndex));
-    EXPECT_EQ(true, a.getAutoindex());
+    EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expectedMethods({ GET, POST });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expectedMethods));
-    EXPECT_EQ(1000, a.getMaxBodySize());
+    EXPECT_EQ(1000ul, a.getMaxBodySize());
     std::map< HttpCode, std::string > expectedError({});
     EXPECT_THAT(a.getErrorPages(), ::testing::ContainerEq(expectedError));
     EXPECT_TRUE(a.hasRoute("/"));
@@ -152,10 +152,10 @@ TEST_F(ServerTestSuite, ParametrizeConstructorServerWithLocation) {
     EXPECT_EQ("othersite", a.getRootDir());
     std::vector< std::string > expectedIndex({ "othersite.html" });
     EXPECT_THAT(a.getIndexPage(), ::testing::ContainerEq(expectedIndex));
-    EXPECT_EQ(true, a.getAutoindex());
+    EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expectedMethods({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expectedMethods));
-    EXPECT_EQ(1000000, a.getMaxBodySize());
+    EXPECT_EQ(1000000ul, a.getMaxBodySize());
     std::map< HttpCode, std::string > expectedError({});
     EXPECT_THAT(a.getErrorPages(), ::testing::ContainerEq(expectedError));
     EXPECT_EQ(true, a.hasServeNameSet());
