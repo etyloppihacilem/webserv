@@ -70,7 +70,7 @@ class FakeRoute {
 
         HttpCode getRedirCode() const { return _getRedirCode; }
 
-        bool hasAutoindexSet() const { return _hasAutoindex; }
+        bool getAutoindex() const { return _hasAutoindex; }
 
         bool hasCgiExtensionSet() const { return _hasCgiExtension; }
 

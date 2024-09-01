@@ -59,7 +59,8 @@ t_state ResponseSendState::process() {
         response.build_response(_buffer, BUFFER_SIZE);
     int written;
 #ifdef DEBUG
-    written = write(1, _buffer.c_str(), (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()));
+    write(1, _buffer.c_str(), (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()));
+    write(1, "\n", 1);
 #endif
     written = write(_socket, _buffer.c_str(), (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()));
     if (written < 0) {

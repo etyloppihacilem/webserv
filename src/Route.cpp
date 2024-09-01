@@ -95,12 +95,16 @@ Route::Route(const std::string &locationPath, StringTokenizer &tokenizedLocation
 
 Route::~Route() {}
 
-bool Route::getAutoindex() const {
-    return _autoindex;
-}
-
 const std::string &Route::getRootDir() const {
     return _rootDir;
+}
+
+const std::vector< std::string > &Route::getIndexPage() const {
+    return _indexPage;
+}
+
+bool Route::getAutoindex() const {
+    return _autoindex;
 }
 
 const std::set< HttpMethod > &Route::getMethods() const {
@@ -109,10 +113,6 @@ const std::set< HttpMethod > &Route::getMethods() const {
 
 int Route::getMaxBodySize() const {
     return _maxBodySize;
-}
-
-const std::vector< std::string > &Route::getIndexPage() const {
-    return _indexPage;
 }
 
 const std::string &Route::getUploadPath() const {

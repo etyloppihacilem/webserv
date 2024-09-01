@@ -66,7 +66,7 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
             debug.log() << "Target is a directory" << std::endl;
             if (find_index(route, buf)) // if index file is found
                 return;
-            _autoindex = route.hasAutoindexSet(); // if nothing else found
+            _autoindex = route.getAutoindex(); // if nothing else found
             debug.log() << "Autoindex is " << (_autoindex ? "enabled" : "disabled") << std::endl;
         } else {             // in case target is anything but a directory
             _is_file = true; // not a dir
@@ -203,6 +203,11 @@ bool Location< ServerClass, RouteClass >::find_index(const RouteClass &route, st
         throw HttpError(InternalServerError); // anything else is sus
     }
     debug.log() << "No index file found in " << _path << std::endl;
+    debug.log() << "dirty debug: " << route.getAutoindex() << " and is indexs empty? " << indexs.empty() << std::endl;
+    if (route.getAutoindex() == false && !indexs.empty()) {
+        info.log() << "Index file set but none found, sending " << NotFound << std::endl;
+        throw HttpError(NotFound); // file found but won't open
+    }
     return false;
 }
 
@@ -320,8 +325,8 @@ const std::string &Location< ServerClass, RouteClass >::get_cgi_path() const {
 
 template < class ServerClass, class RouteClass >
 bool Location< ServerClass, RouteClass >::has_method(HttpMethod method) const {
-    if (method == HEAD)
-        method = GET; // because same
+    // if (method == HEAD)
+    //     method = GET; // because same
     return _methods.find(method) != _methods.end();
 }
 

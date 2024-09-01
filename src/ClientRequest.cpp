@@ -64,6 +64,7 @@ HttpMethod ClientRequest::parse_method(const std::string &method, size_t end) {
                    << std::endl;
         throw HttpError(NotImplemented);
     }
+    debug.log() << "Method '" << method.substr(0, end) << "' in request headers." << std::endl;
     for (int i = GET; i != last; i++) {
         HttpMethod testing = static_cast<HttpMethod>(i);
         if (method.find(method_string(testing)) == 0 && end == method_string(testing).length())

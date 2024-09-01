@@ -63,6 +63,8 @@ void Response::add_header(const std::string &field, const std::string &value) {
   */
 void Response::set_code(HttpCode code) {
     _code = code;
+    if (_is_head && _code == OK)
+        _code = NoContent; // in ubuntu_tester excpected 204.
     if (isError(_code) || isRedirection(_code))
         _header["Connection"] = "close";
     else
@@ -295,6 +297,8 @@ void Response::set_body(ResponseBuildingStrategy *strategy) {
 
 void Response::set_head(bool is_head) {
     _is_head = is_head;
+    if (_is_head && _code == OK)
+        _code = NoContent; // in ubuntu_tester excpected 204.
 }
 
 void Response::save_mem() {

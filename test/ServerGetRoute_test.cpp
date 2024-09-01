@@ -41,6 +41,8 @@ class ServerRouteTestSuite : public ::testing::Test {
     protected:
         ServerRouteTestSuite() {
             info.disable();
+            location = Field("/", StringTokenizer("methods|GET|POST;|index|index.html;|", '|'));
+            a.addRoute(location);
             location = Field("/python", StringTokenizer("methods|GET;", '|'));
             a.addRoute(location);
             location = Field("/empty", StringTokenizer("", '|'));
@@ -94,13 +96,13 @@ TEST_F(ServerRouteTestSuite, getRoute_OK) {
 }
 
 TEST_F(ServerRouteTestSuite, getCGIRoute_KO) {
-    EXPECT_THROW(a.getCGIRoute("/test/index.html").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
-    EXPECT_THROW(a.getCGIRoute("/test/upload.txt").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
-    EXPECT_THROW(a.getCGIRoute("/test/delete.png").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
-    EXPECT_THROW(a.getCGIRoute("/emptyy").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
-    EXPECT_THROW(a.getCGIRoute("/space_travel.d").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
-    EXPECT_THROW(a.getCGIRoute("/*/diff.txt").getLocation(),  ServerGetRoute<Route>::RouteNotFoundWarn);
-    EXPECT_THROW(a.getCGIRoute("/test/diff/delete.png").getLocation(), ServerGetRoute<Route>::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/test/index.html").getLocation(), ServerGetRoute< Route >::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/test/upload.txt").getLocation(), ServerGetRoute< Route >::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/test/delete.png").getLocation(), ServerGetRoute< Route >::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/emptyy").getLocation(), ServerGetRoute< Route >::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/space_travel.d").getLocation(), ServerGetRoute< Route >::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/*/diff.txt").getLocation(), ServerGetRoute< Route >::RouteNotFoundWarn);
+    EXPECT_THROW(a.getCGIRoute("/test/diff/delete.png").getLocation(), ServerGetRoute< Route >::RouteNotFoundWarn);
 }
 
 TEST_F(ServerRouteTestSuite, getCGIRoute_OK) {
@@ -112,4 +114,8 @@ TEST_F(ServerRouteTestSuite, getCGIRoute_OK) {
     EXPECT_EQ(a.getCGIRoute("/test/diff/delete.diff").getLocation(), "/test/diff/deepdiff");
     EXPECT_EQ(a.getCGIRoute("/test/diff/deepdiff/delete.diff").getLocation(), "/test/diff/deepdiff");
     EXPECT_EQ(a.getCGIRoute("/space_travel.diff/search/ici?ici=coucou").getLocation(), "/test/diff/deepdiff");
+}
+
+TEST_F(ServerRouteTestSuite, getUploadLocation) {
+    EXPECT_EQ(a.getUploadLocation("www/index.html"), "/index.html");
 }

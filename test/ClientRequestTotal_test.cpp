@@ -15,6 +15,7 @@
 #include "HttpStatusCodes.hpp"
 #include "HttpUtils.hpp"
 #include "Logger.hpp"
+#include "ProcessState.hpp"
 #include "ReadState.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -656,6 +657,8 @@ INSTANTIATE_TEST_SUITE_P(
 );
 
 TEST_P(TotalRequestFixture, TargetTest) {
+    if (_test->get_state() == s_error)
+        return ; // skit the test
     const std::string &correct = std::get< ttarget >(GetParam());
 
     if (_request->get_status() != OK)
@@ -664,6 +667,8 @@ TEST_P(TotalRequestFixture, TargetTest) {
 }
 
 TEST_P(TotalRequestFixture, MethodTest) {
+    if (_test->get_state() == s_error)
+        return ; // skit the test
     HttpMethod correct = std::get< tmethod >(GetParam());
 
     if (_request->get_status() != OK)
@@ -672,6 +677,8 @@ TEST_P(TotalRequestFixture, MethodTest) {
 }
 
 TEST_P(TotalRequestFixture, BodyTest) {
+    if (_test->get_state() == s_error)
+        return ; // skit the test
     typedef std::map< std::string, std::string > map;
 
     const std::string &correct = std::get< tbody >(GetParam());
@@ -725,6 +732,8 @@ TEST_P(TotalRequestFixture, BodyTest) {
 }
 
 TEST_P(TotalRequestFixture, HeadersTest) {
+    if (_test->get_state() == s_error)
+        return ; // skit the test
     typedef std::map< std::string, std::string > map;
 
     const map &correct      = std::get< theaders >(GetParam());
@@ -750,6 +759,8 @@ TEST_P(TotalRequestFixture, HeadersTest) {
 }
 
 TEST_P(TotalRequestFixture, HaveBodyTest) {
+    if (_test->get_state() == s_error)
+        return ; // skit the test
     const bool correct = std::get< thavebody >(GetParam());
 
     if (_request->get_status() != OK)
@@ -758,24 +769,32 @@ TEST_P(TotalRequestFixture, HaveBodyTest) {
 }
 
 TEST_P(TotalRequestFixture, StatusTest) {
+    if (_test->get_state() == s_error)
+        return ; // skit the test
     const HttpCode correct = std::get< tstatus >(GetParam());
 
     EXPECT_EQ(correct, _request->get_status());
 }
 
 TEST_P(TotalRequestFixture, FdRequestTest) {
+    if (_test->get_state() == s_error)
+        return ; // skit the test
     const int correct = _fd_check;
 
     EXPECT_EQ(correct, _request->get_socket());
 }
 
 TEST_P(TotalRequestFixture, FdStateTest) {
+    if (_test->get_state() == s_error)
+        return ; // skit the test
     const int correct = _fd_check;
 
     EXPECT_EQ(correct, _test->_socket);
 }
 
 TEST_P(TotalRequestFixture, PortTest) {
+    if (_test->get_state() == s_error)
+        return ; // skit the test
     const int correct = std::get< tport >(GetParam());
 
     if (_request->get_status() != OK)
@@ -784,6 +803,8 @@ TEST_P(TotalRequestFixture, PortTest) {
 }
 
 TEST_P(TotalRequestFixture, QueryStringTest) {
+    if (_test->get_state() == s_error)
+        return ; // skit the test
     const std::string &correct = std::get< tqs >(GetParam());
 
     if (_request->get_status() != OK)
