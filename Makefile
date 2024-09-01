@@ -57,46 +57,46 @@ CTESTFLAGS		+= -DTESTING -Igoogletest/googletest/include -Igoogletest/googlemock
 DEBUG_FLAG		= -g3 -DDEBUG
 SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
-HEADER_DIR		= header src
-SRCS_DIR		= src
-OBJS_DIR		= obj
-TEST_DIR		= ${OBJS_DIR}/test
-DEBUG_DIR		= ${OBJS_DIR}/debug
-SANITIZE_DIR	= ${OBJS_DIR}/sanitize
+HEADER_DIR		    = header
+SRC_DIR		        = src
+TEST_DIR			= test
+
+INCLUDE_DIR         = ${HEADER_DIR} ${SRC_DIR}
+OBJ_DIR				= obj
+TEST_OBJ_DIR		= ${OBJ_DIR}/test
+DEBUG_OBJ_DIR		= ${OBJ_DIR}/debug
+SANITIZE_OBJ_DIR	= ${OBJ_DIR}/sanitize
 
 ########################
 ##  AUTO-EDIT ON VAR  ##
 ########################
 
-HEADERS		= $(addprefix -I,$(HEADER_DIR))
-SRCS		= $(shell find src -type f -name "*.cpp" | grep -v ".*_test.cpp" | grep -v ".*Test.cpp")
+SRC_FILES		= $(shell find $(SRC_DIR) -type f -name "*.cpp" | grep -v ".*_test.cpp" | grep -v ".*Test.cpp")
+TEST_FILES   	= $(shell find ${TEST_DIR} -type f -name "*.cpp")
 
-TESTS		= $(shell find src -type f -name "*_test.cpp")
-TESTS		+= $(shell find src -type f -name "*Test.cpp")
+INCLUDES		= $(addprefix -I,$(INCLUDE_DIR))
 
-TESTS_FILES	= $(shell find test -type f -name "*.cpp")
+OBJS			= $(patsubst ${SRC_DIR}%.cpp,${OBJ_DIR}%.o,${SRC_FILES})
+TEST_OBJS		= $(patsubst ${SRC_DIR}%.cpp,${TEST_OBJ_DIR}%.o,$(filter-out ${SRC_DIR}/main.cpp, ${SRC_FILES}))
+TEST_OBJS		+= $(patsubst ${TEST_DIR}%.cpp,${TEST_OBJ_DIR}%.o,${TEST_FILES})
+DEBUG_OBJS		= $(patsubst ${SRC_DIR}%.cpp,${DEBUG_OBJ_DIR}%.o,${SRC_FILES})
+SANITIZE_OBJS	= $(patsubst ${SRC_DIR}%.cpp,${SANITIZE_OBJ_DIR}%.o,${SRC_FILES})
 
-OBJS			= $(patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.o,${SRCS})
-TEST_OBJ		= $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.o,${TESTS})
-TEST_OBJ		+= $(patsubst ${SRCS_DIR}%.cpp,${TEST_DIR}%.o,$(filter-out ${SRCS_DIR}/main.cpp, ${SRCS}))
-TEST_OBJ		+= $(patsubst test%.cpp,${TEST_DIR}%.o,${TESTS_FILES})
-DEBUG_OBJ		= $(patsubst ${SRCS_DIR}%.cpp,${DEBUG_DIR}%.o,${SRCS})
-SANITIZE_OBJ	= $(patsubst ${SRCS_DIR}%.cpp,${SANITIZE_DIR}%.o,${SRCS})
+ALL_FILES		= $(shell find ${SRC_DIR} -type f -regex ".*\.[ch]pp")
+ALL_FILES		+= $(shell find ${TEST_DIR} -type f -regex ".*\.[ch]pp")
+ALL_FILES		+= $(shell find ${HEADER_DIR} -type f -regex ".*\.[ch]pp")
 
-ALL_FILES		= $(shell find src -type f -regex ".*\.[ch]pp")
-ALL_FILES		+= $(shell find test -type f -regex ".*\.[ch]pp")
-ALL_FILES		+= $(shell find header -type f -regex ".*\.[ch]pp")
-
-DEPS		= $(patsubst ${SRCS_DIR}%.cpp,${OBJS_DIR}%.d,${SRCS})
-DEPS		+= $(patsubst %.o,%.d,${TEST_OBJ})
-DEPS		+= $(patsubst %.o,%.d,${DEBUG_OBJ})
-DEPS		+= $(patsubst %.o,%.d,${SANITIZE_OBJ})
+DEPS		= $(patsubst ${SRC_DIR}%.cpp,${OBJ_DIR}%.d,${SRC_FILES})
+DEPS		+= $(patsubst %.o,%.d,${TEST_OBJS})
+DEPS		+= $(patsubst %.o,%.d,${DEBUG_OBJS})
+DEPS		+= $(patsubst %.o,%.d,${SANITIZE_OBJS})
 
 #######################
 ##  USUAL FUNCTIONS  ##
 #######################
 
-RM		= rm -f
+ADDFILE = touch
+RMFILE	= rm -f
 RMDIR	= rm -df
 MKDIR	= mkdir
 
@@ -111,8 +111,8 @@ all: ${NAME} ${NAME_TEST} ${NAME_DEBUG} ${NAME_SANITIZE}
 	@printf "${GREEN}Success${RESET}  :)\n"
 
 clean: # Clean object files
-	@${RM} ${OBJS} ${DEPS} ${TEST_OBJ} ${DEBUG_OBJ} ${SANITIZE_OBJ}
-	@${RMDIR} ${TEST_DIR} ${DEBUG_DIR} ${SANITIZE_DIR} ${OBJS_DIR}
+	@${RM} ${OBJS} ${DEPS} ${TEST_OBJS} ${DEBUG_OBJS} ${SANITIZE_OBJS}
+	@${RMDIR} ${TEST_OBJ_DIR} ${DEBUG_OBJ_DIR} ${SANITIZE_OBJ_DIR} ${OBJ_DIR}
 	@printf "${BLUE}%-44s${RESET}\n" "Cleaning"
 
 fclean: clean # Clean executable file
@@ -146,22 +146,15 @@ clangd: # configure clangd for tests
 mac_clean: # supprime les fichiers dupliqués sur mac
 	@find . -type f -name "* [2-9]*" -print -delete
 
+# TODO: add cleaning rule
 eval_tester: # setup ubuntu_tester
 	@chmod 755 ubuntu_tester ubuntu_cgi_tester
-	@mkdir YoupiBanane
-	@touch YoupiBanane/youpi.bad_extension
-	@touch YoupiBanane/youpi.bla
-	@mkdir YoupiBanane/nop
-	@touch YoupiBanane/nop/youpi.bad_extension
-	@touch YoupiBanane/nop/other.pouic
-	@mkdir YoupiBanane/Yeah
-	@touch YoupiBanane/Yeah/not_happy.bad_extension
 
 file: # Print list of source and object files
-	@printf "${MAGENTA}.cpp:		${GRAY}${SRCS}${RESET}\n"
-	@printf "${MAGENTA}.o:		${GRAY}${SRCS}${RESET}\n"
+	@printf "${MAGENTA}.cpp:		${GRAY}${SRC_FILES}${RESET}\n"
+	@printf "${MAGENTA}.o:		${GRAY}${OBJS}${RESET}\n"
 	@printf "${BLUE}Test files:\n"
-	@printf "  ${MAGENTA}.cpp:		${GRAY}${TESTS_FILES}${RESET}\n"
+	@printf "\t${MAGENTA}.cpp:		${GRAY}${TEST_FILES}${RESET}\n"
 
 help:
 	@egrep -h '\s#\s' ${MAKEFILE_LIST} | sort | awk 'BEGIN {FS = ":.*?# "}; {printf "${MAGENTA}%-15s${GRAY} %s${RESET}\
@@ -171,74 +164,85 @@ help:
 ## TARGETS RULES ##
 ###################
 
-${NAME}: ${OBJS_DIR} ${OBJS} # Compile ${NAME} program
+${NAME}: ${OBJ_DIR} ${OBJS} # Compile ${NAME} program
 	@printf "${YELLOW}Building...${RESET} ${NAME}\n"
-	@${CC} ${CFLAGS} ${HEADERS} -o ${NAME} ${OBJS} ${LIBRARIES}
+	@${CC} ${CFLAGS} ${INCLUDES} -o ${NAME} ${OBJS} ${LIBRARIES}
 
-${NAME_TEST}: ${TEST_OBJ}
+${NAME_TEST}: ${TEST_OBJS} # Compile ${NAME_TEST} program
 	@printf "${YELLOW}Building...${RESET} %s\n" "${NAME_TEST}"
-	@${DEBUG_CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} \
+	@${CC} $(filter-out -MMD, ${CTESTFLAGS}) ${INCLUDES} -o ${NAME_TEST} ${TEST_OBJS} ${LIBRARIES} \
 		./googletest/build/lib/libgtest.a ./googletest/build/lib/libgmock.a
 
-${NAME_DEBUG}: ${DEBUG_OBJ}
+${NAME_DEBUG}: ${DEBUG_OBJS} # Compile ${NAME_DEBUG} program
 	@printf "${YELLOW}Building...${RESET} ${NAME_DEBUG}\n"
-	@${DEBUG_CC} ${CFLAGS} ${DEBUG_FLAG} ${HEADERS} -o ${NAME_DEBUG} ${DEBUG_OBJ} ${LIBRARIES}
+	@${DEBUG_CC} ${CFLAGS} ${DEBUG_FLAG} ${INCLUDES} -o ${NAME_DEBUG} ${DEBUG_OBJS} ${LIBRARIES}
 
-${NAME_SANITIZE}: ${SANITIZE_OBJ}
+${NAME_SANITIZE}: ${SANITIZE_OBJS} # Compile ${NAME_SANITIZE} program
 	@printf "${YELLOW}Building...${RESET} ${NAME_SANITIZE}\n"
-	@${CC} ${CFLAGS} ${SANITIZE_FLAG} ${HEADERS} -o ${NAME_SANITIZE} ${SANITIZE_OBJ} ${LIBRARIES}
+	@${CC} ${CFLAGS} ${SANITIZE_FLAG} ${INCLUDES} -o ${NAME_SANITIZE} ${SANITIZE_OBJS} ${LIBRARIES}
 
 #######################
 ## COMPILATION RULES ##
 #######################
 
-${OBJS_DIR}/%.o: ${SRCS_DIR}/%.cpp
+${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 	@printf "${BLUE}Compiling..${RESET} (${YELLOW}release${RESET})%s %s\n" "" $<
-	@${CC} ${CFLAGS} ${HEADERS} -c $< -o $@
+	@${CC} ${CFLAGS} ${INCLUDES} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${YELLOW}release${RESET})%s %s\n" "" $<
 
-${TEST_DIR}/%.o: ${SRCS_DIR}/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_DIR}
+${TEST_OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_OBJ_DIR}
 	@printf "${BLUE}Compiling..${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
-	@${DEBUG_CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
+	@${CC} ${CTESTFLAGS} ${INCLUDES} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
 
-${TEST_DIR}/%.o: test/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_DIR}
+${TEST_OBJ_DIR}/%.o: ${TEST_DIR}/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_OBJ_DIR}
 	@printf "${BLUE}Compiling..${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
-	@${DEBUG_CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
+	@${CC} ${CTESTFLAGS} ${INCLUDES} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
 
-${DEBUG_DIR}/%.o: ${SRCS_DIR}/%.cpp | ${DEBUG_DIR}
+${DEBUG_OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp | ${DEBUG_OBJ_DIR}
 	@printf "${BLUE}Compiling..${RESET} (${MAGENTA}debug${RESET})%s %s\n" "" $<
-	@${DEBUG_CC} ${CFLAGS} ${DEBUG_FLAG} ${HEADERS} -c $< -o $@
+	@${DEBUG_CC} ${CFLAGS} ${DEBUG_FLAG} ${INCLUDES} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${MAGENTA}debug${RESET})%s %s\n" "" $<
 
-${SANITIZE_DIR}/%.o: ${SRCS_DIR}/%.cpp | ${SANITIZE_DIR}
+${SANITIZE_OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp | ${SANITIZE_OBJ_DIR}
 	@printf "${BLUE}Compiling..${RESET} (${MAGENTA}sanitize${RESET})%s %s\n" "" $<
-	@${CC} ${CFLAGS} ${SANITIZE_FLAG} ${HEADERS} -c $< -o $@
+	@${CC} ${CFLAGS} ${SANITIZE_FLAG} ${INCLUDES} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${MAGENTA}sanitize${RESET})%s %s\n" "" $<
-
-./header:
-	mkdir header
 
 #####################
 ## DIRECTORY RULES ##
 #####################
 
-${OBJS_DIR}:
-	@printf "${YELLOW}...Creating${RESET} ${OBJS_DIR}\n"
-	@${MKDIR} ${OBJS_DIR}
+${HEADER_DIR}:
+	@printf "${YELLOW}...Creating${RESET} ${HEADER_DIR}\n"
+	@${MKDIR} ${HEADER_DIR}
 
-${TEST_DIR}:
-	@printf "${YELLOW}...Creating${RESET} ${TEST_DIR}\n"
-	@${MKDIR} -p ${TEST_DIR}
+${OBJ_DIR}:
+	@printf "${YELLOW}...Creating${RESET} ${OBJ_DIR}\n"
+	@${MKDIR} ${OBJ_DIR}
 
-${DEBUG_DIR}:
-	@printf "${YELLOW}...Creating${RESET} ${DEBUG_DIR}\n"
-	@${MKDIR} -p ${DEBUG_DIR}
+${TEST_OBJ_DIR}:
+	@printf "${YELLOW}...Creating${RESET} ${TEST_OBJ_DIR}\n"
+	@${MKDIR} -p ${TEST_OBJ_DIR}
 
-${SANITIZE_DIR}:
-	@printf "${YELLOW}...Creating${RESET} ${SANITIZE_DIR}\n"
-	@${MKDIR} -p ${SANITIZE_DIR}
+${DEBUG_OBJ_DIR}:
+	@printf "${YELLOW}...Creating${RESET} ${DEBUG_OBJ_DIR}\n"
+	@${MKDIR} -p ${DEBUG_OBJ_DIR}
+
+${SANITIZE_OBJ_DIR}:
+	@printf "${YELLOW}...Creating${RESET} ${SANITIZE_OBJ_DIR}\n"
+	@${MKDIR} -p ${SANITIZE_OBJ_DIR}
+
+${TESTER_DIR}:
+	@mkdir YoupiBanane
+	@touch YoupiBanane/youpi.bad_extension
+	@touch YoupiBanane/youpi.bla
+	@mkdir YoupiBanane/nop
+	@touch YoupiBanane/nop/youpi.bad_extension
+	@touch YoupiBanane/nop/other.pouic
+	@mkdir YoupiBanane/Yeah
+	@touch YoupiBanane/Yeah/not_happy.bad_extension
 
 ###########
 ## OTHER ##
