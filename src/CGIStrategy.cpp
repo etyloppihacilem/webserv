@@ -191,7 +191,7 @@ void CGIStrategy::launch_CGI(size_t size) {
             _exit(1);
         }
         char *cmd = strdup(_cgi_path.c_str());
-        args[0] = cmd;
+        args[0]   = cmd;
         // const char *cmd = "/usr/bin/python3";
         if (!cmd) {
             free(c_env);
@@ -315,12 +315,12 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
 bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way to force chunk
     if (_done)
         return _done;
-    char   buf[PIPE_BUFFER_SIZE + 1] = { 0 };
     int    rd;
     size_t original = buffer.size();
 
     while (buffer.size() - original < size && !_done) {
-        rd = read(_miso[0], buf, PIPE_BUFFER_SIZE);
+        char buf[PIPE_BUFFER_SIZE + 1] = { 0 };
+        rd                             = read(_miso[0], buf, PIPE_BUFFER_SIZE);
         if (rd < 0) {
             close(_miso[0]);
             kill_child(true); // true

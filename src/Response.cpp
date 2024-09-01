@@ -219,13 +219,16 @@ void Response::set_cgi(ResponseBuildingStrategy *strategy) {
     debug.log() << "Setting response with CGI." << std::endl;
     _body = new CGIWriter(*strategy);
     _body->generate(); // this will initiate response headers EXCEPT connection !!
-    if (_header.find("Content-Length") == _header.end())
-        _header["Transfer-Encoding"] = "chunk";
-    CGIStrategy * tmp = dynamic_cast<CGIStrategy *>(strategy);
-    if (tmp)
-        tmp->set_length(true);
-    else
-        error.log() << "CGI is set with no CGIStrategy Strategy." << std::endl;
+    if (_header.find("Content-Length") == _header.end()) {
+        debug.log() << "CGI did not defined length, sending body in chunked format." << std::endl;
+        _header["Transfer-Encoding"] = "chunked";
+    } else {
+        CGIStrategy *tmp = dynamic_cast< CGIStrategy * >(strategy);
+        if (tmp)
+            tmp->set_length(true);
+        else
+            error.log() << "CGI is set with no CGIStrategy Strategy." << std::endl;
+    }
 }
 
 /**
@@ -241,8 +244,8 @@ void Response::set_body(ResponseBuildingStrategy *strategy) {
     clean_body();
     if (strategy->get_estimated_size() > MAX_BODY_BUFFER) {
         _body = new BodyWriterChunk(*strategy);
-        debug.log() << "Response sending format: chunk." << std::endl;
-        _header["Transfer-Encoding"] = "chunk";
+        debug.log() << "Response sending format: chunked." << std::endl;
+        _header["Transfer-Encoding"] = "chunked";
     } else {
         std::stringstream st;
         try {
@@ -251,8 +254,8 @@ void Response::set_body(ResponseBuildingStrategy *strategy) {
             debug.log() << "Response sending format: length." << std::endl;
         } catch (std::bad_alloc &e) {
             _body                        = new BodyWriterChunk(*strategy);
-            _header["Transfer-Encoding"] = "chunk";
-            warn.log() << "Response sending format: chunk (bad_alloc)." << std::endl;
+            _header["Transfer-Encoding"] = "chunked";
+            warn.log() << "Response sending format: chunked (bad_alloc)." << std::endl;
             return;
         }
         _header["Content-Length"] = st.str();

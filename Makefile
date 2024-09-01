@@ -48,6 +48,8 @@ NAME_SANITIZE	= ${NAME}_sanitize
 LIBRARIES		= -lreadline
 
 CC				= c++
+# bc debug clang does not put debug string symbols
+DEBUG_CC		= g++
 CFLAGS			= -MMD -Wall -Werror -Wextra -std=c++98
 CTESTFLAGS		= -MMD -Wall -Werror -Wextra -std=c++20 -g3 -pthread
 CTESTFLAGS		+= -DTESTING -Igoogletest/googletest/include -Igoogletest/googlemock/include -Itest \
@@ -175,12 +177,12 @@ ${NAME}: ${OBJS_DIR} ${OBJS} # Compile ${NAME} program
 
 ${NAME_TEST}: ${TEST_OBJ}
 	@printf "${YELLOW}Building...${RESET} %s\n" "${NAME_TEST}"
-	@${CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} \
+	@${DEBUG_CC} $(filter-out -MMD, ${CTESTFLAGS}) ${HEADERS} -o ${NAME_TEST} ${TEST_OBJ} ${LIBRARIES} \
 		./googletest/build/lib/libgtest.a ./googletest/build/lib/libgmock.a
 
 ${NAME_DEBUG}: ${DEBUG_OBJ}
 	@printf "${YELLOW}Building...${RESET} ${NAME_DEBUG}\n"
-	@${CC} ${CFLAGS} ${DEBUG_FLAG} ${HEADERS} -o ${NAME_DEBUG} ${DEBUG_OBJ} ${LIBRARIES}
+	@${DEBUG_CC} ${CFLAGS} ${DEBUG_FLAG} ${HEADERS} -o ${NAME_DEBUG} ${DEBUG_OBJ} ${LIBRARIES}
 
 ${NAME_SANITIZE}: ${SANITIZE_OBJ}
 	@printf "${YELLOW}Building...${RESET} ${NAME_SANITIZE}\n"
@@ -197,17 +199,17 @@ ${OBJS_DIR}/%.o: ${SRCS_DIR}/%.cpp
 
 ${TEST_DIR}/%.o: ${SRCS_DIR}/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_DIR}
 	@printf "${BLUE}Compiling..${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
-	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
+	@${DEBUG_CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
 
 ${TEST_DIR}/%.o: test/%.cpp | ./googletest/build/lib/libgtest.a ${TEST_DIR}
 	@printf "${BLUE}Compiling..${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
-	@${CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
+	@${DEBUG_CC} ${CTESTFLAGS} ${HEADERS} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${CYAN}test${RESET})%s %s\n" "" $<
 
 ${DEBUG_DIR}/%.o: ${SRCS_DIR}/%.cpp | ${DEBUG_DIR}
 	@printf "${BLUE}Compiling..${RESET} (${MAGENTA}debug${RESET})%s %s\n" "" $<
-	@${CC} ${CFLAGS} ${DEBUG_FLAG} ${HEADERS} -c $< -o $@
+	@${DEBUG_CC} ${CFLAGS} ${DEBUG_FLAG} ${HEADERS} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${MAGENTA}debug${RESET})%s %s\n" "" $<
 
 ${SANITIZE_DIR}/%.o: ${SRCS_DIR}/%.cpp | ${SANITIZE_DIR}

@@ -59,15 +59,18 @@ std::string CGIWriter::generate(size_t size) {
     st << std::hex << temp.size();
     _length         += temp.length();
     CGIStrategy *tmp = dynamic_cast< CGIStrategy * >(_strategy);
+    if (_buffer.length() == 0)
+        _done = true;
     if (tmp) {
-        if (!tmp->get_length())
+        if (!tmp->get_length()) {
+            debug.log() << "Sending a message of length 0x" << st.str() << " (" << temp.size() << ")" << std::endl;
             temp = st.str() + "\r\n" + temp + (_done ? "\r\n0\r\n\r\n" : "\r\n");
+        }
     } else {
+        debug.log() << "Sending a message of length 0x" << st.str() << " (" << temp.size() << ")" << std::endl;
         temp = st.str() + "\r\n" + temp + (_done ? "\r\n0\r\n\r\n" : "\r\n");
         error.log() << "CGIWriter is set with no CGIStrategy Strategy. Sending with Chunk by default." << std::endl;
     }
-    if (_buffer.length() == 0)
-        _done = true;
     return temp;
 }
 
@@ -110,7 +113,7 @@ void CGIWriter::init() {
             _buffer.replace(0, end + 1, "");
             continue;
         }
-        _response.add_header(name, _buffer.substr(found, end));
+        _response.add_header(name, _buffer.substr(found, end - found));
         debug.log() << "CGI added header '" << name << ": " << _buffer.substr(found, end) << "'" << std::endl;
         _buffer.replace(0, end + 1, "");
     }
