@@ -14,7 +14,14 @@
 #include <cstddef>
 #include <ostream>
 
-ResponseBuildingStrategy::ResponseBuildingStrategy() : _response(), _built(false), _done(false), _estimated_size(0) {}
+ResponseBuildingStrategy::ResponseBuildingStrategy(bool is_head) :
+    _response(),
+    _built(false),
+    _done(false),
+    _estimated_size(0),
+    _is_head(is_head) {
+    _response.set_head(_is_head);
+    }
 
 ResponseBuildingStrategy::~ResponseBuildingStrategy() {
     debug.log() << "Strategy is deleting response." << std::endl;

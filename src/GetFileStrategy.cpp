@@ -27,8 +27,8 @@
 #include <strings.h>
 #include <sys/stat.h>
 
-GetFileStrategy::GetFileStrategy(const MimeTypes &mime, const std::string &location, HttpCode code) :
-    ResponseBuildingStrategy(),
+GetFileStrategy::GetFileStrategy(const MimeTypes &mime, const std::string &location, HttpCode code, bool is_head) :
+    ResponseBuildingStrategy(is_head),
     _mime(mime),
     _location(location),
     _code(code) {}
@@ -78,15 +78,8 @@ bool GetFileStrategy::build_response() {
             }
         }
         _estimated_size = buf.st_size;
+        _response.set_last_modified(buf.st_mtim); // last mofified date
     } // saving stack
-    _file.open(_location.c_str(), std::fstream::binary | std::ios_base::in);
-    if (!_file.is_open()) {
-        error.log() << "GetFileStrategy: Undetected error opening file " << _location << ". Sending "
-                    << InternalServerError << std::endl;
-        throw HttpError(InternalServerError);
-    }
-    _response.set_body(this);
-
     std::string extension = extract_extension(_location);
 
     _response.set_code(_code);
@@ -94,6 +87,15 @@ bool GetFileStrategy::build_response() {
     if (!_mime.has_type(extension))
         _response.add_header("Content-Disposition", "attachment; filename=\"" + extract_basename(_location) + "\"");
     //< this is meant to download file in case the mime type is not known.
+    if (_is_head) // do not open file or instantiate body if HEAD request
+        return _built = true;
+    _file.open(_location.c_str(), std::fstream::binary | std::ios_base::in);
+    if (!_file.is_open()) {
+        error.log() << "GetFileStrategy: Undetected error opening file " << _location << ". Sending "
+                    << InternalServerError << std::endl;
+        throw HttpError(InternalServerError);
+    }
+    _response.set_body(this);
     return _built = true;
 }
 

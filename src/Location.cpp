@@ -320,6 +320,8 @@ const std::string &Location< ServerClass, RouteClass >::get_cgi_path() const {
 
 template < class ServerClass, class RouteClass >
 bool Location< ServerClass, RouteClass >::has_method(HttpMethod method) const {
+    if (method == HEAD)
+        method = GET; // because same
     return _methods.find(method) != _methods.end();
 }
 

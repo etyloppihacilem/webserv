@@ -19,6 +19,9 @@
 
 #define PIPE_BUFFER_SIZE 512 // bc 1KiB is already pipe max
 
+#define TIME_LENGTH 32 // 29 normally
+// Sun, 06 Nov 1994 08:49:37 GMT
+
 #define SERVER_SOFTWARE "jeon/0.1"
 
 #define MAX_BODY_BUFFER 1048576 // 1MiB

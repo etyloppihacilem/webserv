@@ -21,6 +21,7 @@ enum HttpMethod {
     POST,
     DELETE,
     PUT, // just in case
+    HEAD,
     last,
 };
 
@@ -36,6 +37,8 @@ inline std::string method_string(const int &code) {
             return "DELETE";
         case PUT:
             return "PUT";
+        case HEAD:
+            return "HEAD";
         default:
             return std::string();
     }

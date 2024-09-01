@@ -17,6 +17,7 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <dirent.h>
 #include <fcntl.h>
 #include <new>
@@ -29,8 +30,8 @@
 #include <unistd.h>
 
 // location ending in /
-GetIndexStrategy::GetIndexStrategy(const std::string &location, const std::string &target) :
-    ResponseBuildingStrategy(),
+GetIndexStrategy::GetIndexStrategy(const std::string &location, const std::string &target, bool is_head) :
+    ResponseBuildingStrategy(is_head),
     _location(location),
     _target(target),
     _dir_list(0),
@@ -185,8 +186,23 @@ bool GetIndexStrategy::build_response() {
         }
     }
     close(dir_fd);
-    _estimated_size = 148 + (133 * _len);
+    struct timespec most_recent = { 0, 0 };
+    struct stat     st_buf;
+    for (int i = 0; i < _len; i++) {
+        if (stat(_dir_list[i]->d_name, &st_buf) >= 0) {
+            if (st_buf.st_mtim.tv_sec > most_recent.tv_sec
+                || (st_buf.st_mtim.tv_sec == most_recent.tv_sec && st_buf.st_mtim.tv_nsec > most_recent.tv_nsec)) {
+                most_recent.tv_sec  = st_buf.st_mtim.tv_sec;
+                most_recent.tv_nsec = st_buf.st_mtim.tv_nsec;
+            }
+        }
+    }
+    _response.set_last_modified(most_recent);
     _response.add_header("Content-Type", "text/html; charset=utf-8");
+    clean_dir_list();
+    if (_is_head)
+        return _built = true;
+    _estimated_size = 148 + (133 * _len);
     _response.set_body(this);
     if (*_location.rbegin() != '/')
         _location += "/";

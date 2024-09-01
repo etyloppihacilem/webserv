@@ -15,6 +15,7 @@
 #include "HttpStatusCodes.hpp"
 #include "ProcessState.hpp"
 #include <cstddef>
+#include <ctime>
 #include <map>
 #include <string>
 
@@ -45,6 +46,9 @@ class Response {
         void        save_mem();
         BodyWriter *get_body();
         bool        have_body();
+        void        date(); ///< Sets Date header to current time, and sets last modified if defined
+        void        set_last_modified(const struct timespec &time);
+        void set_head(bool is_head);
 
     private:
         std::string generate_status_line() const;
@@ -55,7 +59,8 @@ class Response {
         std::map< std::string, std::string > _header; ///< Header map
         BodyWriter                          *_body;   ///< Body of response (if any)
         internal_state                       _state;  ///< To know what is left to generate
-        // bool                                 _is_cgi;
+        struct timespec                      _last_modified;
+        bool                                 _is_head;
 #ifdef TESTING
         FRIEND_TEST(ResponseTestSuite, generate_status_line);
         FRIEND_TEST(ResponseBuildStateFixture, CorrectHeaders);

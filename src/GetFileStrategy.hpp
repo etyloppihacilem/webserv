@@ -21,7 +21,7 @@
 
 class GetFileStrategy : public ResponseBuildingStrategy {
     public:
-        GetFileStrategy(const MimeTypes &mime, const std::string &location, HttpCode code = OK);
+        GetFileStrategy(const MimeTypes &mime, const std::string &location, HttpCode code = OK, bool is_head = false);
         ~GetFileStrategy();
 
         bool build_response();

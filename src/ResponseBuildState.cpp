@@ -56,7 +56,7 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, Cl
 #ifndef TESTING
     if (_request->gateway_checks(port)) {
         const ServerClass &tmp = ServerManager::getInstance()->getServer(_request->get_header().at("Host"), port);
-        _server          = &tmp;
+        _server                = &tmp;
     }
     if (!_server) {
         debug.log() << "ResponseBuildState: Trying to build non recovery response without server." << std::endl;
@@ -198,13 +198,13 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
     } else if (location.is_cgi()) {
         debug.log() << "Choosing CGIStrategy" << std::endl;
         _strategy = new CGIStrategy(location.get_path(), _request, location.get_path_info(), location.get_cgi_path());
-    } else if (_request->get_method() == GET) {
+    } else if (_request->get_method() == GET || _request->get_method() == HEAD) {
         if (location.is_file()) {
             debug.log() << "Choosing GetFileStrategy" << std::endl;
-            _strategy = new GetFileStrategy(mime_types, location.get_path());
+            _strategy = new GetFileStrategy(mime_types, location.get_path(), OK, _request->get_method() == HEAD);
         } else if (location.has_autoindex()) {
             debug.log() << "Choosing GetIndexStrategy" << std::endl;
-            _strategy = new GetIndexStrategy(location.get_path(), _request->get_target());
+            _strategy = new GetIndexStrategy(location.get_path(), _request->get_target(), _request->get_method() == HEAD);
         } else {
             info.log() << "ResponseBuildState: '" << _request->get_target() << "' is not a file, sending " << Forbidden
                        << std::endl;

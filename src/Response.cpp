@@ -20,14 +20,17 @@
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include <cstddef>
+#include <ctime>
 #include <new>
 #include <ostream>
 #include <sstream>
 #include <string>
 
-Response::Response() : _code(OK), _header(), _body(0), _state(rs_line) {
+Response::Response() : _code(OK), _header(), _body(0), _state(rs_line), _is_head(false) {
     add_header("Server", SERVER_SOFTWARE); // adding server name, this is not MUST but SHOULD in RFC
-    _header["Connection"] = "keep-alive";
+    _header["Connection"]  = "keep-alive";
+    _last_modified.tv_sec  = 0;
+    _last_modified.tv_nsec = 0;
 }
 
 // Logic of connection header be :
@@ -50,7 +53,7 @@ void Response::add_header(const std::string &field, const std::string &value) {
         return;
     }
     if (_header.find(field) != _header.end())
-        _header[field] += ", " + value;
+        _header[field] += ", " + value + (*_header[field].rbegin() == ';' ? "" : ";");
     else
         _header[field] = value;
 }
@@ -92,6 +95,30 @@ void Response::set_code(std::string code) {
         _header["Connection"] = "keep-alive";
 }
 
+void Response::date() {
+    struct timespec now;
+    timespec_get(&now, TIME_UTC);
+    char strNow[TIME_LENGTH] = { 0 };
+    strftime(strNow, TIME_LENGTH, "%a, %d %b %Y %H:%M:%S %Z", gmtime(&now.tv_sec));
+    _header["Date"] = strNow;
+    if (!isError(_code) && (_last_modified.tv_nsec != 0 || _last_modified.tv_sec != 0)) {
+        now.tv_sec += 604800;
+        strftime(strNow, TIME_LENGTH, "%a, %d %b %Y %H:%M:%S %Z", gmtime(&now.tv_sec));
+        _header["Expire"] = strNow;
+        strftime(strNow, TIME_LENGTH, "%a, %d %b %Y %H:%M:%S %Z", gmtime(&_last_modified.tv_sec));
+        _header["Last-Modified"] = strNow;
+
+        _header["Cache-Control"] = "private, max-age=604800;";
+    }
+    if (isError(_code))
+        _header["Cache-Control"] = "no-store";
+}
+
+void Response::set_last_modified(const struct timespec &time) {
+    _last_modified.tv_sec  = time.tv_sec;
+    _last_modified.tv_nsec = time.tv_nsec;
+}
+
 /**
   Returns response code.
   */
@@ -128,13 +155,18 @@ bool Response::build_response(std::string &buffer, size_t size) {
     while (buffer.length() < size && _state != finished) {
         if (_state == rs_line) {
             debug.log() << "Generating status line" << std::endl;
+            date(); // updating date headers
             buffer = generate_status_line();
             _state = headers;
         } else if (_state == headers) {
             debug.log() << "Generating headers" << std::endl;
             buffer += generate_header();
+            buffer += "\r\n"; // to end headers
             if (_body) {
-                buffer += "\r\n"; // to end headers
+                if (_is_head) {
+                    debug.log() << "HEAD request, not sending body." << std::endl;
+                    _state = finished;
+                }
                 debug.log() << "Generating body" << std::endl;
                 _state = body;
             } else {
@@ -179,7 +211,6 @@ std::string Response::generate_status_line() const {
   */
 std::string Response::generate_header() const {
     std::stringstream headers;
-
     for (mapit i = _header.begin(); i != _header.end(); i++)
         headers << i->first << ": " << i->second << "\r\n";
     return headers.str();
@@ -260,6 +291,10 @@ void Response::set_body(ResponseBuildingStrategy *strategy) {
         }
         _header["Content-Length"] = st.str();
     }
+}
+
+void Response::set_head(bool is_head) {
+    _is_head = is_head;
 }
 
 void Response::save_mem() {
