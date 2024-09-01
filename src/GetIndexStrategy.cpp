@@ -199,9 +199,10 @@ bool GetIndexStrategy::build_response() {
     }
     _response.set_last_modified(most_recent);
     _response.add_header("Content-Type", "text/html; charset=utf-8");
-    clean_dir_list();
-    if (_is_head)
+    if (_is_head) {
+        clean_dir_list();
         return _built = true;
+    }
     _estimated_size = 148 + (133 * _len);
     _response.set_body(this);
     if (*_location.rbegin() != '/')
