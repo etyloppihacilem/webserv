@@ -210,7 +210,8 @@ void CGIStrategy::launch_CGI(size_t size) {
 
 void CGIStrategy::feed_CGI() {
     if (_body) {
-        std::string &content = _body->get();
+        _body->read_body();
+        std::string &content = _body->get(); // _body buffer is resized on what is written
         int          ret;
         do {
             ret = write(

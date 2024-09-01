@@ -45,8 +45,8 @@ UploadStrategy< ServerClass, RouteClass >::UploadStrategy(
     if (request.have_body()) {
         debug.log() << "Upload created with body" << std::endl;
         _body = request.get_body();
-    }
-    debug.log() << "Upload created with no body" << std::endl;
+    } else
+        debug.log() << "Upload created with no body" << std::endl;
 }
 
 template < class ServerClass, class RouteClass >
@@ -65,8 +65,9 @@ UploadStrategy< ServerClass, RouteClass >::~UploadStrategy() {
    */
 template < class ServerClass, class RouteClass >
 bool UploadStrategy< ServerClass, RouteClass >::build_response() {
-    if (!_body && !_init) {
-        init(); // creating file if not already there and init of headers and stuff
+    if (!_body) {
+        if (!_init)
+            init(); // creating file if not already there and init of headers and stuff
         _file.close();
         _response.set_body("Empty (Success)");
         debug.log() << "No body to upload, upload done." << std::endl;
@@ -76,11 +77,16 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
         warn.log() << "UploadStrategy : trying to build response, but is already built." << std::endl;
         return _built;
     }
-    if (!_init)
+    if (!_init) {
         init();
-    else if (!_body->is_done())
+        debug.log() << "Emptying buffer inside body." << std::endl;
         _file << _body->pop();
-    else {
+    } else if (!_body->is_done()) {
+        size_t read = _body->read_body();
+        debug.log() << "Read " << read << " bytes from socket to put in file." << std::endl;
+        _file << _body->pop();
+    }
+    if (_body->is_done()) {
         _file.close();
         _response.set_body("Success");
         debug.log() << "Upload done." << std::endl;
@@ -114,7 +120,7 @@ void UploadStrategy< ServerClass, RouteClass >::init() {
                     << Forbidden << std::endl;
         throw HttpError(Forbidden);
     }
-    debug.log() << "Successfully created file " << _target << std::endl;
+    debug.log() << "Successfully opened file " << _target << std::endl;
     _init = true;
 }
 

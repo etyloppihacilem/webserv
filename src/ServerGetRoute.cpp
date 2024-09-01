@@ -136,7 +136,8 @@ std::string ServerGetRoute< RouteClass >::getUploadLocation(const std::string &p
         }
     }
     std::string ret = ppath.str();
-    ret.replace(0, pbest.str().length(), best->second.getLocation());
+    if (found)
+        ret.replace(0, pbest.str().length(), best->second.getLocation());
     return found ? ret : "";
 }
 

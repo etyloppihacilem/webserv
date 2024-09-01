@@ -74,7 +74,7 @@ std::string BodyChunk::pop() {
 
 std::string BodyChunk::parse_body() {
     std::string ret = "";
-    read_body();
+    // read_body();
     while (_trailing && !_done) {
         size_t sp;
 

@@ -713,7 +713,7 @@ TEST_P(TotalRequestFixture, BodyTest) {
         return;
     }
     while (!body->is_done() && i++ < MAX_REQUEST_LINE) {
-        // body->read_body();
+        body->read_body();
         body->get();
     }
     if (i >= MAX_REQUEST_LINE)

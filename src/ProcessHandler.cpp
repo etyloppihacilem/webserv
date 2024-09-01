@@ -66,7 +66,7 @@ void ProcessHandler::handle() {
             transition_to_rbs();
             _state->process();
         }
-        if (dynamic_cast< ResponseBuildState<> * >(_state) != 0)
+        if (_state->get_state() == ready && dynamic_cast< ResponseBuildState<> * >(_state) != 0)
             transition_to_rss();
         else if (dynamic_cast< ResponseSendState * >(_state) != 0) {
             ServerManager::getInstance()->listenToClient(_socket_fd, *this);

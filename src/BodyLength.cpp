@@ -44,6 +44,9 @@ BodyLength::BodyLength(int socket, std::string &buffer, std::string length) :
         info.log() << "Body is too large (" << _total << " bytes), sending " << ContentTooLarge << std::endl;
         throw HttpError(ContentTooLarge);
     }
+    debug.log() << "Body had already " << _read_length << " bytes read out of " << _length << " bytes." << std::endl;
+    if (_length <= _read_length)
+        _done = true;
 }
 
 BodyLength::~BodyLength() {}
@@ -63,16 +66,16 @@ size_t BodyLength::read_body() {
     size_read = read(_socket, buf, (_length - _read_length >= BUFFER_SIZE) ? BUFFER_SIZE : _length - _read_length);
     _buffer.insert(_buffer.length(), buf);
     _read_length += size_read;
-    if (_length <= _read_length)
-        _done = true;
     return size_read;
 }
 
 std::string &BodyLength::get() {
-    if (!_done)
-        read_body();
+    // if (!_done)
+    //     read_body();
     _body  += _buffer;
     _buffer = "";
+    if (_length <= _read_length)
+        _done = true;
     return _body;
 }
 
@@ -81,10 +84,12 @@ std::string BodyLength::pop() {
 
     _uniform = false;
     _body    = "";
-    if (!_done)
-        read_body();
-    tmp    += _buffer;
-    _buffer = "";
+    // if (!_done)
+    //     read_body();
+    tmp     += _buffer;
+    _buffer  = "";
+    if (_length <= _read_length)
+        _done = true;
     return tmp;
 }
 
