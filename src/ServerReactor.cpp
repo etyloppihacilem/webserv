@@ -3,7 +3,6 @@
 #include "EventHandler.hpp"
 #include "Logger.hpp"
 #include "ProcessHandler.hpp"
-#include "ProcessState.hpp"
 #include "Server.hpp"
 #include <asm-generic/socket.h>
 #include <cerrno>
@@ -106,7 +105,7 @@ ServerReactor::~ServerReactor(void) {
 int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
     info.log() << "ServerReactor: New connection on client socket " << client_fd << " from " << client_IP << std::endl;
     if (_eventHandlers.size() >= MAX_TOTAL_CONNECTION) {
-        warn.log() << "ServerReactor: addClient: max connection reached." << std::endl;
+        warn.log() << "ServerReactor: addClient: max connection reached, physio refused client." << std::endl;
         return -1;
     }
 
@@ -116,11 +115,45 @@ int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
     errno          = 0;
     if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, client_fd, &event) == -1) {
         delete static_cast< EventHandler * >(event.data.ptr);
-        close(event.data.fd);
         throw std::runtime_error("ServerReactor: epoll_ctl_add: " + std::string(std::strerror(errno)));
     }
 
     _eventHandlers.insert(static_cast< EventHandler * >(event.data.ptr));
+    return 0;
+}
+
+int ServerReactor::addCgiToddler(EventHandler *handler_miso, EventHandler *handler_mosi) {
+    info.log() << "ServerReactor: New CGI bidirectionnal connection on child in " << handler_miso->getSocketFd()
+               << " and child out " << handler_mosi->getSocketFd() << std::endl;
+    if (_eventHandlers.size() >= MAX_TOTAL_CONNECTION) {
+        warn.log() << "ServerReactor: addClient: max connection reached, pipe family will be deported." << std::endl;
+        delete handler_miso;
+        delete handler_mosi;
+        return -1;
+    }
+
+    struct epoll_event event_miso;
+    event_miso.events   = EPOLLIN | EPOLLERR | EPOLLHUP;
+    event_miso.data.ptr = handler_miso;
+    errno = 0;
+    if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, handler_miso->getSocketFd(), &event_miso)) {
+        delete handler_miso;
+        delete handler_mosi;
+        throw std::runtime_error("ServerReactor: epoll_ctl_add: " + std::string(std::strerror(errno)));
+    }
+    
+    struct epoll_event event_mosi;
+    event_mosi.events   = EPOLLOUT | EPOLLERR | EPOLLHUP;
+    event_mosi.data.ptr = handler_mosi;
+    errno = 0;
+    if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, handler_mosi->getSocketFd(), &event_mosi)) {
+        delete handler_miso;
+        delete handler_mosi;
+        throw std::runtime_error("ServerReactor: epoll_ctl_add: " + std::string(std::strerror(errno)));
+    }
+
+    _eventHandlers.insert(handler_miso);
+    _eventHandlers.insert(handler_mosi);
     return 0;
 }
 
