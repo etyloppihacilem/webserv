@@ -28,7 +28,8 @@ ReadState::ReadState(int socket, int port, const std::string &ip) :
     _buffer(),
     _request(0),
     _parse_state(rs_line),
-    _port(port), _ip(ip) {}
+    _port(port),
+    _ip(ip) {}
 
 ReadState::~ReadState() {
     if (_request)
@@ -49,13 +50,11 @@ t_state ReadState::process() {
 
         if ((a = read(_socket, buffer, BUFFER_SIZE)) < 0) {
             error.log() << "Reading into socket " << _socket << " resulted in error: " << strerror(errno)
-                        << ", sending " << InternalServerError << std::endl;
-            return return_error();
+                        << ", closing connection." << std::endl;
+            return _state = s_error;
         } else if (a == 0) {
-            // this should not happen.
-            warn.log() << "Reading nothing into socket " << _socket << ", closing connection with " << BadRequest
-                       << std::endl;
-            return return_error();
+            info.log() << "Reading nothing into socket " << _socket << ", closing connection." << std::endl;
+            return _state = s_error;
         }
     }
     return process_buffer(buffer);
@@ -80,8 +79,7 @@ t_state ReadState::process_buffer(char *buffer) {
             if (_parse_state == rs_line && eol == 0) {
                 _buffer = _buffer.substr(1, _buffer.length() - 1); // to discard leading lines of request
                 sanitize_HTTP_string(_buffer, 0);
-            }
-            else if (_parse_state == rs_line) {
+            } else if (_parse_state == rs_line) {
                 if (!_request->parse_request_line(_buffer))
                     return _state = ready; // ready to return error
                 debug.log() << "Parsing headers." << std::endl;
