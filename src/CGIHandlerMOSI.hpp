@@ -11,9 +11,10 @@
 #ifndef INCLUDE_SRC_CGIHANDLERMOSI_HPP_
 #define INCLUDE_SRC_CGIHANDLERMOSI_HPP_
 
-#include "CGIStrategy.hpp"
 #include "EventHandler.hpp"
 #include <ctime>
+
+class CGIStrategy;
 
 class CGIHandlerMOSI : public EventHandler {
     public:

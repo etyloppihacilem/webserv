@@ -50,10 +50,6 @@ std::string CGIWriter::generate(size_t size) {
     }
     debug.log() << "CGI writer filling buffer of " << size << " byte(s) (currently " << _buffer.length() << " byte(s))"
                 << std::endl;
-    if (!_cgi_done)
-        do {
-            _cgi_done = _strategy->fill_buffer(_buffer, PIPE_BUFFER_SIZE);
-        } while (_buffer.length() < size && !_cgi_done);
     std::string temp = _buffer.substr(0, (size > _buffer.length() ? _buffer.length() : size));
     _buffer.replace(0, (size > _buffer.length() ? _buffer.length() : size), "");
     std::stringstream st;

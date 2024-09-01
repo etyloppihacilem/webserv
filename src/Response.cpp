@@ -243,14 +243,14 @@ void Response::set_body(const std::string &body_content, std::string content_typ
     _header["Content-Type"] = content_type;
 }
 
-void Response::set_cgi(ResponseBuildingStrategy *strategy) {
+void Response::set_cgi(ResponseBuildingStrategy *strategy, CGIWriter &writer) {
     if (!strategy) {
         error.log() << "Trying to set response CGI without strategy. Aborting." << std::endl;
         return;
     }
     clean_body();
     debug.log() << "Setting response with CGI." << std::endl;
-    _body = new CGIWriter(*strategy);
+    _body = dynamic_cast< BodyWriter * >(&writer);
     _body->generate(); // this will initiate response headers EXCEPT connection !!
     if (_header.find("Content-Length") == _header.end()) {
         debug.log() << "CGI did not defined length, sending body in chunked format." << std::endl;

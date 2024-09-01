@@ -19,6 +19,8 @@
 #include <map>
 #include <string>
 
+class CGIWriter;
+
 #ifdef TESTING
 # include "gtest/gtest.h"
 #endif
@@ -35,7 +37,7 @@ class Response {
 
         void        set_body(const std::string &body_content, std::string content_type = "text/plain");
         void        set_body(ResponseBuildingStrategy *strategy);
-        void        set_cgi(ResponseBuildingStrategy *strategy);
+        void        set_cgi(ResponseBuildingStrategy *strategy, CGIWriter &writer);
         ///< To tell response to process CGI reading when bodywriter is called
         void        add_header(const std::string &field, const std::string &value);
         void        set_code(HttpCode code);

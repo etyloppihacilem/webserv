@@ -11,6 +11,8 @@
 #include "CGIStrategy.hpp"
 #include "Body.hpp"
 #include "BodyChunk.hpp"
+#include "CGIHandlerMISO.hpp"
+#include "CGIHandlerMOSI.hpp"
 #include "ClientRequest.hpp"
 #include "HttpError.hpp"
 #include "HttpMethods.hpp"
@@ -39,6 +41,7 @@
 #include <string>
 #include <strings.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 Logger CGIStrategy::babyphone("./child.log", "CHILD", 8);
@@ -60,7 +63,11 @@ CGIStrategy::CGIStrategy(
     _state(init),
     _was_dechunked(false),
     _is_length(false),
-    _max_size(max_size) {
+    _max_size(max_size),
+    _handlerMOSI(0),
+    _handlerMISO(0),
+    _writer(0),
+    _code(OK) {
     if (!_request) {
         error.log() << "Trying to instantiate CGIStrategy without request, sending " << InternalServerError
                     << std::endl;
@@ -73,9 +80,25 @@ CGIStrategy::CGIStrategy(
 CGIStrategy::~CGIStrategy() {
     if (_child)
         kill_child(true);
+    if (_handlerMISO)
+        _handlerMISO->timeout();
+    if (_handlerMOSI)
+        _handlerMOSI->timeout();
+}
+
+void CGIStrategy::removeMISO() {
+    _handlerMISO = 0;
+}
+
+void CGIStrategy::removeMOSI() {
+    _handlerMOSI = 0;
 }
 
 bool CGIStrategy::build_response() {
+    if (_code != OK) {
+        info.log() << "CGIStrategy encountered an error in ChildHandler and will send " << _code << std::endl;
+        throw HttpError(_code);
+    }
     if (_built) {
         warn.log() << "CGIStrategy: build_response called but response is already built." << std::endl;
         return _built;
@@ -87,7 +110,7 @@ bool CGIStrategy::build_response() {
     if (_state == launch)
         launch_CGI(_body ? _body->length() : 0); // or segfault bc there is no body !!!
     // if (_state == running)
-        // feed_CGI();
+    // feed_CGI();
     return _built;
 }
 
@@ -168,6 +191,10 @@ void CGIStrategy::launch_CGI(size_t size) {
         close(_mosi[0]);
         close(_miso[1]);
         info.log() << "CGIStrategy: Child " << pid << " running." << std::endl;
+        _writer      = new CGIWriter(*this);
+        _handlerMISO = new CGIHandlerMISO(_miso[0], *this, *_writer);
+        _handlerMOSI = new CGIHandlerMOSI(_mosi[1], *this);
+        _response.set_cgi(this, *_writer);
         _state = running;
     } else { // child
         close(STDERR_FILENO);
@@ -223,12 +250,13 @@ void CGIStrategy::launch_CGI(size_t size) {
     }
 }
 
-
 /**
   Feed when epoll read event on CGI
   return true when done.
   */
 bool CGIStrategy::feed_CGI() {
+    if (_code != OK)
+        debug.log() << "Error " << _code << " already set, MOSI will not feed child further." << std::endl;
     if (_body) {
         std::string &content = _body->get(); // _body buffer is resized on what is written
         int          ret;
@@ -236,7 +264,8 @@ bool CGIStrategy::feed_CGI() {
             kill_child(true);
             info.log() << "Max body size reached, sending " << ContentTooLarge << std::endl;
             // throw HttpError(ContentTooLarge);
-            return true; // FIX: set error;
+            _code = ContentTooLarge;
+            return true;
         }
         if (content.length() > 0) {
             ret = write(
@@ -247,7 +276,8 @@ bool CGIStrategy::feed_CGI() {
                 error.log() << "CGIStrategy: error while writing in pipe to script " << strerror(errno) << ", sending "
                             << InternalServerError << std::endl;
                 // throw HttpError(InternalServerError);
-                return true; // FIX: set error;
+                _code = InternalServerError;
+                return true;
             }
             debug.log() << "Fed " << ret << " bytes to child." << std::endl;
             if (static_cast< size_t >(ret) < content.length())
@@ -261,7 +291,6 @@ bool CGIStrategy::feed_CGI() {
         }
     } else {
         debug.log() << "Request has no body, CGI is done being initiated." << std::endl;
-        _response.set_cgi(this);
         return true; // nothing to do
     }
     return false;

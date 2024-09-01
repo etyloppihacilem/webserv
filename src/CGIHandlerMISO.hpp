@@ -11,10 +11,11 @@
 #ifndef INCLUDE_SRC_CGIHANDLERMISO_HPP_
 #define INCLUDE_SRC_CGIHANDLERMISO_HPP_
 
-#include "CGIStrategy.hpp"
 #include "CGIWriter.hpp"
 #include "EventHandler.hpp"
 #include <ctime>
+
+class CGIStrategy;
 
 class CGIHandlerMISO : public EventHandler {
     public:

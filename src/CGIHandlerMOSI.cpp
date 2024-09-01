@@ -27,6 +27,7 @@ CGIHandlerMOSI::~CGIHandlerMOSI() {
         close(_socket_fd);
     debug.log() << "CGIHandlerMOSI: closed pipe " << _socket_fd << " for child " << _strategy.get_child_pid() << "."
                 << std::endl;
+    _strategy.removeMOSI();
 }
 
 time_t CGIHandlerMOSI::getTimeout() const {
@@ -36,9 +37,8 @@ time_t CGIHandlerMOSI::getTimeout() const {
 void CGIHandlerMOSI::handle() {
     info.log() << "CGIHandlerMOSI: Child " << _strategy.get_child_pid() << " on pipe " << _socket_fd
                << " received a new event!" << std::endl;
-    if (_strategy.feed_CGI()) {
-        // FIX: suicide delete client on self;
-    }
+    if (_strategy.feed_CGI())
+        timeout();
 } // Run this in loop
 
 void CGIHandlerMOSI::timeout() {

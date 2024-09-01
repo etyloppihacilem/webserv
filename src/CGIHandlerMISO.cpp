@@ -31,6 +31,7 @@ CGIHandlerMISO::~CGIHandlerMISO() {
         close(_socket_fd);
     debug.log() << "CGIHandlerMISO: closed pipe " << _socket_fd << " for child " << _strategy.get_child_pid() << "."
                 << std::endl;
+    _strategy.removeMISO();
 }
 
 time_t CGIHandlerMISO::getTimeout() const {

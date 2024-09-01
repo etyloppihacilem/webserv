@@ -12,7 +12,11 @@
 #define INCLUDE_SRC_CGISTRATEGY_HPP_
 
 #include "Body.hpp"
+#include "CGIHandlerMISO.hpp"
+#include "CGIHandlerMOSI.hpp"
+#include "CGIWriter.hpp"
 #include "ClientRequest.hpp"
+#include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
@@ -20,6 +24,7 @@
 #include <map>
 #include <sched.h>
 #include <string>
+#include <time.h>
 
 typedef enum s_cgistate {
     init = 0,     // first init, run only one time
@@ -46,7 +51,10 @@ class CGIStrategy : public ResponseBuildingStrategy {
         pid_t get_child_pid() const;
         void save_mem();
 
-        bool          feed_CGI();
+        bool feed_CGI();
+        void removeMISO();
+        void removeMOSI();
+
     private:
         static Logger babyphone;
         void          fill_env(std::map< std::string, std::string > &env, size_t size);
@@ -56,19 +64,23 @@ class CGIStrategy : public ResponseBuildingStrategy {
         void          launch_CGI(size_t size);
         void          kill_child(bool k = true);
 
-        std::string    _location;
-        std::string    _path_info;
-        std::string    _cgi_path;
-        std::string    _cgi_response;
-        ClientRequest *_request;
-        Body          *_body;
-        int            _mosi[2]; // master out slave in
-        int            _miso[2]; // master in slave out
-        pid_t          _child;
-        cgistate       _state; ///< When body is ready to be
-        bool           _was_dechunked;
-        bool           _is_length;
-        size_t         _max_size;
+        std::string     _location;
+        std::string     _path_info;
+        std::string     _cgi_path;
+        std::string     _cgi_response;
+        ClientRequest  *_request;
+        Body           *_body;
+        int             _mosi[2]; // master out slave in
+        int             _miso[2]; // master in slave out
+        pid_t           _child;
+        cgistate        _state; ///< When body is ready to be
+        bool            _was_dechunked;
+        bool            _is_length;
+        size_t          _max_size;
+        CGIHandlerMOSI *_handlerMOSI;
+        CGIHandlerMISO *_handlerMISO;
+        CGIWriter      *_writer;
+        HttpCode _code;
 };
 
 #endif // INCLUDE_SRC_CGISTRATEGY_HPP_
