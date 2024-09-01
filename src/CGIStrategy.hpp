@@ -44,12 +44,12 @@ class CGIStrategy : public ResponseBuildingStrategy {
         );
         ~CGIStrategy();
 
-        bool build_response();
-        bool fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
-        void set_length(bool len);
-        bool get_length() const;
+        bool  build_response();
+        bool  fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
+        void  set_length(bool len);
+        bool  get_length() const;
         pid_t get_child_pid() const;
-        void save_mem();
+        void  save_mem();
 
         bool feed_CGI();
         void removeMISO();
@@ -80,7 +80,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         CGIHandlerMOSI *_handlerMOSI;
         CGIHandlerMISO *_handlerMISO;
         CGIWriter      *_writer;
-        HttpCode _code;
+        HttpCode        _code;
 };
 
 #endif // INCLUDE_SRC_CGISTRATEGY_HPP_

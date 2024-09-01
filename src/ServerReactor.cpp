@@ -135,17 +135,17 @@ int ServerReactor::addCgiToddler(EventHandler *handler_miso, EventHandler *handl
     struct epoll_event event_miso;
     event_miso.events   = EPOLLIN | EPOLLERR | EPOLLHUP;
     event_miso.data.ptr = handler_miso;
-    errno = 0;
+    errno               = 0;
     if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, handler_miso->getSocketFd(), &event_miso)) {
         delete handler_miso;
         delete handler_mosi;
         throw std::runtime_error("ServerReactor: epoll_ctl_add: " + std::string(std::strerror(errno)));
     }
-    
+
     struct epoll_event event_mosi;
     event_mosi.events   = EPOLLOUT | EPOLLERR | EPOLLHUP;
     event_mosi.data.ptr = handler_mosi;
-    errno = 0;
+    errno               = 0;
     if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, handler_mosi->getSocketFd(), &event_mosi)) {
         delete handler_miso;
         delete handler_mosi;
