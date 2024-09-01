@@ -52,7 +52,7 @@ class ResponseBuildingStrategy {
         bool     _built;          ///< If response is built yet
         bool     _done;           ///< State of the current object
         size_t   _estimated_size; ///< Estimated size of response body if needed
-        bool _is_head; ///< If request is HEAD, do not generate headers
+        bool     _is_head;        ///< If request is HEAD, do not generate headers
 };
 
 #endif // INCLUDE_SRC_RESPONDEBUILDINGSTRATEGY_CPP_

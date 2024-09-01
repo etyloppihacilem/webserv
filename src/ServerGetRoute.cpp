@@ -67,9 +67,9 @@ const RouteClass &ServerGetRoute< RouteClass >::getCGIRoute(const std::string &p
     /*size_t      nextSlash = (path.length() > 1 ? path.find("/", 1) : 0);*/
     /*std::string testing   = path.substr(0, nextSlash);*/
     /*std::string ext       = extract_extension(testing);*/
-    size_t      nextSlash = 0;
-    std::string testing   = "/";
-    std::string ext = "";
+    size_t                                                       nextSlash = 0;
+    std::string                                                  testing   = "/";
+    std::string                                                  ext       = "";
     do {
         nextSlash = path.find('/', nextSlash + 1);
         testing   = path;

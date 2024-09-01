@@ -21,7 +21,7 @@ ResponseBuildingStrategy::ResponseBuildingStrategy(bool is_head) :
     _estimated_size(0),
     _is_head(is_head) {
     _response.set_head(_is_head);
-    }
+}
 
 ResponseBuildingStrategy::~ResponseBuildingStrategy() {
     debug.log() << "Strategy is deleting response." << std::endl;

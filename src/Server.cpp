@@ -94,7 +94,7 @@ Server::Server(StringTokenizer &tokenizedServer) :
         addRoute(*it);
     if (!hasRoute("/"))
         _routes["/"] = Route(*this);
-    
+
     logParsingEnded(server);
 }
 

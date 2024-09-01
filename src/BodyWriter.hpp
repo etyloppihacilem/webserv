@@ -40,7 +40,7 @@ class BodyWriter {
     protected:
         bool                      _done;     ///< True if body is sent.
         ResponseBuildingStrategy *_strategy; ///< Strategy is needed to generate content of body
-        size_t _length;
+        size_t                    _length;
 };
 
 #endif // INCLUDE_SRC_BODYWRITER_HPP_

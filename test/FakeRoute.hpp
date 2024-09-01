@@ -81,9 +81,7 @@ class FakeRoute {
 
         bool hasUploadSet() const { return _hasUpload; }
 
-        size_t getMaxBodySize() const {
-            return 2147483647;
-        }
+        size_t getMaxBodySize() const { return 2147483647; }
 
         const std::string &getCgiExtension() const { return _getCgiExtension; }
 

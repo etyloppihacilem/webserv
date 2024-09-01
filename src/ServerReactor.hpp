@@ -29,7 +29,7 @@ class ServerReactor {
         void run();
 
 #ifdef TESTING
-        std::set< EventHandler *> &getEventHandler();
+        std::set< EventHandler * > &getEventHandler();
 #endif
 
     private:

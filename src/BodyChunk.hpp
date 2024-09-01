@@ -44,8 +44,8 @@ class BodyChunk : public Body {
 
     private:
         std::string parse_body();
-        void init_chunk();
-        bool is_hex(int c);
+        void        init_chunk();
+        bool        is_hex(int c);
 
         size_t _bytes_remaining; ///< Number of bytes left to read in current chunk
         bool   _eoc;             ///< tells if end of chunk to remove \r\n

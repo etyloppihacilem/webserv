@@ -12,6 +12,7 @@
 #include "Logger.hpp"
 #include "MemoryHandler.hpp"
 #include "ServerManager.hpp"
+#include "header.h"
 #include <csignal>
 #include <cstdlib>
 #include <exception>
@@ -20,7 +21,6 @@
 #include <ostream>
 #include <signal.h>
 #include <string>
-#include "header.h"
 
 volatile sig_atomic_t g_signal = false;
 
@@ -29,7 +29,8 @@ void sigint_handler(int signum) {
     std::cerr << std::endl;
     if (g_signal > true) {
         fatal.log() << "Goodbye..." << std::endl;
-        exit(64);}
+        exit(64);
+    }
     info.log() << "ServerReactor: JEON stop listening." << std::endl;
     (void) signum;
 }

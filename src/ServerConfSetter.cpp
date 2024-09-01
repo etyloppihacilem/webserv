@@ -140,12 +140,12 @@ std::size_t setFieldMaxBodySize(const ValueList &values) {
         throw ServerConfWarn();
     }
 
-    if (ret < 1 || static_cast< std::size_t >(ret) > std::numeric_limits<std::size_t>::max()) {
+    if (ret < 1 || static_cast< std::size_t >(ret) > std::numeric_limits< std::size_t >::max()) {
         warn.log() << "max_body_size: " << values[0] << ", is not a valid size number." << std::endl;
         throw ServerConfWarn();
     }
 
-    return static_cast<std::size_t>(ret);
+    return static_cast< std::size_t >(ret);
 }
 
 HttpCode setFieldErrorPageCode(const ValueList &values) {

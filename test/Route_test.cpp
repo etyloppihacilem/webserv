@@ -82,8 +82,10 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidBasic) {
 }
 
 TEST_F(RouteTestSuite, ParametrizeConstructorValidUpload) {
-    input = StringTokenizer("methods|PUT|POST;|index|index.html;|autoindex|on;|upload_path|/uploads;|client_max_body_size|160;", '|');
-    a     = Route("/", input, server);
+    input = StringTokenizer(
+        "methods|PUT|POST;|index|index.html;|autoindex|on;|upload_path|/uploads;|client_max_body_size|160;", '|'
+    );
+    a = Route("/", input, server);
     EXPECT_EQ("/", a.getLocation());
     EXPECT_EQ("www/", a.getRootDir());
     std::vector< std::string > expectedIndex({ "index.html" });

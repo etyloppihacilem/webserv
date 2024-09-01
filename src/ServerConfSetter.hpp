@@ -15,7 +15,7 @@ std::string                setFieldRoot(const ValueList &values);
 std::vector< std::string > setFieldIndex(const ValueList &values);
 bool                       setFieldAutoindex(const ValueList &values);
 std::set< HttpMethod >     setFieldMethods(const ValueList &values);
-std::size_t                        setFieldMaxBodySize(const ValueList &values);
+std::size_t                setFieldMaxBodySize(const ValueList &values);
 HttpCode                   setFieldErrorPageCode(const ValueList &values);
 std::string                setFieldLocationPath(const std::string &values);
 std::string                setFieldUploadPath(const ValueList &values);

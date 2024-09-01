@@ -131,8 +131,7 @@ void ServerReactor::deleteClient(int socket_fd, EventHandler &handler) {
     if (epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, socket_fd, 0) == -1)
         throw std::runtime_error("ServerReactor: epoll_ctl_del: " + std::string(std::strerror(errno)));
 
-    if (handler.checkTimeout() == false)
-    {
+    if (handler.checkTimeout() == false) {
         std::set< EventHandler * >::iterator it = _eventHandlers.find(&handler);
         delete *it;
         _eventHandlers.erase(it);

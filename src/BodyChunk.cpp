@@ -68,7 +68,7 @@ std::string &BodyChunk::get() {
 std::string BodyChunk::pop() {
     if (_done)
         return "";
-    _uniform        = false;
+    _uniform = false;
     return parse_body();
 }
 

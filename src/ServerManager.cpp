@@ -54,7 +54,9 @@ std::string cleanConfFile(std::string fileContent) {
 bool doesServerExist(const std::vector< Server > &servers, const Server &newServer) {
     for (std::vector< Server >::const_iterator it = servers.begin(); it != servers.end(); ++it) {
         if (it->getPort() == newServer.getPort())
-            if (std::equal(newServer.getServerName().begin(), newServer.getServerName().end(), it->getServerName().begin())) {
+            if (std::equal(
+                    newServer.getServerName().begin(), newServer.getServerName().end(), it->getServerName().begin()
+                )) {
                 logServerRedefinition(newServer.getPort(), newServer.getServerName());
                 return true;
             }
@@ -86,8 +88,7 @@ std::vector< Server > ServerManager::parseConfFile(const std::string &configFile
             if (!doesServerExist(servers, newServer))
                 servers.push_back(newServer);
         }
-    }
-    catch (ServerConfError &e) {
+    } catch (ServerConfError &e) {
         throw FailToInitServerError();
     }
     return servers;

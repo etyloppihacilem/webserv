@@ -239,9 +239,7 @@ void CGIStrategy::feed_CGI() {
             ret = write(
                 _mosi[1], content.c_str(), (PIPE_BUFFER_SIZE <= content.length() ? PIPE_BUFFER_SIZE : content.length())
             );
-            write(
-                1, content.c_str(), (PIPE_BUFFER_SIZE <= content.length() ? PIPE_BUFFER_SIZE : content.length())
-            );
+            write(1, content.c_str(), (PIPE_BUFFER_SIZE <= content.length() ? PIPE_BUFFER_SIZE : content.length()));
             if (ret < 0) {
                 close(_mosi[1]);
                 close(_miso[0]);

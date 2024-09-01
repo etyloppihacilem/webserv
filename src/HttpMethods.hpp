@@ -17,7 +17,7 @@
 #define MAX_METHOD_SIZE 8
 
 enum HttpMethod {
-    GET  = 0,
+    GET = 0,
     POST,
     DELETE,
     PUT, // just in case

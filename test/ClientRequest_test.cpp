@@ -24,13 +24,9 @@
 
 class ClientRequestTestSuite : public ::testing::Test {
     protected:
-        ClientRequestTestSuite() {
-            info.disable();
-        }
+        ClientRequestTestSuite() { info.disable(); }
 
-        ~ClientRequestTestSuite() {
-            info.enable();
-        }
+        ~ClientRequestTestSuite() { info.enable(); }
 };
 
 /*
