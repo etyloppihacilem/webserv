@@ -34,12 +34,15 @@ void AcceptHandler::handle() {
 
     info.log() << "AcceptHandler: port " << _port << " received a new event!" << std::endl;
     if ((client_fd = accept(_socket_fd, (struct sockaddr *) (&socket_addr), &socket_size)) == -1) {
-        warn.log() << "accept: " << std::string(std::strerror(errno)) << std::endl;
+        warn.log() << "AcceptHandler: accept: " << std::string(std::strerror(errno)) << std::endl;
         return;
     }
     char s[INET_ADDRSTRLEN];
     inet_ntop(socket_addr.sin_family, (struct sockaddr *) &socket_addr, s, sizeof s);
-    ServerManager::getInstance()->addClient(client_fd, _port, std::string(s));
+    if (ServerManager::getInstance()->addClient(client_fd, _port, std::string(s)) == -1) {
+        warn.log() << "AcceptHandler: unable to add more client to epoll list." << std::endl;
+        close(client_fd);
+    }
 }
 
 void AcceptHandler::timeout() {

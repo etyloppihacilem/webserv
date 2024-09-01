@@ -46,6 +46,8 @@ void CGIHandlerMISO::handle() {
 } // Run this in loop
 
 void CGIHandlerMISO::timeout() {
+    if (_socket_fd < 0)
+        return;
     warn.log() << "CGIHandlerMISO: Child " << _strategy.get_child_pid() << " on pipe " << _socket_fd << " timed out! ("
                << getTimeout() << "s)" << std::endl;
     ServerManager::getInstance()->deleteClient(_socket_fd, *this);

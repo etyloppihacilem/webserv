@@ -251,7 +251,7 @@ void Response::set_cgi(ResponseBuildingStrategy *strategy, CGIWriter &writer) {
     clean_body();
     debug.log() << "Setting response with CGI." << std::endl;
     _body = dynamic_cast< BodyWriter * >(&writer);
-    _body->generate(); // this will initiate response headers EXCEPT connection !!
+    _body->generate(); // TODO: not there // this will initiate response headers EXCEPT connection !!
     if (_header.find("Content-Length") == _header.end()) {
         debug.log() << "CGI did not defined length, sending body in chunked format." << std::endl;
         _header["Transfer-Encoding"] = "chunked";

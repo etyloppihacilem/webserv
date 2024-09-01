@@ -25,6 +25,7 @@ CGIHandlerMOSI::CGIHandlerMOSI(int MOSI_fd, CGIStrategy &strategy) : EventHandle
 CGIHandlerMOSI::~CGIHandlerMOSI() {
     if (_socket_fd >= 0)
         close(_socket_fd);
+    _socket_fd = -1;
     debug.log() << "CGIHandlerMOSI: closed pipe " << _socket_fd << " for child " << _strategy.get_child_pid() << "."
                 << std::endl;
     _strategy.removeMOSI();
@@ -42,6 +43,8 @@ void CGIHandlerMOSI::handle() {
 } // Run this in loop
 
 void CGIHandlerMOSI::timeout() {
+    if (_socket_fd < 0)
+        return;
     warn.log() << "CGIHandlerMOSI: Child " << _strategy.get_child_pid() << " on pipe " << _socket_fd << " timed out! ("
                << getTimeout() << "s)" << std::endl;
     ServerManager::getInstance()->deleteClient(_socket_fd, *this);

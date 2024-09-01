@@ -104,7 +104,7 @@ ServerReactor::~ServerReactor(void) {
 
 int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
     info.log() << "ServerReactor: New connection on client socket " << client_fd << " from " << client_IP << std::endl;
-    if (_eventHandlers.size() >= MAX_TOTAL_CONNECTION) {
+    if (_eventHandlers.size() + 1 >= MAX_TOTAL_CONNECTION) {
         warn.log() << "ServerReactor: addClient: max connection reached, physio refused client." << std::endl;
         return -1;
     }
@@ -122,10 +122,10 @@ int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
     return 0;
 }
 
-int ServerReactor::addCgiToddler(EventHandler *handler_miso, EventHandler *handler_mosi) {
+int ServerReactor::addCGIToddler(EventHandler *handler_miso, EventHandler *handler_mosi) {
     info.log() << "ServerReactor: New CGI bidirectionnal connection on child in " << handler_miso->getSocketFd()
                << " and child out " << handler_mosi->getSocketFd() << std::endl;
-    if (_eventHandlers.size() >= MAX_TOTAL_CONNECTION) {
+    if (_eventHandlers.size() + 2 >= MAX_TOTAL_CONNECTION) {
         warn.log() << "ServerReactor: addClient: max connection reached, pipe family will be deported." << std::endl;
         delete handler_miso;
         delete handler_mosi;

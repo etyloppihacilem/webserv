@@ -160,8 +160,6 @@ void CGIStrategy::de_chunk() {
         _body->get();
     }
     if (_body->length() > _max_size) {
-        close(_mosi[1]);
-        close(_miso[0]);
         kill_child(true);
         info.log() << "Max body size reached, sending " << ContentTooLarge << std::endl;
         throw HttpError(ContentTooLarge);
@@ -180,10 +178,8 @@ void CGIStrategy::launch_CGI(size_t size) {
     fill_env(env, size);
     pid_t pid = fork();
     if (pid < 0) {
-        close(_miso[0]);
         close(_miso[1]);
         close(_mosi[0]);
-        close(_mosi[1]);
         error.log() << "CGIStrategy: Could not open pipe, sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     } else if (pid) { // parent
@@ -194,6 +190,10 @@ void CGIStrategy::launch_CGI(size_t size) {
         _writer      = new CGIWriter(*this);
         _handlerMISO = new CGIHandlerMISO(_miso[0], *this, *_writer);
         _handlerMOSI = new CGIHandlerMOSI(_mosi[1], *this);
+        if (ServerManager::getInstance()->addCGIToddler(_handlerMISO, _handlerMOSI) == -1) {
+            error.log() << "CGIStrategy: unable to add CGIHandler to epoll list." << std::endl;
+            throw HttpError(InternalServerError);
+        }
         _response.set_cgi(this, *_writer);
         _state = running;
     } else { // child

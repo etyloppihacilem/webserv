@@ -14,7 +14,8 @@ class ServerManager {
         static void           deleteInstance();
         ~ServerManager();
 
-        void addClient(int socket_fd, int port, std::string client_IP);
+        int  addClient(int socket_fd, int port, std::string client_IP);
+        int  addCGIToddler(EventHandler *handler_miso, EventHandler *handler_mosi);
         void deleteClient(int socket_fd, EventHandler &handler);
         void listenToClient(int socket_fd, EventHandler &handler);
         void talkToClient(int socket_fd, EventHandler &handler);

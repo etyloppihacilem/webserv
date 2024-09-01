@@ -83,9 +83,9 @@ void CGIWriter::init() {
         warn.log() << "CGI init already done, aborting" << std::endl;
         return;
     }
-    debug.log() << "Initiating CGI headers" << std::endl;
     if (sanitize_HTTP_string(_buffer, 0).find("\n\n") != _buffer.npos)
         return;
+    debug.log() << "Initiating CGI headers" << std::endl;
     size_t found;
     if ((found = _buffer.find("Status:")) != _buffer.npos) {
         size_t end = _buffer.find("\n", found);
