@@ -46,7 +46,8 @@ CGIStrategy::CGIStrategy(
     const std::string &location,
     ClientRequest     *request,
     const std::string &path_info,
-    const std::string &cgi_path
+    const std::string &cgi_path,
+    size_t             max_size
 ) :
     ResponseBuildingStrategy(),
     _location(location),
@@ -57,7 +58,8 @@ CGIStrategy::CGIStrategy(
     _child(0),
     _state(init),
     _was_dechunked(false),
-    _is_length(false) {
+    _is_length(false),
+    _max_size(max_size) {
     if (!_request) {
         error.log() << "Trying to instantiate CGIStrategy without request, sending " << InternalServerError
                     << std::endl;
@@ -213,6 +215,13 @@ void CGIStrategy::feed_CGI() {
         _body->read_body();
         std::string &content = _body->get(); // _body buffer is resized on what is written
         int          ret;
+        if (_body->length() > _max_size) {
+            close(_mosi[1]);
+            close(_miso[0]);
+            kill_child(true);
+            info.log() << "Max body size reached, sending " << ContentTooLarge << std::endl;
+            throw HttpError(ContentTooLarge);
+        }
         do {
             ret = write(
                 _mosi[1], content.c_str(), (PIPE_BUFFER_SIZE <= content.length() ? PIPE_BUFFER_SIZE : content.length())
@@ -220,6 +229,7 @@ void CGIStrategy::feed_CGI() {
             if (ret < 0) {
                 close(_mosi[1]);
                 close(_miso[0]);
+                kill_child(true);
                 error.log() << "CGIStrategy: error while writing in pipe to script, sending " << InternalServerError
                             << std::endl;
                 throw HttpError(InternalServerError);

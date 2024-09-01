@@ -33,6 +33,7 @@ class UploadStrategy : public ResponseBuildingStrategy {
             const std::string &location,
             const ServerClass &server,
             bool               diff,
+            size_t             max_size,
             bool               replace = false
         );
         ~UploadStrategy();
@@ -49,6 +50,7 @@ class UploadStrategy : public ResponseBuildingStrategy {
         Body              *_body;
         std::string        _target;
         std::string        _location;
+        size_t             _max_size;
         bool               _replace;
         bool               _diff; ///< Upload path different than root dir
 #ifdef TESTING

@@ -34,7 +34,8 @@ class CGIStrategy : public ResponseBuildingStrategy {
             const std::string &location,
             ClientRequest     *_request,
             const std::string &path_info,
-            const std::string &cgi_path
+            const std::string &cgi_path,
+            size_t             max_size
         );
         ~CGIStrategy();
 
@@ -66,6 +67,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         cgistate       _state; ///< When body is ready to be
         bool           _was_dechunked;
         bool           _is_length;
+        size_t         _max_size;
 };
 
 #endif // INCLUDE_SRC_CGISTRATEGY_HPP_

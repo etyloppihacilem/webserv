@@ -197,7 +197,7 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
         throw HttpError(MethodNotAllowed);
     } else if (location.is_cgi()) {
         debug.log() << "Choosing CGIStrategy" << std::endl;
-        _strategy = new CGIStrategy(location.get_path(), _request, location.get_path_info(), location.get_cgi_path());
+        _strategy = new CGIStrategy(location.get_path(), _request, location.get_path_info(), location.get_cgi_path(), 42);
     } else if (_request->get_method() == GET || _request->get_method() == HEAD) {
         if (location.is_file()) {
             debug.log() << "Choosing GetFileStrategy" << std::endl;

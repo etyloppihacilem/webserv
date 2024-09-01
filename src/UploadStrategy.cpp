@@ -30,6 +30,7 @@ UploadStrategy< ServerClass, RouteClass >::UploadStrategy(
     const std::string &location,
     const ServerClass &server,
     bool               diff,
+    size_t             max_size,
     bool               replace
 ) :
     ResponseBuildingStrategy(),
@@ -39,6 +40,7 @@ UploadStrategy< ServerClass, RouteClass >::UploadStrategy(
     _body(0),
     _target(request.get_target()),
     _location(location),
+    _max_size(max_size),
     _replace(replace),
     _diff(diff) {
     (void) server;
@@ -85,6 +87,10 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
         size_t read = _body->read_body();
         debug.log() << "Read " << read << " bytes from socket to put in file." << std::endl;
         _file << _body->pop();
+    }
+    if (_body->length() > _max_size) {
+        info.log() << "Max body size reached, sending " << ContentTooLarge << std::endl;
+        throw HttpError(ContentTooLarge);
     }
     if (_body->is_done()) {
         _file.close();
