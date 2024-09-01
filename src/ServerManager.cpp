@@ -3,6 +3,7 @@
 #include "Logger.hpp"
 #include "Server.hpp"
 #include "ServerConfFields.hpp"
+#include "ServerConfLogging.hpp"
 #include "ServerConfTokenize.hpp"
 #include "StringTokenizer.hpp"
 #include "StringUtils.hpp"
@@ -53,8 +54,10 @@ std::string cleanConfFile(std::string fileContent) {
 bool doesServerExist(const std::vector< Server > &servers, const Server &newServer) {
     for (std::vector< Server >::const_iterator it = servers.begin(); it != servers.end(); ++it) {
         if (it->getPort() == newServer.getPort())
-            if (std::equal(it->getServerName().begin(), it->getServerName().end(), newServer.getServerName().begin()))
+            if (std::equal(newServer.getServerName().begin(), newServer.getServerName().end(), it->getServerName().begin())) {
+                logServerRedefinition(newServer.getPort(), newServer.getServerName());
                 return true;
+            }
     }
     return false;
 }
@@ -75,16 +78,17 @@ std::vector< Server > ServerManager::parseConfFile(const std::string &configFile
         throw FailToInitServerError();
     }
 
-    StringTokenizer tokenizedServers = tokenizeFile(cleanConfFile(readConfFile(configStream)));
-    while (tokenizedServers.hasMoreTokens()) {
-        try {
+    try {
+        StringTokenizer tokenizedServers = tokenizeFile(cleanConfFile(readConfFile(configStream)));
+        while (tokenizedServers.hasMoreTokens()) {
             StringTokenizer tokenizedServer = tokenizeServer(tokenizedServers);
             Server          newServer(tokenizedServer);
             if (!doesServerExist(servers, newServer))
                 servers.push_back(newServer);
-        } catch (ServerConfError &e) {
-            throw FailToInitServerError();
         }
+    }
+    catch (ServerConfError &e) {
+        throw FailToInitServerError();
     }
     return servers;
 }

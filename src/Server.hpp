@@ -26,14 +26,14 @@ class Server : public ServerGetRoute<> {
         Server(StringTokenizer &);
         ~Server();
 
-        std::vector< std::string >        getServerName() const;
-        int                               getPort() const;
-        std::string                       getRootDir() const;
-        std::vector< std::string >        getIndexPage() const;
-        bool                              getAutoindex() const;
-        std::set< HttpMethod >            getMethods() const;
-        int                               getMaxBodySize() const;
-        std::map< HttpCode, std::string > getErrorPages() const;
+        const std::vector< std::string >        &getServerName() const;
+        int                                      getPort() const;
+        const std::string                             &getRootDir() const;
+        const std::vector< std::string >        &getIndexPage() const;
+        bool                                     getAutoindex() const;
+        const std::set< HttpMethod >            &getMethods() const;
+        int                                      getMaxBodySize() const;
+        const std::map< HttpCode, std::string > &getErrorPages() const;
 
         bool hasServeName(const std::string &serverName) const;
 

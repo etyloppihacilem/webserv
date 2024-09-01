@@ -99,7 +99,7 @@ Server::Server(StringTokenizer &tokenizedServer) :
 
 Server::~Server() {}
 
-std::vector< std::string > Server::getServerName() const {
+const std::vector< std::string > &Server::getServerName() const {
     return _serverName;
 }
 
@@ -107,11 +107,11 @@ int Server::getPort() const {
     return _port;
 }
 
-std::string Server::getRootDir() const {
+const std::string &Server::getRootDir() const {
     return _rootDir;
 }
 
-std::vector< std::string > Server::getIndexPage() const {
+const std::vector< std::string > &Server::getIndexPage() const {
     return _indexPage;
 }
 
@@ -119,7 +119,7 @@ bool Server::getAutoindex() const {
     return _autoindex;
 }
 
-std::set< HttpMethod > Server::getMethods() const {
+const std::set< HttpMethod > &Server::getMethods() const {
     return _methods;
 }
 
@@ -127,7 +127,7 @@ int Server::getMaxBodySize() const {
     return _maxBodySize;
 }
 
-std::map< HttpCode, std::string > Server::getErrorPages() const {
+const std::map< HttpCode, std::string > &Server::getErrorPages() const {
     return _errorPages;
 }
 

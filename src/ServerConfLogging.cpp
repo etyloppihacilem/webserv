@@ -49,6 +49,18 @@ void logFieldRedefinition(ConfField fieldCode, const ValueList &values) {
     out << ": is a redifinition of the field value, input ignored." << std::endl;
 }
 
+void logServerRedefinition(int port, const ValueList &values) {
+    std::ostream &out = warn.log();
+    out << "ServerManager: ";
+    for (size_t i = 0; i < values.size(); ++i) {
+        out << values[i];
+        if (i < values.size() - 1)
+            out << ", ";
+    } 
+    out << "on port " << port; 
+    out << " is a redifinition of an existing, server ignored." << std::endl;
+}
+
 void logInvalidValuesCount(ConfField fieldCode, const ValueList &values) {
     std::ostream &out = warn.log();
     out << ConfFieldString(fieldCode) << ": ";

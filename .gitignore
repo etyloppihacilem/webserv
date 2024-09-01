@@ -28,3 +28,11 @@ error_pages_ok
 error_pages_ok/**
 child.log
 python.log
+siege-4.1.6
+siege-4.1.6/**
+siege_call.txt
+ubuntu_tester
+ubuntu_cgi_tester
+Testprogram_*
+YoupiBanane
+YoupiBanane/**

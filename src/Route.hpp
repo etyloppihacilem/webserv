@@ -22,17 +22,17 @@ class Route {
         Route(const std::string &, StringTokenizer &, Server &);
         ~Route();
 
-        std::string                getLocation() const;
-        std::string                getRootDir() const;
-        std::vector< std::string > getIndexPage() const;
-        bool                       getAutoindex() const;
-        std::set< HttpMethod >     getMethods() const;
-        int                        getMaxBodySize() const;
-        std::string                getUploadPath() const;
-        HttpCode                   getRedirCode() const;
-        std::string                getRedirPage() const;
-        std::string                getCgiPath() const;
-        std::string                getCgiExtension() const;
+        const std::string                &getLocation() const;
+        const std::string                &getRootDir() const;
+        const std::vector< std::string > &getIndexPage() const;
+        bool                              getAutoindex() const;
+        const std::set< HttpMethod >     &getMethods() const;
+        int                               getMaxBodySize() const;
+        const std::string                &getUploadPath() const;
+        HttpCode                          getRedirCode() const;
+        const std::string                &getRedirPage() const;
+        const std::string                &getCgiPath() const;
+        const std::string                &getCgiExtension() const;
 
         bool hasRootSet() const;
         bool hasIndexPageSet() const;

@@ -11,6 +11,7 @@ void        logMissingFirstToken(ConfField fieldCode, const std::string &logging
 void        logMissingOpenBrace(ConfField fieldCode, const std::string &loggingInfo);
 void        logMissingCloseBrace(ConfField fieldCode, const std::string &loggingInfo);
 void        logFieldRedefinition(ConfField fieldCode, const ValueList &values);
+void        logServerRedefinition(int port, const ValueList &values);
 void        logInvalidValuesCount(ConfField fieldCode, const ValueList &values);
 void        logInvalidIntConvertion(ConfField fieldCode, const std::string &value);
 

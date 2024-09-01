@@ -68,13 +68,14 @@ int main(int ac, char **av) {
         ServerManager::deleteInstance();
         return 0;
     } catch (ServerManager::FailToInitServerError &e) {
-        error.log() << e.what() << std::endl;
+        debug.log() << "Exit with FailToInitServerError exception." << std::endl;
         return 2;
     } catch (std::exception &e) {
         error.log() << e.what() << std::endl;
+        debug.log() << "Exit with standard exception." << std::endl;
         return 1;
     } catch (...) {
-        fatal.log() << "Caught unexpected error!" << std::endl;
+        fatal.log() << "Caught and exit with unexpected error!" << std::endl;
         return 1;
     }
 }

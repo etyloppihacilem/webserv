@@ -99,11 +99,11 @@ bool Route::getAutoindex() const {
     return _autoindex;
 }
 
-std::string Route::getRootDir() const {
+const std::string &Route::getRootDir() const {
     return _rootDir;
 }
 
-std::set< HttpMethod > Route::getMethods() const {
+const std::set< HttpMethod > &Route::getMethods() const {
     return _methods;
 }
 
@@ -111,11 +111,11 @@ int Route::getMaxBodySize() const {
     return _maxBodySize;
 }
 
-std::vector< std::string > Route::getIndexPage() const {
+const std::vector< std::string > &Route::getIndexPage() const {
     return _indexPage;
 }
 
-std::string Route::getUploadPath() const {
+const std::string &Route::getUploadPath() const {
     return _uploadPath;
 }
 
@@ -123,19 +123,19 @@ HttpCode Route::getRedirCode() const {
     return _redirCode;
 }
 
-std::string Route::getRedirPage() const {
+const std::string &Route::getRedirPage() const {
     return _redirPage;
 }
 
-std::string Route::getCgiPath() const {
+const std::string &Route::getCgiPath() const {
     return _cgiPath;
 }
 
-std::string Route::getCgiExtension() const {
+const std::string &Route::getCgiExtension() const {
     return _cgiExtension;
 }
 
-std::string Route::getLocation() const {
+const std::string &Route::getLocation() const {
     return _location;
 }
 
