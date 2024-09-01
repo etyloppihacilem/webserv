@@ -14,6 +14,7 @@
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "gtest/gtest_prod.h"
+#include <cstddef>
 #include <set>
 #include <string>
 #include <vector>
@@ -79,6 +80,10 @@ class FakeRoute {
         bool hasRedirSet() const { return _hasRedir; }
 
         bool hasUploadSet() const { return _hasUpload; }
+
+        size_t getMaxBodySize() const {
+            return 2147483647;
+        }
 
         const std::string &getCgiExtension() const { return _getCgiExtension; }
 
