@@ -25,7 +25,7 @@
 
 class EventHandler {
     public:
-        EventHandler(int socket_fd, int port);
+        EventHandler(int socket_fd, int port = -1);
         virtual ~EventHandler(void) = 0;
 
         int            getSocketFd(void) const;

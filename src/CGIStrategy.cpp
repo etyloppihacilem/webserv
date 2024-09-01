@@ -86,8 +86,8 @@ bool CGIStrategy::build_response() {
         de_chunk();
     if (_state == launch)
         launch_CGI(_body ? _body->length() : 0); // or segfault bc there is no body !!!
-    if (_state == running)
-        feed_CGI();
+    // if (_state == running)
+        // feed_CGI();
     return _built;
 }
 
@@ -223,48 +223,48 @@ void CGIStrategy::launch_CGI(size_t size) {
     }
 }
 
-void CGIStrategy::feed_CGI() {
+
+/**
+  Feed when epoll read event on CGI
+  return true when done.
+  */
+bool CGIStrategy::feed_CGI() {
     if (_body) {
-        _body->read_body();
         std::string &content = _body->get(); // _body buffer is resized on what is written
         int          ret;
         if (_body->length() > _max_size) {
-            close(_mosi[1]);
-            close(_miso[0]);
             kill_child(true);
             info.log() << "Max body size reached, sending " << ContentTooLarge << std::endl;
-            throw HttpError(ContentTooLarge);
+            // throw HttpError(ContentTooLarge);
+            return true; // FIX: set error;
         }
-        do {
+        if (content.length() > 0) {
             ret = write(
                 _mosi[1], content.c_str(), (PIPE_BUFFER_SIZE <= content.length() ? PIPE_BUFFER_SIZE : content.length())
             );
-            write(1, content.c_str(), (PIPE_BUFFER_SIZE <= content.length() ? PIPE_BUFFER_SIZE : content.length()));
             if (ret < 0) {
-                close(_mosi[1]);
-                close(_miso[0]);
                 kill_child(true);
                 error.log() << "CGIStrategy: error while writing in pipe to script " << strerror(errno) << ", sending "
                             << InternalServerError << std::endl;
-                throw HttpError(InternalServerError);
+                // throw HttpError(InternalServerError);
+                return true; // FIX: set error;
             }
             debug.log() << "Fed " << ret << " bytes to child." << std::endl;
             if (static_cast< size_t >(ret) < content.length())
                 content = content.substr(ret, content.length() - ret);
             else
                 content = "";
-        } while (_was_dechunked && content.length() > 0);
-        if (content.length() == 0) {
-            close(_mosi[1]);
+        }
+        if (content.length() == 0 && _body->is_done()) {
             debug.log() << "Request is done being fed to CGI" << std::endl;
-            _built = true;
+            return true; // all done
         }
     } else {
         debug.log() << "Request has no body, CGI is done being initiated." << std::endl;
-        close(_mosi[1]);
         _response.set_cgi(this);
-        _built = true;
+        return true; // nothing to do
     }
+    return false;
 }
 
 // CONTENT_TYPE="" GATEWAY_INTERFACE=CGI/1.1 HTTP_ACCEPT_ENCODING=gzip HTTP_HOST=127.0.0.1

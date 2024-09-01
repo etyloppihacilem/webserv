@@ -45,6 +45,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         bool get_length() const;
         void save_mem();
 
+        bool          feed_CGI();
     private:
         static Logger babyphone;
         void          fill_env(std::map< std::string, std::string > &env, size_t size);
@@ -52,7 +53,6 @@ class CGIStrategy : public ResponseBuildingStrategy {
         void          init_CGI();
         void          de_chunk();
         void          launch_CGI(size_t size);
-        void          feed_CGI();
         void          kill_child(bool k = true);
 
         std::string    _location;

@@ -26,6 +26,7 @@ class CGIWriter : public BodyWriter {
         std::string generate(size_t size = BUFFER_SIZE);
         size_t      length() const;
         void        save_mem();
+        bool        read_from_child();
 
     private:
         void        send_error(HttpCode code = InternalServerError);

@@ -76,16 +76,20 @@ std::string CGIWriter::generate(size_t size) {
     return temp;
 }
 
+bool CGIWriter::read_from_child() {
+    if (!_cgi_done)
+        _cgi_done = _strategy->fill_buffer(_buffer, PIPE_BUFFER_SIZE);
+    return _cgi_done;
+}
+
 void CGIWriter::init() {
     if (!_init) {
         warn.log() << "CGI init already done, aborting" << std::endl;
         return;
     }
     debug.log() << "Initiating CGI headers" << std::endl;
-    if (!_cgi_done)
-        do {
-            _cgi_done = _strategy->fill_buffer(_buffer, PIPE_BUFFER_SIZE);
-        } while (sanitize_HTTP_string(_buffer, 0).find("\n\n") != _buffer.npos && !_cgi_done);
+    if (sanitize_HTTP_string(_buffer, 0).find("\n\n") != _buffer.npos)
+        return;
     size_t found;
     if ((found = _buffer.find("Status:")) != _buffer.npos) {
         size_t end = _buffer.find("\n", found);
