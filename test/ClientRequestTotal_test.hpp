@@ -96,10 +96,8 @@ class TotalRequestFixture : public ::testing::TestWithParam< TotalRequest > {
         void TearDown() override {
             if (_test)
                 delete _test;
-            if (_request)
-                delete _request;
             // if (_request)
-            //     delete _request;
+            //     delete _request; // IS ALREADY DELETED IN READSTATE
             if (_fd[0] != 0)
                 close(_fd[0]);
         }
