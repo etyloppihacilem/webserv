@@ -28,8 +28,8 @@ ProcessHandler::ProcessHandler(int socket_fd, int port, std::string client_IP) :
     EventHandler(socket_fd, port),
     _state(0),
     _client_IP(client_IP) {
-    debug.log() << "ProcessHandler: created on socket " << _socket_fd << " from port " << _port << " by " << client_IP
-                << "." << std::endl;
+    debug.log() << "ProcessHandler: Client " << _client_IP << " created on socket " << _socket_fd << " from port "
+                << _port << "." << std::endl;
 }
 
 ProcessHandler::~ProcessHandler() {
@@ -37,8 +37,8 @@ ProcessHandler::~ProcessHandler() {
         debug.log() << "ProcessHandler deletes ProcessState" << std::endl;
         delete _state;
     }
-    debug.log() << "ProcessHandler: deleted client " << _client_IP << " on " << _socket_fd << " from " << _port << "."
-                << std::endl;
+    debug.log() << "ProcessHandler: Client " << _client_IP << " deleted on socket " << _socket_fd << " from port "
+                << _port << "." << std::endl;
     close(_socket_fd);
 }
 
@@ -56,8 +56,8 @@ time_t ProcessHandler::getTimeout() const {
 }
 
 void ProcessHandler::handle() {
-    info.log() << "ProcessHandler: port " << _port << " on socket " << _socket_fd << " received a new event!"
-               << std::endl;
+    info.log() << "ProcessHandler: Client " << _client_IP << " on socket " << _socket_fd << " from port " << _port
+               << " received a new event!" << std::endl;
     if (!_state)
         _state = new ReadState(_socket_fd, _port, _client_IP);
     if (_state->process() == ready) {
@@ -82,7 +82,7 @@ void ProcessHandler::handle() {
 }
 
 void ProcessHandler::timeout() {
-    warn.log() << "Client " << _client_IP << " on socket " << _socket_fd << " on port " << _port << " timed out! ("
+    warn.log() << "ProcessHandler: Client " << _client_IP << " on socket " << _socket_fd << " on port " << _port << " timed out! ("
                << getTimeout() << "s)" << std::endl;
     ServerManager::getInstance()->deleteClient(_socket_fd, *this);
 }

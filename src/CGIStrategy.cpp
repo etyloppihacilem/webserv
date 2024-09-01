@@ -386,6 +386,10 @@ bool CGIStrategy::get_length() const {
     return _is_length;
 }
 
+pid_t CGIStrategy::get_child_pid() const {
+    return _child;
+}
+
 void CGIStrategy::save_mem() {
     _response.save_mem();
 }

@@ -43,6 +43,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         bool fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
         void set_length(bool len);
         bool get_length() const;
+        pid_t get_child_pid() const;
         void save_mem();
 
         bool          feed_CGI();
