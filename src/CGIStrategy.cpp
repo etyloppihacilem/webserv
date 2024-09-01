@@ -16,7 +16,6 @@
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
-#include "Path.hpp"
 #include "Response.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
@@ -69,7 +68,7 @@ CGIStrategy::CGIStrategy(
 
 CGIStrategy::~CGIStrategy() {
     if (_child)
-        kill_child();
+        kill_child(true);
 }
 
 bool CGIStrategy::build_response() {
@@ -137,8 +136,7 @@ void CGIStrategy::de_chunk() {
 
 void CGIStrategy::launch_CGI(size_t size) {
     // program separation
-    std::string absolute_location = Path(_location).str();
-    debug.log() << "Preparing to launch CGI " << _cgi_path << " with script " << absolute_location << std::endl;
+    debug.log() << "Preparing to launch CGI " << _cgi_path << " with script " << _location << std::endl;
     std::map< std::string, std::string > env;
     fill_env(env, size);
     pid_t pid = fork();
@@ -164,20 +162,19 @@ void CGIStrategy::launch_CGI(size_t size) {
             close(_miso[1]);
             _exit(1);
         }
+        close(_mosi[0]);
         if (dup2(_miso[1], 1) < 0) {
             babyphone.log() << "Cannot redirect stdout into child." << std::endl;
-            close(_mosi[0]);
             close(_miso[1]);
             _exit(1);
         }
+        close(_miso[1]);
         char **args = new (std::nothrow) char *[3];
-        args[1]     = strdup(absolute_location.c_str());
+        args[1]     = strdup(_location.c_str());
         if (!args || !args[0]) {
             if (args)
                 free(args);
             babyphone.log() << "Cannot creat arg string. Aborting." << std::endl;
-            close(_mosi[0]);
-            close(_miso[1]);
             _exit(1);
         }
         args[2]      = 0;
@@ -186,8 +183,6 @@ void CGIStrategy::launch_CGI(size_t size) {
             free(args[0]);
             free(args);
             babyphone.log() << "Cannot creat arg string. Aborting." << std::endl;
-            close(_mosi[0]);
-            close(_miso[1]);
             _exit(1);
         }
         char *cmd = strdup(_cgi_path.c_str());
@@ -198,19 +193,16 @@ void CGIStrategy::launch_CGI(size_t size) {
             free(args[0]);
             free(args);
             babyphone.log() << "Cannot create arg string. Aborting." << std::endl;
-            close(_mosi[0]);
-            close(_miso[1]);
             _exit(1);
         }
-        babyphone.log() << "Running execve(" << cmd << ", " << args[0] << ", env)" << std::endl;
+        babyphone.log() << "Running execve(" << cmd << ", " << args[1] << ", env)" << std::endl;
+        std::cout << "Inside: I am inside\r\n";
         execve(cmd, args, c_env);
         babyphone.log() << "CGIStrategy: Execve failed to run " << strerror(errno) << std::endl; // logging is on stderr
-        close(_mosi[0]);
-        close(_miso[1]);
         free(c_env);
         free(args[0]);
         free(args);
-        _exit(1); // _exit with underscore does not flush STDIO
+        _exit(1); // _exit with underscore does not flush STDIO"
         // WARN: Check if this is memory safe.
     }
 }

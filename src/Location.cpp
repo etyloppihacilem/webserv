@@ -144,7 +144,7 @@ bool Location< ServerClass, RouteClass >::init_cgi_glob(const std::string &targe
     _methods               = route.getMethods();
     _route                 = route.getLocation();
     _cgi_path              = route.getRootDir();
-    std::string ext        = route.getCgiExtension();
+    std::string ext        = "." + route.getCgiExtension();
     size_t      sep        = 0;
     size_t      next_slash = 0;
     debug.log() << "Looking for extension and separating target into path and path_info with extension " << ext

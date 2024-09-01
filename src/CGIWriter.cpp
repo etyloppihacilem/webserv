@@ -56,19 +56,20 @@ std::string CGIWriter::generate(size_t size) {
     std::string temp = _buffer.substr(0, (size > _buffer.length() ? _buffer.length() : size));
     _buffer.replace(0, (size > _buffer.length() ? _buffer.length() : size), "");
     std::stringstream st;
-    st << std::hex << temp.size();
-    _length         += temp.length();
+    size_t            temp_size = temp.size();
+    st << std::hex << temp_size;
+    _length         += temp_size;
     CGIStrategy *tmp = dynamic_cast< CGIStrategy * >(_strategy);
     if (_buffer.length() == 0)
         _done = true;
     if (tmp) {
         if (!tmp->get_length()) {
-            debug.log() << "Sending a message of length 0x" << st.str() << " (" << temp.size() << ")" << std::endl;
-            temp = st.str() + "\r\n" + temp + (_done ? "\r\n0\r\n\r\n" : "\r\n");
+            debug.log() << "Sending a message of length 0x" << st.str() << " (" << temp_size << ")" << std::endl;
+            temp = st.str() + "\r\n" + temp + (_done && temp_size ? "\r\n0\r\n\r\n" : "\r\n");
         }
     } else {
-        debug.log() << "Sending a message of length 0x" << st.str() << " (" << temp.size() << ")" << std::endl;
-        temp = st.str() + "\r\n" + temp + (_done ? "\r\n0\r\n\r\n" : "\r\n");
+        debug.log() << "Sending a message of length 0x" << st.str() << " (" << temp_size << ")" << std::endl;
+        temp = st.str() + "\r\n" + temp + (_done && temp_size ? "\r\n0\r\n\r\n" : "\r\n");
         error.log() << "CGIWriter is set with no CGIStrategy Strategy. Sending with Chunk by default." << std::endl;
     }
     return temp;
@@ -99,11 +100,14 @@ void CGIWriter::init() {
     }
     debug.log() << "Parsing CGI headers" << std::endl;
     while (*_buffer.begin() != '\n') {
-        size_t end = _buffer.find("\n");
-        found      = _buffer.find(":");
+        size_t end   = _buffer.find("\n");
+        found        = _buffer.find(":");
+        size_t space = _buffer.find_first_of(" \t");
         if (end == _buffer.npos)
             break;
-        if (found == _buffer.npos || found > end) {
+        if (found == _buffer.npos || found > end || space < found) {
+            warn.log() << "CGI header line was discarded because of incorrect header format." << std::endl;
+            debug.log() << "Line: " << _buffer.substr(0, end) << std::endl;
             _buffer.replace(0, end + 1, "");
             continue;
         }
@@ -114,7 +118,7 @@ void CGIWriter::init() {
             continue;
         }
         _response.add_header(name, _buffer.substr(found, end - found));
-        debug.log() << "CGI added header '" << name << ": " << _buffer.substr(found, end) << "'" << std::endl;
+        debug.log() << "CGI added header '" << name << ": " << _buffer.substr(found, end - found) << "'" << std::endl;
         _buffer.replace(0, end + 1, "");
     }
     _buffer.replace(0, 1, ""); // this is a \n

@@ -74,7 +74,7 @@ t_state ReadState::process_buffer(char *buffer) {
             _request = new ClientRequest(_socket, _ip);
             debug.log() << "Parsing request line." << std::endl;
         }
-        // length check
+        // length check"
         while (_parse_state != body && (eol = _buffer.find("\n")) != _buffer.npos) {
             if (_parse_state == rs_line && eol == 0) {
                 _buffer = _buffer.substr(1, _buffer.length() - 1); // to discard leading lines of request
