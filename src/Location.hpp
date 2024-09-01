@@ -19,6 +19,7 @@
 #include "HttpStatusCodes.hpp"
 #include "Route.hpp"
 #include "Server.hpp"
+#include <cstddef>
 #include <set>
 #include <string>
 #ifdef TESTING
@@ -45,6 +46,7 @@ class Location {
         const std::string &get_path_info() const;
         const std::string &get_cgi_path() const;
         bool               has_method(HttpMethod method) const;
+        std::size_t        get_max_body_size() const;
 
     private:
         Location(); // for testing purposes only
@@ -64,6 +66,7 @@ class Location {
         bool                   _is_redirect;
         bool                   _is_diff; ///< If uploadpath and rootdir differs
         std::set< HttpMethod > _methods;
+        std::size_t            _max_body_size;
         HttpCode               _status_code;
         HttpCode               _default_error;
         std::string            _route;       ///< Route location in config

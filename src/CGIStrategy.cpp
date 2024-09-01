@@ -27,6 +27,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fcntl.h>
 #include <iostream>
 #include <map>
 #include <new>
@@ -97,7 +98,7 @@ void CGIStrategy::init_CGI() {
     }
     debug.log() << "Running init for CGIStrategy." << std::endl;
     if (_body) {
-        if (dynamic_cast< BodyChunk * >(_body) == 0) {
+        if (dynamic_cast< BodyChunk * >(_body) != 0) {
             debug.log() << "CGI request with body type chunk, body needs to be dechunked." << std::endl;
             _state = loading_body;
         } else {
@@ -131,10 +132,22 @@ void CGIStrategy::de_chunk() {
         warn.log() << "CGIStrategy: dechunking body while _state is not loading_body, aborting." << std::endl;
         return;
     }
-    if (!_body->is_done())
+    if (!_body->is_done()) {
+        _body->read_body();
         _body->get();
-    if (_body->is_done())
+    }
+    if (_body->length() > _max_size) {
+        close(_mosi[1]);
+        close(_miso[0]);
+        kill_child(true);
+        info.log() << "Max body size reached, sending " << ContentTooLarge << std::endl;
+        throw HttpError(ContentTooLarge);
+    }
+    if (_body->is_done()) {
+        debug.log() << "Body was successfully dechunked, for a total length of " << _body->length() << " bytes."
+                    << std::endl;
         _state = launch;
+    }
 }
 
 void CGIStrategy::launch_CGI(size_t size) {
@@ -157,6 +170,7 @@ void CGIStrategy::launch_CGI(size_t size) {
         info.log() << "CGIStrategy: Child " << pid << " running." << std::endl;
         _state = running;
     } else { // child
+        close(STDERR_FILENO);
         close(_mosi[1]);
         close(_miso[0]);
         if (dup2(_mosi[0], 0) < 0) {
@@ -206,7 +220,6 @@ void CGIStrategy::launch_CGI(size_t size) {
         free(args[0]);
         free(args);
         _exit(1); // _exit with underscore does not flush STDIO"
-        // WARN: Check if this is memory safe.
     }
 }
 
@@ -226,14 +239,18 @@ void CGIStrategy::feed_CGI() {
             ret = write(
                 _mosi[1], content.c_str(), (PIPE_BUFFER_SIZE <= content.length() ? PIPE_BUFFER_SIZE : content.length())
             );
+            write(
+                1, content.c_str(), (PIPE_BUFFER_SIZE <= content.length() ? PIPE_BUFFER_SIZE : content.length())
+            );
             if (ret < 0) {
                 close(_mosi[1]);
                 close(_miso[0]);
                 kill_child(true);
-                error.log() << "CGIStrategy: error while writing in pipe to script, sending " << InternalServerError
-                            << std::endl;
+                error.log() << "CGIStrategy: error while writing in pipe to script " << strerror(errno) << ", sending "
+                            << InternalServerError << std::endl;
                 throw HttpError(InternalServerError);
             }
+            debug.log() << "Fed " << ret << " bytes to child." << std::endl;
             if (static_cast< size_t >(ret) < content.length())
                 content = content.substr(ret, content.length() - ret);
             else
@@ -251,6 +268,11 @@ void CGIStrategy::feed_CGI() {
         _built = true;
     }
 }
+
+// CONTENT_TYPE="" GATEWAY_INTERFACE=CGI/1.1 HTTP_ACCEPT_ENCODING=gzip HTTP_HOST=127.0.0.1
+// HTTP_USER_AGENT=Go-http-client/1.1 PATH_INFO="" QUERY_STRING="" REMOTE_ADDR=2.0.164.200 REMOTE_HOST=""
+// REQUEST_METHOD=GET SCRIPT_NAME=/directory/youpi.bla SERVER_NAME=127.0.0.1 SERVER_PORT=8080 SERVER_PROTOCOL=HTTP/1.1
+// SERVER_SOFTWAR=jeon/0.1 PATH_TRANSLATED=YoupiBananerectory/youpi.bla
 
 void CGIStrategy::fill_env(std::map< std::string, std::string > &env, size_t size) {
     env["CONTENT_TYPE"] = "";
@@ -275,7 +297,7 @@ void CGIStrategy::fill_env(std::map< std::string, std::string > &env, size_t siz
         st >> env["SERVER_PORT"];
     }
     env["SERVER_PROTOCOL"] = "HTTP/1.1";
-    env["SERVER_SOFTWAR"]  = SERVER_SOFTWARE;
+    env["SERVER_SOFTWARE"] = SERVER_SOFTWARE;
     for (mapit it = _request->get_header().begin(); it != _request->get_header().end(); it++) {
         std::string name = "HTTP_";
         name            += it->first;

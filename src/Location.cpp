@@ -18,6 +18,7 @@
 #include "ServerGetRoute.hpp"
 #include "StringUtils.hpp"
 #include <cerrno>
+#include <climits>
 #include <cstring>
 #include <features.h>
 #include <ostream>
@@ -33,6 +34,7 @@ Location< ServerClass, RouteClass >::Location() :
     _is_cgi(false),
     _is_redirect(false),
     _is_diff(false),
+    _max_body_size(INT_MAX),
     _status_code(OK),
     _default_error(Forbidden) {}
 
@@ -43,6 +45,7 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
     _is_cgi(false),
     _is_redirect(false),
     _is_diff(false),
+    _max_body_size(INT_MAX),
     _status_code(OK),
     _default_error(Forbidden) {
     struct stat buf;
@@ -52,6 +55,7 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
         const RouteClass &route = server.getRoute(target);
         _route                  = route.getLocation();
         debug.log() << "Using route " << _route << std::endl;
+        _max_body_size = route.getMaxBodySize();
         if (route.hasRedirSet()) {
             set_redir(target, route);
             return;
@@ -203,7 +207,6 @@ bool Location< ServerClass, RouteClass >::find_index(const RouteClass &route, st
         throw HttpError(InternalServerError); // anything else is sus
     }
     debug.log() << "No index file found in " << _path << std::endl;
-    debug.log() << "dirty debug: " << route.getAutoindex() << " and is indexs empty? " << indexs.empty() << std::endl;
     if (route.getAutoindex() == false && !indexs.empty()) {
         info.log() << "Index file set but none found, sending " << NotFound << std::endl;
         throw HttpError(NotFound); // file found but won't open
@@ -328,6 +331,11 @@ bool Location< ServerClass, RouteClass >::has_method(HttpMethod method) const {
     // if (method == HEAD)
     //     method = GET; // because same
     return _methods.find(method) != _methods.end();
+}
+
+template < class ServerClass, class RouteClass >
+std::size_t Location< ServerClass, RouteClass >::get_max_body_size() const {
+    return _max_body_size;
 }
 
 template class Location<>; // force compilation for this template (defaults)

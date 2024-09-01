@@ -197,14 +197,18 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
         throw HttpError(MethodNotAllowed);
     } else if (location.is_cgi()) {
         debug.log() << "Choosing CGIStrategy" << std::endl;
-        _strategy = new CGIStrategy(location.get_path(), _request, location.get_path_info(), location.get_cgi_path(), 42);
+        _strategy = new CGIStrategy(
+            location.get_path(), _request, location.get_path_info(), location.get_cgi_path(),
+            location.get_max_body_size()
+        );
     } else if (_request->get_method() == GET || _request->get_method() == HEAD) {
         if (location.is_file()) {
             debug.log() << "Choosing GetFileStrategy" << std::endl;
             _strategy = new GetFileStrategy(mime_types, location.get_path(), OK, _request->get_method() == HEAD);
         } else if (location.has_autoindex()) {
             debug.log() << "Choosing GetIndexStrategy" << std::endl;
-            _strategy = new GetIndexStrategy(location.get_path(), _request->get_target(), _request->get_method() == HEAD);
+            _strategy
+                = new GetIndexStrategy(location.get_path(), _request->get_target(), _request->get_method() == HEAD);
         } else {
             info.log() << "ResponseBuildState: '" << _request->get_target() << "' is not a file, sending " << Forbidden
                        << std::endl;
@@ -213,7 +217,8 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
     } else if (_request->get_method() == POST || _request->get_method() == PUT) {
         debug.log() << "Choosing UploadStrategy" << std::endl;
         _strategy = new UploadStrategy< ServerClass, RouteClass >(
-            *_request, location.get_upload_path(), *_server, location.is_diff(), (_request->get_method() == PUT)
+            *_request, location.get_upload_path(), *_server, location.is_diff(), (_request->get_method() == PUT),
+            location.get_max_body_size()
         );
     } else if (_request->get_method() == DELETE) {
         debug.log() << "Choosing DeleteStrategy" << std::endl;
