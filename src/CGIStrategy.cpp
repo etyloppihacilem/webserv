@@ -81,9 +81,9 @@ CGIStrategy::~CGIStrategy() {
     if (_child)
         kill_child(true);
     if (_handlerMISO)
-        _handlerMISO->timeout();
+        ServerManager::getInstance()->deleteClient(_handlerMISO->getSocketFd(), *_handlerMISO);
     if (_handlerMOSI)
-        _handlerMOSI->timeout();
+        ServerManager::getInstance()->deleteClient(_handlerMOSI->getSocketFd(), *_handlerMOSI);
 }
 
 void CGIStrategy::removeMISO() {
@@ -178,17 +178,33 @@ void CGIStrategy::launch_CGI(size_t size) {
     fill_env(env, size);
     pid_t pid = fork();
     if (pid < 0) {
+        close(_miso[0]);
         close(_miso[1]);
         close(_mosi[0]);
-        error.log() << "CGIStrategy: Could not open pipe, sending " << InternalServerError << std::endl;
+        close(_mosi[1]);
+        error.log() << "CGIStrategy: Could not fork CGI child, sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     } else if (pid) { // parent
         _child = pid;
         close(_mosi[0]);
         close(_miso[1]);
         info.log() << "CGIStrategy: Child " << pid << " running." << std::endl;
-        _writer      = new CGIWriter(*this);
-        _handlerMISO = new CGIHandlerMISO(_miso[0], *this, *_writer);
+        _writer = new CGIWriter(*this);
+        errno   = 0;
+        if (fcntl(_miso[0], F_SETFL, O_NONBLOCK) == -1) {
+            close(_miso[0]);
+            close(_mosi[1]);
+            error.log() << "CGIStrategy: unable to add set miso to O_NONBLOCK " + std::string(std::strerror(errno)) << std::endl;
+            throw HttpError(InternalServerError);
+        }
+        _handlerMISO = new CGIHandlerMISO(_miso[0], _request->get_socket(), *this, *_writer);
+        errno        = 0;
+        if (fcntl(_mosi[1], F_SETFL, O_NONBLOCK) == -1) {
+            close(_miso[0]);
+            close(_mosi[1]);
+            error.log() << "CGIStrategy: unable to add set mosi to O_NONBLOCK " + std::string(std::strerror(errno)) << std::endl;
+            throw HttpError(InternalServerError);
+        }
         _handlerMOSI = new CGIHandlerMOSI(_mosi[1], *this);
         if (ServerManager::getInstance()->addCGIToddler(_handlerMISO, _handlerMOSI) == -1) {
             error.log() << "CGIStrategy: unable to add CGIHandler to epoll list." << std::endl;
@@ -255,6 +271,7 @@ void CGIStrategy::launch_CGI(size_t size) {
   return true when done.
   */
 bool CGIStrategy::feed_CGI() {
+    debug.log() << "CGI child is going to be fed." << std::endl;
     if (_code != OK)
         debug.log() << "Error " << _code << " already set, MOSI will not feed child further." << std::endl;
     if (_body) {
@@ -386,7 +403,7 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
                 kill_child(false);
             } else {
                 debug.log() << "Done reading from CGI pipe, closing child." << std::endl;
-                close(_miso[0]);
+                /*close(_miso[0]);*/ // NOTE: to reproduce heavy leak Reactor.
                 _done = true;
             }
         }
@@ -409,6 +426,10 @@ void CGIStrategy::kill_child(bool k) {
 
 void CGIStrategy::set_length(bool len) {
     _is_length = len;
+}
+
+void CGIStrategy::is_done_building() {
+    _built = true;
 }
 
 bool CGIStrategy::get_length() const {

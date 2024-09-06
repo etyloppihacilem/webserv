@@ -29,9 +29,7 @@ class ServerReactor {
 
         void run();
 
-#ifdef TESTING
-        std::set< EventHandler * > &getEventHandler();
-#endif
+        EventHandler *getCGIHandler(int CGI_process_fd) const;
 
     private:
         int                        _epoll_fd;

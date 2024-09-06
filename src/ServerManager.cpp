@@ -5,6 +5,7 @@
 #include "ServerConfFields.hpp"
 #include "ServerConfLogging.hpp"
 #include "ServerConfTokenize.hpp"
+#include "ServerReactor.hpp"
 #include "StringTokenizer.hpp"
 #include "StringUtils.hpp"
 #include <algorithm>
@@ -142,8 +143,6 @@ const Server &ServerManager::getServer(int port) const {
     throw ServerNotFoundWarn(portStr.str());
 }
 
-#ifdef TESTING
-ServerReactor &ServerManager::getReactor() {
+const ServerReactor &ServerManager::getReactor() const {
     return _reactor;
 }
-#endif

@@ -123,8 +123,8 @@ int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
 }
 
 int ServerReactor::addCGIToddler(EventHandler *handler_miso, EventHandler *handler_mosi) {
-    info.log() << "ServerReactor: New CGI bidirectionnal connection on child in " << handler_miso->getSocketFd()
-               << " and child out " << handler_mosi->getSocketFd() << std::endl;
+    info.log() << "ServerReactor: New CGI bidirectionnal connection on child in " << handler_mosi->getSocketFd()
+               << " and child out " << handler_miso->getSocketFd() << std::endl;
     if (_eventHandlers.size() + 2 >= MAX_TOTAL_CONNECTION) {
         warn.log() << "ServerReactor: addClient: max connection reached, pipe family will be deported." << std::endl;
         delete handler_miso;
@@ -157,9 +157,8 @@ int ServerReactor::addCGIToddler(EventHandler *handler_miso, EventHandler *handl
     return 0;
 }
 
-// NOTE: for info should we pass the client IP?
 void ServerReactor::deleteClient(int socket_fd, EventHandler &handler) {
-    info.log() << "ServerReactor: Delete client socket " << socket_fd << std::endl;
+    info.log() << "ServerReactor: Delete connection on socket " << socket_fd << std::endl;
     errno = 0;
     if (epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, socket_fd, 0) == -1)
         throw std::runtime_error("ServerReactor: epoll_ctl_del: " + std::string(std::strerror(errno)));
@@ -229,8 +228,11 @@ void ServerReactor::run() {
     }
 }
 
-#ifdef TESTING
-std::set< EventHandler * > &ServerReactor::getEventHandler() {
-    return _eventHandlers;
+EventHandler *ServerReactor::getCGIHandler(int CGI_process_fd) const {
+    std::set<EventHandler *>::iterator it;
+    for (it = _eventHandlers.begin(); it != _eventHandlers.end(); ++it) {
+        if ((*it)->getSocketFd() == CGI_process_fd)
+            return (*it);
+    }
+    return 0;
 }
-#endif

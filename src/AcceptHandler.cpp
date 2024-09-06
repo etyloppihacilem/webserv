@@ -6,9 +6,11 @@
 #include <cerrno>
 #include <cstring>
 #include <ctime>
+#include <fcntl.h>
 #include <limits>
 #include <netinet/in.h>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -36,6 +38,12 @@ void AcceptHandler::handle() {
     if ((client_fd = accept(_socket_fd, (struct sockaddr *) (&socket_addr), &socket_size)) == -1) {
         warn.log() << "AcceptHandler: accept: " << std::string(std::strerror(errno)) << std::endl;
         return;
+    }
+
+    errno = 0;
+    if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
+        close(client_fd);
+        throw std::runtime_error("ServerReactor: fcntl: " + std::string(std::strerror(errno)));
     }
     char s[INET_ADDRSTRLEN];
     inet_ntop(socket_addr.sin_family, (struct sockaddr *) &socket_addr, s, sizeof s);

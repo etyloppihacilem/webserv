@@ -47,6 +47,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         bool  build_response();
         bool  fill_buffer(std::string &buffer, size_t size = MAX_BODY_BUFFER);
         void  set_length(bool len);
+        void  is_done_building();
         bool  get_length() const;
         pid_t get_child_pid() const;
         void  save_mem();
