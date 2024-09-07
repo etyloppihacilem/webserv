@@ -195,6 +195,10 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
             throw HttpError(InternalServerError);
         }
         _handlerMISO = new CGIHandlerMISO(_miso[0], *this, *_writer, _temp_file, _request->get_socket());
+        if (ServerManager::getInstance()->addCGIToddler(_handlerMISO) == -1) {
+            error.log() << "CGIStrategy: unable to add CGIToddler to epoll list." << std::endl;
+            throw HttpError(InternalServerError);
+        }
         _temp_stream.close();
         errno = 0;
         _response.set_cgi(this, *_writer);
@@ -345,7 +349,7 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
         char buf[PIPE_BUFFER_SIZE + 1] = { 0 };
         rd                             = read(_miso[0], buf, PIPE_BUFFER_SIZE);
         if (rd < 0) {
-            close(_miso[0]);
+            /*close(_miso[0]);*/
             kill_child(true); // true
             error.log() << "Error reading in pipe from CGI child. Aborting." << std::endl;
             return _done = true;

@@ -72,7 +72,7 @@ std::string CGIWriter::generate(size_t size) {
 }
 
 bool CGIWriter::read_from_child() {
-    debug.log() << "Parent child is going to read from child." << std::endl;
+    debug.log() << "Parent is going to read from child." << std::endl;
     if (!_cgi_done)
         _cgi_done = _strategy->fill_buffer(_buffer, PIPE_BUFFER_SIZE);
     return _cgi_done;
