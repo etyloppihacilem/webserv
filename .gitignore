@@ -36,3 +36,4 @@ ubuntu_cgi_tester
 Testprogram_*
 YoupiBanane
 YoupiBanane/**
+*.log

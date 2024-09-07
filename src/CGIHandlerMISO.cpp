@@ -33,11 +33,12 @@ CGIHandlerMISO::~CGIHandlerMISO() {
     if (_socket_fd >= 0)
         close(_socket_fd);
     _strategy.removeMISO();
-    _strategy.is_done_building();
-    EventHandler *CGI_process = ServerManager::getInstance()->getReactor().getCGIHandler(_process_fd);
-    if (CGI_process) {
-        CGI_process->handle();
-    }
+    // Stuff to end _strategy BUT not here
+    // _strategy.is_done_building();
+    // EventHandler *CGI_process = ServerManager::getInstance()->getReactor().getCGIHandler(_process_fd);
+    // if (CGI_process) {
+    //     CGI_process->handle();
+    // }
 }
 
 time_t CGIHandlerMISO::getTimeout() const {

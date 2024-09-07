@@ -109,7 +109,12 @@ bool CGIStrategy::build_response() {
         de_chunk();
     if (_state == launch)
         launch_CGI(_body ? _body->length() : 0); // or segfault bc there is no body !!!
-    // if (_state == running)
+    if (_state == running) {
+        if (_body->get().length() < PIPE_BUFFER_SIZE)
+            _body->read_body();
+        if (_body->is_done())
+            _built = true;
+    }
     // feed_CGI();
     return _built;
 }
@@ -194,7 +199,8 @@ void CGIStrategy::launch_CGI(size_t size) {
         if (fcntl(_miso[0], F_SETFL, O_NONBLOCK) == -1) {
             close(_miso[0]);
             close(_mosi[1]);
-            error.log() << "CGIStrategy: unable to add set miso to O_NONBLOCK " + std::string(std::strerror(errno)) << std::endl;
+            error.log() << "CGIStrategy: unable to add set miso to O_NONBLOCK " + std::string(std::strerror(errno))
+                        << std::endl;
             throw HttpError(InternalServerError);
         }
         _handlerMISO = new CGIHandlerMISO(_miso[0], _request->get_socket(), *this, *_writer);
@@ -202,7 +208,8 @@ void CGIStrategy::launch_CGI(size_t size) {
         if (fcntl(_mosi[1], F_SETFL, O_NONBLOCK) == -1) {
             close(_miso[0]);
             close(_mosi[1]);
-            error.log() << "CGIStrategy: unable to add set mosi to O_NONBLOCK " + std::string(std::strerror(errno)) << std::endl;
+            error.log() << "CGIStrategy: unable to add set mosi to O_NONBLOCK " + std::string(std::strerror(errno))
+                        << std::endl;
             throw HttpError(InternalServerError);
         }
         _handlerMOSI = new CGIHandlerMOSI(_mosi[1], *this);
@@ -211,7 +218,10 @@ void CGIStrategy::launch_CGI(size_t size) {
             throw HttpError(InternalServerError);
         }
         _response.set_cgi(this, *_writer);
-        _state = running;
+        if (_was_dechunked)
+            _built = true;
+        else
+            _state = running; // or a read_body will be done without epoll
     } else { // child
         close(STDERR_FILENO);
         close(_mosi[1]);
