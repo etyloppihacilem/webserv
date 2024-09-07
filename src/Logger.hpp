@@ -11,6 +11,7 @@
 #ifndef INCLUDE_SRC_LOGGER_HPP_
 #define INCLUDE_SRC_LOGGER_HPP_
 
+#include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include <cstddef>
 #include <fstream>
@@ -65,6 +66,7 @@ class Logger : public std::ostream {
 };
 
 std::ostream &operator<<(std::ostream &os, const HttpCode code);
+std::ostream &operator<<(std::ostream &os, const HttpMethod method);
 
 extern Logger info;
 extern Logger warn;

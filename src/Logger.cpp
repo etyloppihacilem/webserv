@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "Logger.hpp"
+#include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "colors.hpp"
 #include <cstdarg>
@@ -96,6 +97,11 @@ Logger::~Logger() {
 
 std::ostream &operator<<(std::ostream &os, const HttpCode code) {
     os << static_cast< int >(code) << " " << status_string(code);
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const HttpMethod method) {
+    os << method_string(method);
     return os;
 }
 

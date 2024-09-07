@@ -27,8 +27,8 @@ enum HttpMethod {
 
 #define COUNT_METHOD 4
 
-inline std::string method_string(const int &code) {
-    switch (code) {
+inline std::string method_string(const int &method) {
+    switch (method) {
         case GET:
             return "GET";
         case POST:

@@ -25,6 +25,7 @@
 #include <set>
 #include <string>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <vector>
 
 template < class ServerClass, class RouteClass >
@@ -49,8 +50,7 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
     _status_code(OK),
     _default_error(Forbidden) {
     struct stat buf;
-    if (check_cgi_glob(target, server))
-        return;
+    check_cgi_glob(target, server);
     try {
         const RouteClass &route = server.getRoute(target);
         _route                  = route.getLocation();
@@ -62,7 +62,8 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
         }
         build_path(target, route);
         _is_diff = route.getRootDir() != route.getUploadPath();
-        _methods = route.getMethods();
+        if (!_is_cgi)
+            _methods = route.getMethods();
         if (stat_file(target, buf))
             return;
         debug.log() << "Target '" << target << "' exists." << std::endl;
@@ -146,7 +147,7 @@ template < class ServerClass, class RouteClass >
 bool Location< ServerClass, RouteClass >::init_cgi_glob(const std::string &target, const RouteClass &route) {
     _is_cgi                = true;
     _methods               = route.getMethods();
-    _route                 = route.getLocation();
+    // _route                 = route.getLocation();
     _cgi_path              = route.getRootDir();
     std::string ext        = "." + route.getCgiExtension();
     size_t      sep        = 0;
@@ -162,11 +163,11 @@ bool Location< ServerClass, RouteClass >::init_cgi_glob(const std::string &targe
         return false;
     }
     debug.log() << "Extension was found." << std::endl;
-    build_path(target.substr(0, sep), route);
-    debug.log() << "Script path " << _path << std::endl;
     _cgi_path  = route.getCgiPath();
     _path_info = target.substr(sep, target.length() - sep);
     debug.log() << "Path_info " << _path_info << std::endl;
+    // build_path(target.substr(0, sep), route);
+    // debug.log() << "Script path " << _path << std::endl;
     return true;
 }
 
@@ -262,6 +263,10 @@ template < class ServerClass, class RouteClass >
 void Location< ServerClass, RouteClass >::setup_cgi(const RouteClass &route) {
     if (!route.hasCgiPathSet() || !route.hasCgiExtensionSet())
         return; // nothing to configure because cgi is incomplete
+    if (!_is_cgi) {
+        debug.log() << "CGI already set by glob, will not be set again." << std::endl;
+        return;
+    }
     _is_cgi   = true;
     _cgi_path = route.getCgiPath();
 }

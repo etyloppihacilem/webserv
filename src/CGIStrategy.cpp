@@ -238,6 +238,8 @@ void CGIStrategy::launch_CGI(size_t size) {
         close(STDERR_FILENO);
         close(_mosi[1]);
         close(_miso[0]);
+        // close(_mosi[0]); // DEBUG HERE
+        // _mosi[0] = open("temp.test", O_RDONLY);
         if (dup2(_mosi[0], 0) < 0) {
             babyphone.log() << "Cannot redirect stdin into child." << std::endl;
             close(_mosi[0]);
@@ -349,14 +351,18 @@ void CGIStrategy::fill_env(std::map< std::string, std::string > &env, size_t siz
         st >> env["CONTENT_LENGTH"];
     }
     env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    env["PATH_INFO"]         = _path_info;
-    env["PATH_TRANSLATED"]   = _location; // physical path after translation on device
-    env["QUERY_STRING"]      = _request->get_query_string();
-    env["REMOTE_HOST"]       = "";                 // leave empty
-    env["REMOTE_ADDR"]       = _request->get_ip(); // client ip
-    env["REQUEST_METHOD"]    = method_string(_request->get_method());
-    env["SCRIPT_NAME"]       = _request->get_target();
-    env["SERVER_NAME"]       = _request->get_header().at("Host");
+    // env["PATH_INFO"]         = _path_info;
+    env["PATH_INFO"]       = _request->get_target();
+    debug.log() << "PATH_INFO=" << env["PATH_INFO"] << std::endl;
+    env["REQUEST_URI"] = _request->get_target();
+    debug.log() << "REQUEST_URI=" << _request->get_target() << std::endl;
+    env["PATH_TRANSLATED"] = _location; // physical path after translation on device
+    env["QUERY_STRING"]    = _request->get_query_string();
+    env["REMOTE_HOST"]     = "";                 // leave empty
+    env["REMOTE_ADDR"]     = _request->get_ip(); // client ip
+    env["REQUEST_METHOD"]  = method_string(_request->get_method());
+    env["SCRIPT_NAME"]     = _request->get_target();
+    env["SERVER_NAME"]     = _request->get_header().at("Host");
     {
         std::stringstream st;
         st << _request->get_port();
@@ -392,7 +398,7 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
     for (std::map< std::string, std::string >::const_iterator it = env.begin(); it != env.end(); it++) {
         std::string tmp = it->first + "=" + it->second;
         babyphone.log() << "Adding to CGI env " << tmp << std::endl;
-        if (!(ret[i] = strdup(tmp.c_str()))) { // bad alloc
+        if (!(ret[i++] = strdup(tmp.c_str()))) { // bad alloc
             babyphone.log() << "CGIStrategy: env alloc partially failed. CGI env will not be generated." << std::endl;
             for (size_t j = 0; j <= env.size(); j++)
                 if (ret[j])
