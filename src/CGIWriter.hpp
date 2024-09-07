@@ -32,11 +32,11 @@ class CGIWriter : public BodyWriter {
         bool        init();
 
     private:
-        void        send_error(HttpCode code = InternalServerError);
-        Response   &_response;
-        std::string _buffer;
-        size_t      _total;
-        bool        _cgi_done;
+        void         send_error(HttpCode code = InternalServerError);
+        Response    &_response;
+        std::string  _buffer;
+        size_t       _total;
+        bool         _cgi_done;
         CGIStrategy *_cgi_strategy; // to cast
 };
 

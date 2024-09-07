@@ -94,7 +94,7 @@ bool CGIStrategy::build_response() {
         info.log() << "CGIStrategy encountered an error in ChildHandler and will send " << _code << std::endl;
         throw HttpError(_code);
     }
-    if (_built) {
+    if (_built || _state == launched) {
         warn.log() << "CGIStrategy: build_response called but response is already built." << std::endl;
         return _built;
     }
@@ -194,12 +194,13 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
                         << std::endl;
             throw HttpError(InternalServerError);
         }
-        _handlerMISO = new CGIHandlerMISO(_miso[0], *this, *_writer, _temp_file);
+        _handlerMISO = new CGIHandlerMISO(_miso[0], *this, *_writer, _temp_file, _request->get_socket());
         _temp_stream.close();
         errno = 0;
         _response.set_cgi(this, *_writer);
-        _built = true; // CGIStrategy done
-    } else {           // child
+        _state = launched;
+        // _built = true; // CGIStrategy is never done
+    } else { // child
         close(STDERR_FILENO);
         close(_miso[0]);
         if (body) {

@@ -30,6 +30,7 @@ typedef enum s_cgistate {
     init = 0,     // first init, run only one time
     loading_body, // if body is length so reading it
     launch,       // launch CGI
+    launched,
 } cgistate;
 
 class CGIStrategy : public ResponseBuildingStrategy {

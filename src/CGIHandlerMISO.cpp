@@ -21,11 +21,18 @@
 #include <string>
 #include <unistd.h>
 
-CGIHandlerMISO::CGIHandlerMISO(int MISO_fd, CGIStrategy &strategy, CGIWriter &writer, const std::string &temp_file) :
+CGIHandlerMISO::CGIHandlerMISO(
+    int                MISO_fd,
+    CGIStrategy       &strategy,
+    CGIWriter         &writer,
+    const std::string &temp_file,
+    int                process_fd
+) :
     EventHandler(MISO_fd),
     _strategy(strategy),
     _writer(writer),
-    _temp_file(temp_file) {
+    _temp_file(temp_file),
+    _process_fd(process_fd) {
     debug.log() << "CGIHandlerMISO: created on pipe " << _socket_fd << " for child " << _strategy.get_child_pid() << "."
                 << std::endl;
 }
@@ -53,11 +60,16 @@ void CGIHandlerMISO::handle() {
     info.log() << "CGIHandlerMISO: Child " << _strategy.get_child_pid() << " on pipe " << _socket_fd
                << " received a new event!" << std::endl;
     if (_writer.read_from_child()) {
-        _writer.init();
-        ServerManager::getInstance()->deleteClient(_socket_fd, *this);
+        if (!_writer.init())
+            ServerManager::getInstance()->talkToClient(
+                _process_fd, *ServerManager::getInstance()->getReactor().getCGIHandler(_process_fd)
+            );
         return;
     }
-    _writer.init();
+    if (!_writer.init())
+        ServerManager::getInstance()->talkToClient(
+            _process_fd, *ServerManager::getInstance()->getReactor().getCGIHandler(_process_fd)
+        );
 } // Run this in loop
 
 void CGIHandlerMISO::timeout() {

@@ -143,6 +143,6 @@ const Server &ServerManager::getServer(int port) const {
     throw ServerNotFoundWarn(portStr.str());
 }
 
-const ServerReactor &ServerManager::getReactor() const {
+ServerReactor &ServerManager::getReactor() {
     return _reactor;
 }

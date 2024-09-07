@@ -214,3 +214,11 @@ void ServerReactor::run() {
         }
     }
 }
+
+EventHandler *ServerReactor::getCGIHandler(int CGI_process_fd) {
+    std::set< EventHandler * >::iterator it;
+    for (it = _eventHandlers.begin(); it != _eventHandlers.end(); ++it)
+        if ((*it)->getSocketFd() == CGI_process_fd)
+            return *it;
+    return 0;
+}
