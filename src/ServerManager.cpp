@@ -103,8 +103,8 @@ int ServerManager::addClient(int socket_fd, int port, std::string client_IP) {
     return _reactor.addClient(socket_fd, port, client_IP);
 }
 
-int ServerManager::addCGIToddler(EventHandler *handler_miso, EventHandler *handler_mosi) {
-    return _reactor.addCGIToddler(handler_miso, handler_mosi);
+int ServerManager::addCGIToddler(EventHandler *handler_miso) {
+    return _reactor.addCGIToddler(handler_miso);
 }
 
 void ServerManager::deleteClient(int socket_fd, EventHandler &handler) {

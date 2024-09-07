@@ -18,9 +18,8 @@
 #include <ostream>
 #include <unistd.h>
 
-CGIHandlerMISO::CGIHandlerMISO(int MISO_fd, int process_fd, CGIStrategy &strategy, CGIWriter &writer) :
+CGIHandlerMISO::CGIHandlerMISO(int MISO_fd, CGIStrategy &strategy, CGIWriter &writer) :
     EventHandler(MISO_fd),
-    _process_fd(process_fd),
     _strategy(strategy),
     _writer(writer) {
     debug.log() << "CGIHandlerMISO: created on pipe " << _socket_fd << " for child " << _strategy.get_child_pid() << "."

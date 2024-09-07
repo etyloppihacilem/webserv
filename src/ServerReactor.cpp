@@ -122,13 +122,12 @@ int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
     return 0;
 }
 
-int ServerReactor::addCGIToddler(EventHandler *handler_miso, EventHandler *handler_mosi) {
-    info.log() << "ServerReactor: New CGI bidirectionnal connection on child in " << handler_mosi->getSocketFd()
-               << " and child out " << handler_miso->getSocketFd() << std::endl;
+int ServerReactor::addCGIToddler(EventHandler *handler_miso) {
+    info.log() << "ServerReactor: New CGI bidirectionnal connection on child out " << handler_miso->getSocketFd()
+               << std::endl;
     if (_eventHandlers.size() + 2 >= MAX_TOTAL_CONNECTION) {
         warn.log() << "ServerReactor: addClient: max connection reached, pipe family will be deported." << std::endl;
         delete handler_miso;
-        delete handler_mosi;
         return -1;
     }
 
@@ -138,22 +137,10 @@ int ServerReactor::addCGIToddler(EventHandler *handler_miso, EventHandler *handl
     errno               = 0;
     if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, handler_miso->getSocketFd(), &event_miso)) {
         delete handler_miso;
-        delete handler_mosi;
-        throw std::runtime_error("ServerReactor: epoll_ctl_add: " + std::string(std::strerror(errno)));
-    }
-
-    struct epoll_event event_mosi;
-    event_mosi.events   = EPOLLOUT | EPOLLERR | EPOLLHUP;
-    event_mosi.data.ptr = handler_mosi;
-    errno               = 0;
-    if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, handler_mosi->getSocketFd(), &event_mosi)) {
-        delete handler_miso;
-        delete handler_mosi;
         throw std::runtime_error("ServerReactor: epoll_ctl_add: " + std::string(std::strerror(errno)));
     }
 
     _eventHandlers.insert(handler_miso);
-    _eventHandlers.insert(handler_mosi);
     return 0;
 }
 
@@ -226,13 +213,4 @@ void ServerReactor::run() {
             debug.log() << "ServerReactor: timeout check done." << std::endl;
         }
     }
-}
-
-EventHandler *ServerReactor::getCGIHandler(int CGI_process_fd) const {
-    std::set<EventHandler *>::iterator it;
-    for (it = _eventHandlers.begin(); it != _eventHandlers.end(); ++it) {
-        if ((*it)->getSocketFd() == CGI_process_fd)
-            return (*it);
-    }
-    return 0;
 }

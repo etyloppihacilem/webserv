@@ -19,7 +19,7 @@ class CGIStrategy;
 
 class CGIHandlerMISO : public EventHandler {
     public:
-        CGIHandlerMISO(int MISO_fd, int _process_fd, CGIStrategy &strategy, CGIWriter &writer);
+        CGIHandlerMISO(int MISO_fd, CGIStrategy &strategy, CGIWriter &writer);
         ~CGIHandlerMISO();
 
         time_t getTimeout() const;
@@ -27,7 +27,6 @@ class CGIHandlerMISO : public EventHandler {
         void   timeout();
 
     private:
-        int         _process_fd;
         CGIStrategy &_strategy;
         CGIWriter   &_writer;
 };

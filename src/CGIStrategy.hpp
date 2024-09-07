@@ -13,7 +13,6 @@
 
 #include "Body.hpp"
 #include "CGIHandlerMISO.hpp"
-#include "CGIHandlerMOSI.hpp"
 #include "CGIWriter.hpp"
 #include "ClientRequest.hpp"
 #include "HttpStatusCodes.hpp"
@@ -21,6 +20,7 @@
 #include "ResponseBuildingStrategy.hpp"
 #include "todo.hpp"
 #include <cstddef>
+#include <fstream>
 #include <map>
 #include <sched.h>
 #include <string>
@@ -28,9 +28,8 @@
 
 typedef enum s_cgistate {
     init = 0,     // first init, run only one time
-    loading_body, // if body needs to be dechunked, run as long as body takes to be read entierely
+    loading_body, // if body is length so reading it
     launch,       // launch CGI
-    running,      // running CGI script
 } cgistate;
 
 class CGIStrategy : public ResponseBuildingStrategy {
@@ -52,9 +51,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         pid_t get_child_pid() const;
         void  save_mem();
 
-        bool feed_CGI();
         void removeMISO();
-        void removeMOSI();
         bool MISO_alive() const;
 
     private:
@@ -62,24 +59,25 @@ class CGIStrategy : public ResponseBuildingStrategy {
         void          fill_env(std::map< std::string, std::string > &env, size_t size);
         char        **generate_env(const std::map< std::string, std::string > &env) const;
         void          init_CGI();
-        void          de_chunk();
+        void          fill_temp_file();
         void          launch_CGI(size_t size);
         void          kill_child(bool k = true);
+        void          clean_filestream();
 
         std::string     _location;
         std::string     _path_info;
         std::string     _cgi_path;
         std::string     _cgi_response;
+        std::string     _temp_file;
+        std::fstream    _temp_stream;
         ClientRequest  *_request;
         Body           *_body;
-        int             _mosi[2]; // master out slave in
+        // int             _mosi[2]; // master out slave in
         int             _miso[2]; // master in slave out
         pid_t           _child;
         cgistate        _state; ///< When body is ready to be
-        bool            _was_dechunked;
         bool            _is_length;
         size_t          _max_size;
-        CGIHandlerMOSI *_handlerMOSI;
         CGIHandlerMISO *_handlerMISO;
         CGIWriter      *_writer;
         HttpCode        _code;
