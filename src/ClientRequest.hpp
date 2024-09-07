@@ -37,6 +37,7 @@ class ClientRequest {
         std::string        get_target() const;
         HttpMethod         get_method();
         Body              *get_body();
+        void               remove_body();
         bool               have_body() const;
         HttpCode           get_status() const;
         int                get_socket() const;

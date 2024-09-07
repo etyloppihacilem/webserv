@@ -73,8 +73,10 @@ CGIStrategy::CGIStrategy(
                     << std::endl;
         throw HttpError(InternalServerError);
     }
-    if (_request->have_body())
+    if (_request->have_body()) {
         _body = _request->get_body();
+        _request->remove_body();
+    }
 }
 
 CGIStrategy::~CGIStrategy() {
@@ -84,6 +86,8 @@ CGIStrategy::~CGIStrategy() {
         ServerManager::getInstance()->deleteClient(_handlerMISO->getSocketFd(), *_handlerMISO);
     if (_handlerMOSI)
         ServerManager::getInstance()->deleteClient(_handlerMOSI->getSocketFd(), *_handlerMOSI);
+    if (_body)
+        delete _body;
 }
 
 void CGIStrategy::removeMISO() {

@@ -469,6 +469,10 @@ Body *ClientRequest::get_body() {
     return _body;
 }
 
+void ClientRequest::remove_body() { // so it is not freed by clientrequest
+    _body = 0;
+}
+
 const std::map< std::string, std::string > &ClientRequest::get_header() {
     return _header;
 }
