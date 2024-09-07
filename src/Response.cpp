@@ -156,11 +156,6 @@ bool Response::build_response(std::string &buffer, size_t size) {
     }
     while (buffer.length() < size && _state != finished) {
         if (_state == rs_line) {
-            debug.log() << "Generating status line" << std::endl;
-            date(); // updating date headers
-            buffer = generate_status_line();
-            _state = headers;
-        } else if (_state == headers) {
             if (_body->init_todo()) {
                 CGIWriter *tmp;
                 if ((tmp = dynamic_cast< CGIWriter * >(_body)) != 0) {
@@ -172,6 +167,11 @@ bool Response::build_response(std::string &buffer, size_t size) {
                     warn.log() << "No init on no CGIWriter BodyWriter" << std::endl;
                 }
             }
+            debug.log() << "Generating status line" << std::endl;
+            date(); // updating date headers
+            buffer = generate_status_line();
+            _state = headers;
+        } else if (_state == headers) {
             if (_header.find("Content-Length") == _header.end()) { // here ?
                 debug.log() << "CGI did not defined length, sending body in chunked format." << std::endl;
                 _header["Transfer-Encoding"] = "chunked";
