@@ -35,12 +35,14 @@ class BodyWriter {
         virtual size_t      length() const                      = 0; ///< Returns length of body sent or to be sent,
                                                                      ///< depending on BodyWriter type.
         bool                is_done() const;                         ///< Returns if BodyWriter is done sending.
+        bool                init_todo() const;                       ///< Returns if BodyWriter is done sending.
         virtual void        save_mem() = 0;                          ///< Save allocated heap.
 
     protected:
         bool                      _done;     ///< True if body is sent.
         ResponseBuildingStrategy *_strategy; ///< Strategy is needed to generate content of body
         size_t                    _length;
+        bool                      _init; ///< Wether init needs to be done
 };
 
 #endif // INCLUDE_SRC_BODYWRITER_HPP_

@@ -18,6 +18,8 @@
 #include <cstddef>
 #include <string>
 
+class CGIStrategy;
+
 class CGIWriter : public BodyWriter {
     public:
         CGIWriter(ResponseBuildingStrategy &strategy);
@@ -27,15 +29,15 @@ class CGIWriter : public BodyWriter {
         size_t      length() const;
         void        save_mem();
         bool        read_from_child();
+        bool        init();
 
     private:
         void        send_error(HttpCode code = InternalServerError);
-        void        init();
         Response   &_response;
         std::string _buffer;
         size_t      _total;
-        bool        _init; ///< Wether init needs to be done
         bool        _cgi_done;
+        CGIStrategy *_cgi_strategy; // to cast
 };
 
 #endif // INCLUDE_SRC_CGIWRITER_HPP_

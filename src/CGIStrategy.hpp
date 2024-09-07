@@ -55,6 +55,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         bool feed_CGI();
         void removeMISO();
         void removeMOSI();
+        bool MISO_alive() const;
 
     private:
         static Logger babyphone;

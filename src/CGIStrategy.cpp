@@ -110,10 +110,18 @@ bool CGIStrategy::build_response() {
     if (_state == launch)
         launch_CGI(_body ? _body->length() : 0); // or segfault bc there is no body !!!
     if (_state == running) {
-        if (_body->get().length() < PIPE_BUFFER_SIZE)
-            _body->read_body();
-        if (_body->is_done())
+        if (_body && !_was_dechunked) {
+            if (_body->get().length() < PIPE_BUFFER_SIZE)
+                _body->read_body();
+            if (_body->is_done())
+                _built = true;
+        } else {
+            if (!_body)
+                debug.log() << "No body to read, response built." << std::endl;
+            else
+                warn.log() << "Body was dechunked so already read." << std::endl;
             _built = true;
+        }
     }
     // feed_CGI();
     return _built;
@@ -222,7 +230,7 @@ void CGIStrategy::launch_CGI(size_t size) {
             _built = true;
         else
             _state = running; // or a read_body will be done without epoll
-    } else { // child
+    } else {                  // child
         close(STDERR_FILENO);
         close(_mosi[1]);
         close(_miso[0]);
@@ -434,9 +442,9 @@ void CGIStrategy::kill_child(bool k) {
     _child = 0;
 }
 
-void CGIStrategy::set_length(bool len) {
-    _is_length = len;
-}
+// void CGIStrategy::set_length(bool len) {
+//     _is_length = len;
+// }
 
 void CGIStrategy::is_done_building() {
     _built = true;
@@ -448,6 +456,10 @@ bool CGIStrategy::get_length() const {
 
 pid_t CGIStrategy::get_child_pid() const {
     return _child;
+}
+
+bool CGIStrategy::MISO_alive() const {
+    return _handlerMISO != 0;
 }
 
 void CGIStrategy::save_mem() {

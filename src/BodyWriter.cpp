@@ -11,9 +11,13 @@
 #include "BodyWriter.hpp"
 #include <ostream>
 
-BodyWriter::BodyWriter() : _done(false), _strategy(0), _length(0) {}
+BodyWriter::BodyWriter() : _done(false), _strategy(0), _length(0), _init(false) {}
 
-BodyWriter::BodyWriter(ResponseBuildingStrategy &strategy) : _done(false), _strategy(&strategy), _length(0) {}
+BodyWriter::BodyWriter(ResponseBuildingStrategy &strategy) :
+    _done(false),
+    _strategy(&strategy),
+    _length(0),
+    _init(false) {}
 
 BodyWriter::~BodyWriter() {}
 
@@ -24,4 +28,8 @@ std::ostream &operator<<(std::ostream &os, BodyWriter &obj) {
 
 bool BodyWriter::is_done() const {
     return _done;
+}
+
+bool BodyWriter::init_todo() const {
+    return _init;
 }

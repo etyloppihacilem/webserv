@@ -161,6 +161,21 @@ bool Response::build_response(std::string &buffer, size_t size) {
             buffer = generate_status_line();
             _state = headers;
         } else if (_state == headers) {
+            if (_body->init_todo()) {
+                CGIWriter *tmp;
+                if ((tmp = dynamic_cast< CGIWriter * >(_body)) != 0) {
+                    if (tmp->init()) {
+                        debug.log() << "CGIWriter init not done yet." << std::endl;
+                        break;
+                    }
+                } else {
+                    warn.log() << "No init on no CGIWriter BodyWriter" << std::endl;
+                }
+            }
+            if (_header.find("Content-Length") == _header.end()) { // here ?
+                debug.log() << "CGI did not defined length, sending body in chunked format." << std::endl;
+                _header["Transfer-Encoding"] = "chunked";
+            }
             debug.log() << "Generating headers" << std::endl;
             buffer += generate_header();
             buffer += "\r\n"; // to end headers
@@ -251,17 +266,17 @@ void Response::set_cgi(ResponseBuildingStrategy *strategy, CGIWriter &writer) {
     clean_body();
     debug.log() << "Setting response with CGI." << std::endl;
     _body = dynamic_cast< BodyWriter * >(&writer);
-    _body->generate(); // TODO: not there // this will initiate response headers EXCEPT connection !!
-    if (_header.find("Content-Length") == _header.end()) {
-        debug.log() << "CGI did not defined length, sending body in chunked format." << std::endl;
-        _header["Transfer-Encoding"] = "chunked";
-    } else {
-        CGIStrategy *tmp = dynamic_cast< CGIStrategy * >(strategy);
-        if (tmp)
-            tmp->set_length(true);
-        else
-            error.log() << "CGI is set with no CGIStrategy Strategy." << std::endl;
-    }
+    // _body->generate(); // TODO: not there // this will initiate response headers EXCEPT connection !!
+    // if (_header.find("Content-Length") == _header.end()) {
+    //     debug.log() << "CGI did not defined length, sending body in chunked format." << std::endl;
+    //     _header["Transfer-Encoding"] = "chunked";
+    // } else {
+    //     CGIStrategy *tmp = dynamic_cast< CGIStrategy * >(strategy);
+    //     if (tmp)
+    //         tmp->set_length(true);
+    //     else
+    //         error.log() << "CGI is set with no CGIStrategy Strategy." << std::endl;
+    // }
 }
 
 /**

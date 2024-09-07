@@ -48,8 +48,11 @@ time_t CGIHandlerMISO::getTimeout() const {
 void CGIHandlerMISO::handle() {
     info.log() << "CGIHandlerMISO: Child " << _strategy.get_child_pid() << " on pipe " << _socket_fd
                << " received a new event!" << std::endl;
-    if (_writer.read_from_child())
+    if (_writer.read_from_child()) {
+        _writer.init();
         ServerManager::getInstance()->deleteClient(_socket_fd, *this);
+    }
+    _writer.init();
 } // Run this in loop
 
 void CGIHandlerMISO::timeout() {
