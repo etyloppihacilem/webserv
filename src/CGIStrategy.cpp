@@ -179,6 +179,7 @@ void CGIStrategy::de_chunk() {
     if (_body->length() > _max_size) {
         kill_child(true);
         info.log() << "Max body size reached, sending " << ContentTooLarge << std::endl;
+        debug.log() << "client_max_body_size = " << _max_size << "(bytes) while body length = " << _body->length() << std::endl;
         throw HttpError(ContentTooLarge);
     }
     if (_body->is_done()) {
@@ -391,7 +392,7 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
         babyphone.log() << "CGIStrategy: env alloc failed. CGI env will not be generated." << std::endl;
         return 0;
     }
-    bzero(ret, env.size() + 1);
+    bzero(ret, sizeof(char *) * (env.size() + 1));
 
     size_t i = 0;
 

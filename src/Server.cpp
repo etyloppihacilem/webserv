@@ -46,7 +46,7 @@ Server::Server() :
     _indexPage(1, "index.html"),
     _autoindex(false),
     _methods(initMethod, initMethod + 1),
-    _maxBodySize(1000000),
+    _maxBodySize(MAX_BODY_SIZE),
     _errorPages(),
     _isFieldSet(COUNT_CONF_FIELD, false) {
     _routes["/"] = Route(*this);
@@ -60,7 +60,7 @@ Server::Server(StringTokenizer &tokenizedServer) :
     _indexPage(1, "index.html"),
     _autoindex(false),
     _methods(initMethod, initMethod + 1),
-    _maxBodySize(1000000),
+    _maxBodySize(MAX_BODY_SIZE),
     _errorPages(),
     _isFieldSet(COUNT_CONF_FIELD, false) {
 

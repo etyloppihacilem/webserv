@@ -51,6 +51,7 @@ void CGIHandlerMISO::handle() {
     if (_writer.read_from_child()) {
         _writer.init();
         ServerManager::getInstance()->deleteClient(_socket_fd, *this);
+        return ;
     }
     _writer.init();
 } // Run this in loop

@@ -76,14 +76,16 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
         } else {             // in case target is anything but a directory
             _is_file = true; // not a dir
             debug.log() << "Target is a file" << std::endl;
-            if (route.hasCgiExtensionSet() && extract_extension(_path) == route.getCgiExtension()) {
-                debug.log() << "Route has cgi " << route.getCgiPath() << " and target correct extension "
-                            << route.getCgiExtension() << std::endl;
-                setup_cgi(route);
-            } else {
-                if (route.hasCgiExtensionSet())
-                    debug.log() << target << " has wrong extension for CGI, CGI is not enabled." << std::endl;
-                debug.log() << "No CGI enabled." << std::endl;
+            if (!_is_cgi) {
+                if (route.hasCgiExtensionSet() && extract_extension(_path) == route.getCgiExtension()) {
+                    debug.log() << "Route has cgi " << route.getCgiPath() << " and target correct extension "
+                                << route.getCgiExtension() << std::endl;
+                    setup_cgi(route);
+                } else {
+                    if (route.hasCgiExtensionSet())
+                        debug.log() << target << " has wrong extension for CGI, CGI is not enabled." << std::endl;
+                    debug.log() << "No CGI enabled." << std::endl;
+                }
             }
         }
     } catch (typename ServerGetRoute< RouteClass >::RouteNotFoundWarn &e) {
