@@ -14,12 +14,13 @@
 #include "CGIWriter.hpp"
 #include "EventHandler.hpp"
 #include <ctime>
+#include <string>
 
 class CGIStrategy;
 
 class CGIHandlerMISO : public EventHandler {
     public:
-        CGIHandlerMISO(int MISO_fd, CGIStrategy &strategy, CGIWriter &writer);
+        CGIHandlerMISO(int MISO_fd, CGIStrategy &strategy, CGIWriter &writer, const std::string &temp_file);
         ~CGIHandlerMISO();
 
         time_t getTimeout() const;
@@ -29,6 +30,7 @@ class CGIHandlerMISO : public EventHandler {
     private:
         CGIStrategy &_strategy;
         CGIWriter   &_writer;
+        std::string _temp_file;
 };
 
 #endif // INCLUDE_SRC_CGIHANDLERMISO_HPP_

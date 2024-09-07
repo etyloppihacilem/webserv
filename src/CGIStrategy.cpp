@@ -103,7 +103,7 @@ bool CGIStrategy::build_response() {
     if (_state == loading_body) // listen event
         fill_temp_file();
     if (_state == launch)
-        launch_CGI(_body ? _body->length() : 0); // or segfault bc there is no body !!!
+        launch_CGI(_body ? _body->length() : 0, _body != 0); // or segfault bc there is no body !!!
     return _built;
 }
 
@@ -171,7 +171,7 @@ void CGIStrategy::fill_temp_file() {
     }
 }
 
-void CGIStrategy::launch_CGI(size_t size) {
+void CGIStrategy::launch_CGI(size_t size, bool body) {
     // program separation
     debug.log() << "Preparing to launch CGI " << _cgi_path << " with script " << _location << std::endl;
     std::map< std::string, std::string > env;
@@ -194,22 +194,30 @@ void CGIStrategy::launch_CGI(size_t size) {
                         << std::endl;
             throw HttpError(InternalServerError);
         }
-        _handlerMISO = new CGIHandlerMISO(_miso[0], *this, *_writer);
-        errno        = 0;
+        _handlerMISO = new CGIHandlerMISO(_miso[0], *this, *_writer, _temp_file);
+        _temp_stream.close();
+        errno = 0;
         _response.set_cgi(this, *_writer);
         _built = true; // CGIStrategy done
     } else {           // child
         close(STDERR_FILENO);
         close(_miso[0]);
-        // close(_mosi[0]); // DEBUG HERE
-        // _mosi[0] = open("temp.test", O_RDONLY);
-        int temp_fd = open(_temp_file.c_str(), O_RDONLY);
-        if (dup2(temp_fd, 0) < 0) {
-            babyphone.log() << "Cannot redirect stdin into child." << std::endl;
-            close(_miso[1]);
-            _exit(1);
-        }
-        close(temp_fd);
+        if (body) {
+            int temp_fd = open(_temp_file.c_str(), O_RDONLY);
+            if (temp_fd < 0) {
+                babyphone.log() << "Cannot open temp file " << _temp_file << " " << strerror(errno) << std::endl;
+                close(_miso[1]);
+                _exit(1);
+            }
+            if (dup2(temp_fd, 0) < 0) {
+                babyphone.log() << "Cannot redirect stdin into child." << std::endl;
+                close(temp_fd);
+                close(_miso[1]);
+                _exit(1);
+            }
+            close(temp_fd);
+        } else
+            close(0);
         if (dup2(_miso[1], 1) < 0) {
             babyphone.log() << "Cannot redirect stdout into child." << std::endl;
             close(_miso[1]);
