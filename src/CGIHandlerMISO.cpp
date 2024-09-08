@@ -56,8 +56,10 @@ void CGIHandlerMISO::handle() {
                << " received a new event!" << std::endl;
     if (_writer.read_from_child()) {
         _writer.init();
-        _strategy.is_done_building();
-        ServerManager::getInstance()->getReactor().getCGIHandler(_process_fd)->handle();
+        if (!_strategy.is_built()) {
+            _strategy.is_done_building();
+            ServerManager::getInstance()->getReactor().getCGIHandler(_process_fd)->handle();
+        }
         ServerManager::getInstance()->deleteClient(getSocketFd(), *this);
         return;
     }

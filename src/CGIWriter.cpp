@@ -48,11 +48,11 @@ std::string CGIWriter::generate(size_t size) {
         init();
         return "";
     }
-    if (_buffer.length() == 0 && !_cgi_done) {
+    if (_buffer.length() == 0 && !(_cgi_done = !_cgi_strategy->is_child_alive())) {
         debug.log() << "Waiting for CGI to fill buffer." << std::endl;
         return "";
     }
-    if (_length == 0 && _buffer.length() == 0 && _cgi_done) {
+    if (_length == 0 && _buffer.length() == 0 && (_cgi_done = !_cgi_strategy->is_child_alive())) {
         debug.log() << "CGI ended with no body." << std::endl;
         _done = true;
         return "";
@@ -65,7 +65,7 @@ std::string CGIWriter::generate(size_t size) {
     size_t            temp_size = temp.size();
     st << std::hex << temp_size;
     _length += temp_size;
-    if (_buffer.length() == 0 && _cgi_done && !_cgi_strategy->is_child_alive())
+    if (_buffer.length() == 0 && (_cgi_done = !_cgi_strategy->is_child_alive()))
         _done = true;
     if (_cgi_strategy) {
         if (!_cgi_strategy->get_length()) {
@@ -82,7 +82,7 @@ std::string CGIWriter::generate(size_t size) {
 
 bool CGIWriter::read_from_child() {
     debug.log() << "Parent is going to read from child." << std::endl;
-    if (!_cgi_done)
+    if (!_cgi_done) // CGI done is only done when CGI is done being read and NOT when child is dead:
         _cgi_done = _strategy->fill_buffer(_buffer, PIPE_BUFFER_SIZE);
     if (_cgi_done)
         debug.log() << "Done reading from child." << std::endl;

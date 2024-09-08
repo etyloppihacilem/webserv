@@ -16,7 +16,9 @@
 #include "ServerConfFields.hpp"
 #include "todo.hpp"
 #include <cctype>
+#include <cerrno>
 #include <cstddef>
+#include <cstring>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -58,13 +60,18 @@ size_t BodyLength::read_body() {
     if (_done)
         return 0;
 
-    char   buf[BUFFER_SIZE + 1]; // the whole buffer is set to 0
-    size_t size_read;
+    char buf[BUFFER_SIZE + 1]; // the whole buffer is set to 0
+    int  size_read;
 
     for (size_t i = 0; i < BUFFER_SIZE + 1; i++)
         buf[i] = 0;
     size_read = read(_socket, buf, (_length - _read_length >= BUFFER_SIZE) ? BUFFER_SIZE : _length - _read_length);
-    _buffer.insert(_buffer.length(), buf);
+    if (size_read < 0) {
+        error.log() << "Invalid read in BodyLength " << strerror(errno) << std::endl;
+        return 0;
+    }
+    debug.log() << "Just read " << size_read << " bytes from BodyLength." << std::endl;
+    _buffer      += std::string(buf);
     _read_length += size_read;
     return size_read;
 }

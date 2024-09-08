@@ -16,7 +16,9 @@
 #include "ServerConfFields.hpp"
 #include "todo.hpp"
 #include <cctype>
+#include <cerrno>
 #include <cstddef>
+#include <cstring>
 #include <ios>
 #include <iterator>
 #include <ostream>
@@ -39,8 +41,8 @@ size_t BodyChunk::read_body() {
     if (_done)
         return 0;
 
-    char   buf[BUFFER_SIZE + 1] = { 0 }; // whole buffer is set to 0
-    size_t size_read;
+    char buf[BUFFER_SIZE + 1] = { 0 }; // whole buffer is set to 0
+    int  size_read;
 
     if (_bytes_remaining && _bytes_remaining >= _buffer.length())
         size_read = (_bytes_remaining - _buffer.length()) + 2;
@@ -51,7 +53,11 @@ size_t BodyChunk::read_body() {
     else
         size_read = 1;
     size_read = read(_socket, buf, size_read > BUFFER_SIZE ? BUFFER_SIZE : size_read);
-    _buffer  += std::string(buf);
+    if (size_read < 0) {
+        error.log() << "Invalid read in BodyLength " << strerror(errno) << std::endl;
+        return 0;
+    }
+    _buffer += std::string(buf);
     return size_read;
 }
 

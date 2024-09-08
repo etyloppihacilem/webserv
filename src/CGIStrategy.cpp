@@ -101,7 +101,7 @@ bool CGIStrategy::build_response() {
     }
     if (_state == init) // no poll event
         init_CGI();
-    if (_state == loading_body) // listen event
+    else if (_state == loading_body) // listen event
         fill_temp_file();
     if (_state == launch)
         launch_CGI(_body ? _body->length() : 0, _body != 0); // or segfault bc there is no body !!!
@@ -187,10 +187,6 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
         error.log() << "CGIStrategy: Could not fork CGI child, sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     } else if (pid) { // parent
-        static int a = 0;
-        a++;
-        if (a > 1)
-            a++;
         _child = pid;
         close(_miso[1]);
         info.log() << "CGIStrategy: Child " << pid << " running." << std::endl;
@@ -237,10 +233,10 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
             }
             close(temp_fd);
         }
-        /*close(_miso[1]);*/
-        /*_miso[1] = open("./output.log", O_CREAT | O_WRONLY | O_TRUNC, 000666);*/
-        /*if (_miso[1] < 0)*/
-        /*    babyphone.log() << "Could not open outfile." << std::endl;*/
+        // close(_miso[1]);
+        // _miso[1] = open("./output.log", O_CREAT | O_WRONLY | O_TRUNC, 000666);
+        // if (_miso[1] < 0)
+        //     babyphone.log() << "Could not open outfile." << std::endl;
         if (dup2(_miso[1], 1) < 0) {
             babyphone.log() << "Cannot redirect stdout into child." << std::endl;
             close(_miso[1]);
@@ -393,7 +389,7 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
 }
 
 bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way to force chunk
-    if (_done)
+    if (_done)                                                    // not done
         return _done;
     int rd;
     (void) size;
@@ -458,9 +454,9 @@ void CGIStrategy::kill_child(bool k) {
     if (WIFEXITED(status)) {
         exit_code = WEXITSTATUS(status);
         debug.log() << "child exited with exit code " << exit_code << "." << std::endl;
-    if (WIFSIGNALED(status))
-        debug.log() << "Child was terminated by signal " << WTERMSIG(status) << " " << strsignal(WTERMSIG(status))
-                    << std::endl;
+        if (WIFSIGNALED(status))
+            debug.log() << "Child was terminated by signal " << WTERMSIG(status) << " " << strsignal(WTERMSIG(status))
+                        << std::endl;
     } else {
         debug.log() << "child not exited live in limbs of memory." << std::endl;
     }
