@@ -397,8 +397,8 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
         char buf[PIPE_BUFFER_SIZE + 1] = { 0 };
         rd                             = read(_miso[0], buf, PIPE_BUFFER_SIZE);
         if (rd < 0) {
-            // kill_child(true); // true bc we want to execute child
-            kill_child(false); // WARN:debug only bc we dont want to kill our child
+            kill_child(true); // true bc we want to execute child
+            // kill_child(false); // debug only
             error.log() << "Error reading in pipe from CGI child. Aborting." << std::endl;
             return _done = true;
         }
