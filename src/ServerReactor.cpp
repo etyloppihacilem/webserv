@@ -123,7 +123,7 @@ int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
 }
 
 void ServerReactor::deleteClient(int socket_fd, EventHandler &handler) {
-    info.log() << "ServerReactor: Delete connection on socket " << socket_fd << std::endl;
+    info.log() << "ServerReactor: Delete connection on socket " << socket_fd << " hastimedout " << handler.checkTimeout() << "." << std::endl;
 
     errno = 0;
     if (epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, socket_fd, 0) == -1)

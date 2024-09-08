@@ -78,10 +78,13 @@ CGIStrategy::CGIStrategy(
 }
 
 CGIStrategy::~CGIStrategy() {
+    debug.log() << "CGIStrategy: destructor call" << std::endl;
     if (_child)
         kill_child(true);
     if (_body)
         delete _body;
+    remove(_temp_file_miso.c_str());
+    remove(_temp_file_mosi.c_str());
 }
 
 bool CGIStrategy::build_response() {
@@ -402,14 +405,13 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
     return _done;
 }
 
-void CGIStrategy::open_child_file() {
-    // if (_temp_stream_miso.is_open())
-    //     return;
-    // _temp_stream_miso.open(_temp_file_miso.c_str(), std::ifstream::binary | std::ios_base::in);
-    // debug.log() << "Parent opened " << _temp_file_miso << "." << std::endl;
-    // if (!_temp_stream_miso.is_open())
-    //     error.log() << "Coult not open file " << _temp_file_miso << std::endl;
-    _fd_miso = open(_temp_file_miso.c_str(), O_RDONLY);
+bool CGIStrategy::open_child_file() {
+    if ((_fd_miso = open(_temp_file_miso.c_str(), O_RDONLY))) {
+        error.log() << "CGIStrategy: fail to open miso temp file " << _temp_file_miso << ", " << std::strerror(errno) << std::endl;
+        return false;
+    }
+    debug.log() << "CGIStrategy: succeed to open miso temp file " << _temp_file_miso << "." << std::endl;
+    return true;
 }
 
 bool CGIStrategy::is_child_alive() {

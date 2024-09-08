@@ -95,8 +95,7 @@ bool CGIWriter::init() {
     if (_cgi_strategy->is_child_alive()) // child is still alive, so init can not be done
         return _init;
     if (!_opened) {
-        _cgi_strategy->open_child_file();
-        _opened = true;
+        _opened = _cgi_strategy->open_child_file();
         return _init;
     }
     do {

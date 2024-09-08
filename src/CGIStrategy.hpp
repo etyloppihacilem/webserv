@@ -51,7 +51,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         pid_t get_child_pid() const;
         void  save_mem();
         bool  is_child_alive();
-        void  open_child_file();
+        bool  open_child_file();
 
     private:
         static Logger babyphone;
