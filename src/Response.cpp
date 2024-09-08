@@ -158,7 +158,7 @@ bool Response::build_response(std::string &buffer, size_t size) {
     }
     while (buffer.length() < size && _state != finished) {
         if (_state == rs_line) {
-            if (_body->init_todo()) {
+            if (_body && _body->init_todo()) {
                 CGIWriter *tmp;
                 if ((tmp = dynamic_cast< CGIWriter * >(_body)) != 0) {
                     if (tmp->init()) {
@@ -174,14 +174,10 @@ bool Response::build_response(std::string &buffer, size_t size) {
             buffer = generate_status_line();
             _state = headers;
         } else if (_state == headers) {
-            if (_header.find("Content-Length") == _header.end()) { // here ?
-                debug.log() << "CGI did not defined length, sending body in chunked format." << std::endl;
-                _header["Transfer-Encoding"] = "chunked";
-            }
             debug.log() << "Generating headers" << std::endl;
             buffer += generate_header();
-            buffer += "\r\n"; // to end headers
             if (_body) {
+                buffer += "\r\n"; // to end headers
                 if (_is_head) {
                     debug.log() << "HEAD request, not sending body." << std::endl;
                     _state = finished;
@@ -189,7 +185,8 @@ bool Response::build_response(std::string &buffer, size_t size) {
                 debug.log() << "Generating body" << std::endl;
                 _state = body;
             } else {
-                _state = finished;
+                buffer += "\r\n"; // to end headers
+                _state  = finished;
                 debug.log() << "Response generated" << std::endl;
             }
         } else if (_state == body) {

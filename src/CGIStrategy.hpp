@@ -51,6 +51,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         bool  get_length() const;
         pid_t get_child_pid() const;
         void  save_mem();
+        bool  is_child_alive();
 
         void removeMISO();
         bool MISO_alive() const;

@@ -377,6 +377,22 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
     return _done;
 }
 
+bool CGIStrategy::is_child_alive() {
+    if (!_child) {
+        debug.log() << "Child already died." << std::endl;
+        return false;
+    }
+    int waitinfo;
+    waitpid(_child, &waitinfo, WNOHANG);
+    if (WIFEXITED(waitinfo) == 0) {
+        debug.log() << "Child is not dead yet." << std::endl;
+        return true;
+    }
+    debug.log() << "Child " << _child << " have died with exit code " << WEXITSTATUS(waitinfo) << std::endl;
+    _child = 0;
+    return false;
+}
+
 void CGIStrategy::kill_child(bool k) {
     if (!_child) {
         warn.log() << "Trying to kill child when there is no child running." << std::endl;
