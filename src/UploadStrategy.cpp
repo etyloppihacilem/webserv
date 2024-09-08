@@ -76,6 +76,7 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
         if (_file.is_open())
             _file.close();
         _response.set_body("Empty (Success)");
+        _response.set_code(Created);
         debug.log() << "No body to upload, upload done." << std::endl;
         return _built = true; // no body to upload
     }
