@@ -36,6 +36,7 @@
 #include <signal.h>
 #include <sstream>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <string>
 #include <strings.h>
@@ -228,11 +229,15 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
             }
             close(temp_fd);
         }
-        /*if (dup2(_miso[1], 1) < 0) {*/
-        /*    babyphone.log() << "Cannot redirect stdout into child." << std::endl;*/
-        /*    close(_miso[1]);*/
-        /*    _exit(1);*/
-        /*}*/
+        /*close(_miso[1]);*/
+        /*_miso[1] = open("./output.log", O_CREAT | O_WRONLY | O_TRUNC, 000666);*/
+        /*if (_miso[1] < 0)*/
+        /*    babyphone.log() << "Could not open outfile." << std::endl;*/
+        if (dup2(_miso[1], 1) < 0) {
+            babyphone.log() << "Cannot redirect stdout into child." << std::endl;
+            close(_miso[1]);
+            _exit(1);
+        }
         close(_miso[1]);
         char **args = new (std::nothrow) char *[3];
         args[1]     = strdup(_location.c_str());
@@ -285,11 +290,11 @@ void CGIStrategy::fill_env(std::map< std::string, std::string > &env, size_t siz
         st >> env["CONTENT_LENGTH"];
     }
     env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    // env["PATH_INFO"]         = _path_info; // RFC 3875 friendly
-    env["PATH_INFO"]         = _request->get_target();
+    /*env["PATH_INFO"]         = _path_info; // RFC 3875 friendly*/
+    // env["PATH_INFO"]         = _request->get_target();
     debug.log() << "PATH_INFO=" << env["PATH_INFO"] << std::endl;
-    env["REQUEST_URI"] = _request->get_target();
-    debug.log() << "REQUEST_URI=" << env["REQUEST_URI"] << std::endl;
+    /*env["REQUEST_URI"] = _request->get_target();*/
+    /*debug.log() << "REQUEST_URI=" << env["REQUEST_URI"] << std::endl;*/
     env["PATH_TRANSLATED"] = _location; // physical path after translation on device
     env["QUERY_STRING"]    = _request->get_query_string();
     env["REMOTE_HOST"]     = "";                 // leave empty
@@ -355,7 +360,8 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
         rd                             = read(_miso[0], buf, PIPE_BUFFER_SIZE);
         if (rd < 0) {
             /*close(_miso[0]);*/
-            kill_child(true); // true
+            /*kill_child(true); // true*/
+            kill_child(false); // DEBUG only bc we dont want to kill our child
             error.log() << "Error reading in pipe from CGI child. Aborting." << std::endl;
             return _done = true;
         }
@@ -381,7 +387,15 @@ void CGIStrategy::kill_child(bool k) {
     }
     if (k)
         kill(_child, SIGKILL);
-    waitpid(_child, 0, 0); // just to make sure
+    int status;
+    int exit_code;
+    waitpid(_child, &status, 0); // just to make sure
+    if (WIFEXITED(status)) {
+        exit_code = WEXITSTATUS(status);
+        debug.log() << "child exited with exit code " << exit_code << "." << std::endl;
+    } else {
+        debug.log() << "child not exited live in limbs of memory." << std::endl;
+    }
     clean_filestream();
     _child = 0;
 }
