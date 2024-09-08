@@ -81,6 +81,10 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
         return _built;
     }
     if (!_init) {
+        if (_body->get() == "" && _body->is_done()) {
+            debug.log() << "Body is empty, sending " << Created << std::endl;
+            return _built = true;
+        }
         init();
         debug.log() << "Emptying buffer inside body." << std::endl;
         _file << _body->pop();
