@@ -23,8 +23,9 @@
 
 ResponseSendState::ResponseSendState(int socket, ResponseBuildingStrategy *strategy) :
     ProcessState(socket),
-    _strategy(strategy),
-    _sent(false) {
+    _strategy(strategy)
+// _sent(false) {
+{
     if (!strategy) {
         error.log() << "ResponseSendState: no strategy provided, closing connexion" << std::endl;
         _state = s_error;

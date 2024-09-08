@@ -26,7 +26,6 @@ class ResponseSendState : public ProcessState {
     private:
         ResponseBuildingStrategy *_strategy;
         std::string               _buffer;
-        bool                      _sent;
 };
 
 #endif // INCLUDE_SRC_RESPONSESENDSTATE_HPP_
