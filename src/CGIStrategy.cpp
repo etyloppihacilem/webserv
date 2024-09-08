@@ -278,8 +278,9 @@ void CGIStrategy::fill_env(std::map< std::string, std::string > &env, size_t siz
         st >> env["CONTENT_LENGTH"];
     }
     env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    // env["PATH_INFO"]         = _path_info; // RFC 3875 friendly
-    env["PATH_INFO"]         = _request->get_target();
+    env["REDIRECT_STATUS"]   = "200"; // see if this needs to be hard coded
+    env["PATH_INFO"]         = _path_info; // RFC 3875 friendly
+    // env["PATH_INFO"]         = _request->get_target();
     env["REQUEST_URI"]       = _request->get_target();
     env["PATH_TRANSLATED"]   = _location; // physical path after translation on device
     env["QUERY_STRING"]      = _request->get_query_string();

@@ -149,7 +149,7 @@ template < class ServerClass, class RouteClass >
 bool Location< ServerClass, RouteClass >::init_cgi_glob(const std::string &target, const RouteClass &route) {
     _is_cgi                = true;
     _methods               = route.getMethods();
-    // _route                 = route.getLocation();
+    _route                 = route.getLocation();
     _cgi_path              = route.getRootDir();
     std::string ext        = "." + route.getCgiExtension();
     size_t      sep        = 0;
@@ -224,7 +224,7 @@ template < class ServerClass, class RouteClass >
 void Location< ServerClass, RouteClass >::build_path(const std::string &target, const RouteClass &route) {
     _path        = target;
     _upload_path = target;
-    _path_info   = target;
+    // _path_info   = target;
     _route_path  = route.getRootDir();
     if (*_route_path.rbegin() == '/')
         _route_path.resize(_route_path.length() - 1);
@@ -235,7 +235,7 @@ void Location< ServerClass, RouteClass >::build_path(const std::string &target, 
         _path.replace(0, route.getLocation().length(), _route_path);
         _upload_path.replace(0, route.getLocation().length(), route.getUploadPath());
     }
-    _path_info.replace(0, route.getLocation().length(), "");
+    // _path_info.replace(0, route.getLocation().length(), "");
 }
 
 /**
