@@ -27,7 +27,8 @@ CGIWriter::CGIWriter(ResponseBuildingStrategy &strategy) :
     BodyWriter(strategy),
     _response(strategy.get_response()),
     _total(0),
-    _cgi_done(false) {
+    _cgi_done(false),
+    _opened(false) {
     if ((_cgi_strategy = dynamic_cast< CGIStrategy * >(&strategy)) == 0) {
         error.log() << "Trying to instantiate CGIWriter with non CGIStrategy strategy, sending " << InternalServerError
                     << std::endl;
@@ -93,7 +94,11 @@ bool CGIWriter::init() {
         return _init;
     if (_cgi_strategy->is_child_alive()) // child is still alive, so init can not be done
         return _init;
-    _cgi_strategy->open_child_file();
+    if (!_opened) {
+        _cgi_strategy->open_child_file();
+        _opened = true;
+        return _init;
+    }
     do {
         read_from_child();
     } while (sanitize_HTTP_string(_buffer, 0).find("\n\n") == _buffer.npos && !_cgi_done);

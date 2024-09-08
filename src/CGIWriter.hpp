@@ -38,6 +38,7 @@ class CGIWriter : public BodyWriter {
         size_t       _total;
         bool         _cgi_done;
         CGIStrategy *_cgi_strategy; // to cast
+        bool         _opened;
 };
 
 #endif // INCLUDE_SRC_CGIWRITER_HPP_

@@ -193,6 +193,8 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
         _state = launched;
         _built = true; // response is meant to wait for child
     } else {           // child
+        if (setpgid(0, 0))
+            babyphone.log() << "setpgid failed " << strerror(errno) << std::endl;
 #ifndef DEBUG
         close(STDERR_FILENO); // close stderr if not debug
 #else
@@ -384,11 +386,9 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
             return _done = true;
         }
         if (rd == 0) {
-            if (_child) {
-                debug.log() << "Done reading from CGI pipe, waiting for child." << std::endl;
-                // kill_child(false);
-                _done = true;
-            }
+            debug.log() << "Done reading from CGI pipe, waiting for child." << std::endl;
+            // kill_child(false);
+            _done = true;
         }
         debug.log() << "Read " << rd << " byte(s) from CGI pipe." << std::endl;
 #ifdef DEBUG
@@ -418,15 +418,20 @@ bool CGIStrategy::is_child_alive() {
         return false;
     }
     int waitinfo;
-    waitpid(_child, &waitinfo, WNOHANG);
+    waitpid(-_child, &waitinfo, WNOHANG | WUNTRACED);
     if (WIFEXITED(waitinfo) == 0) {
         debug.log() << "Child is not dead yet." << std::endl;
         return true;
     }
     debug.log() << "Child " << _child << " have died with exit code " << WEXITSTATUS(waitinfo) << std::endl;
+    waitpid(-_child, &waitinfo, WUNTRACED);
     if (WIFSIGNALED(waitinfo))
         debug.log() << "Child was terminated by signal " << WTERMSIG(waitinfo) << " " << strsignal(WTERMSIG(waitinfo))
                     << std::endl;
+    if (WIFSTOPPED(waitinfo))
+        debug.log() << "Child is stopped. " << WSTOPSIG(waitinfo) << std::endl;
+    if (WIFCONTINUED(waitinfo))
+        debug.log() << "Child is stopped." << std::endl;
     _child = 0;
     return false;
 }
@@ -440,7 +445,7 @@ void CGIStrategy::kill_child(bool k) {
         kill(_child, SIGKILL);
     int status;
     int exit_code;
-    waitpid(_child, &status, 0); // just to make sure
+    waitpid(-_child, &status, WUNTRACED); // just to make sure
     if (WIFEXITED(status)) {
         exit_code = WEXITSTATUS(status);
         debug.log() << "child exited with exit code " << exit_code << "." << std::endl;
