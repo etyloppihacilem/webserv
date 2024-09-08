@@ -12,7 +12,6 @@
 #define INCLUDE_SRC_CGISTRATEGY_HPP_
 
 #include "Body.hpp"
-#include "CGIHandlerMISO.hpp"
 #include "CGIWriter.hpp"
 #include "ClientRequest.hpp"
 #include "HttpStatusCodes.hpp"
@@ -52,9 +51,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         pid_t get_child_pid() const;
         void  save_mem();
         bool  is_child_alive();
-
-        void removeMISO();
-        bool MISO_alive() const;
+        void  open_child_file();
 
     private:
         static Logger babyphone;
@@ -66,23 +63,23 @@ class CGIStrategy : public ResponseBuildingStrategy {
         void          kill_child(bool k = true);
         void          clean_filestream();
 
-        std::string     _location;
-        std::string     _path_info;
-        std::string     _cgi_path;
-        std::string     _cgi_response;
-        std::string     _temp_file;
-        std::fstream    _temp_stream;
-        ClientRequest  *_request;
-        Body           *_body;
-        // int             _mosi[2]; // master out slave in
-        int             _miso[2]; // master in slave out
-        pid_t           _child;
-        cgistate        _state; ///< When body is ready to be
-        bool            _is_length;
-        size_t          _max_size;
-        CGIHandlerMISO *_handlerMISO;
-        CGIWriter      *_writer;
-        HttpCode        _code;
+        std::string    _location;
+        std::string    _path_info;
+        std::string    _cgi_path;
+        std::string    _cgi_response;
+        std::string    _temp_file_mosi;
+        std::string    _temp_file_miso;
+        std::fstream   _temp_stream_mosi;
+        // std::fstream   _temp_stream_miso;
+        int            _fd_miso;
+        ClientRequest *_request;
+        Body          *_body;
+        pid_t          _child;
+        cgistate       _state; ///< When body is ready to be
+        bool           _is_length;
+        size_t         _max_size;
+        CGIWriter     *_writer;
+        HttpCode       _code;
 };
 
 #endif // INCLUDE_SRC_CGISTRATEGY_HPP_

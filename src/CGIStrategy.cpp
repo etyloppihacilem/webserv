@@ -10,7 +10,6 @@
 
 #include "CGIStrategy.hpp"
 #include "Body.hpp"
-#include "CGIHandlerMISO.hpp"
 #include "ClientRequest.hpp"
 #include "HttpError.hpp"
 #include "HttpMethods.hpp"
@@ -28,6 +27,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <new>
@@ -57,13 +57,13 @@ CGIStrategy::CGIStrategy(
     _location(location),
     _path_info(path_info),
     _cgi_path(cgi_path),
+    _fd_miso(-1),
     _request(request),
     _body(0),
     _child(0),
     _state(init),
     _is_length(false),
     _max_size(max_size),
-    _handlerMISO(0),
     _writer(0),
     _code(OK) {
     if (!_request) {
@@ -80,14 +80,8 @@ CGIStrategy::CGIStrategy(
 CGIStrategy::~CGIStrategy() {
     if (_child)
         kill_child(true);
-    if (_handlerMISO)
-        ServerManager::getInstance()->deleteClient(_handlerMISO->getSocketFd(), *_handlerMISO);
     if (_body)
         delete _body;
-}
-
-void CGIStrategy::removeMISO() {
-    _handlerMISO = 0;
 }
 
 bool CGIStrategy::build_response() {
@@ -109,11 +103,18 @@ bool CGIStrategy::build_response() {
 }
 
 void CGIStrategy::clean_filestream() {
-    if (_temp_stream.is_open()) {
-        debug.log() << "_temp_stream is still open, removing " << _temp_file << std::endl;
-        remove(_temp_file.c_str());
-        _temp_stream.close();
+    if (_temp_stream_mosi.is_open()) {
+        debug.log() << "_temp_stream_mosi is still open, removing " << _temp_file_mosi << std::endl;
+        remove(_temp_file_mosi.c_str());
+        _temp_stream_mosi.close();
     }
+    if (_fd_miso > 0)
+        close(_fd_miso);
+    // if (_temp_stream_miso.is_open()) {
+    //     debug.log() << "_temp_stream_mosi is still open, removing " << _temp_file_miso << std::endl;
+    //     remove(_temp_file_miso.c_str());
+    //     _temp_stream_miso.close();
+    // }
 }
 
 void CGIStrategy::init_CGI() {
@@ -125,25 +126,22 @@ void CGIStrategy::init_CGI() {
     {
         std::stringstream st;
         st << "./temp_" << std::hex << _request << std::dec << "_" << _request->get_socket();
-        _temp_file = st.str();
+        _temp_file_mosi = st.str() + "_mosi";
+        _temp_file_miso = st.str() + "_miso";
     }
-    _temp_stream.open(_temp_file.c_str(), std::ios::trunc | std::ios::out);
-    if (!_temp_stream.is_open()) {
-        error.log() << "CGI temp file " << _temp_file << " could not be opened, sending " << InternalServerError
+    _temp_stream_mosi.open(_temp_file_mosi.c_str(), std::ios::trunc | std::ios::out);
+    if (!_temp_stream_mosi.is_open()) {
+        error.log() << "CGI temp file " << _temp_file_mosi << " could not be opened, sending " << InternalServerError
                     << std::endl;
         throw HttpError(InternalServerError);
     }
-    debug.log() << "Created temp file " << _temp_file << " for CGI." << std::endl;
+    debug.log() << "Created temp file " << _temp_file_mosi << " for CGI." << std::endl;
     if (_body) {
         _state = loading_body;
     } else {
-        _temp_stream.close();
+        _temp_stream_mosi.close();
         debug.log() << "CGI request with no body." << std::endl;
         _state = launch;
-    }
-    if (pipe(_miso) < 0) {
-        error.log() << "CGIStrategy: Could not open pipe, sending " << InternalServerError << std::endl;
-        throw HttpError(InternalServerError);
     }
 }
 
@@ -159,7 +157,7 @@ void CGIStrategy::fill_temp_file() {
     }
     if (!_body->is_done()) {
         _body->read_body();
-        _temp_stream << _body->pop();
+        _temp_stream_mosi << _body->pop();
     }
     if (_body->length() > _max_size) {
         kill_child(true);
@@ -182,33 +180,19 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
     fill_env(env, size);
     pid_t pid = fork();
     if (pid < 0) {
-        close(_miso[0]);
-        close(_miso[1]);
         error.log() << "CGIStrategy: Could not fork CGI child, sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     } else if (pid) { // parent
         _child = pid;
-        close(_miso[1]);
         info.log() << "CGIStrategy: Child " << pid << " running." << std::endl;
         _writer = new CGIWriter(*this);
         errno   = 0;
-        if (fcntl(_miso[0], F_SETFL, O_NONBLOCK) == -1) {
-            close(_miso[0]);
-            error.log() << "CGIStrategy: unable to add set miso to O_NONBLOCK " + std::string(std::strerror(errno))
-                        << std::endl;
-            throw HttpError(InternalServerError);
-        }
-        _handlerMISO = new CGIHandlerMISO(_miso[0], *this, *_writer, _temp_file, _request->get_socket());
-        if (ServerManager::getInstance()->addCGIToddler(_handlerMISO) == -1) {
-            error.log() << "CGIStrategy: unable to add CGIToddler to epoll list." << std::endl;
-            throw HttpError(InternalServerError);
-        }
-        _temp_stream.close();
+        _temp_stream_mosi.close();
         errno = 0;
         _response.set_cgi(this, *_writer);
         _state = launched;
-        // _built = true; // CGIStrategy is never done
-    } else { // child
+        _built = true; // response is meant to wait for child
+    } else {           // child
 #ifndef DEBUG
         close(STDERR_FILENO); // close stderr if not debug
 #else
@@ -217,32 +201,28 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
         info.disable();
         warn.disable();
 #endif
-        close(_miso[0]);
-        if (body || 1) {
-            int temp_fd = open(_temp_file.c_str(), O_RDONLY);
+        if (body || 1) { // TODO: else close stdin
+            int temp_fd = open(_temp_file_mosi.c_str(), O_RDONLY);
             if (temp_fd < 0) {
-                babyphone.log() << "Cannot open temp file " << _temp_file << " " << strerror(errno) << std::endl;
-                close(_miso[1]);
+                babyphone.log() << "Cannot open temp file " << _temp_file_mosi << " " << strerror(errno) << std::endl;
                 _exit(1);
             }
             if (dup2(temp_fd, 0) < 0) {
                 babyphone.log() << "Cannot redirect stdin into child." << std::endl;
                 close(temp_fd);
-                close(_miso[1]);
                 _exit(1);
             }
             close(temp_fd);
         }
-        // close(_miso[1]);
-        // _miso[1] = open("./output.log", O_CREAT | O_WRONLY | O_TRUNC, 000666);
-        // if (_miso[1] < 0)
-        //     babyphone.log() << "Could not open outfile." << std::endl;
-        if (dup2(_miso[1], 1) < 0) {
+        int temp_fd = open(_temp_file_miso.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 000666);
+        if (temp_fd < 0)
+            babyphone.log() << "Could not open outfile." << std::endl;
+        if (dup2(temp_fd, 1) < 0) {
             babyphone.log() << "Cannot redirect stdout into child." << std::endl;
-            close(_miso[1]);
+            close(temp_fd);
             _exit(1);
         }
-        close(_miso[1]);
+        close(temp_fd);
         char **args = new (std::nothrow) char *[3];
         args[1]     = strdup(_location.c_str());
         if (!args || !args[1]) {
@@ -391,22 +371,22 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
 bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way to force chunk
     if (_done)                                                    // not done
         return _done;
+
     int rd;
     (void) size;
-
     if (!_done) {
         char buf[PIPE_BUFFER_SIZE + 1] = { 0 };
-        rd                             = read(_miso[0], buf, PIPE_BUFFER_SIZE);
+        rd                             = read(_fd_miso, buf, PIPE_BUFFER_SIZE);
         if (rd < 0) {
-            kill_child(true); // true bc we want to execute child
+            // kill_child(true); // true bc we want to execute child
             // kill_child(false); // debug only
-            error.log() << "Error reading in pipe from CGI child. Aborting." << std::endl;
+            error.log() << "Error reading in pipe from CGI child. " << strerror(errno) << ". Aborting." << std::endl;
             return _done = true;
         }
         if (rd == 0) {
             if (_child) {
                 debug.log() << "Done reading from CGI pipe, waiting for child." << std::endl;
-                kill_child(false);
+                // kill_child(false);
                 _done = true;
             }
         }
@@ -420,6 +400,16 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
         buffer += std::string(buf);
     }
     return _done;
+}
+
+void CGIStrategy::open_child_file() {
+    // if (_temp_stream_miso.is_open())
+    //     return;
+    // _temp_stream_miso.open(_temp_file_miso.c_str(), std::ifstream::binary | std::ios_base::in);
+    // debug.log() << "Parent opened " << _temp_file_miso << "." << std::endl;
+    // if (!_temp_stream_miso.is_open())
+    //     error.log() << "Coult not open file " << _temp_file_miso << std::endl;
+    _fd_miso = open(_temp_file_miso.c_str(), O_RDONLY);
 }
 
 bool CGIStrategy::is_child_alive() {
@@ -478,10 +468,6 @@ bool CGIStrategy::get_length() const {
 
 pid_t CGIStrategy::get_child_pid() const {
     return _child;
-}
-
-bool CGIStrategy::MISO_alive() const {
-    return _handlerMISO != 0;
 }
 
 void CGIStrategy::save_mem() {
