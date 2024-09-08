@@ -68,9 +68,10 @@ UploadStrategy< ServerClass, RouteClass >::~UploadStrategy() {
 template < class ServerClass, class RouteClass >
 bool UploadStrategy< ServerClass, RouteClass >::build_response() {
     if (!_body) {
-        if (!_init)
-            init(); // creating file if not already there and init of headers and stuff
-        _file.close();
+        // if (!_init)
+        // init(); // creating file if not already there and init of headers and stuff
+        if (_file.is_open())
+            _file.close();
         _response.set_body("Empty (Success)");
         debug.log() << "No body to upload, upload done." << std::endl;
         return _built = true; // no body to upload
