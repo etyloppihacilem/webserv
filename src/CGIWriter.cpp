@@ -103,8 +103,8 @@ bool CGIWriter::init() {
             send_error(InternalServerError);
         }
         debug.log() << "Found Status header, parsing response accordingly" << std::endl;
-        found = _buffer.find_first_not_of(" \t", found);
-        _response.set_code(_buffer.substr(found, end - found));
+        found = _buffer.find_first_not_of(" \t", found + 7);
+        _response.set_code(_buffer.substr(found, end - (found)));
         _buffer.replace(found, (end + 1) - found, ""); // deleting Status stuff and \n
     }
     debug.log() << "Parsing CGI headers" << std::endl;

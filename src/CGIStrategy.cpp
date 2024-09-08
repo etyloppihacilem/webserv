@@ -120,20 +120,22 @@ void CGIStrategy::init_CGI() {
         return;
     }
     debug.log() << "Running init for CGIStrategy." << std::endl;
-    if (_body) {
         {
             std::stringstream st;
             st << "./temp_" << std::hex << _request << std::dec << "_" << _request->get_socket();
             _temp_file = st.str();
         }
-        _temp_stream.open(_temp_file.c_str());
+        _temp_stream.open(_temp_file.c_str(), std::ios::trunc | std::ios::out);
         if (!_temp_stream.is_open()) {
             error.log() << "CGI temp file " << _temp_file << " could not be opened, sending " << InternalServerError
                         << std::endl;
             throw HttpError(InternalServerError);
         }
+        debug.log() << "Created temp file " << _temp_file << " for CGI." << std::endl;
+    if (_body) {
         _state = loading_body;
     } else {
+        _temp_stream.close();
         debug.log() << "CGI request with no body." << std::endl;
         _state = launch;
     }
@@ -183,6 +185,10 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
         error.log() << "CGIStrategy: Could not fork CGI child, sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     } else if (pid) { // parent
+        static int a = 0;
+        a++;
+        if (a > 1)
+            a++;
         _child = pid;
         close(_miso[1]);
         info.log() << "CGIStrategy: Child " << pid << " running." << std::endl;
@@ -221,13 +227,12 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
                 _exit(1);
             }
             close(temp_fd);
-        } else
-            close(0);
-        if (dup2(_miso[1], 1) < 0) {
-            babyphone.log() << "Cannot redirect stdout into child." << std::endl;
-            close(_miso[1]);
-            _exit(1);
         }
+        /*if (dup2(_miso[1], 1) < 0) {*/
+        /*    babyphone.log() << "Cannot redirect stdout into child." << std::endl;*/
+        /*    close(_miso[1]);*/
+        /*    _exit(1);*/
+        /*}*/
         close(_miso[1]);
         char **args = new (std::nothrow) char *[3];
         args[1]     = strdup(_location.c_str());
@@ -284,7 +289,7 @@ void CGIStrategy::fill_env(std::map< std::string, std::string > &env, size_t siz
     env["PATH_INFO"]         = _request->get_target();
     debug.log() << "PATH_INFO=" << env["PATH_INFO"] << std::endl;
     env["REQUEST_URI"] = _request->get_target();
-    debug.log() << "REQUEST_URI=" << _request->get_target() << std::endl;
+    debug.log() << "REQUEST_URI=" << env["REQUEST_URI"] << std::endl;
     env["PATH_TRANSLATED"] = _location; // physical path after translation on device
     env["QUERY_STRING"]    = _request->get_query_string();
     env["REMOTE_HOST"]     = "";                 // leave empty
@@ -343,9 +348,9 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
     if (_done)
         return _done;
     int    rd;
-    size_t original = buffer.size();
+    (void)size;
 
-    while (buffer.size() - original < size && !_done) {
+    if (!_done) {
         char buf[PIPE_BUFFER_SIZE + 1] = { 0 };
         rd                             = read(_miso[0], buf, PIPE_BUFFER_SIZE);
         if (rd < 0) {
@@ -358,13 +363,11 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
             if (_child) {
                 debug.log() << "Done reading from CGI pipe, waiting for child." << std::endl;
                 kill_child(false);
-            } else {
-                debug.log() << "Done reading from CGI pipe, closing child." << std::endl;
-                // close(_miso[0]); // NOTE: to reproduce heavy leak Reactor.
                 _done = true;
             }
         }
         debug.log() << "Read " << rd << " byte(s) from CGI pipe." << std::endl;
+        write(1, buf, rd);
         buffer.insert(0, buf);
     }
     return _done;

@@ -54,16 +54,18 @@ void CGIHandlerMISO::handle() {
     info.log() << "CGIHandlerMISO: Child " << _strategy.get_child_pid() << " on pipe " << _socket_fd
                << " received a new event!" << std::endl;
     if (_writer.read_from_child()) {
-        if (!_writer.init())
-            ServerManager::getInstance()->talkToClient(
-                _process_fd, *ServerManager::getInstance()->getReactor().getCGIHandler(_process_fd)
-            );
+        _writer.init();
+        _strategy.is_done_building();
+        ServerManager::getInstance()->getReactor().getCGIHandler(_process_fd)->handle();
+        ServerManager::getInstance()->deleteClient(getSocketFd(), *this);
         return;
     }
-    if (!_writer.init())
+    if (!_writer.init()) {
+        _strategy.is_done_building();
         ServerManager::getInstance()->talkToClient(
             _process_fd, *ServerManager::getInstance()->getReactor().getCGIHandler(_process_fd)
         );
+    }
 } // Run this in loop
 
 void CGIHandlerMISO::timeout() {
