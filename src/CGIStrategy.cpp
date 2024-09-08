@@ -215,6 +215,11 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
     } else { // child
 #ifndef DEBUG
         close(STDERR_FILENO); // close stderr if not debug
+#else
+        Logger::unforce();
+        debug.disable();
+        info.disable();
+        warn.disable();
 #endif
         close(_miso[0]);
         if (body || 1) {
@@ -433,6 +438,9 @@ bool CGIStrategy::is_child_alive() {
         return true;
     }
     debug.log() << "Child " << _child << " have died with exit code " << WEXITSTATUS(waitinfo) << std::endl;
+    if (WIFSIGNALED(waitinfo))
+        debug.log() << "Child was terminated by signal " << WTERMSIG(waitinfo) << " " << strsignal(WTERMSIG(waitinfo))
+                    << std::endl;
     _child = 0;
     return false;
 }
@@ -450,6 +458,9 @@ void CGIStrategy::kill_child(bool k) {
     if (WIFEXITED(status)) {
         exit_code = WEXITSTATUS(status);
         debug.log() << "child exited with exit code " << exit_code << "." << std::endl;
+    if (WIFSIGNALED(status))
+        debug.log() << "Child was terminated by signal " << WTERMSIG(status) << " " << strsignal(WTERMSIG(status))
+                    << std::endl;
     } else {
         debug.log() << "child not exited live in limbs of memory." << std::endl;
     }

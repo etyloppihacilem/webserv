@@ -63,9 +63,7 @@ void CGIHandlerMISO::handle() {
     }
     if (!_writer.init()) {
         _strategy.is_done_building();
-        ServerManager::getInstance()->talkToClient(
-            _process_fd, *ServerManager::getInstance()->getReactor().getCGIHandler(_process_fd)
-        );
+        ServerManager::getInstance()->getReactor().getCGIHandler(_process_fd)->handle();
     }
 } // Run this in loop
 

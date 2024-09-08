@@ -48,7 +48,7 @@ std::string CGIWriter::generate(size_t size) {
         init();
         return "";
     }
-    if (_buffer.length() == 0 && !(_cgi_done = !_cgi_strategy->is_child_alive())) {
+    if (_buffer.length() == 0 && !_cgi_done) {
         debug.log() << "Waiting for CGI to fill buffer." << std::endl;
         return "";
     }
@@ -65,7 +65,7 @@ std::string CGIWriter::generate(size_t size) {
     size_t            temp_size = temp.size();
     st << std::hex << temp_size;
     _length += temp_size;
-    if (_buffer.length() == 0)
+    if (_buffer.length() == 0 && _cgi_done && !_cgi_strategy->is_child_alive())
         _done = true;
     if (_cgi_strategy) {
         if (!_cgi_strategy->get_length()) {

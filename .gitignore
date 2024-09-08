@@ -38,3 +38,4 @@ YoupiBanane
 YoupiBanane/**
 *.log
 temp.test
+temp*
