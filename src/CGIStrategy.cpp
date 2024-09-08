@@ -83,8 +83,10 @@ CGIStrategy::~CGIStrategy() {
         kill_child(true);
     if (_body)
         delete _body;
-    remove(_temp_file_miso.c_str());
-    remove(_temp_file_mosi.c_str());
+    debug.log() << "Unlinking " << _temp_file_miso << std::endl;
+    unlink(_temp_file_miso.c_str());
+    debug.log() << "Unlinking " << _temp_file_mosi << std::endl;
+    unlink(_temp_file_mosi.c_str());
 }
 
 bool CGIStrategy::build_response() {
@@ -107,8 +109,8 @@ bool CGIStrategy::build_response() {
 
 void CGIStrategy::clean_filestream() {
     if (_temp_stream_mosi.is_open()) {
-        debug.log() << "_temp_stream_mosi is still open, removing " << _temp_file_mosi << std::endl;
-        remove(_temp_file_mosi.c_str());
+        debug.log() << "_temp_stream_mosi is still open, unlinking " << _temp_file_mosi << std::endl;
+        unlink(_temp_file_mosi.c_str());
         _temp_stream_mosi.close();
     }
     if (_fd_miso > 0)
@@ -227,6 +229,7 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
             close(temp_fd);
             _exit(1);
         }
+        babyphone.log() << "Opened outfile MISO " << _temp_file_miso << std::endl;
         close(temp_fd);
         char **args = new (std::nothrow) char *[3];
         args[1]     = strdup(_location.c_str());
@@ -407,11 +410,11 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
 }
 
 bool CGIStrategy::open_child_file() {
-    if ((_fd_miso = open(_temp_file_miso.c_str(), O_RDONLY))) {
+    if ((_fd_miso = open(_temp_file_miso.c_str(), O_RDONLY)) < 0) {
         error.log() << "CGIStrategy: fail to open miso temp file " << _temp_file_miso << ", " << std::strerror(errno) << std::endl;
-        return false;
+        return true; // not to loop
     }
-    debug.log() << "CGIStrategy: succeed to open miso temp file " << _temp_file_miso << "." << std::endl;
+    debug.log() << "CGIStrategy: opened " << _temp_file_miso << "." << std::endl;
     return true;
 }
 
