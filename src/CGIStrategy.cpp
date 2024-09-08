@@ -411,8 +411,10 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
         }
         debug.log() << "Read " << rd << " byte(s) from CGI pipe." << std::endl;
 #ifdef DEBUG
-        write(1, buf, rd);
-        write(1, "\n", 1);
+        if (rd > 0) {
+            write(1, buf, rd);
+            write(1, "\n", 1);
+        }
 #endif
         buffer += std::string(buf);
     }
