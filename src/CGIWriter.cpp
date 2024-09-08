@@ -152,6 +152,8 @@ bool CGIWriter::init() {
     debug.log() << "CGI reponse init done" << std::endl;
     if ((_cgi_done = !_cgi_strategy->is_child_alive()) && _buffer == "") {
         debug.log() << "No body form CGI." << std::endl;
+        if (isSuccessful(_response.get_code()))
+            _response.set_code(NoContent);
         _done = true;
     }
     if (!is_done()) {
