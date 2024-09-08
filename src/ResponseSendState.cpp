@@ -9,6 +9,7 @@
 ##################################################################################################################### */
 
 #include "ResponseSendState.hpp"
+#include "CGIStrategy.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "ProcessState.hpp"

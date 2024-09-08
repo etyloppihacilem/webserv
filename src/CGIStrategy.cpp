@@ -83,10 +83,6 @@ CGIStrategy::~CGIStrategy() {
         kill_child(true);
     if (_body)
         delete _body;
-    debug.log() << "Unlinking " << _temp_file_miso << std::endl;
-    unlink(_temp_file_miso.c_str());
-    debug.log() << "Unlinking " << _temp_file_mosi << std::endl;
-    unlink(_temp_file_mosi.c_str());
 }
 
 bool CGIStrategy::build_response() {
@@ -281,9 +277,9 @@ void CGIStrategy::fill_env(std::map< std::string, std::string > &env, size_t siz
         st >> env["CONTENT_LENGTH"];
     }
     env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    env["REDIRECT_STATUS"]   = "200"; // see if this needs to be hard coded
-    env["PATH_INFO"]         = _path_info; // RFC 3875 friendly
-    // env["PATH_INFO"]         = _request->get_target();
+    env["REDIRECT_STATUS"]   = "200";      // see if this needs to be hard coded
+    // env["PATH_INFO"]         = _path_info; // RFC 3875 friendly
+    env["PATH_INFO"]         = _request->get_target();
     env["REQUEST_URI"]       = _request->get_target();
     env["PATH_TRANSLATED"]   = _location; // physical path after translation on device
     env["QUERY_STRING"]      = _request->get_query_string();
@@ -411,10 +407,14 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
 
 bool CGIStrategy::open_child_file() {
     if ((_fd_miso = open(_temp_file_miso.c_str(), O_RDONLY)) < 0) {
-        error.log() << "CGIStrategy: fail to open miso temp file " << _temp_file_miso << ", " << std::strerror(errno) << std::endl;
-        return true; // not to loop
+        error.log() << "CGIStrategy: fail to open miso temp file " << _temp_file_miso << ", " << std::strerror(errno)
+                    << std::endl;
     }
     debug.log() << "CGIStrategy: opened " << _temp_file_miso << "." << std::endl;
+    debug.log() << "Unlinking " << _temp_file_miso << std::endl;
+    unlink(_temp_file_miso.c_str());
+    debug.log() << "Unlinking " << _temp_file_mosi << std::endl;
+    unlink(_temp_file_mosi.c_str());
     return true;
 }
 
