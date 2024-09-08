@@ -10,8 +10,9 @@
 
 class ServerManager {
     public:
-        static ServerManager *getInstance(const std::string &configFile = "");
+        static ServerManager *getInstance(const std::string &configFile = "", const char **env = 0);
         static void           deleteInstance();
+        static const char   **getEnv();
         ~ServerManager();
 
         int  addClient(int socket_fd, int port, std::string client_IP);
@@ -55,6 +56,7 @@ class ServerManager {
         std::vector< Server > parseConfFile(const std::string &configFile);
 
         static ServerManager *_instance;
+        static const char   **_env;
         std::vector< Server > _servers;
         ServerReactor         _reactor;
 };

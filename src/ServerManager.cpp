@@ -18,10 +18,21 @@
 #include <vector>
 
 ServerManager *ServerManager::_instance = 0;
+const char   **ServerManager::_env      = 0;
 
-ServerManager *ServerManager::getInstance(const std::string &configFile) {
-    if (ServerManager::_instance == 0)
+const char **ServerManager::getEnv() {
+    if (!_env)
+        error.log() << "Getting env but env is null." << std::endl;
+    return _env;
+}
+
+ServerManager *ServerManager::getInstance(const std::string &configFile, const char **env) {
+    if (ServerManager::_instance == 0) {
         ServerManager::_instance = new ServerManager(configFile);
+        _env                     = env;
+        if (!_env)
+            error.log() << "New instance did not set env. Env is null." << std::endl;
+    }
     return ServerManager::_instance;
 }
 

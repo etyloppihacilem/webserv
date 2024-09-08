@@ -18,6 +18,7 @@
 #include <cstdio>
 #include <cstring>
 #include <ostream>
+#include <stdio.h>
 #include <string>
 
 DeleteStrategy::DeleteStrategy(const std::string &location) : ResponseBuildingStrategy(), _location(location) {}
@@ -32,7 +33,7 @@ bool DeleteStrategy::build_response() {
         warn.log() << "DeleteStrategy : trying to build response, but is already built." << std::endl;
         return _built;
     }
-    if (std::remove(_location.c_str())) {
+    if (remove(_location.c_str())) {
         switch (errno) {
             case ENOENT:
                 info.log() << "DeleteStrategy: could not remove file '" << _location << "' " << strerror(errno)

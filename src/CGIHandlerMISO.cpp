@@ -40,6 +40,7 @@ CGIHandlerMISO::CGIHandlerMISO(
 CGIHandlerMISO::~CGIHandlerMISO() {
     debug.log() << "CGIHandlerMISO: closed pipe " << _socket_fd << " for child " << _strategy.get_child_pid() << "."
                 << std::endl;
+    debug.log() << "Removing " << _temp_file << std::endl;
     remove(_temp_file.c_str());
     if (_socket_fd >= 0)
         close(_socket_fd);

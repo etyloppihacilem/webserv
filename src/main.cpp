@@ -8,15 +8,12 @@
 
 ############################################################################# */
 
-#include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
-#include "MemoryHandler.hpp"
 #include "ServerManager.hpp"
 #include "header.h"
 #include <csignal>
 #include <cstdlib>
 #include <exception>
-#include <ios>
 #include <iostream>
 #include <ostream>
 #include <signal.h>
@@ -51,7 +48,7 @@ static void header() {
     info.log() << "                  Of NGINX" << std::endl;
 }
 
-int main(int ac, char **av) {
+int main(int ac, char **av, const char **env) {
     if (ac != 2) {
         error.log() << "Hint: ./webserv {config_file} " << std::endl;
         return 1;
@@ -64,7 +61,7 @@ int main(int ac, char **av) {
     try {
         signal(SIGINT, sigint_handler);
         signal(SIGPIPE, sigpipe_handler);
-        ServerManager::getInstance(std::string(av[1]));
+        ServerManager::getInstance(std::string(av[1]), env);
         ServerManager::getInstance()->run();
         ServerManager::deleteInstance();
         return 0;
