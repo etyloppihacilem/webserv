@@ -100,6 +100,8 @@ bool CGIWriter::init() {
         }
         if ((_cgi_done = !_cgi_strategy->is_child_alive())) {
             error.log() << "Init can not be done and MISO has ended, init will never be done, aborting." << std::endl;
+            if (_buffer.length() == 0)
+                _done = true;
             return _init = false;
         }
         return true;
