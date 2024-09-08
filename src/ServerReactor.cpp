@@ -123,8 +123,7 @@ int ServerReactor::addClient(int client_fd, int port, std::string client_IP) {
 }
 
 int ServerReactor::addCGIToddler(EventHandler *handler_miso) {
-    info.log() << "ServerReactor: New CGI connection on child out " << handler_miso->getSocketFd()
-               << std::endl;
+    info.log() << "ServerReactor: New CGI connection on child out " << handler_miso->getSocketFd() << std::endl;
     if (_eventHandlers.size() + 1 >= MAX_TOTAL_CONNECTION) {
         warn.log() << "ServerReactor: addClient: max connection reached, pipe family will be deported." << std::endl;
         delete handler_miso;

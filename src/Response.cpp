@@ -82,13 +82,15 @@ void Response::set_code(std::string code) {
     st << code;
     int tmp;
     if (!(st >> tmp)) {
-        error.log() << "Could not parse response code from string '" << code << "', sending " << InternalServerError << std::endl;
+        error.log() << "Could not parse response code from string '" << code << "', sending " << InternalServerError
+                    << std::endl;
         _code = InternalServerError;
     }
     if (status_string(tmp) != "")
         _code = static_cast< HttpCode >(tmp);
     else {
-        error.log() << tmp << " ('" << code << "') is not a valid HttpCode, sending " << InternalServerError << std::endl;
+        error.log() << tmp << " ('" << code << "') is not a valid HttpCode, sending " << InternalServerError
+                    << std::endl;
         _code = InternalServerError;
     }
     if (isError(_code) || isRedirection(_code))

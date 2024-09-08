@@ -120,18 +120,18 @@ void CGIStrategy::init_CGI() {
         return;
     }
     debug.log() << "Running init for CGIStrategy." << std::endl;
-        {
-            std::stringstream st;
-            st << "./temp_" << std::hex << _request << std::dec << "_" << _request->get_socket();
-            _temp_file = st.str();
-        }
-        _temp_stream.open(_temp_file.c_str(), std::ios::trunc | std::ios::out);
-        if (!_temp_stream.is_open()) {
-            error.log() << "CGI temp file " << _temp_file << " could not be opened, sending " << InternalServerError
-                        << std::endl;
-            throw HttpError(InternalServerError);
-        }
-        debug.log() << "Created temp file " << _temp_file << " for CGI." << std::endl;
+    {
+        std::stringstream st;
+        st << "./temp_" << std::hex << _request << std::dec << "_" << _request->get_socket();
+        _temp_file = st.str();
+    }
+    _temp_stream.open(_temp_file.c_str(), std::ios::trunc | std::ios::out);
+    if (!_temp_stream.is_open()) {
+        error.log() << "CGI temp file " << _temp_file << " could not be opened, sending " << InternalServerError
+                    << std::endl;
+        throw HttpError(InternalServerError);
+    }
+    debug.log() << "Created temp file " << _temp_file << " for CGI." << std::endl;
     if (_body) {
         _state = loading_body;
     } else {
@@ -347,8 +347,8 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
 bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way to force chunk
     if (_done)
         return _done;
-    int    rd;
-    (void)size;
+    int rd;
+    (void) size;
 
     if (!_done) {
         char buf[PIPE_BUFFER_SIZE + 1] = { 0 };
@@ -368,7 +368,8 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
         }
         debug.log() << "Read " << rd << " byte(s) from CGI pipe." << std::endl;
         write(1, buf, rd);
-        buffer.insert(0, buf);
+        // buffer.insert(0, buf);
+        buffer += std::string(buf);
     }
     return _done;
 }
