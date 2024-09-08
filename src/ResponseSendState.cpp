@@ -45,16 +45,16 @@ t_state ResponseSendState::process() {
         return _state;
     }
     Response &response = _strategy->get_response();
-    if (_sent) {
-        debug.log() << "Response is sent." << std::endl;
-        _state = ready;
-        if (isError(response.get_code()) || isRedirection(response.get_code())) {
-            info.log() << "Closing connexion because of " << (isError(response.get_code()) ? "error" : "redirection")
-                       << " code " << response.get_code() << std::endl;
-            _state = s_error;
-        }
-        return _state;
-    }
+    // if (_sent) { // TODO: delete _send if not used anywhere
+    //     debug.log() << "Response is sent." << std::endl;
+    //     _state = ready;
+    //     if (isError(response.get_code()) || isRedirection(response.get_code())) {
+    //         info.log() << "Closing connexion because of " << (isError(response.get_code()) ? "error" : "redirection")
+    //                    << " code " << response.get_code() << std::endl;
+    //         _state = s_error;
+    //     }
+    //     return _state;
+    // }
     if (!response.is_done())
         response.build_response(_buffer, BUFFER_SIZE);
     int written = 0;
@@ -75,8 +75,16 @@ t_state ResponseSendState::process() {
         error.log() << "Partial write in socker " << _socket << ", content may be affected." << std::endl;
     _buffer = _buffer.substr(written, _buffer.length() - written);
     if (response.is_done() && _buffer.length() == 0) {
-        debug.log() << "Response was sent and is waiting to end." << std::endl;
-        _sent = true;
+        // debug.log() << "Response was sent and is waiting to end." << std::endl; // duplicate just in case
+        // _sent = true;
+        debug.log() << "Response is sent." << std::endl;
+        _state = ready;
+        if (isError(response.get_code()) || isRedirection(response.get_code())) {
+            info.log() << "Closing connexion because of " << (isError(response.get_code()) ? "error" : "redirection")
+                       << " code " << response.get_code() << std::endl;
+            _state = s_error;
+        }
+        return _state;
     }
     return _state;
 }
