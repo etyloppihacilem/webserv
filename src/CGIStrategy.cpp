@@ -214,7 +214,7 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
     } else { // child
         close(STDERR_FILENO);
         close(_miso[0]);
-        if (body) {
+        if (body || 1) {
             int temp_fd = open(_temp_file.c_str(), O_RDONLY);
             if (temp_fd < 0) {
                 babyphone.log() << "Cannot open temp file " << _temp_file << " " << strerror(errno) << std::endl;
@@ -257,7 +257,6 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
         }
         char *cmd = strdup(_cgi_path.c_str());
         args[0]   = cmd;
-        // const char *cmd = "/usr/bin/python3";
         if (!cmd) {
             free(c_env);
             free(args[0]);
@@ -290,11 +289,11 @@ void CGIStrategy::fill_env(std::map< std::string, std::string > &env, size_t siz
         st >> env["CONTENT_LENGTH"];
     }
     env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    /*env["PATH_INFO"]         = _path_info; // RFC 3875 friendly*/
-    // env["PATH_INFO"]         = _request->get_target();
+    // env["PATH_INFO"]         = _path_info; // RFC 3875 friendly
+    env["PATH_INFO"]         = _request->get_target();
     debug.log() << "PATH_INFO=" << env["PATH_INFO"] << std::endl;
-    /*env["REQUEST_URI"] = _request->get_target();*/
-    /*debug.log() << "REQUEST_URI=" << env["REQUEST_URI"] << std::endl;*/
+    env["REQUEST_URI"] = _request->get_target();
+    debug.log() << "REQUEST_URI=" << env["REQUEST_URI"] << std::endl;
     env["PATH_TRANSLATED"] = _location; // physical path after translation on device
     env["QUERY_STRING"]    = _request->get_query_string();
     env["REMOTE_HOST"]     = "";                 // leave empty
@@ -337,7 +336,7 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
     for (std::map< std::string, std::string >::const_iterator it = env.begin(); it != env.end(); it++) {
         std::string tmp = it->first + "=" + it->second;
         babyphone.log() << "Adding to CGI env " << tmp << std::endl;
-        if (!(ret[i++] = strdup(tmp.c_str()))) { // bad alloc
+        if (!(ret[i++] = strdup(tmp.c_str()))) { // bad alloc is fine
             babyphone.log() << "CGIStrategy: env alloc partially failed. CGI env will not be generated." << std::endl;
             for (size_t j = 0; j <= env.size(); j++)
                 if (ret[j])
@@ -359,9 +358,8 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
         char buf[PIPE_BUFFER_SIZE + 1] = { 0 };
         rd                             = read(_miso[0], buf, PIPE_BUFFER_SIZE);
         if (rd < 0) {
-            /*close(_miso[0]);*/
-            /*kill_child(true); // true*/
-            kill_child(false); // DEBUG only bc we dont want to kill our child
+            // kill_child(true); // true bc we want to execute child
+            kill_child(false); // WARN:debug only bc we dont want to kill our child
             error.log() << "Error reading in pipe from CGI child. Aborting." << std::endl;
             return _done = true;
         }
@@ -374,7 +372,6 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
         }
         debug.log() << "Read " << rd << " byte(s) from CGI pipe." << std::endl;
         write(1, buf, rd);
-        // buffer.insert(0, buf);
         buffer += std::string(buf);
     }
     return _done;
