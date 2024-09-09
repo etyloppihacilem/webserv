@@ -69,6 +69,12 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
             return;
         debug.log() << "Target '" << target << "' exists." << std::endl;
         if (S_ISDIR(buf.st_mode)) { // in case target is a directory
+            if (*target.rbegin() != '/'){
+                _status_code = MovedPermanently;
+                _is_redirect = true;
+                _path = target + "/";
+                return;
+            }
             debug.log() << "Target is a directory" << std::endl;
             if (find_index(route, buf)) // if index file is found
                 return;
