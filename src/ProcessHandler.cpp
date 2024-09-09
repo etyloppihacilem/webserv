@@ -19,6 +19,7 @@
 #include "ResponseBuildingStrategy.hpp"
 #include "ResponseSendState.hpp"
 #include "ServerManager.hpp"
+#include "StringUtils.hpp"
 #include <ctime>
 #include <ostream>
 #include <string>
@@ -128,4 +129,11 @@ void ProcessHandler::transition_to_rss() {
     _state = new ResponseSendState(_socket_fd, strategy);
     ServerManager::getInstance()->talkToClient(_socket_fd, *this);
     debug.log() << "ProcessHandler: transitionning done." << std::endl;
+}
+
+void ProcessHandler::save_mem() {
+    debug.log() << "(i) ProcessHandler on " << _client_IP << " " << _port << " saved mem !" << std::endl;
+    shrink_to_fit(_client_IP);
+    if (_state)
+        _state->save_mem();
 }

@@ -56,3 +56,7 @@ void AcceptHandler::handle() {
 void AcceptHandler::timeout() {
     updateLastsActivity();
 }
+
+void AcceptHandler::save_mem() {
+    debug.log() << "(i) AcceptHandler on " << _port << " saved mem !" << std::endl;
+}

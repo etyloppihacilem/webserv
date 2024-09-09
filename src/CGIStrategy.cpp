@@ -18,6 +18,7 @@
 #include "Response.hpp"
 #include "ResponseBuildingStrategy.hpp"
 #include "ServerManager.hpp"
+#include "StringUtils.hpp"
 #include "todo.hpp"
 #include <cctype>
 #include <cerrno>
@@ -516,5 +517,18 @@ pid_t CGIStrategy::get_child_pid() const {
 }
 
 void CGIStrategy::save_mem() {
+    debug.log() << "(i) CGIStrategy saved mem !" << std::endl;
+    if (_built) { // if CGI already launched
+        _location  = "";
+        _path_info = "";
+        _cgi_path  = "";
+    }
+    if (_request)
+        _request->save_mem();
+    shrink_to_fit(_location);
+    shrink_to_fit(_path_info);
+    shrink_to_fit(_cgi_path);
+    shrink_to_fit(_temp_file_mosi);
+    shrink_to_fit(_temp_file_miso);
     _response.save_mem();
 }

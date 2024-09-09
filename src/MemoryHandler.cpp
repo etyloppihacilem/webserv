@@ -48,4 +48,8 @@ bool MemoryHandler::deallocate() {
     return _allocated;
 }
 
-MemoryHandler mem(1024);
+bool MemoryHandler::is_allocated() const {
+    return _allocated;
+}
+
+MemoryHandler mem(524288); // 500kiB

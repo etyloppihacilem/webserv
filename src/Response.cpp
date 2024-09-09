@@ -17,9 +17,11 @@
 #include "Logger.hpp"
 #include "ProcessState.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "StringUtils.hpp"
 #include "todo.hpp"
 #include <cstddef>
 #include <ctime>
+#include <map>
 #include <new>
 #include <ostream>
 #include <sstream>
@@ -305,5 +307,17 @@ void Response::set_head(bool is_head) {
 }
 
 void Response::save_mem() {
-    _body->save_mem();
+    debug.log() << "(i) Response saved mem !" << std::endl;
+    if (_state > headers)
+        _header.clear();
+    else
+        for (std::map< std::string, std::string >::iterator it = _header.begin(); it != _header.end(); it++)
+            shrink_to_fit(it->second);
+    if (_state == finished) {
+        if (_body)
+            delete _body;
+        _body = 0;
+    }
+    if (_body)
+        _body->save_mem();
 }

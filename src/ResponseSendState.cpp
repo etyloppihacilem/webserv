@@ -14,6 +14,7 @@
 #include "ProcessState.hpp"
 #include "Response.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "StringUtils.hpp"
 #include "todo.hpp"
 #include <cerrno>
 #include <cstddef>
@@ -78,5 +79,7 @@ t_state ResponseSendState::process() {
 }
 
 void ResponseSendState::save_mem() {
-    ; // TODO: coder ça
+    debug.log() << "(i) ResponseSendState saved mem !" << std::endl;
+    shrink_to_fit(_buffer);
+    _strategy->save_mem();
 }

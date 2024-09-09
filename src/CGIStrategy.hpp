@@ -66,7 +66,6 @@ class CGIStrategy : public ResponseBuildingStrategy {
         std::string    _location;
         std::string    _path_info;
         std::string    _cgi_path;
-        std::string    _cgi_response;
         std::string    _temp_file_mosi;
         std::string    _temp_file_miso;
         std::fstream   _temp_stream_mosi;

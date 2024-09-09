@@ -37,6 +37,8 @@ class EventHandler {
         bool         checkTimeout(void);
         void         updateLastsActivity(void);
 
+        virtual void save_mem() = 0;
+
     protected:
         int    _socket_fd;
         int    _port;

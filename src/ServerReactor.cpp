@@ -2,6 +2,7 @@
 #include "AcceptHandler.hpp"
 #include "EventHandler.hpp"
 #include "Logger.hpp"
+#include "MemoryHandler.hpp"
 #include "ProcessHandler.hpp"
 #include "Server.hpp"
 #include <asm-generic/socket.h>
@@ -10,6 +11,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <netinet/in.h>
+#include <new>
 #include <ostream>
 #include <set>
 #include <stdexcept>
@@ -164,33 +166,43 @@ void ServerReactor::run() {
 
     info.log() << "ServerReactor: JEON is listening..." << std::endl;
     while (g_signal == false) {
-        errno = 0;
-        if ((event_count = epoll_wait(_epoll_fd, events, MAX_TOTAL_CONNECTION, 16000)) == -1) {
-            if (errno == EINTR)
-                return;
-            error.log() << "ServerReactor: epoll_wait: " << std::string(std::strerror(errno)) << std::endl;
-        }
-
-        for (int i = 0; i < event_count; ++i) {
-            if (_eventHandlers.find(static_cast< EventHandler * >(events[i].data.ptr)) == _eventHandlers.end())
-                continue;
-            static_cast< EventHandler * >(events[i].data.ptr)->handle();
-        }
-        if (event_count == 0) {
-            info.log() << "ServerReactor: Check for timout! (handler count = " << _eventHandlers.size() << ")."
-                       << std::endl;
-            std::vector< std::set< EventHandler * >::iterator > deleteHandler;
-            for (std::set< EventHandler * >::iterator it = _eventHandlers.begin(); it != _eventHandlers.end(); ++it)
-                if ((*it)->checkTimeout() == true) {
-                    (*it)->timeout();
-                    deleteHandler.push_back(it);
-                }
-            for (std::vector< std::set< EventHandler * >::iterator >::iterator it = deleteHandler.begin();
-                 it != deleteHandler.end(); ++it) {
-                delete **it;
-                _eventHandlers.erase(*it);
+        if (!mem.is_allocated())
+            mem.allocate();
+        try {
+            errno = 0;
+            if ((event_count = epoll_wait(_epoll_fd, events, MAX_TOTAL_CONNECTION, 16000)) == -1) {
+                if (errno == EINTR)
+                    return;
+                error.log() << "ServerReactor: epoll_wait: " << std::string(std::strerror(errno)) << std::endl;
             }
-            debug.log() << "ServerReactor: timeout check done." << std::endl;
+
+            for (int i = 0; i < event_count; ++i) {
+                if (_eventHandlers.find(static_cast< EventHandler * >(events[i].data.ptr)) == _eventHandlers.end())
+                    continue;
+                static_cast< EventHandler * >(events[i].data.ptr)->handle();
+            }
+            if (event_count == 0) {
+                info.log() << "ServerReactor: Check for timout! (handler count = " << _eventHandlers.size() << ")."
+                           << std::endl;
+                std::vector< std::set< EventHandler * >::iterator > deleteHandler;
+                for (std::set< EventHandler * >::iterator it = _eventHandlers.begin(); it != _eventHandlers.end(); ++it)
+                    if ((*it)->checkTimeout() == true) {
+                        (*it)->timeout();
+                        deleteHandler.push_back(it);
+                    }
+                for (std::vector< std::set< EventHandler * >::iterator >::iterator it = deleteHandler.begin();
+                     it != deleteHandler.end(); ++it) {
+                    delete **it;
+                    _eventHandlers.erase(*it);
+                }
+                debug.log() << "ServerReactor: timeout check done." << std::endl;
+            }
+        } catch (std::bad_alloc &e) {
+            mem.deallocate();
+            error.log() << "Catched bad_alloc, running memory saving procedures." << std::endl;
+            for (std::set< EventHandler * >::iterator it = _eventHandlers.begin(); it != _eventHandlers.end(); ++it)
+                (*it)->save_mem();
+            mem.allocate();
         }
     }
 }

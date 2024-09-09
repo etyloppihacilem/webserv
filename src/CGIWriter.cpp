@@ -188,5 +188,6 @@ size_t CGIWriter::length() const { // tbh i can't remember why this method exist
 }
 
 void CGIWriter::save_mem() {
-    ; // TODO: code this
+    debug.log() << "(i) CGIWriter saved mem !" << std::endl;
+    shrink_to_fit(_buffer);
 }

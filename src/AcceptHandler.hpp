@@ -15,6 +15,7 @@ class AcceptHandler : public EventHandler {
 
         void handle();
         void timeout();
+        void save_mem();
 };
 
 #endif // !INCLUDE_SRC_ACCEPTHANDLER_HPP_

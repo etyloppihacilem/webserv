@@ -64,10 +64,5 @@ void ErrorStrategy::generateErrorPage(std::string &buffer) {
         error.log() << "bad_alloc during recovery, running basic error generation in low memory consumption mode."
                     << std::endl;
         buffer = status_string(_code);
-    } // TODO: check if memory needs to be reallocated after using this strategy.
-      //         check this after response is sent.
-}
-
-void ErrorStrategy::save_mem() {
-    ;
+    }
 }

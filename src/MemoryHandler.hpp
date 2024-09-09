@@ -28,6 +28,7 @@ class MemoryHandler {
 
         bool allocate();
         bool deallocate();
+        bool is_allocated()const;
 
     private:
         char  *_storage;   ///< Place where the storage happends

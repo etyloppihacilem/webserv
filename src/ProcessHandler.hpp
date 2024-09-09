@@ -32,6 +32,8 @@ class ProcessHandler : public EventHandler {
         void handle();
         void timeout();
 
+        void save_mem();
+
     private:
         void clean_state();
         void transition_to_rbs(); ///< Transition to response building state;
