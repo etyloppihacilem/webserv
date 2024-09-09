@@ -80,6 +80,7 @@ t_state ResponseSendState::process() {
         // debug.log() << "Response was sent and is waiting to end." << std::endl; // duplicate just in case
         // _sent = true;
         debug.log() << "Response is sent." << std::endl;
+        info.log() << "Just sent " << response.get_code() << std::endl;
         _state = ready;
         if (isError(response.get_code()) || isRedirection(response.get_code())) {
             info.log() << "Closing connexion because of " << (isError(response.get_code()) ? "error" : "redirection")

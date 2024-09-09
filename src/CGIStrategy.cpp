@@ -40,6 +40,7 @@
 #include <string.h>
 #include <string>
 #include <strings.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
@@ -79,8 +80,8 @@ CGIStrategy::CGIStrategy(
 
 CGIStrategy::~CGIStrategy() {
     debug.log() << "CGIStrategy: destructor call" << std::endl;
-    if (_child)
-        kill_child(true);
+    // if (_child)
+    //     kill_child(true);
     if (_body)
         delete _body;
 }
@@ -194,6 +195,7 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
         _state = launched;
         _built = true; // response is meant to wait for child
     } else {           // child
+        // sleep(10);
         if (setpgid(0, 0))
             babyphone.log() << "setpgid failed " << strerror(errno) << std::endl;
 #ifndef DEBUG
@@ -217,7 +219,7 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
             }
             close(temp_fd);
         }
-        int temp_fd = open(_temp_file_miso.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 000666);
+        int temp_fd = open(_temp_file_miso.c_str(), O_CREAT | O_WRONLY | O_TRUNC | O_SYNC, 000666);
         if (temp_fd < 0)
             babyphone.log() << "Could not open outfile." << std::endl;
         if (dup2(temp_fd, 1) < 0) {
@@ -386,6 +388,7 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
             // kill_child(true); // true bc we want to execute child
             // kill_child(false); // debug only
             error.log() << "Error reading in pipe from CGI child. " << strerror(errno) << ". Aborting." << std::endl;
+            _response.set_code(InternalServerError);
             return _done = true;
         }
         if (rd == 0) {
@@ -406,10 +409,26 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
 }
 
 bool CGIStrategy::open_child_file() {
+    // int dir_fd = open(".", O_RDONLY | O_DIRECTORY);
+    // if (dir_fd < 0)
+    //     error.log() << "Could not open directory for syncing. " << strerror(errno) << std::endl;
+    // else {
+    //     fsync(dir_fd);
+    //     close(dir_fd);
+    // }
+    if (is_child_alive())
+        return false;
+    struct stat buf;
+    if (stat(_temp_file_miso.c_str(), &buf)) {
+        error.log() << "Stat failed " << strerror(errno) << std::endl;
+        return false;
+    }
     if ((_fd_miso = open(_temp_file_miso.c_str(), O_RDONLY)) < 0) {
         error.log() << "CGIStrategy: fail to open miso temp file " << _temp_file_miso << ", " << std::strerror(errno)
                     << std::endl;
     }
+    if (fsync(_fd_miso) < 0)
+        warn.log() << "fsync failed on " << _temp_file_miso << std::endl;
     debug.log() << "CGIStrategy: opened " << _temp_file_miso << "." << std::endl;
     debug.log() << "Unlinking " << _temp_file_miso << std::endl;
     unlink(_temp_file_miso.c_str());
@@ -424,13 +443,28 @@ bool CGIStrategy::is_child_alive() {
         return false;
     }
     int waitinfo;
-    waitpid(-_child, &waitinfo, WNOHANG | WUNTRACED);
-    if (WIFEXITED(waitinfo) == 0) {
+    int ret;
+    if ((ret = waitpid(_child, &waitinfo, WNOHANG)) <= 0) {
+        event.log() << "Child " << _child << " is not dead yet. (nohang) " << ret << " " << strerror(errno)
+                   << std::endl; // should log debug
+        return true;
+    }
+    { // debug
+        if (WIFSIGNALED(waitinfo))
+            debug.log() << "Child was terminated by signal " << WTERMSIG(waitinfo) << " "
+                        << strsignal(WTERMSIG(waitinfo)) << std::endl;
+        if (WIFSTOPPED(waitinfo))
+            debug.log() << "Child is stopped. " << WSTOPSIG(waitinfo) << std::endl;
+        if (WIFCONTINUED(waitinfo))
+            debug.log() << "Child is stopped." << std::endl;
+    }
+    if (!WIFEXITED(waitinfo)) {
         debug.log() << "Child is not dead yet." << std::endl;
         return true;
     }
-    debug.log() << "Child " << _child << " have died with exit code " << WEXITSTATUS(waitinfo) << std::endl;
-    waitpid(-_child, &waitinfo, WUNTRACED);
+    // kill(-_child, SIGKILL);
+    info.log() << "Child " << _child << " have died with exit code " << WEXITSTATUS(waitinfo) << std::endl;
+    debug.log() << "untraced:" << waitpid(-_child, &waitinfo, WUNTRACED) << std::endl;
     if (WIFSIGNALED(waitinfo))
         debug.log() << "Child was terminated by signal " << WTERMSIG(waitinfo) << " " << strsignal(WTERMSIG(waitinfo))
                     << std::endl;
@@ -454,7 +488,7 @@ void CGIStrategy::kill_child(bool k) {
     waitpid(-_child, &status, WUNTRACED); // just to make sure
     if (WIFEXITED(status)) {
         exit_code = WEXITSTATUS(status);
-        debug.log() << "child exited with exit code " << exit_code << "." << std::endl;
+        info.log() << "child exited with exit code " << exit_code << "." << std::endl;
         if (WIFSIGNALED(status))
             debug.log() << "Child was terminated by signal " << WTERMSIG(status) << " " << strsignal(WTERMSIG(status))
                         << std::endl;

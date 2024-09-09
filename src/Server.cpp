@@ -57,7 +57,7 @@ Server::Server(StringTokenizer &tokenizedServer) :
     _serverName(1, "localhost"),
     _port(8080),
     _rootDir("www"),
-    _indexPage(1, "index.html"),
+    _indexPage(),
     _autoindex(false),
     _methods(initMethod, initMethod + 1),
     _maxBodySize(MAX_BODY_SIZE),

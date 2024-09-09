@@ -39,3 +39,5 @@ YoupiBanane/**
 *.log
 temp.test
 temp*
+www_tester
+www_tester/*

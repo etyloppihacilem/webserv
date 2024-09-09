@@ -17,7 +17,7 @@
 # define BUFFER_SIZE 1024 // 1 KiB arbitrary too but bigger
 #endif
 
-#define PIPE_BUFFER_SIZE 512 // bc 1KiB is already pipe max
+#define PIPE_BUFFER_SIZE BUFFER_SIZE // bc 1KiB is already pipe max
 
 #define TIME_LENGTH 32 // 29 normally
 // Sun, 06 Nov 1994 08:49:37 GMT

@@ -57,9 +57,10 @@ CTESTFLAGS		+= -DTESTING -Igoogletest/googletest/include -Igoogletest/googlemock
 DEBUG_FLAG		= -g3 -DDEBUG
 SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
-HEADER_DIR		    = header
-SRC_DIR		        = src
+HEADER_DIR			= header
+SRC_DIR				= src
 TEST_DIR			= test
+TESTER_DIR			= YoupiBanane
 
 INCLUDE_DIR         = ${HEADER_DIR} ${SRC_DIR}
 OBJ_DIR				= obj
@@ -72,7 +73,7 @@ SANITIZE_OBJ_DIR	= ${OBJ_DIR}/sanitize
 ########################
 
 SRC_FILES		= $(shell find $(SRC_DIR) -type f -name "*.cpp" | grep -v ".*_test.cpp" | grep -v ".*Test.cpp")
-TEST_FILES   	= $(shell find ${TEST_DIR} -type f -name "*.cpp")
+TEST_FILES		= $(shell find ${TEST_DIR} -type f -name "*.cpp")
 
 INCLUDES		= $(addprefix -I,$(INCLUDE_DIR))
 
@@ -147,7 +148,7 @@ mac_clean: # supprime les fichiers dupliqués sur mac
 	@find . -type f -name "* [2-9]*" -print -delete
 
 # TODO: add cleaning rule
-eval_tester: # setup ubuntu_tester
+eval_tester: ${TESTER_DIR} # setup ubuntu_tester
 	@chmod 755 ubuntu_tester ubuntu_cgi_tester
 
 file: # Print list of source and object files
@@ -235,14 +236,16 @@ ${SANITIZE_OBJ_DIR}:
 	@${MKDIR} -p ${SANITIZE_OBJ_DIR}
 
 ${TESTER_DIR}:
-	@mkdir YoupiBanane
-	@touch YoupiBanane/youpi.bad_extension
-	@touch YoupiBanane/youpi.bla
-	@mkdir YoupiBanane/nop
-	@touch YoupiBanane/nop/youpi.bad_extension
-	@touch YoupiBanane/nop/other.pouic
-	@mkdir YoupiBanane/Yeah
-	@touch YoupiBanane/Yeah/not_happy.bad_extension
+	mkdir -p YoupiBanane/nop
+	touch YoupiBanane/youpi.bad_extension
+	touch YoupiBanane/youpi.bla
+	touch YoupiBanane/nop/youpi.bad_extension
+	touch YoupiBanane/nop/other.pouic
+	mkdir -p YoupiBanane/Yeah
+	touch YoupiBanane/Yeah/not_happy.bad_extension
+	mkdir -p www_tester/post_body
+	mkdir -p www_tester/uploads
+	echo "Coucou :)" > www_tester/index.txt
 
 ###########
 ## OTHER ##

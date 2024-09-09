@@ -56,6 +56,7 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
         _route                  = route.getLocation();
         debug.log() << "Using route " << _route << std::endl;
         _max_body_size = route.getMaxBodySize();
+        debug.log() << "Routes max_body_size is " << _max_body_size << std::endl;
         if (route.hasRedirSet()) {
             set_redir(target, route);
             return;

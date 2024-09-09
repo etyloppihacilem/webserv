@@ -217,8 +217,8 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
     } else if (_request->get_method() == POST || _request->get_method() == PUT) {
         debug.log() << "Choosing UploadStrategy" << std::endl;
         _strategy = new UploadStrategy< ServerClass, RouteClass >(
-            *_request, location.get_upload_path(), *_server, location.is_diff(), (_request->get_method() == PUT),
-            location.get_max_body_size()
+            *_request, location.get_upload_path(), *_server, location.is_diff(), location.get_max_body_size(),
+            (_request->get_method() == PUT)
         );
     } else if (_request->get_method() == DELETE) {
         debug.log() << "Choosing DeleteStrategy" << std::endl;

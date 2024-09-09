@@ -73,5 +73,6 @@ extern Logger warn;
 extern Logger error;
 extern Logger fatal;
 extern Logger debug;
+extern Logger event;
 
 #endif // INCLUDE_SRC_LOGGER_HPP_

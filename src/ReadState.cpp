@@ -29,7 +29,9 @@ ReadState::ReadState(int socket, int port, const std::string &ip) :
     _request(0),
     _parse_state(rs_line),
     _port(port),
-    _ip(ip) {}
+    _ip(ip) {
+    info.log() << "Parsing incoming request." << std::endl;
+}
 
 ReadState::~ReadState() {
     if (_request)
@@ -53,7 +55,7 @@ t_state ReadState::process() {
                         << ", closing connection." << std::endl;
             return _state = s_error;
         } else if (a == 0) {
-            info.log() << "Reading nothing into socket " << _socket << ", closing connection." << std::endl;
+            warn.log() << "Reading nothing into socket " << _socket << ", closing connection." << std::endl;
             return _state = s_error;
         }
     }
@@ -108,6 +110,7 @@ t_state ReadState::process_buffer(char *buffer) {
             _request->init_body(_buffer);
             _parse_state = finished;
             _state       = ready;
+            info.log() << "Just parsed " << _request->get_method() << " " << _request->get_target() << std::endl;
         }
     }
     return _state;

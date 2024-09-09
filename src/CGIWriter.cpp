@@ -54,6 +54,8 @@ std::string CGIWriter::generate(size_t size) {
     } while (sanitize_HTTP_string(_buffer, 0).length() < size && !_cgi_done);
     if (_length == 0 && _buffer.length() == 0 && _cgi_done) {
         debug.log() << "CGI ended with no body." << std::endl;
+        if (isSuccessful(_response.get_code()))
+            _response.set_code(NoContent);
         _done = true;
         return "";
     }

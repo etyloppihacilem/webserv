@@ -12,7 +12,6 @@
 #include "BodyWriter.hpp"
 #include "BodyWriterChunk.hpp"
 #include "BodyWriterLength.hpp"
-#include "CGIStrategy.hpp"
 #include "CGIWriter.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
@@ -65,6 +64,7 @@ void Response::set_code(HttpCode code) {
     _code = code;
     if (_is_head && _code == OK)
         _code = NoContent; // in ubuntu_tester excpected 204.
+    debug.log() << "Response code set to " << code << std::endl;
     if (isError(_code) || isRedirection(_code))
         _header["Connection"] = "close";
     else

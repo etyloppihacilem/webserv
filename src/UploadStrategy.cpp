@@ -84,6 +84,11 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
         return _built;
     }
     if (!_init) {
+        if (_body->length() > _max_size) {
+            info.log() << "Max body size reached, sending " << ContentTooLarge << " before creating file." << std::endl;
+            debug.log() << "_body->length() " << _body->length() << " > " << _max_size << std::endl;
+            throw HttpError(ContentTooLarge);
+        }
         init();
         debug.log() << "Emptying buffer inside body." << std::endl;
         _file << _body->pop();
@@ -94,6 +99,7 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
     }
     if (_body->length() > _max_size) {
         info.log() << "Max body size reached, sending " << ContentTooLarge << std::endl;
+        debug.log() << "_body->length() " << _body->length() << " > " << _max_size << std::endl;
         throw HttpError(ContentTooLarge);
     }
     if (_body->is_done()) {
@@ -123,6 +129,7 @@ void UploadStrategy< ServerClass, RouteClass >::init_location() {
             if (errno == ENOENT) {
                 debug.log() << "Upload location " << _location << " was not found and will be created." << std::endl;
                 found = true; // we will create a file.
+                break;
             }
             if (errno == EACCES) {
                 warn.log() << "Could not open file " << _location << " for stat before upload, " << strerror(errno)
@@ -171,6 +178,7 @@ void UploadStrategy< ServerClass, RouteClass >::init() {
         warn.log() << "Init is already done and does not need to be done again." << std::endl;
         return;
     }
+    init_location();
     _file.open(_location.c_str(), std::fstream::in);
     if (_diff) {
         std::string location = _server.getUploadLocation(_location);
