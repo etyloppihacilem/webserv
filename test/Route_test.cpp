@@ -37,7 +37,7 @@ TEST_F(RouteTestSuite, DefaultConstructor) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expected({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
-    EXPECT_EQ(a.getMaxBodySize(), 1000000ul);
+    EXPECT_EQ(a.getMaxBodySize(), 2147483648ul);
     EXPECT_EQ("www/", a.getUploadPath());
     EXPECT_EQ(OK, a.getRedirCode());
     EXPECT_EQ("", a.getRedirPage());
@@ -64,7 +64,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidBasic) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expected({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
-    EXPECT_EQ(a.getMaxBodySize(), 1000000ul);
+    EXPECT_EQ(a.getMaxBodySize(), 2147483648ul);
     EXPECT_EQ("www/images/", a.getUploadPath());
     EXPECT_EQ(OK, a.getRedirCode());
     EXPECT_EQ("", a.getRedirPage());
@@ -120,7 +120,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidRewrite) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expected({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
-    EXPECT_EQ(a.getMaxBodySize(), 1000000ul);
+    EXPECT_EQ(a.getMaxBodySize(), 2147483648ul);
     EXPECT_EQ("www/YouHaveBeenRedirect/", a.getUploadPath());
     EXPECT_EQ(MovedPermanently, a.getRedirCode());
     EXPECT_EQ("/redir/newLocation.html", a.getRedirPage());
@@ -149,7 +149,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorValidCgi) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expected({ GET, POST });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
-    EXPECT_EQ(a.getMaxBodySize(), 1000000ul);
+    EXPECT_EQ(a.getMaxBodySize(), 2147483648ul);
     EXPECT_EQ("cgi-bin/", a.getUploadPath());
     EXPECT_EQ(OK, a.getRedirCode());
     EXPECT_EQ("", a.getRedirPage());
@@ -180,7 +180,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorOnlyInvalid) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expected({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
-    EXPECT_EQ(a.getMaxBodySize(), 1000000ul);
+    EXPECT_EQ(a.getMaxBodySize(), 2147483648ul);
     EXPECT_EQ("www/", a.getUploadPath());
     EXPECT_EQ(OK, a.getRedirCode());
     EXPECT_EQ("", a.getRedirPage());

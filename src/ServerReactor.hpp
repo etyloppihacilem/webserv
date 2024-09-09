@@ -21,13 +21,16 @@ class ServerReactor {
         int  initServerSocket(int port);
         void initNetwork(const std::vector< Server > &servers);
 
-        int           addClient(int socket_fd, int port, std::string client_IP);
-        void          deleteClient(int socket_fd, EventHandler &handler);
-        void          listenToClient(int socket_fd, EventHandler &handler);
-        void          talkToClient(int socket_fd, EventHandler &handler);
-        EventHandler *getCGIHandler(int CGI_process_fd);
+        int  addClient(int socket_fd, int port, std::string client_IP);
+        void deleteClient(int socket_fd, EventHandler &handler);
+        void listenToClient(int socket_fd, EventHandler &handler);
+        void talkToClient(int socket_fd, EventHandler &handler);
 
         void run();
+
+#ifdef TESTING
+        const std::set< EventHandler * > &getEventHandlers() const;
+#endif
 
     private:
         int                        _epoll_fd;

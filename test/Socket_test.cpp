@@ -25,8 +25,8 @@ void http_server_test(void);
 
 TEST(SocketTestSuite, checkSocketConstruction) {
     ServerManager::getInstance("conf/webserv.conf");
-    std::set< EventHandler * > eventHandler = ServerManager::getInstance()->getReactor().getEventHandler();
-    for (std::set< EventHandler * >::iterator it = eventHandler.begin(); it != eventHandler.end(); ++it) {
+    std::set< EventHandler * > eventHandler = ServerManager::getInstance()->getReactor().getEventHandlers();
+    for (std::set< EventHandler * >::const_iterator it = eventHandler.begin(); it != eventHandler.end(); ++it) {
         int fd   = (*it)->getSocketFd();
         int port = (*it)->getPort();
         info.log() << "Test fd: " << fd << " open on port " << port << "." << std::endl;

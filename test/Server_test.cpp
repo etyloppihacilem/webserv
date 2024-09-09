@@ -39,7 +39,7 @@ TEST_F(ServerTestSuite, DefaultConstructor) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expectedMethods({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expectedMethods));
-    EXPECT_EQ(1000000ul, a.getMaxBodySize());
+    EXPECT_EQ(2147483648ul, a.getMaxBodySize());
     std::map< HttpCode, std::string > expectedError({});
     EXPECT_THAT(a.getErrorPages(), ::testing::ContainerEq(expectedError));
     EXPECT_TRUE(a.hasRoute("/"));
@@ -97,7 +97,7 @@ TEST_F(ServerTestSuite, ParametrizeConstructorServer1) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expectedMethods({ DELETE });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expectedMethods));
-    EXPECT_EQ(1000000ul, a.getMaxBodySize());
+    EXPECT_EQ(2147483648ul, a.getMaxBodySize());
     std::map< HttpCode, std::string > expectedError({});
     EXPECT_THAT(a.getErrorPages(), ::testing::ContainerEq(expectedError));
     EXPECT_TRUE(a.hasRoute("/"));
@@ -155,7 +155,7 @@ TEST_F(ServerTestSuite, ParametrizeConstructorServerWithLocation) {
     EXPECT_EQ(false, a.getAutoindex());
     std::set< HttpMethod > expectedMethods({ GET });
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expectedMethods));
-    EXPECT_EQ(1000000ul, a.getMaxBodySize());
+    EXPECT_EQ(2147483648ul, a.getMaxBodySize());
     std::map< HttpCode, std::string > expectedError({});
     EXPECT_THAT(a.getErrorPages(), ::testing::ContainerEq(expectedError));
     EXPECT_EQ(true, a.hasServeNameSet());

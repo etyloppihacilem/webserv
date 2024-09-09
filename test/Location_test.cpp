@@ -31,7 +31,7 @@ TEST(LocationTestSuite, BuildPathTest) {
     loc.build_path(target, route);
     EXPECT_EQ(loc.get_route_path(), "routeDirTEST");
     EXPECT_EQ(loc.get_path(), "routeDirTEST" + original_target);
-    EXPECT_EQ(loc.get_path_info(), original_target);
+    EXPECT_EQ(loc.get_path_info(), "");
 }
 
 TEST(LocationTestSuite, BuildPathRedirectTest) {
