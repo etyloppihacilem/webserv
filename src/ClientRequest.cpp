@@ -355,7 +355,8 @@ void ClientRequest::decode_target() {
 
         st << std::hex << _target.substr(percent + 1, 2);
         st >> c;
-        _target.replace(percent, 3, 1, c);
+        if (c > 31 && c != 127)
+            _target.replace(percent, 3, 1, c); // do not replace if not printable character
         percent++; // to prevent a %25 ('%') to encode itself
     }
     debug.log() << "Target decoded: " << _target << std::endl;

@@ -162,7 +162,7 @@ bool Response::build_response(std::string &buffer, size_t size) {
                 CGIWriter *tmp;
                 if ((tmp = dynamic_cast< CGIWriter * >(_body)) != 0) {
                     if (tmp->init()) {
-                        debug.log() << "CGIWriter init not done yet." << std::endl;
+                        event.log() << "CGIWriter init not done yet." << std::endl;
                         break;
                     }
                 } else {

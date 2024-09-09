@@ -9,7 +9,6 @@
 ##################################################################################################################### */
 
 #include "ResponseSendState.hpp"
-#include "CGIStrategy.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "ProcessState.hpp"
@@ -24,9 +23,7 @@
 
 ResponseSendState::ResponseSendState(int socket, ResponseBuildingStrategy *strategy) :
     ProcessState(socket),
-    _strategy(strategy)
-// _sent(false) {
-{
+    _strategy(strategy) {
     if (!strategy) {
         error.log() << "ResponseSendState: no strategy provided, closing connexion" << std::endl;
         _state = s_error;
@@ -47,16 +44,6 @@ t_state ResponseSendState::process() {
         return _state;
     }
     Response &response = _strategy->get_response();
-    // if (_sent) { // TODO: delete _send if not used anywhere
-    //     debug.log() << "Response is sent." << std::endl;
-    //     _state = ready;
-    //     if (isError(response.get_code()) || isRedirection(response.get_code())) {
-    //         info.log() << "Closing connexion because of " << (isError(response.get_code()) ? "error" : "redirection")
-    //                    << " code " << response.get_code() << std::endl;
-    //         _state = s_error;
-    //     }
-    //     return _state;
-    // }
     if (!response.is_done())
         response.build_response(_buffer, BUFFER_SIZE);
     int written = 0;
@@ -72,13 +59,14 @@ t_state ResponseSendState::process() {
                     << ". Closing connexion" << std::endl;
         _state = s_error; // is_error means to close the connexion
     }
-    debug.log() << "Wrote " << written << " byte(s) in socket " << _socket << std::endl;
+    if (written)
+        debug.log() << "Wrote " << written << " byte(s) in socket " << _socket << std::endl;
+    else
+        event.log() << "Wrote " << written << " byte(s) in socket " << _socket << std::endl;
     if (static_cast< size_t >(written) < (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()))
         error.log() << "Partial write in socker " << _socket << ", content may be affected." << std::endl;
     _buffer = _buffer.substr(written, _buffer.length() - written);
     if (response.is_done() && _buffer.length() == 0) {
-        // debug.log() << "Response was sent and is waiting to end." << std::endl; // duplicate just in case
-        // _sent = true;
         debug.log() << "Response is sent." << std::endl;
         info.log() << "Just sent " << response.get_code() << std::endl;
         _state = ready;
