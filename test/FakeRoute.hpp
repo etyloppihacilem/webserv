@@ -122,6 +122,7 @@ class FakeRoute {
 
         friend ResponseBuildStateFixture;
         FRIEND_TEST(LocationTestSuite, BuildPathTest);
+        FRIEND_TEST(LocationTestSuite, BuildCursorPathTest);
         FRIEND_TEST(LocationTestSuite, BuildPathRedirectTest);
 };
 

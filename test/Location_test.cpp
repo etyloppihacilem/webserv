@@ -10,6 +10,8 @@
 
 #include "FakeRoute.hpp"
 #include "FakeServer.hpp"
+#include "HttpMethods.hpp"
+#include "HttpStatusCodes.hpp"
 #include "Location.hpp"
 #include "gtest/gtest.h"
 #include <string>
@@ -31,6 +33,20 @@ TEST(LocationTestSuite, BuildPathTest) {
     loc.build_path(target, route);
     EXPECT_EQ(loc.get_route_path(), "routeDirTEST");
     EXPECT_EQ(loc.get_path(), "routeDirTEST" + original_target);
+    EXPECT_EQ(loc.get_path_info(), "");
+}
+
+TEST(LocationTestSuite, BuildCursorPathTest) {
+    Location< FakeServer, FakeRoute > loc;
+    FakeRoute                         route;
+    std::string                       original_target = "/cursors.js";
+    std::string                       target          = "/cursors" + original_target;
+
+    route._getRootDir  = "etyloppihacilem.com";
+    route._getLocation = "/cursors";
+    loc.build_path(target, route);
+    EXPECT_EQ(loc.get_route_path(), "etyloppihacilem.com");
+    EXPECT_EQ(loc.get_path(), "etyloppihacilem.com" + original_target);
     EXPECT_EQ(loc.get_path_info(), "");
 }
 

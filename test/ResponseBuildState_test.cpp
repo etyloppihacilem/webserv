@@ -10,7 +10,6 @@
 
 #include "ResponseBuildState_test.hpp"
 #include "BodyWriter.hpp"
-#include "BodyWriterChunk.hpp"
 #include "BodyWriterLength.hpp"
 #include "CGIStrategy.hpp"
 #include "DeleteStrategy.hpp"

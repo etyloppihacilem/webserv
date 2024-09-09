@@ -12,6 +12,7 @@
 #include "StringUtils.hpp"
 #include <algorithm>
 #include <cstddef>
+#include <locale>
 #include <map>
 #include <ostream>
 #include <set>

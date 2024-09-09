@@ -83,6 +83,7 @@ class Location {
                                                */
 #ifdef TESTING
         FRIEND_TEST(LocationTestSuite, BuildPathTest);
+        FRIEND_TEST(LocationTestSuite, BuildCursorPathTest);
         FRIEND_TEST(LocationTestSuite, BuildPathRedirectTest);
 #endif
 };
