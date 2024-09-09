@@ -37,6 +37,11 @@ void sigpipe_handler(int signum) {
     debug.log() << "Just got sigpipe" << std::endl;
 }
 
+void sigchld_handler(int signum) {
+    (void) signum;
+    info.log() << "Just got sigchld, a child finished." << std::endl;
+}
+
 static void header() {
     info.log() << "        " << a << std::endl;
     info.log() << "        " << b << std::endl;
@@ -62,6 +67,7 @@ int main(int ac, char **av, const char **env) {
     try {
         signal(SIGINT, sigint_handler);
         signal(SIGPIPE, sigpipe_handler);
+        signal(SIGCHLD, sigchld_handler);
         ServerManager::getInstance(std::string(av[1]), env);
         ServerManager::getInstance()->run();
         ServerManager::deleteInstance();
