@@ -446,7 +446,7 @@ bool CGIStrategy::is_child_alive() {
     int ret;
     if ((ret = waitpid(_child, &waitinfo, WNOHANG)) <= 0) {
         event.log() << "Child " << _child << " is not dead yet. (nohang) " << ret << " " << strerror(errno)
-                   << std::endl; // should log debug
+                    << std::endl; // should log debug
         return true;
     }
     { // debug

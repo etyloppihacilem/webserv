@@ -57,7 +57,7 @@ time_t ProcessHandler::getTimeout() const {
 
 void ProcessHandler::handle() {
     event.log() << "ProcessHandler: Client " << _client_IP << " on socket " << _socket_fd << " from port " << _port
-               << " received a new event!" << std::endl;
+                << " received a new event!" << std::endl;
     updateLastsActivity();
     if (!_state)
         _state = new ReadState(_socket_fd, _port, _client_IP);

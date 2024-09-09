@@ -196,7 +196,7 @@ void ServerReactor::run() {
 }
 
 #ifdef TESTING
-const std::set<EventHandler *> &ServerReactor::getEventHandlers() const {
+const std::set< EventHandler * > &ServerReactor::getEventHandlers() const {
     return _eventHandlers;
 }
 #endif

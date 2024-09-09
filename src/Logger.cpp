@@ -156,4 +156,4 @@ Logger warn(std::cerr, "WARNING", _YELLOW, 8);
 Logger error(std::cerr, "ERROR", _RED, 8);
 Logger fatal(std::cerr, "FATAL", _PURPLE _BLINK, 8);
 Logger debug(std::cerr, "DEBUG", _GREEN, 8, true); // Cannot be forced
-Logger event(std::cerr, "EVENT", _CYAN, 8, true); // Cannot be forced
+Logger event(std::cerr, "EVENT", _CYAN, 8, true);  // Cannot be forced
