@@ -57,7 +57,7 @@ void logServerRedefinition(int port, const ValueList &values) {
         if (i < values.size() - 1)
             out << ", ";
     }
-    out << "on port " << port;
+    out << " on port " << port;
     out << " is a redifinition of an existing, server ignored." << std::endl;
 }
 
