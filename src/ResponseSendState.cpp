@@ -59,10 +59,7 @@ t_state ResponseSendState::process() {
                     << ". Closing connexion" << std::endl;
         _state = s_error; // is_error means to close the connexion
     }
-    if (written)
-        debug.log() << "Wrote " << written << " byte(s) in socket " << _socket << std::endl;
-    else
-        event.log() << "Wrote " << written << " byte(s) in socket " << _socket << std::endl;
+    event.log() << "Wrote " << written << " byte(s) in socket " << _socket << std::endl;
     if (static_cast< size_t >(written) < (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()))
         error.log() << "Partial write in socker " << _socket << ", content may be affected." << std::endl;
     _buffer = _buffer.substr(written, _buffer.length() - written);

@@ -22,8 +22,6 @@ doc
 doc/*
 doc.tar.gz
 doc.zip
-error_pages
-error_pages/**
 error_pages_ok
 error_pages_ok/**
 child.log

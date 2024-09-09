@@ -78,6 +78,7 @@ bool GetFileStrategy::build_response() {
             }
         }
         _estimated_size = buf.st_size;
+        debug.log() << "Sending " << _estimated_size << " bytes" << std::endl;
         _response.set_last_modified(buf.st_mtim); // last mofified date
     } // saving stack
     std::string extension = extract_extension(_location);
@@ -111,7 +112,9 @@ bool GetFileStrategy::fill_buffer(std::string &buffer, size_t size) {
     _file.read(buf, size > BUFFER_SIZE ? BUFFER_SIZE : size);
     if (_file.eof())
         _done = true;
-    buffer += buf;
+    std::string temp = std::string(buf, _file.gcount());
+    event.log() << "Just read " << temp.length() << "/" << _file.gcount() << " from file." << std::endl;
+    buffer += temp;
     return _done;
 }
 

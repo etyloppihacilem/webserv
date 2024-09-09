@@ -7,3 +7,6 @@
 [submodule "cgi-bin"]
 	path = cgi-bin
 	url = git@github.com:etyloppihacilem/webserv-cgi-bin.git
+[submodule "error_pages"]
+	path = error_pages
+	url = ./error_pages

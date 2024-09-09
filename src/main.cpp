@@ -58,6 +58,7 @@ int main(int ac, char **av, const char **env) {
     debug.disable();
     event.disable();
 #endif
+    event.disable();
     header();
     try {
         signal(SIGINT, sigint_handler);
