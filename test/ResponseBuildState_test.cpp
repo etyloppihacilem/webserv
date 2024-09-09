@@ -228,6 +228,20 @@ std::vector< d_rbs > ResponseBuildData = {
         true,
         "/test/diff",
     },
+    {
+        "get_to_folder_with_file_name",
+        "GET /test/test.txt HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        tGetFileStrategy,
+        OK,
+        {
+            { "Content-Length", "33" },
+            { "Content-Type", "text/plain" },
+        },
+        true,
+        "This has a different mimetype...\n",
+        false,
+        "/test",
+    },
 };
 
 INSTANTIATE_TEST_SUITE_P(
