@@ -19,9 +19,12 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstring>
+#include <fcntl.h>
 #include <fstream>
 #include <ostream>
+#include <sstream>
 #include <string>
+#include <sys/stat.h>
 #include <unistd.h>
 
 template < class ServerClass, class RouteClass >
@@ -68,8 +71,8 @@ UploadStrategy< ServerClass, RouteClass >::~UploadStrategy() {
 template < class ServerClass, class RouteClass >
 bool UploadStrategy< ServerClass, RouteClass >::build_response() {
     if (!_body) {
-        // if (!_init)
-        // init(); // creating file if not already there and init of headers and stuff
+        if (!_init)
+            init(); // creating file if not already there and init of headers and stuff
         if (_file.is_open())
             _file.close();
         _response.set_body("Empty (Success)");
@@ -81,10 +84,6 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
         return _built;
     }
     if (!_init) {
-        if (_body->get() == "" && _body->is_done()) {
-            debug.log() << "Body is empty, sending " << Created << std::endl;
-            return _built = true;
-        }
         init();
         debug.log() << "Emptying buffer inside body." << std::endl;
         _file << _body->pop();
@@ -108,6 +107,65 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
 }
 
 template < class ServerClass, class RouteClass >
+std::string UploadStrategy< ServerClass, RouteClass >::create_name(int nb) {
+    std::stringstream st;
+    st << "/uploadfile_" << nb;
+    return st.str();
+}
+
+template < class ServerClass, class RouteClass >
+void UploadStrategy< ServerClass, RouteClass >::init_location() {
+    struct stat buf;
+    bool        found = false;
+    int         creat = 0;
+    do {
+        if (stat(_location.c_str(), &buf)) {
+            if (errno == ENOENT) {
+                debug.log() << "Upload location " << _location << " was not found and will be created." << std::endl;
+                found = true; // we will create a file.
+            }
+            if (errno == EACCES) {
+                warn.log() << "Could not open file " << _location << " for stat before upload, " << strerror(errno)
+                           << ", sending " << Forbidden << std::endl;
+                throw(HttpError(Forbidden));
+            }
+            if (errno == ENAMETOOLONG) {
+                warn.log() << "Could not open file " << _location << " for stat before upload, " << strerror(errno)
+                           << ", sending " << URITooLong << std::endl;
+                throw(HttpError(URITooLong));
+            }
+            warn.log() << "Could not open file " << _location << " for stat before upload, " << strerror(errno)
+                       << ", sending " << InternalServerError << std::endl;
+            throw(HttpError(InternalServerError));
+        } else {
+            if (creat < 0) {
+                error.log() << "New file creation did a int overflow, sending " << InternalServerError << std::endl;
+                throw HttpError(InternalServerError);
+            }
+            if (creat) { // create in progress and file exists
+                size_t last_slash = _location.find_last_of("/");
+                if (last_slash == _location.npos) {
+                    error.log() << "Error while incrementing new file count of " << _location << ", sending "
+                                << InternalServerError << std::endl;
+                    throw HttpError(InternalServerError);
+                }
+                _location.resize(last_slash);      // triming last name aka the one we just tested
+                _location += create_name(creat++); // checking if uploadfile_[creat] exists there
+                continue;                          // looping again
+            }
+            if (!S_ISDIR(buf.st_mode)) {
+                debug.log() << "Found file " << _location << " for upload." << std::endl;
+                found = true; // file is a file and is found
+            } else {          // this is a directory
+                debug.log() << "Location " << _location << " for upload is a directory, creating a new file."
+                            << std::endl;
+                _location += create_name(creat++); // checking if uploadfile_0 exists there
+            }
+        }
+    } while (!found);
+}
+
+template < class ServerClass, class RouteClass >
 void UploadStrategy< ServerClass, RouteClass >::init() {
     if (_init) {
         warn.log() << "Init is already done and does not need to be done again." << std::endl;
@@ -127,6 +185,11 @@ void UploadStrategy< ServerClass, RouteClass >::init() {
     _file.close();
     _file.open(_location.c_str(), std::fstream::out | (_replace ? std::fstream::trunc : std::fstream::app));
     if (!_file.is_open()) {
+        if (errno == ENOENT) { // cause could be validated with stat if component of path does not exists
+            info.log() << "UploadStrategy: could not open file " << _location << ", " << strerror(errno) << ". Sending "
+                       << NotFound << std::endl;
+            throw HttpError(NotFound);
+        }
         error.log() << "UploadStrategy: cannot open " << _location << " to upload: " << strerror(errno) << ". Sending "
                     << Forbidden << std::endl;
         throw HttpError(Forbidden);

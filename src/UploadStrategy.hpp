@@ -42,7 +42,9 @@ class UploadStrategy : public ResponseBuildingStrategy {
         bool fill_buffer(std::string &buffer, size_t size);
 
     private:
-        void init();
+        void        init();
+        void        init_location();
+        std::string create_name(int nb);
 
         bool               _init;
         const ServerClass &_server;
