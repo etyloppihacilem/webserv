@@ -83,6 +83,21 @@ std::vector< d_rbs > ResponseBuildData = {
         "/test",
     },
     {
+        "PUT_create",
+        "PUT /test/upload.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+        tUploadStrategy,
+        Created,
+        {
+            { "Location", "/test/upload.txt" },
+            { "Content-Length", "7" },
+            { "Content-Type", "text/plain" },
+        },
+        true,
+        "Success",
+        true,
+        "/test",
+    },
+    {
         "DELETE",
         "DELETE /test/delete.png HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
         tDeleteStrategy,
@@ -163,7 +178,7 @@ std::vector< d_rbs > ResponseBuildData = {
     },
     {
         "indexStrategy",
-        "GET /test HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        "GET /test/ HTTP/1.1\r\nHost: coucou\r\n\r\n",
         tGetIndexStrategy,
         OK,
         {
@@ -200,7 +215,7 @@ std::vector< d_rbs > ResponseBuildData = {
     },
     {
         "python_route_only",
-        "GET /python HTTP/1.1\r\nHost: coucou\r\n\r\n",
+        "GET /python/ HTTP/1.1\r\nHost: coucou\r\n\r\n",
         tGetFileStrategy,
         OK,
         {
@@ -215,6 +230,21 @@ std::vector< d_rbs > ResponseBuildData = {
     {
         "upload_to_different_location",
         "POST /test/diff/hihi.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
+        tUploadStrategy,
+        Created,
+        {
+            { "Location", "/test/diff/upload/hihi.txt" },
+            { "Content-Length", "7" },
+            { "Content-Type", "text/plain" },
+        },
+        true,
+        "Success",
+        true,
+        "/test/diff",
+    },
+    {
+        "upload_to_different_location_PUT",
+        "PUT /test/diff/hihi.txt HTTP/1.1\r\nHost: coucou\r\nContent-Length: 22\r\n\r\nCoucou je suis heureux",
         tUploadStrategy,
         Created,
         {

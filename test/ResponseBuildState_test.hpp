@@ -198,12 +198,12 @@ class ResponseBuildStateFixture : public ::testing::TestWithParam< d_rbs > {
                 { "index.html" }
             );
             _server._routes["/test"] = FakeRoute(
-                OK, true, false, false, false, false, "", "", "/test", "", "www/test", "", { GET, POST, DELETE },
+                OK, true, false, false, false, false, "", "", "/test", "", "www/test", "", { GET, POST, PUT, DELETE },
                 { "lindex.html" }
             );
             _server._routes["/test/diff"] = FakeRoute(
                 OK, true, false, false, false, false, "", "", "/test/diff", "", "www/test", "www/test/upload",
-                { GET, POST, DELETE }, { "lindex.html" }
+                { GET, POST, PUT, DELETE }, { "lindex.html" }
             );
             _server._routes["/space_corridor"] = FakeRoute(
                 TemporaryRedirect, false, false, false, true, false, "", "", "/space_corridor",
