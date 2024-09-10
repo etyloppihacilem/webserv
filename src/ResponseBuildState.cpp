@@ -57,8 +57,13 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, Cl
     if (_request->gateway_checks(port)) {
         if (_request->get_header().find("Host")
             != _request->get_header().end()) { // cause if there is no host we're fucked
-            const ServerClass &tmp = ServerManager::getInstance()->getServer(_request->get_header().at("Host"), port);
-            _server                = &tmp;
+            try {
+                const ServerClass &tmp
+                    = ServerManager::getInstance()->getServer(_request->get_header().at("Host"), port);
+                _server = &tmp;
+            } catch (ServerManager::ServerNotFoundWarn &e) {
+                ; // nothing just continue
+            }
         }
     }
     if (!_server) {

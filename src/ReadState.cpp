@@ -47,8 +47,8 @@ t_state ReadState::process() {
 
     char buffer[BUFFER_SIZE + 1] = { 0 };
 
+    int a = 0;
     if (_state == waiting) {
-        int a;
 
         if ((a = read(_socket, buffer, BUFFER_SIZE)) < 0) {
             error.log() << "Reading into socket " << _socket << " resulted in error: " << strerror(errno)
@@ -59,7 +59,7 @@ t_state ReadState::process() {
             return _state = s_error;
         }
     }
-    return process_buffer(buffer);
+    return process_buffer(buffer, a);
 }
 
 /**
@@ -67,9 +67,9 @@ t_state ReadState::process() {
 
   Called by process().
   */
-t_state ReadState::process_buffer(char *buffer) {
+t_state ReadState::process_buffer(char *buffer, int size_read) {
     size_t eol; // end of line
-    _buffer += buffer;
+    _buffer.append(buffer, size_read);
     sanitize_HTTP_string(_buffer, 0);
     if (_state == waiting) {
         if (_request == 0) {

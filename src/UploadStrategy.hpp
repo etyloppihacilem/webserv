@@ -44,6 +44,8 @@ class UploadStrategy : public ResponseBuildingStrategy {
     private:
         void        init();
         void        init_location();
+        bool        init_multipart(); // return true when ok
+        bool sanitize_multipart();
         std::string create_name(int nb);
 
         bool               _init;
@@ -52,9 +54,12 @@ class UploadStrategy : public ResponseBuildingStrategy {
         Body              *_body;
         std::string        _target;
         std::string        _location;
+        std::string        _multipart;
+        std::string        _multipart_f; ///< multipart file name
         size_t             _max_size;
         bool               _replace;
         bool               _diff; ///< Upload path different than root dir
+        bool               _first;
 #ifdef TESTING
 # include "gtest/gtest.h"
         FRIEND_TEST(ResponseBuildStateFixture, CorrectStrategyTest);

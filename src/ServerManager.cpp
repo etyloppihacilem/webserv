@@ -137,7 +137,8 @@ const Server &ServerManager::getServer(const std::string &serverName, int port) 
 
     std::stringstream portStr;
     portStr << port;
-    throw ServerNotFoundWarn(serverName + portStr.str());
+    warn.log() << "Throwing ServerNotFoundWarn with (" << serverName << ", " << portStr.str() << ")" << std::endl;
+    throw ServerNotFoundWarn();
 }
 
 const Server &ServerManager::getServer(int port) const {
@@ -147,6 +148,7 @@ const Server &ServerManager::getServer(int port) const {
 
     std::stringstream portStr;
     portStr << port;
+    warn.log() << "Throwing ServerNotFoundWarn" << std::endl;
     throw ServerNotFoundWarn(portStr.str());
 }
 #ifdef TESTING

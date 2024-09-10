@@ -27,7 +27,7 @@ class ReadState : public ProcessState {
         ClientRequest *get_client_request();
 
     private:
-        t_state process_buffer(char *buffer);
+        t_state process_buffer(char *buffer, int size_read);
         t_state return_error(HttpCode code = BadRequest);
 
         std::string    _buffer; ///< Buffer for parsing on socket

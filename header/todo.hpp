@@ -14,7 +14,7 @@
 #ifdef TESTING
 # define BUFFER_SIZE 13 // arbitrary for testing
 #else
-# define BUFFER_SIZE 1024 // 1 KiB arbitrary too but bigger
+# define BUFFER_SIZE 4096 // 1 KiB arbitrary too but bigger
 #endif
 
 #define PIPE_BUFFER_SIZE BUFFER_SIZE // bc 1KiB is already pipe max

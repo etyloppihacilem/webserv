@@ -40,7 +40,7 @@ Location< ServerClass, RouteClass >::Location() :
     _default_error(Forbidden) {}
 
 template < class ServerClass, class RouteClass >
-Location< ServerClass, RouteClass >::Location(const std::string &target, const ServerClass &server) :
+Location< ServerClass, RouteClass >::Location(std::string target, const ServerClass &server) :
     _autoindex(false),
     _is_file(false),
     _is_cgi(false),
@@ -69,13 +69,17 @@ Location< ServerClass, RouteClass >::Location(const std::string &target, const S
             return;
         debug.log() << "Target '" << target << "' exists." << std::endl;
         if (S_ISDIR(buf.st_mode)) { // in case target is a directory
-            if (*target.rbegin() != '/'){
+            if (*target.rbegin() != '/') {
                 _status_code = MovedPermanently;
                 _is_redirect = true;
-                _path = target + "/";
+                _path        = target + "/";
                 return;
             }
             debug.log() << "Target is a directory" << std::endl;
+            while (target.length() > 1 && *target.rbegin() == '/') {
+                debug.log() << "Trimed slash from " << target << std::endl;
+                target.resize(target.size() - 1); // triming trailing slash
+            }
             if (find_index(route, buf)) // if index file is found
                 return;
             _autoindex = route.getAutoindex(); // if nothing else found

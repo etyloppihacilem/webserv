@@ -29,7 +29,7 @@
 template < class ServerClass = Server, class RouteClass = Route > // template is there for testing purposes
 class Location {
     public:
-        Location(const std::string &target, const ServerClass &server);
+        Location(std::string target, const ServerClass &server);
         ~Location();
 
         bool               has_autoindex() const;

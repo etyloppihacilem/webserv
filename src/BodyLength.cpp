@@ -70,9 +70,10 @@ size_t BodyLength::read_body() {
         error.log() << "Invalid read in BodyLength " << strerror(errno) << std::endl;
         return 0;
     }
-    debug.log() << "Just read " << size_read << " bytes from BodyLength." << std::endl;
-    _buffer      += std::string(buf);
+    event.log() << "Just read " << size_read << " bytes from BodyLength." << std::endl;
+    _buffer.append(buf, size_read);
     _read_length += size_read;
+    event.log() << "Body has " << _read_length << " bytes read out of " << _length << " bytes." << std::endl;
     return size_read;
 }
 

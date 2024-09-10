@@ -16,11 +16,14 @@
 #include "HttpStatusCodes.hpp"
 #include "Logger.hpp"
 #include "Route.hpp"
+#include "StringUtils.hpp"
+#include "todo.hpp"
 #include <cerrno>
 #include <cstddef>
 #include <cstring>
 #include <fcntl.h>
 #include <fstream>
+#include <map>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -45,8 +48,26 @@ UploadStrategy< ServerClass, RouteClass >::UploadStrategy(
     _location(location),
     _max_size(max_size),
     _replace(replace),
-    _diff(diff) {
+    _diff(diff),
+    _first(false) {
     (void) server;
+    const std::map< std::string, std::string > &header = request.get_header();
+    if (header.find("Content-Type") != header.end()) {
+        if (header.at("Content-Type").find("multipart/form-data") == 0) {
+            _multipart = header.at("Content-Type");
+            size_t sep = _multipart.find_first_of(";");
+            if (sep == _multipart.npos || sep + 1 == _multipart.length())
+                _multipart = "";
+            else {
+                _multipart = _multipart.substr(sep + 1, _multipart.length() - (sep + 1));
+                size_t sep = _multipart.find_first_of("boundray=");
+                if (sep == _multipart.npos || sep + 9 == _multipart.length())
+                    _multipart = "";
+                else
+                    _multipart = _multipart.substr(sep + 9, _multipart.length() - (sep + 9));
+            }
+        }
+    }
     if (request.have_body()) {
         debug.log() << "Upload created with body" << std::endl;
         _body = request.get_body();
@@ -70,6 +91,10 @@ UploadStrategy< ServerClass, RouteClass >::~UploadStrategy() {
    */
 template < class ServerClass, class RouteClass >
 bool UploadStrategy< ServerClass, RouteClass >::build_response() {
+    if (_multipart != "" && !_first) {
+        _first = true; // fisrt done
+        return _built;
+    }
     if (!_body) {
         if (!_init)
             init(); // creating file if not already there and init of headers and stuff
@@ -89,13 +114,23 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
             debug.log() << "_body->length() " << _body->length() << " > " << _max_size << std::endl;
             throw HttpError(ContentTooLarge);
         }
+        if (!init_multipart())
+            return _built;
         init();
         debug.log() << "Emptying buffer inside body." << std::endl;
-        _file << _body->pop();
+        if (_multipart == "")
+            _file << _body->pop();
+        else if (!sanitize_multipart())
+            return _built;
+        debug.log() << "Just wrote " << _file.tellg() << " bytes to file." << std::endl;
     } else if (!_body->is_done()) {
         size_t read = _body->read_body();
-        debug.log() << "Read " << read << " bytes from socket to put in file." << std::endl;
-        _file << _body->pop();
+        event.log() << "Read " << read << " bytes from socket to put in file." << std::endl;
+        if (_multipart == "")
+            _file << _body->pop();
+        else if (!sanitize_multipart())
+            return _built;
+        debug.log() << "Just wrote " << _file.tellg() << " bytes to file." << std::endl;
     }
     if (_body->length() > _max_size) {
         info.log() << "Max body size reached, sending " << ContentTooLarge << std::endl;
@@ -113,10 +148,52 @@ bool UploadStrategy< ServerClass, RouteClass >::build_response() {
 }
 
 template < class ServerClass, class RouteClass >
+bool UploadStrategy< ServerClass, RouteClass >::sanitize_multipart() { // true when continue normally
+    std::string &buffer = _body->get();
+    if (buffer.length() < 2 * (BUFFER_SIZE > _multipart.length() + 4 ? BUFFER_SIZE : _multipart.length() + 4)
+        && !_body->is_done()) // -- and CRLF
+        return false;
+    size_t found = buffer.find("--"+ _multipart + "--\r\n");
+    if (found != buffer.npos) {
+        buffer.replace(found, _multipart.length() + 6, "");
+        _multipart = "";
+    } else if (buffer.find(_multipart) != buffer.npos) {
+        error.log() << "Multipart is not just one upload file, sending " << BadRequest << std::endl;
+        write(1, buffer.c_str(), buffer.length());
+        throw(HttpError(BadRequest));
+    }
+    _file << buffer.substr(0, BUFFER_SIZE);
+    buffer.replace(0, BUFFER_SIZE, "");
+    return true;
+}
+
+template < class ServerClass, class RouteClass >
 std::string UploadStrategy< ServerClass, RouteClass >::create_name(int nb) {
     std::stringstream st;
-    st << "/uploadfile_" << nb;
+    st << "uploadfile_" << nb;
     return st.str();
+}
+
+template < class ServerClass, class RouteClass >
+bool UploadStrategy< ServerClass, RouteClass >::init_multipart() {
+    _body->read_body();
+    if (_multipart == "")
+        return true; // no multipart to parse
+    if (_body->get().find(_multipart) == std::string::npos && _body->get().length() >= _multipart.length())
+        return true; // no multipart
+    if (sanitize_HTTP_string(_body->get(), 0).find(_multipart + "\n") == std::string::npos
+        || _body->get().find("\n\n") == std::string::npos)
+        return false;                                     // multipart not there yet
+    _body->get().replace(0, _multipart.length() + 1, ""); // +1 for \n
+    size_t end      = _body->get().find("\n\n");
+    size_t filename = _body->get().find("filename=\"");
+    if (filename != std::string::npos) {
+        size_t end_fn = _body->get().find_first_of("\"", filename + 10);
+        if (end_fn != std::string::npos)
+            _multipart_f = _body->get().substr(filename + 10, end_fn - (filename + 10));
+    }
+    _body->get().replace(0, end + 2, ""); // to remove double \n\n
+    return true;
 }
 
 template < class ServerClass, class RouteClass >
@@ -164,9 +241,14 @@ void UploadStrategy< ServerClass, RouteClass >::init_location() {
                 debug.log() << "Found file " << _location << " for upload." << std::endl;
                 found = true; // file is a file and is found
             } else {          // this is a directory
+                if (_multipart_f != "") {
+                    _location   += _multipart_f;
+                    _multipart_f = "";
+                } else {
+                    _location += create_name(creat++); // checking if uploadfile_0 exists there
+                }
                 debug.log() << "Location " << _location << " for upload is a directory, creating a new file."
                             << std::endl;
-                _location += create_name(creat++); // checking if uploadfile_0 exists there
             }
         }
     } while (!found);
@@ -191,7 +273,10 @@ void UploadStrategy< ServerClass, RouteClass >::init() {
     else
         _response.set_code(OK);
     _file.close();
-    _file.open(_location.c_str(), std::fstream::out | (_replace ? std::fstream::trunc : std::fstream::app));
+    _file.open(
+        _location.c_str(),
+        std::fstream::out | std::fstream::binary | (_replace ? std::fstream::trunc : std::fstream::app)
+    );
     if (!_file.is_open()) {
         if (errno == ENOENT) { // cause could be validated with stat if component of path does not exists
             info.log() << "UploadStrategy: could not open file " << _location << ", " << strerror(errno) << ". Sending "

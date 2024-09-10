@@ -57,7 +57,8 @@ size_t BodyChunk::read_body() {
         error.log() << "Invalid read in BodyLength " << strerror(errno) << std::endl;
         return 0;
     }
-    _buffer += std::string(buf);
+    _buffer += std::string(buf, size_read);
+    event.log() << "Just read " << size_read << " bytes RAW from BodyBuffer." << std::endl;
     return size_read;
 }
 

@@ -169,6 +169,7 @@ void ClientRequest::parse_target(const std::string &in, size_t pos) {
   Host is not yet defined.
   */
 void ClientRequest::parse_header_line(const std::string &in, size_t begin, size_t end) {
+    debug.log() << "Header length to parse " << end - begin << " > " << MAX_REQUEST_LINE << std::endl;
     if (end - begin > MAX_REQUEST_LINE) {
         info.log() << "Max header line length exceeded, sending " << ContentTooLarge << std::endl;
         throw HttpError(RequestHeaderFieldsTooLarge);
