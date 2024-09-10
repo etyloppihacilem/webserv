@@ -183,7 +183,7 @@ std::vector< d_rbs > ResponseBuildData = {
         OK,
         {
             { "Content-Type", "text/html; charset=utf-8" },
-            { "Content-Length", "630" },
+            { "Content-Length", "800" },
         },
         true,
         "<head></head><body><h1>/test/</h1><table><tr><td>Type</td><td>Name</td><td>size</td></tr><tr><td>DIR</"
@@ -191,6 +191,8 @@ std::vector< d_rbs > ResponseBuildData = {
         "href=\"/test/..\">..</a></td><td>0</td></tr><tr><td>REG</td><td><a "
         "href=\"/test/delete.png\">delete.png</a></td><td>0</td></tr><tr><td>REG</td><td><a "
         "href=\"/test/index.html\">index.html</a></td><td>11</td></tr><tr><td>REG</td><td><a "
+        "href=\"/test/send.html\">send.html</a></td><td>406</td></tr><tr><td>REG</td><td><a "
+        "href=\"/test/send_put.html\">send_put.html</a></td><td>405</td></tr><tr><td>REG</td><td><a "
         "href=\"/test/test.txt\">test.txt</a></td><td>33</td></tr><tr><td>DIR</td><td><a "
         "href=\"/test/upload\">upload</a></td><td>0</td></tr><tr><td>REG</td><td><a "
         "href=\"/test/upload_a.md\">upload_a.md</a></td><td>23</td></tr></table></body>",
