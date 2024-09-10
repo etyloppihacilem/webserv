@@ -59,6 +59,7 @@ t_state ResponseSendState::process() {
         error.log() << "Error while writing response to socket " << _socket << ": " << strerror(errno)
                     << ". Closing connexion" << std::endl;
         _state = s_error; // is_error means to close the connexion
+        return _state;    // cause written < 0 won't do well in substr...
     }
     event.log() << "Wrote " << written << " byte(s) in socket " << _socket << std::endl;
     if (static_cast< size_t >(written) < (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()))

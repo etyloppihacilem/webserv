@@ -55,17 +55,26 @@ ResponseBuildState< ServerClass, RouteClass >::ResponseBuildState(int socket, Cl
         _code = _request->get_status();
 #ifndef TESTING
     if (_request->gateway_checks(port)) {
-        const ServerClass &tmp = ServerManager::getInstance()->getServer(_request->get_header().at("Host"), port);
-        _server                = &tmp;
+        if (_request->get_header().find("Host")
+            != _request->get_header().end()) { // cause if there is no host we're fucked
+            const ServerClass &tmp = ServerManager::getInstance()->getServer(_request->get_header().at("Host"), port);
+            _server                = &tmp;
+        }
     }
     if (!_server) {
-        debug.log() << "ResponseBuildState: Trying to build non recovery response without server." << std::endl;
-        _recovery = true;
-        if (!isError(_code)) {
-            _code = InternalServerError;
-            debug.log() << "Recovery was therefor activated with " << _code << " (default)" << std::endl;
-        } else
-            debug.log() << "Recovery was therefor activated with " << _code << std::endl;
+        if (isRedirection(_code) || isError(_code)) {
+            debug.log() << "ResponseBuildState: Building with no server with " << _code
+                        << ", enabling recovery. (this is normal operation)" << std::endl;
+            _recovery = true; // here recovery means we will not try to read _server (bc it's null)
+        } else {
+            debug.log() << "ResponseBuildState: Trying to build non recovery response without server." << std::endl;
+            _recovery = true;
+            if (!isError(_code)) {
+                _code = InternalServerError;
+                debug.log() << "Recovery was therefor activated with " << _code << " (default)" << std::endl;
+            } else
+                debug.log() << "Recovery was therefor activated with " << _code << std::endl;
+        }
     }
 #else
     (void) port;
@@ -236,6 +245,16 @@ void ResponseBuildState< ServerClass, RouteClass >::init_strategy() {
   */
 template < class ServerClass, class RouteClass >
 void ResponseBuildState< ServerClass, RouteClass >::init_strategy(HttpCode code) {
+    if (isRedirection(code)) {
+        if (_request->get_header().find("Location") == _request->get_header().end()) {
+            error.log() << "Redirect in recovery with Location header not set, sending " << InternalServerError
+                        << std::endl;
+            throw HttpError(InternalServerError);
+        }
+        debug.log() << "Choosing RedirectStrategy (recovery, normal operation)" << std::endl;
+        _strategy = new RedirectStrategy(_request->get_header().at("Location"), _request->get_query_string(), code);
+        return;
+    }
     if (!isError(code))
         warn.log() << "Generating error for non error code " << code << std::endl;
     try {

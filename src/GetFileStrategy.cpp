@@ -34,8 +34,10 @@ GetFileStrategy::GetFileStrategy(const MimeTypes &mime, const std::string &locat
     _code(code) {}
 
 GetFileStrategy::~GetFileStrategy() {
-    if (_file.is_open())
+    if (_file.is_open()) {
+        debug.log() << "Closing " << _location << std::endl;
         _file.close();
+    }
 }
 
 bool GetFileStrategy::build_response() {

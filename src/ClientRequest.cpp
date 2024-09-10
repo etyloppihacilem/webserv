@@ -75,6 +75,10 @@ HttpMethod ClientRequest::parse_method(const std::string &method, size_t end) {
 }
 
 bool ClientRequest::gateway_checks(int port) {
+    if (!isSuccessful(_status)) {
+        debug.log() << "Status is " << _status << ", skipping gateway tests" << std::endl;
+        return true;
+    }
     if (port != _port) {
         info.log() << "Request was recieved on port " << port << " but wanted port " << _port << ", sending "
                    << BadGateway << std::endl;
@@ -106,6 +110,8 @@ void ClientRequest::parse_target(const std::string &in, size_t pos) {
 
         sp_protocol = in.find_first_of(" \t", pos + 1);
         protocol    = in.find("HTTP", pos);
+        debug.log() << "Found sp_protocol at " << sp_protocol << std::endl;
+        debug.log() << "Found protocol at " << protocol << std::endl;
         if (protocol == std::string::npos || sp_protocol == std::string::npos || protocol + 8 != in.find("\n", pos)) {
             info.log() << "Bad request_line, sending " << BadRequest << std::endl;
             throw HttpError(BadRequest);

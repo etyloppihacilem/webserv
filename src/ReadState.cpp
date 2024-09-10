@@ -82,8 +82,9 @@ t_state ReadState::process_buffer(char *buffer) {
                 _buffer = _buffer.substr(1, _buffer.length() - 1); // to discard leading lines of request
                 sanitize_HTTP_string(_buffer, 0);
             } else if (_parse_state == rs_line) {
-                if (!_request->parse_request_line(_buffer))
+                if (!_request->parse_request_line(_buffer)) {
                     return _state = ready; // ready to return error
+                }
                 debug.log() << "Parsing headers." << std::endl;
                 _parse_state = headers; // next state
             } else if (_parse_state == headers) {
