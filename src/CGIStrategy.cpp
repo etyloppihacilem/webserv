@@ -79,8 +79,9 @@ CGIStrategy::CGIStrategy(
 
 CGIStrategy::~CGIStrategy() {
     debug.log() << "CGIStrategy: destructor call" << std::endl;
-    // if (_child)
-    //     kill_child(true);
+    if (_child)
+        kill_child(true);
+    clean_filestream();
     if (_body)
         delete _body;
 }
@@ -111,6 +112,7 @@ void CGIStrategy::clean_filestream() {
     }
     if (_fd_miso > 0)
         close(_fd_miso);
+    _fd_miso = -1;
     // if (_temp_stream_miso.is_open()) {
     //     debug.log() << "_temp_stream_mosi is still open, removing " << _temp_file_miso << std::endl;
     //     remove(_temp_file_miso.c_str());
@@ -494,7 +496,6 @@ void CGIStrategy::kill_child(bool k) {
     } else {
         debug.log() << "child not exited live in limbs of memory." << std::endl;
     }
-    clean_filestream();
     _child = 0;
 }
 

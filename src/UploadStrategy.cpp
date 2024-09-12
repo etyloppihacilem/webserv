@@ -159,7 +159,7 @@ bool UploadStrategy< ServerClass, RouteClass >::sanitize_multipart() { // true w
         _multipart = "";
     } else if (buffer.find(_multipart) != buffer.npos) {
         error.log() << "Multipart is not just one upload file, sending " << BadRequest << std::endl;
-        write(1, buffer.c_str(), buffer.length());
+        // write(1, buffer.c_str(), buffer.length()); // debug
         throw(HttpError(BadRequest));
     }
     _file << buffer.substr(0, BUFFER_SIZE);

@@ -19,6 +19,7 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstring>
+#include <iostream>
 #include <ostream>
 #include <unistd.h>
 
@@ -50,8 +51,10 @@ t_state ResponseSendState::process() {
     int written = 0;
     if (_buffer != "") {
 #ifdef DEBUG
+    if (response.is_text()) {
         write(1, _buffer.c_str(), (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()));
         write(1, "\n", 1);
+    }
 #endif
         written = write(_socket, _buffer.c_str(), (BUFFER_SIZE <= _buffer.length() ? BUFFER_SIZE : _buffer.length()));
     }

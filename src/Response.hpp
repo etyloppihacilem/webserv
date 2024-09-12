@@ -51,6 +51,7 @@ class Response {
         void        date(); ///< Sets Date header to current time, and sets last modified if defined
         void        set_last_modified(const struct timespec &time);
         void        set_head(bool is_head);
+        bool        is_text() const; ///< Returns true if response is text and could be printed. Used mostly for debug
 
     private:
         std::string generate_status_line() const;

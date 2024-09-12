@@ -306,6 +306,14 @@ void Response::set_head(bool is_head) {
         _code = NoContent; // in ubuntu_tester excpected 204.
 }
 
+bool Response::is_text() const {
+    if (_header.find("Content-Type") != _header.end()) {
+        if (_header.at("Content-Type").find("text") != std::string::npos)
+            return true;
+    }
+    return false;
+}
+
 void Response::save_mem() {
     debug.log() << "(i) Response saved mem !" << std::endl;
     if (_state > headers)
