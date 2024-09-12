@@ -44,6 +44,7 @@ NAME			= webserv
 NAME_TEST		= ${NAME}_test
 NAME_DEBUG		= ${NAME}_debug
 NAME_SANITIZE	= ${NAME}_sanitize
+NAME_TESTER		= ${NAME}_tester
 
 LIBRARIES		= -lreadline
 
@@ -60,13 +61,14 @@ SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 HEADER_DIR			= header
 SRC_DIR				= src
 TEST_DIR			= test
-TESTER_DIR			= YoupiBanane
+TESTER_WWW_DIR		= YoupiBanane
 
 INCLUDE_DIR         = ${HEADER_DIR} ${SRC_DIR}
 OBJ_DIR				= obj
 TEST_OBJ_DIR		= ${OBJ_DIR}/test
 DEBUG_OBJ_DIR		= ${OBJ_DIR}/debug
 SANITIZE_OBJ_DIR	= ${OBJ_DIR}/sanitize
+TESTER_OBJ_DIR		= ${OBJ_DIR}/tester
 
 ########################
 ##  AUTO-EDIT ON VAR  ##
@@ -82,6 +84,7 @@ TEST_OBJS		= $(patsubst ${SRC_DIR}%.cpp,${TEST_OBJ_DIR}%.o,$(filter-out ${SRC_DI
 TEST_OBJS		+= $(patsubst ${TEST_DIR}%.cpp,${TEST_OBJ_DIR}%.o,${TEST_FILES})
 DEBUG_OBJS		= $(patsubst ${SRC_DIR}%.cpp,${DEBUG_OBJ_DIR}%.o,${SRC_FILES})
 SANITIZE_OBJS	= $(patsubst ${SRC_DIR}%.cpp,${SANITIZE_OBJ_DIR}%.o,${SRC_FILES})
+TESTER_OBJS		= $(patsubst ${SRC_DIR}%.cpp,${TESTER_OBJ_DIR}%.o,${SRC_FILES})
 
 ALL_FILES		= $(shell find ${SRC_DIR} -type f -regex ".*\.[ch]pp")
 ALL_FILES		+= $(shell find ${TEST_DIR} -type f -regex ".*\.[ch]pp")
@@ -91,6 +94,7 @@ DEPS		= $(patsubst ${SRC_DIR}%.cpp,${OBJ_DIR}%.d,${SRC_FILES})
 DEPS		+= $(patsubst %.o,%.d,${TEST_OBJS})
 DEPS		+= $(patsubst %.o,%.d,${DEBUG_OBJS})
 DEPS		+= $(patsubst %.o,%.d,${SANITIZE_OBJS})
+DEPS		+= $(patsubst %.o,%.d,${TESTER_OBJS})
 
 #######################
 ##  USUAL FUNCTIONS  ##
@@ -108,16 +112,16 @@ MKDIR	= mkdir
 release: ${NAME} # Default rule
 	@printf "${GREEN}Success${RESET}  :)\n"
 
-all: ${NAME} ${NAME_TEST} ${NAME_DEBUG} ${NAME_SANITIZE}
+all: ${NAME} ${NAME_TEST} ${NAME_DEBUG} ${NAME_SANITIZE} ${NAME_TESTER}
 	@printf "${GREEN}Success${RESET}  :)\n"
 
 clean: # Clean object files
-	@${RM} ${OBJS} ${DEPS} ${TEST_OBJS} ${DEBUG_OBJS} ${SANITIZE_OBJS}
-	@${RMDIR} ${TEST_OBJ_DIR} ${DEBUG_OBJ_DIR} ${SANITIZE_OBJ_DIR} ${OBJ_DIR}
+	@${RM} ${OBJS} ${DEPS} ${TEST_OBJS} ${DEBUG_OBJS} ${SANITIZE_OBJS} ${TESTER_OBJS}
+	@${RMDIR} ${TEST_OBJ_DIR} ${DEBUG_OBJ_DIR} ${SANITIZE_OBJ_DIR} ${TESTER_OBJ_DIR} ${OBJ_DIR}
 	@printf "${BLUE}%-44s${RESET}\n" "Cleaning"
 
 fclean: clean # Clean executable file
-	@${RM} ${NAME} ${NAME_TEST} ${NAME_DEBUG} ${NAME_SANITIZE}
+	@${RM} ${NAME} ${NAME_TEST} ${NAME_DEBUG} ${NAME_SANITIZE} ${NAME_TESTER}
 	@printf "${BLUE}%-44s${RESET}\n" "File cleaning"
 
 re: fclean # Execute fclean & release rules
@@ -131,6 +135,9 @@ debug: ${NAME_DEBUG} # Compile tests.
 
 sanitize: ${NAME_SANITIZE} # Compile tests.
 	@printf "${MAGENTA}Sanitize build ${GREEN}Success${RESET}  :)\n"
+
+tester: ${NAME_TESTER} # Compile tests.
+	@printf "${GREY}Sanitize build ${GREEN}Success${RESET}  :)\n"
 
 run_tests: test
 	./${NAME_TEST}
@@ -148,7 +155,7 @@ mac_clean: # supprime les fichiers dupliqués sur mac
 	@find . -type f -name "* [2-9]*" -print -delete
 
 # TODO: add cleaning rule
-eval_tester: ${TESTER_DIR} # setup ubuntu_tester
+eval_tester: ${TESTER_WWW_DIR} # setup ubuntu_tester
 	@chmod 755 ubuntu_tester ubuntu_cgi_tester
 
 file: # Print list of source and object files
@@ -182,6 +189,10 @@ ${NAME_SANITIZE}: ${SANITIZE_OBJS} # Compile ${NAME_SANITIZE} program
 	@printf "${YELLOW}Building...${RESET} ${NAME_SANITIZE}\n"
 	@${CC} ${CFLAGS} ${SANITIZE_FLAG} ${INCLUDES} -o ${NAME_SANITIZE} ${SANITIZE_OBJS} ${LIBRARIES}
 
+${NAME_TESTER}: ${TESTER_OBJS} # Compile ${NAME_TESTER} program
+	@printf "${YELLOW}Building...${RESET} ${NAME_TESTER}\n"
+	@${CC} ${CFLAGS} -DTESTER ${INCLUDES} -o ${NAME_TESTER} ${TESTER_OBJS} ${LIBRARIES}
+
 #######################
 ## COMPILATION RULES ##
 #######################
@@ -211,6 +222,11 @@ ${SANITIZE_OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp | ${SANITIZE_OBJ_DIR}
 	@${CC} ${CFLAGS} ${SANITIZE_FLAG} ${INCLUDES} -c $< -o $@
 	@printf "${GREEN}.......Done${RESET} (${MAGENTA}sanitize${RESET})%s %s\n" "" $<
 
+${TESTER_OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp | ${TESTER_OBJ_DIR}
+	@printf "${BLUE}Compiling..${RESET} (${GREY}tester${RESET})%s %s\n" "" $<
+	@${CC} ${CFLAGS} -DTESTER ${INCLUDES} -c $< -o $@
+	@printf "${GREEN}.......Done${RESET} (${GREY}tester${RESET})%s %s\n" "" $<
+
 #####################
 ## DIRECTORY RULES ##
 #####################
@@ -235,7 +251,11 @@ ${SANITIZE_OBJ_DIR}:
 	@printf "${YELLOW}...Creating${RESET} ${SANITIZE_OBJ_DIR}\n"
 	@${MKDIR} -p ${SANITIZE_OBJ_DIR}
 
-${TESTER_DIR}:
+${TESTER_OBJ_DIR}:
+	@printf "${YELLOW}...Creating${RESET} ${TESTER_OBJ_DIR}\n"
+	@${MKDIR} -p ${TESTER_OBJ_DIR}
+
+${TESTER_WWW_DIR}:
 	mkdir -p YoupiBanane/nop
 	touch YoupiBanane/youpi.bad_extension
 	touch YoupiBanane/youpi.bla

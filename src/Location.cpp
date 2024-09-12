@@ -75,12 +75,14 @@ Location< ServerClass, RouteClass >::Location(std::string target, const ServerCl
             return;
         debug.log() << "Target '" << target << "' exists." << std::endl;
         if (S_ISDIR(buf.st_mode)) { // in case target is a directory
+#ifndef TESTER
             if (*target.rbegin() != '/') {
                 _status_code = MovedPermanently;
                 _is_redirect = true;
                 _path        = target + "/";
                 return;
             }
+#endif
             debug.log() << "Target is a directory" << std::endl;
             while (target.length() > 1 && *target.rbegin() == '/') {
                 debug.log() << "Trimed slash from " << target << std::endl;
