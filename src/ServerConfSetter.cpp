@@ -120,6 +120,8 @@ std::set< HttpMethod > setFieldMethods(const ValueList &values) {
             ret.insert(PUT);
         else if (*it == "HEAD")
             ret.insert(HEAD);
+        else if (*it == "none")
+            ret.insert(last);
         else
             warn.log() << "methods: " << *it << ", is not a valid Http method." << std::endl;
 

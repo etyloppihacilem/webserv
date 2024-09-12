@@ -12,6 +12,7 @@
 #define INCLUDE_SRC_PROCESSHANDLER_HPP_
 
 #include "EventHandler.hpp"
+#include "HttpStatusCodes.hpp"
 #include "ProcessState.hpp"
 #include <ctime>
 #include <string>
@@ -36,11 +37,13 @@ class ProcessHandler : public EventHandler {
 
     private:
         void clean_state();
-        void transition_to_rbs(); ///< Transition to response building state;
-        void transition_to_rss(); ///< Transition to response sending state;
+        void transition_to_rbs();          ///< Transition to response building state;
+        void transition_to_rss();          ///< Transition to response sending state;
+        bool rewind_to_rbs(HttpCode code); ///< To reply an error.
 
         ProcessState *_state;
         std::string   _client_IP;
+        size_t        _rewind_count;
 };
 
 #endif // INCLUDE_SRC_PROCESSHANDLER_HPP_

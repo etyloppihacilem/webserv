@@ -80,7 +80,7 @@ CGIStrategy::CGIStrategy(
 CGIStrategy::~CGIStrategy() {
     debug.log() << "CGIStrategy: destructor call" << std::endl;
     if (_child)
-        kill_child(true);
+        kill_child();
     clean_filestream();
     if (_body)
         delete _body;
@@ -163,7 +163,7 @@ void CGIStrategy::fill_temp_file() {
         _temp_stream_mosi << _body->pop();
     }
     if (_body->length() > _max_size) {
-        kill_child(true);
+        kill_child();
         info.log() << "Max body size reached, sending " << ContentTooLarge << std::endl;
         debug.log() << "client_max_body_size = " << _max_size << "(bytes) while body length = " << _body->length()
                     << std::endl;
@@ -464,38 +464,30 @@ bool CGIStrategy::is_child_alive() {
         return true;
     }
     // kill(-_child, SIGKILL);
-    info.log() << "Child " << _child << " have died with exit code " << WEXITSTATUS(waitinfo) << std::endl;
     debug.log() << "untraced:" << waitpid(-_child, &waitinfo, WUNTRACED) << std::endl;
+    if (WEXITSTATUS(waitinfo) != 0) {
+        error.log() << "CGI child exited with non 0 exit code " << WEXITSTATUS(waitinfo) << ", sending "
+                    << InternalServerError << std::endl;
+        throw HttpError(InternalServerError);
+    } else
+        info.log() << "Child " << _child << " have died with exit code " << WEXITSTATUS(waitinfo) << std::endl;
     if (WIFSIGNALED(waitinfo))
         debug.log() << "Child was terminated by signal " << WTERMSIG(waitinfo) << " " << strsignal(WTERMSIG(waitinfo))
                     << std::endl;
     if (WIFSTOPPED(waitinfo))
         debug.log() << "Child is stopped. " << WSTOPSIG(waitinfo) << std::endl;
     if (WIFCONTINUED(waitinfo))
-        debug.log() << "Child is stopped." << std::endl;
+        debug.log() << "Child is not stopped." << std::endl;
     _child = 0;
     return false;
 }
 
-void CGIStrategy::kill_child(bool k) {
+void CGIStrategy::kill_child() {
     if (!_child) {
         warn.log() << "Trying to kill child when there is no child running." << std::endl;
         return;
     }
-    if (k)
-        kill(_child, SIGKILL);
-    int status;
-    int exit_code;
-    waitpid(-_child, &status, WUNTRACED); // just to make sure
-    if (WIFEXITED(status)) {
-        exit_code = WEXITSTATUS(status);
-        info.log() << "child exited with exit code " << exit_code << "." << std::endl;
-        if (WIFSIGNALED(status))
-            debug.log() << "Child was terminated by signal " << WTERMSIG(status) << " " << strsignal(WTERMSIG(status))
-                        << std::endl;
-    } else {
-        debug.log() << "child not exited live in limbs of memory." << std::endl;
-    }
+    kill(_child, SIGKILL);
     _child = 0;
 }
 

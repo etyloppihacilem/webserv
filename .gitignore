@@ -46,3 +46,5 @@ request.txt
 header_too_long.txt
 request.txt
 target_too_large.txt
+archives
+archives/*

@@ -28,7 +28,8 @@
 ProcessHandler::ProcessHandler(int socket_fd, int port, std::string client_IP) :
     EventHandler(socket_fd, port),
     _state(0),
-    _client_IP(client_IP) {
+    _client_IP(client_IP),
+    _rewind_count(0) {
     debug.log() << "ProcessHandler: Client " << _client_IP << " created on socket " << _socket_fd << " from port "
                 << _port << "." << std::endl;
 }
@@ -71,9 +72,12 @@ void ProcessHandler::handle() {
         if (_state->get_state() == ready && dynamic_cast< ResponseBuildState<> * >(_state) != 0)
             transition_to_rss();
         else if (dynamic_cast< ResponseSendState * >(_state) != 0) {
+            if (dynamic_cast< ResponseSendState * >(_state)->get_internal_status() != unset
+                && rewind_to_rbs(dynamic_cast< ResponseSendState * >(_state)->get_internal_status()))
+                return; // rewind
             ServerManager::getInstance()->listenToClient(_socket_fd, *this);
-            delete _state;
-            _state = 0;
+            clean_state();
+            _rewind_count = 0;
             debug.log() << "End of life of state." << std::endl;
         }
     }
@@ -129,6 +133,19 @@ void ProcessHandler::transition_to_rss() {
     _state = new ResponseSendState(_socket_fd, strategy);
     ServerManager::getInstance()->talkToClient(_socket_fd, *this);
     debug.log() << "ProcessHandler: transitionning done." << std::endl;
+}
+
+bool ProcessHandler::rewind_to_rbs(HttpCode code) {
+    if (_rewind_count++ > 2)
+        return false;
+    clean_state();
+    if (!isError(code)) {
+        warn.log() << code << " is not a proper error code for rewind recovery." << std::endl;
+        code = InternalServerError;
+    }
+    debug.log() << "Rewinding to ResponseBuildState to send " << code << std::endl;
+    _state = new ResponseBuildState<>(_socket_fd, code);
+    return true;
 }
 
 void ProcessHandler::save_mem() {
