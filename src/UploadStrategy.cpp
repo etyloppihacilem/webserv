@@ -153,7 +153,7 @@ bool UploadStrategy< ServerClass, RouteClass >::sanitize_multipart() { // true w
     if (buffer.length() < 2 * (BUFFER_SIZE > _multipart.length() + 4 ? BUFFER_SIZE : _multipart.length() + 4)
         && !_body->is_done()) // -- and CRLF
         return false;
-    size_t found = buffer.find("--"+ _multipart + "--\r\n");
+    size_t found = buffer.find("--" + _multipart + "--\r\n");
     if (found != buffer.npos) {
         buffer.replace(found, _multipart.length() + 6, "");
         _multipart = "";
@@ -233,8 +233,9 @@ void UploadStrategy< ServerClass, RouteClass >::init_location() {
                                 << InternalServerError << std::endl;
                     throw HttpError(InternalServerError);
                 }
-                _location.resize(last_slash);      // triming last name aka the one we just tested
-                _location += create_name(creat++); // checking if uploadfile_[creat] exists there
+                _location.resize(last_slash); // triming last name aka the one we just tested
+                _location += (*_location.rbegin() == '/' ? "" : "/")
+                           + create_name(creat++); // checking if uploadfile_[creat] exists there
                 continue;                          // looping again
             }
             if (!S_ISDIR(buf.st_mode)) {

@@ -55,7 +55,7 @@ int main(int ac, char **av, const char **env) {
     }
     Logger::force(); // Forcing all output in normal operations.
 #ifndef DEBUG
-    debug.disable();
+    // debug.disable();
     event.disable();
 #endif
     // event.disable();

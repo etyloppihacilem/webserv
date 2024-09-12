@@ -55,13 +55,15 @@ CFLAGS			= -MMD -Wall -Werror -Wextra -std=c++98
 CTESTFLAGS		= -MMD -Wall -Werror -Wextra -std=c++20 -g3 -pthread
 CTESTFLAGS		+= -DTESTING -Igoogletest/googletest/include -Igoogletest/googlemock/include -Itest \
 				   -DWORKDIR=\"${shell realpath .}\"
+# CEVALTESTERFLAGS = -DTESTER -DDEBUG
+CEVALTESTERFLAGS = -DTESTER
 DEBUG_FLAG		= -g3 -DDEBUG
 SANITIZE_FLAG	= -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
 HEADER_DIR			= header
 SRC_DIR				= src
 TEST_DIR			= test
-TESTER_WWW_DIR		= YoupiBanane
+TESTER_WWW_DIR		= www_tester
 
 INCLUDE_DIR         = ${HEADER_DIR} ${SRC_DIR}
 OBJ_DIR				= obj
@@ -137,7 +139,7 @@ sanitize: ${NAME_SANITIZE} # Compile tests.
 	@printf "${MAGENTA}Sanitize build ${GREEN}Success${RESET}  :)\n"
 
 tester: ${NAME_TESTER} # Compile tests.
-	@printf "${GREY}Sanitize build ${GREEN}Success${RESET}  :)\n"
+	@printf "${GRAY}Tester build ${GREEN}Success${RESET}  :)\n"
 
 run_tests: test
 	./${NAME_TEST}
@@ -191,7 +193,7 @@ ${NAME_SANITIZE}: ${SANITIZE_OBJS} # Compile ${NAME_SANITIZE} program
 
 ${NAME_TESTER}: ${TESTER_OBJS} # Compile ${NAME_TESTER} program
 	@printf "${YELLOW}Building...${RESET} ${NAME_TESTER}\n"
-	@${CC} ${CFLAGS} -DTESTER ${INCLUDES} -o ${NAME_TESTER} ${TESTER_OBJS} ${LIBRARIES}
+	@${CC} ${CFLAGS} ${CEVALTESTERFLAGS} ${INCLUDES} -o ${NAME_TESTER} ${TESTER_OBJS} ${LIBRARIES}
 
 #######################
 ## COMPILATION RULES ##
@@ -223,9 +225,9 @@ ${SANITIZE_OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp | ${SANITIZE_OBJ_DIR}
 	@printf "${GREEN}.......Done${RESET} (${MAGENTA}sanitize${RESET})%s %s\n" "" $<
 
 ${TESTER_OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp | ${TESTER_OBJ_DIR}
-	@printf "${BLUE}Compiling..${RESET} (${GREY}tester${RESET})%s %s\n" "" $<
-	@${CC} ${CFLAGS} -DTESTER ${INCLUDES} -c $< -o $@
-	@printf "${GREEN}.......Done${RESET} (${GREY}tester${RESET})%s %s\n" "" $<
+	@printf "${BLUE}Compiling..${RESET} (${GRAY}tester${RESET})%s %s\n" "" $<
+	@${CC} ${CFLAGS} ${CEVALTESTERFLAGS} ${INCLUDES} -c $< -o $@
+	@printf "${GREEN}.......Done${RESET} (${GRAY}tester${RESET})%s %s\n" "" $<
 
 #####################
 ## DIRECTORY RULES ##

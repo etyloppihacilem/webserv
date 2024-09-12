@@ -59,7 +59,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         char        **generate_env(const std::map< std::string, std::string > &env) const;
         void          init_CGI();
         void          fill_temp_file();
-        void          launch_CGI(size_t size, bool body);
+        void          launch_CGI(size_t size);
         void          kill_child();
         void          clean_filestream();
 

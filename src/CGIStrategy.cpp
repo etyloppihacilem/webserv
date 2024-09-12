@@ -100,7 +100,7 @@ bool CGIStrategy::build_response() {
     else if (_state == loading_body) // listen event
         fill_temp_file();
     if (_state == launch)
-        launch_CGI(_body ? _body->length() : 0, _body != 0); // or segfault bc there is no body !!!
+        launch_CGI(_body ? _body->length() : 0); // or segfault bc there is no body !!!
     return _built;
 }
 
@@ -167,16 +167,18 @@ void CGIStrategy::fill_temp_file() {
         info.log() << "Max body size reached, sending " << ContentTooLarge << std::endl;
         debug.log() << "client_max_body_size = " << _max_size << "(bytes) while body length = " << _body->length()
                     << std::endl;
+        _temp_stream_mosi.close();
         throw HttpError(ContentTooLarge);
     }
     if (_body->is_done()) {
         debug.log() << "Body was successfully dechunked, for a total length of " << _body->length() << " bytes."
                     << std::endl;
+        _temp_stream_mosi.close();
         _state = launch;
     }
 }
 
-void CGIStrategy::launch_CGI(size_t size, bool body) {
+void CGIStrategy::launch_CGI(size_t size) {
     // program separation
     debug.log() << "Preparing to launch CGI " << _cgi_path << " with script " << _location << std::endl;
     std::map< std::string, std::string > env;
@@ -207,19 +209,6 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
         info.disable();
         warn.disable();
 #endif
-        if (body || 1) { // TODO: else close stdin
-            int temp_fd = open(_temp_file_mosi.c_str(), O_RDONLY);
-            if (temp_fd < 0) {
-                babyphone.log() << "Cannot open temp file " << _temp_file_mosi << " " << strerror(errno) << std::endl;
-                _exit(1);
-            }
-            if (dup2(temp_fd, 0) < 0) {
-                babyphone.log() << "Cannot redirect stdin into child." << std::endl;
-                close(temp_fd);
-                _exit(1);
-            }
-            close(temp_fd);
-        }
         int temp_fd = open(_temp_file_miso.c_str(), O_CREAT | O_WRONLY | O_TRUNC | O_SYNC, 000666);
         if (temp_fd < 0)
             babyphone.log() << "Could not open outfile." << std::endl;
@@ -238,6 +227,17 @@ void CGIStrategy::launch_CGI(size_t size, bool body) {
             babyphone.log() << "Cannot creat arg string. Aborting." << std::endl;
             _exit(1);
         }
+        temp_fd = open(_temp_file_mosi.c_str(), O_RDONLY);
+        if (temp_fd < 0) {
+            babyphone.log() << "Cannot open temp file " << _temp_file_mosi << " " << strerror(errno) << std::endl;
+            _exit(1);
+        }
+        if (dup2(temp_fd, 0) < 0) {
+            babyphone.log() << "Cannot redirect temp file " << _temp_stream_mosi << " into child." << std::endl;
+            close(temp_fd);
+            _exit(1);
+        }
+        close(temp_fd);
         args[2]      = 0;
         char **c_env = generate_env(env);
         if (!c_env) { // nothing gets past this line
@@ -282,18 +282,18 @@ void CGIStrategy::fill_env(std::map< std::string, std::string > &env, size_t siz
     env["GATEWAY_INTERFACE"] = "CGI/1.1";
     env["REDIRECT_STATUS"]   = "200"; // see if this needs to be hard coded
 #ifndef TESTER
-    env["PATH_INFO"]         = _path_info; // RFC 3875 friendly
+    env["PATH_INFO"] = _path_info; // RFC 3875 friendly
 #else
-    env["PATH_INFO"]         = _request->get_target();
+    env["PATH_INFO"] = _request->get_target();
 #endif
-    env["REQUEST_URI"]       = _request->get_target();
-    env["PATH_TRANSLATED"]   = _location; // physical path after translation on device
-    env["QUERY_STRING"]      = _request->get_query_string();
-    env["REMOTE_HOST"]       = "";                 // leave empty
-    env["REMOTE_ADDR"]       = _request->get_ip(); // client ip
-    env["REQUEST_METHOD"]    = method_string(_request->get_method());
-    env["SCRIPT_NAME"]       = _request->get_target();
-    env["SERVER_NAME"]       = _request->get_header().at("Host");
+    env["REQUEST_URI"]     = _request->get_target();
+    env["PATH_TRANSLATED"] = _location; // physical path after translation on device
+    env["QUERY_STRING"]    = _request->get_query_string();
+    env["REMOTE_HOST"]     = "";                 // leave empty
+    env["REMOTE_ADDR"]     = _request->get_ip(); // client ip
+    env["REQUEST_METHOD"]  = method_string(_request->get_method());
+    env["SCRIPT_NAME"]     = _request->get_target();
+    env["SERVER_NAME"]     = _request->get_header().at("Host");
     debug.log() << "PATH_INFO=" << env["PATH_INFO"] << std::endl;
     debug.log() << "REQUEST_URI=" << env["REQUEST_URI"] << std::endl;
     {
@@ -407,7 +407,7 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
             write(1, "\n", 1);
         }
 #endif
-        buffer += std::string(buf);
+        buffer += std::string(buf, rd);
     }
     return _done;
 }

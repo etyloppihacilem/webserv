@@ -29,7 +29,6 @@ Logger::Logger(std::ostream &os, std::string level, std::string color, size_t wi
     _enabled(true),
     _no_force(no_force),
     _is_file(false) {
-    std::cerr << "Setting " << level << std::endl;
     _dev_null.setstate(std::ios_base::badbit); // set /dev/null to be /dev/null
     width -= level.length();
     if (os.rdbuf() == std::cout.rdbuf() || os.rdbuf() == std::cerr.rdbuf())
@@ -52,7 +51,6 @@ Logger::Logger(const std::string &filename, std::string level, size_t width, boo
     _enabled(true),
     _no_force(no_force),
     _is_file(false) {
-    std::cerr << "Setting " << level << std::endl;
     _dev_null.setstate(std::ios_base::badbit); // set /dev/null to be /dev/null
     width -= level.length();
     _level = "[ ";
