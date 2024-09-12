@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "Logger.hpp"
+#include "CGIStrategy.hpp"
 #include "HttpMethods.hpp"
 #include "HttpStatusCodes.hpp"
 #include "colors.hpp"
@@ -21,10 +22,14 @@
 #include <ostream>
 #include <string>
 
+std::ofstream Logger::_dev_null;
+bool          Logger::_force = false;
+
 Logger::Logger(std::ostream &os, std::string level, std::string color, size_t width, bool no_force) :
     _enabled(true),
     _no_force(no_force),
     _is_file(false) {
+    std::cerr << "Setting " << level << std::endl;
     _dev_null.setstate(std::ios_base::badbit); // set /dev/null to be /dev/null
     width -= level.length();
     if (os.rdbuf() == std::cout.rdbuf() || os.rdbuf() == std::cerr.rdbuf())
@@ -47,6 +52,7 @@ Logger::Logger(const std::string &filename, std::string level, size_t width, boo
     _enabled(true),
     _no_force(no_force),
     _is_file(false) {
+    std::cerr << "Setting " << level << std::endl;
     _dev_null.setstate(std::ios_base::badbit); // set /dev/null to be /dev/null
     width -= level.length();
     _level = "[ ";
@@ -148,12 +154,12 @@ bool Logger::is_forced() {
     return _force;
 }
 
-std::ofstream Logger::_dev_null;
-bool          Logger::_force = false;
-
 Logger info(std::cerr, "INFO", _BLUE, 8);
 Logger warn(std::cerr, "WARNING", _YELLOW, 8);
 Logger error(std::cerr, "ERROR", _RED, 8);
 Logger fatal(std::cerr, "FATAL", _PURPLE _BLINK, 8);
 Logger debug(std::cerr, "DEBUG", _GREEN, 8, true); // Cannot be forced
 Logger event(std::cerr, "EVENT", _CYAN, 8, true);  // Cannot be forced
+
+class CGIStrategy;
+Logger CGIStrategy::babyphone("./child.log", "CHILD", 8);

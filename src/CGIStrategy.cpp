@@ -46,8 +46,6 @@
 #include <time.h>
 #include <unistd.h>
 
-Logger CGIStrategy::babyphone("./child.log", "CHILD", 8);
-
 CGIStrategy::CGIStrategy(
     const std::string &location,
     ClientRequest     *request,
