@@ -63,8 +63,14 @@ Location< ServerClass, RouteClass >::Location(std::string target, const ServerCl
         }
         build_path(target, route);
         _is_diff = route.getRootDir() != route.getUploadPath();
-        if (!_is_cgi)
+        if (!_is_cgi) {
             _methods = route.getMethods();
+            std::set< HttpMethod >::iterator it;
+            for (it = _methods.begin(); it != _methods.end(); it++)
+                debug.log() << "Method " << *it << " is enabled." << std::endl;
+            if (it == _methods.begin())
+                debug.log() << "No methods enabled." << std::endl;
+        }
         if (stat_file(target, buf))
             return;
         debug.log() << "Target '" << target << "' exists." << std::endl;

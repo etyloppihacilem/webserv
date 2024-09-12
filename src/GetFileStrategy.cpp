@@ -94,9 +94,31 @@ bool GetFileStrategy::build_response() {
         return _built = true;
     _file.open(_location.c_str(), std::fstream::binary | std::ios_base::in);
     if (!_file.is_open()) {
-        error.log() << "GetFileStrategy: Undetected error opening file " << _location << ". Sending "
-                    << InternalServerError << std::endl;
-        throw HttpError(InternalServerError);
+        switch (errno) {
+            case ENOENT:
+                info.log() << "GetFileStrategy: cannot open file '" << _location << "' " << strerror(errno)
+                           << ", sending " << NotFound << std::endl;
+                throw HttpError(NotFound);
+            case EACCES:
+                info.log() << "GetFileStrategy: cannot open file '" << _location << "' " << strerror(errno)
+                           << ", sending " << Forbidden << std::endl;
+                throw HttpError(Forbidden);
+            case ENOMEM:
+                throw std::bad_alloc();
+            case ENOTDIR:
+                info.log() << "GetFileStrategy: cannot open file '" << _location << "' " << strerror(errno)
+                           << ", sending " << Forbidden << std::endl;
+                throw HttpError(Forbidden, "DIR"); // this is to tell the difference between directory forbidden and
+                                                   // no directory forbidden
+            case ENAMETOOLONG:
+                info.log() << "GetFileStrategy: cannot open file '" << _location << "' " << strerror(errno)
+                           << ", sending " << URITooLong << std::endl;
+                throw HttpError(URITooLong);
+            default:
+                error.log() << "GetFileStrategy: Undetected error opening file " << _location << " " << strerror(errno)
+                            << ". Sending " << InternalServerError << std::endl;
+                throw HttpError(InternalServerError);
+        }
     }
     _response.set_body(this);
     return _built = true;

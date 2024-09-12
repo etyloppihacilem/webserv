@@ -118,11 +118,13 @@ std::set< HttpMethod > setFieldMethods(const ValueList &values) {
             ret.insert(DELETE);
         else if (*it == "PUT")
             ret.insert(PUT);
+        else if (*it == "HEAD")
+            ret.insert(HEAD);
         else
             warn.log() << "methods: " << *it << ", is not a valid Http method." << std::endl;
 
-    if (ret.empty())
-        throw ServerConfWarn();
+    // if (ret.empty()) // can be empty to disable route.
+    //     throw ServerConfWarn();
     return ret;
 }
 

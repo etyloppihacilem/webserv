@@ -127,7 +127,8 @@ t_state ResponseBuildState< ServerClass, RouteClass >::process() {
                 init_strategy();
             _strategy->build_response();
         } catch (HttpError &e) {
-            _code = e.get_code(); // max 3 try
+            if (!isError(_code))
+                _code = e.get_code(); // keep current error
             if (_strategy) {
                 delete _strategy;
                 _strategy = 0;
@@ -136,7 +137,13 @@ t_state ResponseBuildState< ServerClass, RouteClass >::process() {
             _strategy->build_response();
         }
     } catch (HttpError &e) {
-        init_strategy(e.get_code()); // Should never happen (or if someone delete an error file while being read)
+        if (_strategy) {
+            delete _strategy;
+            _strategy = 0;
+        }
+        if (!isError(_code)) // keep current error
+            _code = e.get_code();
+        init_strategy(_code);     // Should never happen (or if someone delete an error file while being read)
         _strategy->build_response();
     }
     return _strategy->is_built() ? (_state = ready) : (_state = waiting);

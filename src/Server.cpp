@@ -46,7 +46,7 @@ Server::Server() :
     _rootDir("www"),
     _indexPage(1, "index.html"),
     _autoindex(false),
-    _methods(initMethod, initMethod + 1),
+    _methods(),
     _maxBodySize(MAX_BODY_SIZE),
     _errorPages(),
     _isFieldSet(COUNT_CONF_FIELD, false) {
@@ -60,7 +60,7 @@ Server::Server(StringTokenizer &tokenizedServer) :
     _rootDir("www"),
     _indexPage(),
     _autoindex(false),
-    _methods(initMethod, initMethod + 1),
+    _methods(),
     _maxBodySize(MAX_BODY_SIZE),
     _errorPages(),
     _isFieldSet(COUNT_CONF_FIELD, false) {
