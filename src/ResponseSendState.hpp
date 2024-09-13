@@ -28,7 +28,7 @@ class ResponseSendState : public ProcessState {
     private:
         ResponseBuildingStrategy *_strategy;
         std::string               _buffer;
-        HttpCode                _internal_status;
+        HttpCode                  _internal_status;
 };
 
 #endif // INCLUDE_SRC_RESPONSESENDSTATE_HPP_

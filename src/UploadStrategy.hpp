@@ -45,7 +45,7 @@ class UploadStrategy : public ResponseBuildingStrategy {
         void        init();
         void        init_location();
         bool        init_multipart(); // return true when ok
-        bool sanitize_multipart();
+        bool        sanitize_multipart();
         std::string create_name(int nb);
 
         bool               _init;

@@ -256,8 +256,8 @@ void CGIStrategy::launch_CGI(size_t size) {
         }
         if (dup2(temp_fd, 0) < 0) {
             // remove(_temp_file_miso.c_str());
-            babyphone.log() << static_cast< long >(getpid()) << ": " << "Cannot redirect temp file "
-                            << _temp_file_mosi << " into child." << std::endl;
+            babyphone.log() << static_cast< long >(getpid()) << ": " << "Cannot redirect temp file " << _temp_file_mosi
+                            << " into child." << std::endl;
             close(temp_fd);
             _exit(1);
         }

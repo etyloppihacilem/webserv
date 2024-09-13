@@ -143,7 +143,7 @@ t_state ResponseBuildState< ServerClass, RouteClass >::process() {
         }
         if (!isError(_code)) // keep current error
             _code = e.get_code();
-        init_strategy(_code);     // Should never happen (or if someone delete an error file while being read)
+        init_strategy(_code); // Should never happen (or if someone delete an error file while being read)
         _strategy->build_response();
     }
     return _strategy->is_built() ? (_state = ready) : (_state = waiting);
