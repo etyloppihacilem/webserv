@@ -62,7 +62,7 @@ std::string CGIWriter::generate(size_t size) {
         debug.log() << "Response has no " << NoContent << " code, trying to end transmission with end chunk."
                     << std::endl;
     }
-    debug.log() << "CGI writer filling buffer of " << size << " byte(s) (currently " << _buffer.length() << " byte(s))"
+    event.log() << "CGI writer filling buffer of " << size << " byte(s) (currently " << _buffer.length() << " byte(s))"
                 << std::endl;
     std::string temp = _buffer.substr(0, (size > _buffer.length() ? _buffer.length() : size));
     _buffer.replace(0, (size > _buffer.length() ? _buffer.length() : size), "");
@@ -74,11 +74,11 @@ std::string CGIWriter::generate(size_t size) {
         _done = true;
     if (_cgi_strategy) {
         if (!_cgi_strategy->get_length()) {
-            debug.log() << "Sending a message of length 0x" << st.str() << " (" << temp_size << ")" << std::endl;
+            event.log() << "Sending a message of length 0x" << st.str() << " (" << temp_size << ")" << std::endl;
             temp = st.str() + "\r\n" + temp + (_done && temp_size ? "\r\n0\r\n\r\n" : "\r\n");
         }
     } else {
-        debug.log() << "Sending a message of length 0x" << st.str() << " (" << temp_size << ")" << std::endl;
+        event.log() << "Sending a message of length 0x" << st.str() << " (" << temp_size << ")" << std::endl;
         temp = st.str() + "\r\n" + temp + (_done && temp_size ? "\r\n0\r\n\r\n" : "\r\n");
         error.log() << "CGIWriter is set with no CGIStrategy Strategy. Sending with Chunk by default." << std::endl;
     }
@@ -86,7 +86,7 @@ std::string CGIWriter::generate(size_t size) {
 }
 
 bool CGIWriter::read_from_child() {
-    debug.log() << "Parent is going to read from child." << std::endl;
+    event.log() << "Parent is going to read from child." << std::endl;
     if (!_cgi_done) // CGI done is only done when CGI is done being read and NOT when child is dead:
         _cgi_done = _strategy->fill_buffer(_buffer, PIPE_BUFFER_SIZE);
     if (_cgi_done)

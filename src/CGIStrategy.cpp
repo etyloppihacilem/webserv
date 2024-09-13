@@ -79,9 +79,11 @@ CGIStrategy::CGIStrategy(
 
 CGIStrategy::~CGIStrategy() {
     debug.log() << "CGIStrategy: destructor call" << std::endl;
-    if (_child)
-        kill_child();
-    clean_filestream();
+    // if (_child)
+    //     kill_child();
+    if (_fd_miso > 0)
+        close(_fd_miso);
+    _fd_miso = -1;
     if (_body)
         delete _body;
 }
@@ -104,22 +106,22 @@ bool CGIStrategy::build_response() {
     return _built;
 }
 
-void CGIStrategy::clean_filestream() {
-    if (_temp_stream_mosi.is_open()) {
-        debug.log() << "_temp_stream_mosi is still open, unlinking " << _temp_file_mosi << std::endl;
-        unlink(_temp_file_mosi.c_str());
-        _temp_stream_mosi.close();
-    }
-    if (_fd_miso > 0)
-        close(_fd_miso);
-    _fd_miso = -1;
-    // if (_temp_stream_miso.is_open()) {
-    //     debug.log() << "_temp_stream_mosi is still open, removing " << _temp_file_miso << std::endl;
-    //     remove(_temp_file_miso.c_str());
-    //     _temp_stream_miso.close();
-    // }
-}
-
+// void CGIStrategy::clean_filestream() {
+//     if (_temp_stream_mosi.is_open()) {
+//         debug.log() << "_temp_stream_mosi is still open, unlinking " << _temp_file_mosi << std::endl;
+//         unlink(_temp_file_mosi.c_str());
+//         _temp_stream_mosi.close();
+//     }
+//     if (_fd_miso > 0)
+//         close(_fd_miso);
+//     _fd_miso = -1;
+//     // if (_temp_stream_miso.is_open()) {
+//     //     debug.log() << "_temp_stream_mosi is still open, removing " << _temp_file_miso << std::endl;
+//     //     remove(_temp_file_miso.c_str());
+//     //     _temp_stream_miso.close();
+//     // }
+// }
+//
 void CGIStrategy::init_CGI() {
     if (_state != init) {
         warn.log() << "CGIStrategy: init called while not in init _state, abort init" << std::endl;
@@ -128,14 +130,17 @@ void CGIStrategy::init_CGI() {
     debug.log() << "Running init for CGIStrategy." << std::endl;
     {
         std::stringstream st;
-        st << "./temp_" << std::hex << _request << std::dec << "_" << _request->get_socket();
+        st << "./temp_" << std::hex << (reinterpret_cast< long >(_request) ^ rand())
+           << (reinterpret_cast< long >(this) ^ rand()) << "_" << rand() << std::dec << "_" << _request->get_socket();
         _temp_file_mosi = st.str() + "_mosi";
         _temp_file_miso = st.str() + "_miso";
+        debug.log() << "Will be using " << _temp_file_mosi << std::endl;
+        debug.log() << "Will be using " << _temp_file_miso << std::endl;
     }
     _temp_stream_mosi.open(_temp_file_mosi.c_str(), std::ios::trunc | std::ios::out);
     if (!_temp_stream_mosi.is_open()) {
-        error.log() << "CGI temp file " << _temp_file_mosi << " could not be opened, sending " << InternalServerError
-                    << std::endl;
+        error.log() << "CGI temp file " << _temp_file_mosi << " could not be opened(" << strerror(errno)
+                    << "), sending " << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     }
     debug.log() << "Created temp file " << _temp_file_mosi << " for CGI." << std::endl;
@@ -160,7 +165,10 @@ void CGIStrategy::fill_temp_file() {
     }
     if (!_body->is_done()) {
         _body->read_body();
-        _temp_stream_mosi << _body->pop();
+        if (!(_temp_stream_mosi << _body->pop())) {
+            error.log() << "Could not write to " << _temp_file_mosi << " " << strerror(errno) << std::endl;
+            throw HttpError(InternalServerError);
+        }
     }
     if (_body->length() > _max_size) {
         kill_child();
@@ -189,10 +197,12 @@ void CGIStrategy::launch_CGI(size_t size) {
         throw HttpError(InternalServerError);
     } else if (pid) { // parent
         _child = pid;
-        info.log() << "CGIStrategy: Child " << pid << " running." << std::endl;
+        info.log() << "CGIStrategy: Child " << pid << " running with " << _temp_file_mosi << std::endl;
+        info.log() << "CGIStrategy: Child " << pid << " creating " << _temp_file_miso << std::endl;
         _writer = new CGIWriter(*this);
         errno   = 0;
-        _temp_stream_mosi.close();
+        if (_temp_stream_mosi.is_open())
+            _temp_stream_mosi.close();
         errno = 0;
         _response.set_cgi(this, *_writer);
         _state = launched;
@@ -200,7 +210,7 @@ void CGIStrategy::launch_CGI(size_t size) {
     } else {           // child
         // sleep(10);
         if (setpgid(0, 0))
-            babyphone.log() << "setpgid failed " << strerror(errno) << std::endl;
+            babyphone.log() << getpid() << ": setpgid failed " << strerror(errno) << std::endl;
 #ifndef DEBUG
         close(STDERR_FILENO); // close stderr if not debug
 #else
@@ -209,31 +219,44 @@ void CGIStrategy::launch_CGI(size_t size) {
         info.disable();
         warn.disable();
 #endif
-        int temp_fd = open(_temp_file_miso.c_str(), O_CREAT | O_WRONLY | O_TRUNC | O_SYNC, 000666);
+        int temp_fd = open(_temp_file_miso.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 000666);
         if (temp_fd < 0)
-            babyphone.log() << "Could not open outfile." << std::endl;
+            babyphone.log() << getpid() << ": Could not open outfile." << std::endl;
         if (dup2(temp_fd, 1) < 0) {
-            babyphone.log() << "Cannot redirect stdout into child." << std::endl;
+            babyphone.log() << getpid() << ": Cannot redirect stdout into child." << std::endl;
             close(temp_fd);
             _exit(1);
         }
-        babyphone.log() << "Opened outfile MISO " << _temp_file_miso << std::endl;
+        babyphone.log() << getpid() << ": Opened outfile MISO " << _temp_file_miso << std::endl;
         close(temp_fd);
         char **args = new (std::nothrow) char *[3];
         args[1]     = strdup(_location.c_str());
         if (!args || !args[1]) {
             if (args)
                 free(args);
-            babyphone.log() << "Cannot creat arg string. Aborting." << std::endl;
+            babyphone.log() << getpid() << ": Cannot creat arg string. Aborting." << std::endl;
             _exit(1);
         }
+        // struct stat buf;
+        // temp_fd = 0;
+        // while (stat(_temp_file_mosi.c_str(), &buf) && temp_fd < 100) { // max 1s try
+        //     babyphone.log() << getpid() << ": File " << _temp_file_mosi << " not avialable yet " << strerror(errno)
+        //                     << std::endl;
+        //     usleep(10 * 1000); // 10ms
+        //     temp_fd++;
+        // }
+        // temp_fd = -1;
         temp_fd = open(_temp_file_mosi.c_str(), O_RDONLY);
         if (temp_fd < 0) {
-            babyphone.log() << "Cannot open temp file " << _temp_file_mosi << " " << strerror(errno) << std::endl;
+            // remove(_temp_file_miso.c_str());
+            babyphone.log() << getpid() << ": " << "Cannot open temp file " << _temp_file_mosi << " " << strerror(errno)
+                            << std::endl;
             _exit(1);
         }
         if (dup2(temp_fd, 0) < 0) {
-            babyphone.log() << "Cannot redirect temp file " << _temp_stream_mosi << " into child." << std::endl;
+            // remove(_temp_file_miso.c_str());
+            babyphone.log() << getpid() << ": " << "Cannot redirect temp file " << _temp_stream_mosi << " into child."
+                            << std::endl;
             close(temp_fd);
             _exit(1);
         }
@@ -243,7 +266,7 @@ void CGIStrategy::launch_CGI(size_t size) {
         if (!c_env) { // nothing gets past this line
             free(args[0]);
             free(args);
-            babyphone.log() << "Cannot creat arg string. Aborting." << std::endl;
+            babyphone.log() << getpid() << ": " << "Cannot creat arg string. Aborting." << std::endl;
             _exit(1);
         }
         char *cmd = strdup(_cgi_path.c_str());
@@ -252,13 +275,14 @@ void CGIStrategy::launch_CGI(size_t size) {
             free(c_env);
             free(args[0]);
             free(args);
-            babyphone.log() << "Cannot create arg string. Aborting." << std::endl;
+            babyphone.log() << getpid() << ": " << "Cannot create arg string. Aborting." << std::endl;
             _exit(1);
         }
-        babyphone.log() << "Running execve(" << cmd << ", " << args[1] << ", env)" << std::endl;
+        babyphone.log() << getpid() << ": " << "Running execve(" << cmd << ", " << args[1] << ", env)" << std::endl;
         ServerManager::getInstance()->deleteInstance(); // TS-14
         execve(cmd, args, c_env);
-        babyphone.log() << "CGIStrategy: Execve failed to run " << strerror(errno) << std::endl; // logging is on stderr
+        babyphone.log() << getpid() << ": " << "CGIStrategy: Execve failed to run " << strerror(errno)
+                        << std::endl; // logging is on stderr
         free(c_env);
         free(args[0]);
         free(args);
@@ -323,7 +347,7 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
     size_t       sys_env_size = 0;
 
     if (!sys_env)
-        babyphone.log() << "sys_env is null, and will no be used." << std::endl;
+        babyphone.log() << getpid() << ": " << "sys_env is null, and will no be used." << std::endl;
     else {
         for (size_t i = 0; sys_env[i] != 0; i++) {
             std::string env_str = sys_env[i];
@@ -334,10 +358,11 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
             }
             sys_env_size++;
         }
-        babyphone.log() << "sys_env.length is " << sys_env_size << std::endl;
+        babyphone.log() << getpid() << ": " << "sys_env.length is " << sys_env_size << std::endl;
     }
     if (!(ret = new (std::nothrow) char *[env.size() + sys_env_size + 1])) {
-        babyphone.log() << "CGIStrategy: env alloc failed. CGI env will not be generated." << std::endl;
+        babyphone.log() << getpid() << ": " << "CGIStrategy: env alloc failed. CGI env will not be generated."
+                        << std::endl;
         return 0;
     }
     bzero(ret, sizeof(char *) * (env.size() + sys_env_size + 1));
@@ -346,9 +371,10 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
 
     for (std::map< std::string, std::string >::const_iterator it = env.begin(); it != env.end(); it++) {
         std::string tmp = it->first + "=" + it->second;
-        babyphone.log() << "Adding to CGI env " << tmp << std::endl;
+        babyphone.log() << getpid() << ": " << "Adding to CGI env " << tmp << std::endl;
         if (!(ret[i++] = strdup(tmp.c_str()))) { // bad alloc is fine
-            babyphone.log() << "CGIStrategy: env alloc partially failed. CGI env will not be generated." << std::endl;
+            babyphone.log() << getpid() << ": "
+                            << "CGIStrategy: env alloc partially failed. CGI env will not be generated." << std::endl;
             for (size_t j = 0; j <= env.size() + sys_env_size; j++)
                 if (ret[j])
                     delete[] ret[j];
@@ -361,14 +387,15 @@ char **CGIStrategy::generate_env(const std::map< std::string, std::string > &env
         if (env_str.find("=") != env_str.npos) {
             env_str.resize(env_str.find("="));
             if (env.find(env_str) != env.end()) {
-                babyphone.log() << "Skipping " << sys_env[it] << " because " << env_str << " is CGI reserved."
-                                << std::endl;
+                babyphone.log() << getpid() << ": " << "Skipping " << sys_env[it] << " because " << env_str
+                                << " is CGI reserved." << std::endl;
                 continue; // do not increment size because wont be saved
             }
         }
-        babyphone.log() << "Adding base to CGI env " << sys_env[it] << std::endl;
+        babyphone.log() << getpid() << ": " << "Adding base to CGI env " << sys_env[it] << std::endl;
         if (!(ret[i++] = strdup(sys_env[it]))) { // bad alloc is fine
-            babyphone.log() << "CGIStrategy: env alloc partially failed. CGI env will not be generated." << std::endl;
+            babyphone.log() << getpid() << ": "
+                            << "CGIStrategy: env alloc partially failed. CGI env will not be generated." << std::endl;
             for (size_t j = 0; j <= env.size() + sys_env_size; j++)
                 if (ret[j])
                     delete[] ret[j];
@@ -400,7 +427,7 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
             // kill_child(false);
             _done = true;
         }
-        debug.log() << "Read " << rd << " byte(s) from CGI pipe." << std::endl;
+        event.log() << "Read " << rd << " byte(s) from CGI pipe." << std::endl;
 #ifdef DEBUG
         if (rd > 0) {
             write(1, buf, rd);
@@ -453,34 +480,35 @@ bool CGIStrategy::is_child_alive() {
                     << std::endl; // should log debug
         return true;
     }
-    { // debug
-        if (WIFSIGNALED(waitinfo))
-            debug.log() << "Child was terminated by signal " << WTERMSIG(waitinfo) << " "
-                        << strsignal(WTERMSIG(waitinfo)) << std::endl;
-        if (WIFSTOPPED(waitinfo))
-            debug.log() << "Child is stopped. " << WSTOPSIG(waitinfo) << std::endl;
-        if (WIFCONTINUED(waitinfo))
-            debug.log() << "Child is stopped." << std::endl;
-    }
-    if (!WIFEXITED(waitinfo)) {
-        debug.log() << "Child is not dead yet." << std::endl;
-        return true;
-    }
-    // kill(-_child, SIGKILL);
-    debug.log() << "untraced:" << waitpid(-_child, &waitinfo, WUNTRACED) << std::endl;
     if (WEXITSTATUS(waitinfo) != 0) {
-        error.log() << "CGI child exited with non 0 exit code " << WEXITSTATUS(waitinfo) << ", sending "
+        error.log() << "Child " << _child << " exited with non 0 exit code " << WEXITSTATUS(waitinfo) << ", sending "
                     << InternalServerError << std::endl;
         throw HttpError(InternalServerError);
     } else
         info.log() << "Child " << _child << " have died with exit code " << WEXITSTATUS(waitinfo) << std::endl;
-    if (WIFSIGNALED(waitinfo))
-        debug.log() << "Child was terminated by signal " << WTERMSIG(waitinfo) << " " << strsignal(WTERMSIG(waitinfo))
-                    << std::endl;
-    if (WIFSTOPPED(waitinfo))
-        debug.log() << "Child is stopped. " << WSTOPSIG(waitinfo) << std::endl;
-    if (WIFCONTINUED(waitinfo))
-        debug.log() << "Child is not stopped." << std::endl;
+    { // debug
+        if (WIFSIGNALED(waitinfo))
+            debug.log() << "Child " << _child << " was terminated by signal " << WTERMSIG(waitinfo) << " "
+                        << strsignal(WTERMSIG(waitinfo)) << std::endl;
+        if (WIFSTOPPED(waitinfo))
+            debug.log() << "Child " << _child << " is stopped. " << WSTOPSIG(waitinfo) << std::endl;
+        if (WIFCONTINUED(waitinfo))
+            debug.log() << "Child " << _child << " is stopped." << std::endl;
+    }
+    if (!WIFEXITED(waitinfo)) {
+        debug.log() << "Child " << _child << " is not dead yet." << std::endl;
+        return true;
+    }
+    // kill(-_child, SIGKILL);
+    // debug.log() << "untraced:" << waitpid(-_child, &waitinfo, WUNTRACED) << std::endl;
+    // if (WIFSIGNALED(waitinfo))
+    //     debug.log() << "Child was terminated by signal " << WTERMSIG(waitinfo) << " " <<
+    //     strsignal(WTERMSIG(waitinfo))
+    //                 << std::endl;
+    // if (WIFSTOPPED(waitinfo))
+    //     debug.log() << "Child is stopped. " << WSTOPSIG(waitinfo) << std::endl;
+    // if (WIFCONTINUED(waitinfo))
+    //     debug.log() << "Child is not stopped." << std::endl;
     _child = 0;
     return false;
 }

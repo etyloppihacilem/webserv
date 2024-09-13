@@ -61,7 +61,7 @@ class CGIStrategy : public ResponseBuildingStrategy {
         void          fill_temp_file();
         void          launch_CGI(size_t size);
         void          kill_child();
-        void          clean_filestream();
+        // void          clean_filestream();
 
         std::string    _location;
         std::string    _path_info;

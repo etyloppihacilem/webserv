@@ -13,6 +13,7 @@
 #include "header.h"
 #include <csignal>
 #include <cstdlib>
+#include <ctime>
 #include <exception>
 #include <iostream>
 #include <ostream>
@@ -55,11 +56,12 @@ int main(int ac, char **av, const char **env) {
     }
     Logger::force(); // Forcing all output in normal operations.
 #ifndef DEBUG
-    // debug.disable();
+    debug.disable();
     event.disable();
 #endif
     // event.disable();
     header();
+    srand(time(0)); // init random
     try {
         signal(SIGINT, sigint_handler);
         signal(SIGPIPE, sigpipe_handler);

@@ -170,7 +170,7 @@ void ServerReactor::run() {
             mem.allocate();
         try {
             errno = 0;
-            if ((event_count = epoll_wait(_epoll_fd, events, MAX_TOTAL_CONNECTION, 16000)) == -1) {
+            if ((event_count = epoll_wait(_epoll_fd, events, MAX_TOTAL_CONNECTION, 5000)) == -1) {
                 if (errno == EINTR)
                     return;
                 error.log() << "ServerReactor: epoll_wait: " << std::string(std::strerror(errno)) << std::endl;

@@ -12,6 +12,8 @@
 #include "global_test.h"
 #include "gtest/gtest.h"
 #include <csignal>
+#include <cstdlib>
+#include <ctime>
 #include <filesystem>
 #include <ostream>
 #include <string>
@@ -22,6 +24,7 @@ bool                  filesystem_tests = true; // wether test using real files a
 int main(int argc, char **argv) {
     // Logger::force();
     debug.disable();
+    srand(time(0)); // init random
 #ifndef WORKDIR
 # define WORKDIR ""
     filesystem_tests = false;
