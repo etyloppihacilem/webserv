@@ -195,6 +195,9 @@ void ServerReactor::run() {
                     delete **it;
                     _eventHandlers.erase(*it);
                 }
+                info.log() << "ServerReactor: memory saving procedure." << std::endl;
+                for (std::set< EventHandler * >::iterator it = _eventHandlers.begin(); it != _eventHandlers.end(); ++it)
+                    (*it)->save_mem();
                 debug.log() << "ServerReactor: timeout check done." << std::endl;
             }
         } catch (std::bad_alloc &e) {

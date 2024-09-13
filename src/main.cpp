@@ -9,6 +9,7 @@
 ############################################################################# */
 
 #include "Logger.hpp"
+#include "MemoryHandler.hpp"
 #include "ServerManager.hpp"
 #include "header.h"
 #include <csignal>
@@ -61,6 +62,7 @@ int main(int ac, char **av, const char **env) {
 #endif
     // event.disable();
     header();
+    mem.allocate();
     srand(time(0)); // init random
     try {
         signal(SIGINT, sigint_handler);
