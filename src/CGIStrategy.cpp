@@ -233,7 +233,7 @@ void CGIStrategy::launch_CGI(size_t size) {
         args[1]     = strdup(_location.c_str());
         if (!args || !args[1]) {
             if (args)
-                free(args);
+                delete[] args;
             babyphone.log() << static_cast< long >(getpid()) << ": Cannot creat arg string. Aborting." << std::endl;
             _exit(1);
         }
@@ -266,7 +266,7 @@ void CGIStrategy::launch_CGI(size_t size) {
         char **c_env = generate_env(env);
         if (!c_env) { // nothing gets past this line
             free(args[0]);
-            free(args);
+            delete[] args;
             babyphone.log() << static_cast< long >(getpid()) << ": " << "Cannot creat arg string. Aborting."
                             << std::endl;
             _exit(1);
@@ -276,7 +276,7 @@ void CGIStrategy::launch_CGI(size_t size) {
         if (!cmd) {
             free(c_env);
             free(args[0]);
-            free(args);
+            delete[] args;
             babyphone.log() << static_cast< long >(getpid()) << ": " << "Cannot create arg string. Aborting."
                             << std::endl;
             _exit(1);
@@ -289,7 +289,7 @@ void CGIStrategy::launch_CGI(size_t size) {
                         << strerror(errno) << std::endl; // logging is on stderr
         free(c_env);
         free(args[0]);
-        free(args);
+        delete[] args;
         _exit(1); // _exit with underscore does not flush STDIO"
     }
 }
