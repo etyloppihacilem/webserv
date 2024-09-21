@@ -445,6 +445,13 @@ bool CGIStrategy::fill_buffer(std::string &buffer, size_t size) { // find a way 
     return _done;
 }
 
+void CGIStrategy::remove_child_file() const {
+    debug.log() << "Unlinking " << _temp_file_miso << std::endl;
+    unlink(_temp_file_miso.c_str());
+    debug.log() << "Unlinking " << _temp_file_mosi << std::endl;
+    unlink(_temp_file_mosi.c_str());
+}
+
 bool CGIStrategy::open_child_file() {
     // int dir_fd = open(".", O_RDONLY | O_DIRECTORY);
     // if (dir_fd < 0)
@@ -467,10 +474,7 @@ bool CGIStrategy::open_child_file() {
     if (fsync(_fd_miso) < 0)
         warn.log() << "fsync failed on " << _temp_file_miso << std::endl;
     debug.log() << "CGIStrategy: opened " << _temp_file_miso << "." << std::endl;
-    debug.log() << "Unlinking " << _temp_file_miso << std::endl;
-    unlink(_temp_file_miso.c_str());
-    debug.log() << "Unlinking " << _temp_file_mosi << std::endl;
-    unlink(_temp_file_mosi.c_str());
+    remove_child_file();
     return true;
 }
 
@@ -489,6 +493,7 @@ bool CGIStrategy::is_child_alive() {
     if (WEXITSTATUS(waitinfo) != 0) {
         error.log() << "Child " << _child << " exited with non 0 exit code " << WEXITSTATUS(waitinfo) << ", sending "
                     << InternalServerError << std::endl;
+        remove_child_file();
         throw HttpError(InternalServerError);
     } else
         info.log() << "Child " << _child << " have died with exit code " << WEXITSTATUS(waitinfo) << std::endl;
