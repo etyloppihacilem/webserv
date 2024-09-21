@@ -37,7 +37,7 @@ TEST_F(ServerTestSuite, DefaultConstructor) {
     EXPECT_EQ(1ul, a.getIndexPage().size());
     EXPECT_EQ("index.html", a.getIndexPage()[0]);
     EXPECT_EQ(false, a.getAutoindex());
-    std::set< HttpMethod > expectedMethods({ GET });
+    std::set< HttpMethod > expectedMethods;
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expectedMethods));
     EXPECT_EQ(2147483648ul, a.getMaxBodySize());
     std::map< HttpCode, std::string > expectedError({});

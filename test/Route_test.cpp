@@ -35,7 +35,7 @@ TEST_F(RouteTestSuite, DefaultConstructor) {
     std::vector< std::string > expectedIndex({ "index.html" });
     EXPECT_THAT(a.getIndexPage(), ::testing::ContainerEq(expectedIndex));
     EXPECT_EQ(false, a.getAutoindex());
-    std::set< HttpMethod > expected({ GET });
+    std::set< HttpMethod > expected;
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
     EXPECT_EQ(a.getMaxBodySize(), 2147483648ul);
     EXPECT_EQ("www/", a.getUploadPath());
@@ -178,7 +178,7 @@ TEST_F(RouteTestSuite, ParametrizeConstructorOnlyInvalid) {
     std::vector< std::string > expectedIndex({ "index.html" });
     EXPECT_THAT(a.getIndexPage(), ::testing::ContainerEq(expectedIndex));
     EXPECT_EQ(false, a.getAutoindex());
-    std::set< HttpMethod > expected({ GET });
+    std::set< HttpMethod > expected;
     EXPECT_THAT(a.getMethods(), ::testing::ContainerEq(expected));
     EXPECT_EQ(a.getMaxBodySize(), 2147483648ul);
     EXPECT_EQ("www/", a.getUploadPath());
