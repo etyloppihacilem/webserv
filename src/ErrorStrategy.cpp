@@ -13,6 +13,7 @@
 #include "Logger.hpp"
 #include "MemoryHandler.hpp"
 #include "ResponseBuildingStrategy.hpp"
+#include "todo.hpp"
 #include <cstddef>
 #include <new>
 #include <ostream>
@@ -56,8 +57,8 @@ void ErrorStrategy::generateErrorPage(std::string &buffer) {
 
         st << "<head><title>" << static_cast< int >(_code)
            << " Error</title></head><body><h1>Error: " << static_cast< int >(_code) << " " << status_string(_code)
-           << "</h1><div>This error page was "
-           << "automatically generated.</div></body>";
+           << "</h1><p>This error page was "
+           << "automatically generated.</p><p>" SERVER_SOFTWARE "</p></body>";
         buffer += st.str();
     } catch (std::bad_alloc &e) { // in case of heap going missing.
         mem.deallocate();

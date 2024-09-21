@@ -22,7 +22,7 @@
 #define TIME_LENGTH 32 // 29 normally
 // Sun, 06 Nov 1994 08:49:37 GMT
 
-#define SERVER_SOFTWARE "jeon/0.1"
+#define SERVER_SOFTWARE "jeon/1.1" // 2nd correction
 
 #define MAX_BODY_BUFFER 1048576 // 1MiB
 
