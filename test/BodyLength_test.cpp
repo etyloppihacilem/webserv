@@ -101,6 +101,8 @@ TEST(BodyLengthTestSuite, read_body) {
         EXPECT_EQ((size_t) i * BUFFER_SIZE > 130 ? 130 : (size_t) i * BUFFER_SIZE, test._read_length);
     }
     EXPECT_TRUE(test.is_done());
+    close(fd[0]);
+    close(fd[1]);
 }
 
 TEST(BodyLengthTestSuite, get) {
@@ -127,6 +129,8 @@ TEST(BodyLengthTestSuite, get) {
         EXPECT_EQ((size_t) i * BUFFER_SIZE > 130 ? 130 : (size_t) i * BUFFER_SIZE, test._read_length);
     }
     EXPECT_TRUE(test.is_done());
+    close(fd[0]);
+    close(fd[1]);
 }
 
 TEST(BodyLengthTestSuite, pop) {
@@ -154,4 +158,6 @@ TEST(BodyLengthTestSuite, pop) {
     }
     EXPECT_TRUE(test.is_done());
     EXPECT_EQ(test._buffer, "");
+    close(fd[0]);
+    close(fd[1]);
 }

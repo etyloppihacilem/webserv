@@ -40,6 +40,7 @@ class ReadState : public ProcessState {
 #ifdef TESTING
         FRIEND_TEST(ReadStateSuite, FindMethod);
         FRIEND_TEST(TotalRequestFixture, FdStateTest);
+        friend class TotalRequestFixture;
 #endif
 };
 

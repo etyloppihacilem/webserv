@@ -94,10 +94,13 @@ class TotalRequestFixture : public ::testing::TestWithParam< TotalRequest > {
         static void SetUpTestSuite() { info.disable(); }
 
         void TearDown() override {
+            if (_request) {
+                delete _request;
+                if (_test->_request == _request)
+                    _test->_request = 0;
+            }
             if (_test)
                 delete _test;
-            // if (_request)
-            //     delete _request; // IS ALREADY DELETED IN READSTATE
             if (_fd[0] != 0)
                 close(_fd[0]);
         }

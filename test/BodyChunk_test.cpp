@@ -173,6 +173,8 @@ TEST(BodyChunkTestSuite, get) {
     EXPECT_EQ(&test._body, &test.get());
     EXPECT_EQ(tmp1, test._body);
     EXPECT_TRUE(test.is_done());
+    close(fd[0]);
+    close(fd[1]);
 }
 
 TEST(BodyChunkTestSuite, pop) {
@@ -205,4 +207,6 @@ TEST(BodyChunkTestSuite, pop) {
     if (!i)
         GTEST_FATAL_FAILURE_("Infinite loop detected.");
     EXPECT_TRUE(test.is_done());
+    close(fd[0]);
+    close(fd[1]);
 }
