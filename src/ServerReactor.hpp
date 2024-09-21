@@ -11,6 +11,11 @@
 #define MAX_SERVER_BACKLOG 100
 #define MAX_CLIENT_CONNECTION 5
 #define MAX_TOTAL_CONNECTION 512 // or 1000 but risky to access file rssources.
+#ifdef DEBUG
+# define TIMEOUT_TIME 16000
+#else
+# define TIMEOUT_TIME 5000
+#endif
 
 class ServerReactor {
     public:
